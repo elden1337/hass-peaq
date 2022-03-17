@@ -1,0 +1,22 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "This integration has already been configured"
+        },
+        "error": {
+            "cannot_connect": "Cannot create Peaq-instance",
+            "invalid_auth": "Invalid authentication",
+            "unknown": "Unknown error has occured"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "name": "PowerSensor",
+                    "powersensorincludescar": "PowerSensor includes car",
+                    "chargertype": "Charger brand",
+                    "locale": "City and country"
+                }
+            }
+        }
+   }
+}

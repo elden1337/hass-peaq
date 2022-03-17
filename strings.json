@@ -1,0 +1,22 @@
+{
+    "config": {
+      "step": {
+        "user": {
+          "data": {
+            "name": "[%key:common::config_flow::data::powersensor%]",
+            "powersensorincludescar": "[%key:common::config_flow::data::powersensorincludescar%]",
+            "chargertype": "[%key:common::config_flow::data::chargertype%]",
+            "locale": "[%key:common::config_flow::data::locale%]"
+          }
+        }
+      },
+      "error": {
+        "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+        "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+        "unknown": "[%key:common::config_flow::error::unknown%]"
+      },
+      "abort": {
+        "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      }
+    }
+  }

@@ -1,0 +1,8 @@
+
+enable:
+  name: Enable Peaq
+  description: Enables Peaq smart charging
+
+disable:
+  name: Disable Peaq
+  description: Disables Peaq smart charging
