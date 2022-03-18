@@ -25,10 +25,10 @@ class Hub:
     CONSUMPTION_TOTAL_NAME = "Energy including car" 
 
     """for getters and setters internals"""
-    _currentPeaksensor = 0 #sensor
-    _powersensor = 0
-    _carpowersensor = 0
-    _totalhourlyenergy = 0
+    _CurrentPeakSensor = 0 #sensor
+    _PowerSensor = 0
+    _CarPowerSensor = 0
+    _TotalHourlyEnergy = 0
     _PowerSensorMovingAverage = 0
     """for getters and setters internals"""
 
@@ -46,11 +46,6 @@ class Hub:
         self.powersensorentity = self._SetPowerSensors(configInputs["powersensor"])
         """from the config inputs"""
         
-        #tillfälliga
-        self.Locale = configInputs["locale"]
-        self.ChargerType = configInputs["chargertype"]
-        #tillfälliga
-
         #self.currentPeaksensorentity = f"sensor.{self._name}_{self.CONSUMPTION_TOTAL_NAME}_hourly"
         self.TotalHourlyEnergy_Entity = f"sensor.{self.NAME.lower()}_{ex.NameToId(self.CONSUMPTION_TOTAL_NAME)}_hourly"
         self.PowerSensorMovingAverage_Entity = "sensor.peaq_average_consumption"
@@ -63,14 +58,6 @@ class Hub:
 
         self.charging_done = False
         self.ChargerEnabled = True
-
-        # """for getters and setters externals"""
-        # self.PowerSensorMovingAverage
-        # self.TotalEnergyThisHour
-        # self.powersensor
-        # self.carpowersensor
-        # self.currentPeak
-        # """for getters and setters externals"""
 
         """Init the subclasses"""
         self.LocaleData = LocaleData(configInputs["locale"])
@@ -107,45 +94,41 @@ class Hub:
     def PowerSensorMovingAverage(self, value):
         self._PowerSensorMovingAverage = int(float(value))
 
-
     """Total hourly energy"""
     @property
     def TotalEnergyThisHour(self):
-        return self._totalhourlyenergy
+        return self._TotalHourlyEnergy
 
     @TotalEnergyThisHour.setter
     def TotalEnergyThisHour(self, value):
-        self._totalhourlyenergy = float(value)
-
+        self._TotalHourlyEnergy = float(value)
 
     """House powersensor"""
     @property
     def powersensor(self):
-        return self._powersensor
+        return self._PowerSensor
 
     @powersensor.setter
     def powersensor(self, value):
-        self._powersensor = int(float(value))
-
+        self._PowerSensor = int(float(value))
 
     """Car powersensor"""
     @property
     def carpowersensor(self):
-        return self._carpowersensor
+        return self._CarPowerSensor
 
     @carpowersensor.setter
     def carpowersensor(self, value):
-        self._carpowersensor = int(float(value))
-
+        self._CarPowerSensor = int(float(value))
 
     """Current peak"""
     @property
     def currentPeak(self):
-        return max(self._currentPeaksensor, float(self._monthlystartpeak[datetime.now().month]))
+        return max(self._CurrentPeakSensor, float(self._monthlystartpeak[datetime.now().month]))
 
     @currentPeak.setter
     def currentPeak(self, value):
-        self._currentPeaksensor = float(value)
+        self._CurrentPeakSensor = float(value)
 
 
     @callback

@@ -6,6 +6,7 @@ class LocaleData():
     def __init__(self, input):
         self._ObservedPeak = ""
         self._ChargedPeak = ""
+        self._Type = input
 
         if input == constants.LOCALE_SE_GOTHENBURG:
             self.ObservedPeak = AVERAGEOFTHREEDAYS_MIN
@@ -22,6 +23,10 @@ class LocaleData():
             self.ObservedPeak = ""
             self.ChargedPeak = ""
 
+    @property
+    def Type(self) -> str:
+        return self._Type
+        
     """Observed peak (only added as sensor if separated from charged peak)"""
     @property
     def ObservedPeak(self) -> str:
@@ -30,7 +35,6 @@ class LocaleData():
     @ObservedPeak.setter
     def ObservedPeak(self, val) -> str:
         self._ObservedPeak = val
-
 
     """Charged peak (always added)"""
     @property

@@ -4,12 +4,17 @@ import custom_components.peaq.constants as constants
 class ChargerTypeData():
     def __init__(self, input):
         self._Charger = None
+        self._Type = input
 
         if input == constants.CHARGERTYPE_CHARGEAMPS:
             self.Charger = ChargeAmps()
         elif  input == constants.CHARGERTYPE_EASEE:
             self.Charger = Easee()
-        
+    
+    @property
+    def Type(self) -> str:
+        return self._Type
+
     @property
     def Charger(self):
         return self._Charger
@@ -18,14 +23,13 @@ class ChargerTypeData():
     def Charger(self, obj):
         self._Charger = obj
 
-
 """Shared baseclass"""
 class ChargerTypeBase():
     def __init__(self):
         self._PowerMeter = ""
         self._PowerSwitch = ""
         self._ChargerEntity = ""
-        self._ServiceCalls = {}
+        self._ServiceCalls = {}     
 
     """Power meter"""
     @property
@@ -36,7 +40,6 @@ class ChargerTypeBase():
     def PowerMeter(self, obj):
         self._PowerMeter = obj
 
-
     """Power Switch"""
     @property
     def PowerSwitch(self):
@@ -46,7 +49,6 @@ class ChargerTypeBase():
     def PowerSwitch(self, obj):
         self._PowerSwitch = obj
 
-
     """Charger entity"""
     @property
     def ChargerEntity(self):
@@ -55,7 +57,6 @@ class ChargerTypeBase():
     @ChargerEntity.setter
     def ChargerEntity(self, obj):
         self._ChargerEntity = obj
-
 
     """Service calls"""
     @property
@@ -80,11 +81,3 @@ class ChargeAmps(ChargerTypeBase):
 class Easee(ChargerTypeBase):
     def __init__(self):
         super().__init__()
-
-class Garo(ChargerTypeBase):
-    def __init__(self):
-        super().__init__()
-
-
-
-
