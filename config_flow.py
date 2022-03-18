@@ -10,7 +10,7 @@ from homeassistant import config_entries, exceptions
 from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_NAME
 import homeassistant.helpers.config_validation as cv
-import custom_components.peaq.constants as pk
+import custom_components.peaq.peaq.constants as pk
 
 from .const import DOMAIN  # pylint:disable=unused-import
 
@@ -57,6 +57,7 @@ async def validate_input(hass: HomeAssistant, data: dict) -> dict[str, Any]:
     # InvalidAuth
 
     return {"title": data["name"]}
+
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for peaq."""

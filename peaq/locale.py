@@ -1,4 +1,4 @@
-import custom_components.peaq.constants as constants
+import custom_components.peaq.peaq.constants
 from custom_components.peaq.sensors.peaqsqlsensor import (BASICMAX,AVERAGEOFTHREEDAYS,AVERAGEOFTHREEDAYS_MIN,HIGHLOAD)
 
 """Init the service"""

@@ -1,7 +1,7 @@
 """The peaq integration."""
 from __future__ import annotations
 import logging
-from custom_components.peaq.hub import Hub
+from custom_components.peaq.peaq.hub import Hub
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry

@@ -8,12 +8,12 @@ from custom_components.peaq.sensors.peaqutilitysensor import (
 from custom_components.peaq.sensors.peaqintegrationsensor import PeaqIntegrationSensor
 from custom_components.peaq.sensors.peaqaveragesensor import PeaqAverageSensor
 from custom_components.peaq.sensors.peaqsqlsensor import (PeaqSQLSensor, PeaqSQLSensorHelper)
-
 from custom_components.peaq.sensors.peaqpowersensor import (PeaqPowerSensor, PeaqAmpSensor)
 from custom_components.peaq.sensors.peaqpredictionsensor import PeaqPredictionSensor
 from custom_components.peaq.sensors.peaqthresholdsensor import PeaqThresholdSensor
 from custom_components.peaq.sensors.peaqsensor import PeaqSensor
 from custom_components.peaq.peaq.extensionmethods import Extensions as ex
+
 from homeassistant.components.sensor import SensorEntity
 
 from homeassistant.core import (
@@ -81,7 +81,6 @@ async def gather_Sensors(hass: HomeAssistant, hub) -> list:
     peaqsensors.append(PeaqSensor(hub)) #chargecontroller
     return peaqsensors
     
-
 class DeviceSensor(SensorEntity):
     should_poll = True
 

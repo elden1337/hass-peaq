@@ -1,19 +1,18 @@
 import logging
 from datetime import datetime
-from custom_components.peaq.peaq.extensionmethods import Extensions as ex
 
-from custom_components.peaq.chargecontroller import ChargeController
-from custom_components.peaq.prediction import Prediction
-from custom_components.peaq.threshold import Threshold
+from custom_components.peaq.peaq.extensionmethods import Extensions as ex
+from custom_components.peaq.peaq.chargecontroller import ChargeController
+from custom_components.peaq.peaq.prediction import Prediction
+from custom_components.peaq.peaq.threshold import Threshold
+from custom_components.peaq.peaq.locale import LocaleData
+from custom_components.peaq.peaq.chargertypes import ChargerTypeData
 
 from homeassistant.helpers.event import async_track_state_change
 from homeassistant.core import (
     HomeAssistant,
     callback,
 )
-
-from custom_components.peaq.peaq.locale import LocaleData
-from custom_components.peaq.peaq.chargertypes import ChargerTypeData
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -2,6 +2,7 @@ from homeassistant.components.sql.sensor import (
     SQLSensor
 )
 from custom_components.peaq.const import DOMAIN
+import custom_components.peaq.peaq.extensionmethods as ex
 
 BASICMAX = "BasicMax"
 AVERAGEOFTHREEDAYS = "AverageOfThreeDays"
@@ -15,7 +16,7 @@ class PeaqSQLSensorHelper():
     BASENAME = "Monthly max peak"
 
     def __init__(self, sensor :str):
-        self._sensor = sensor.lower().replace(" ", "_")
+        self._sensor = ex.NameToId(sensor)
     
     def GetQueryType(self, type):
         QUERYTYPES = {
@@ -44,7 +45,7 @@ class PeaqSQLSensor(SQLSensor):
     def __init__(self, hub, sessmaker, query):
         self._hub = hub
         self._attr_name = f"{hub.NAME} {query['name']}"
-        self._attr_unique_id = f"{DOMAIN}_{self._hub.HUB_ID}_{self._attr_name.lower().replace(' ','_').replace(',','')}"
+        self._attr_unique_id = f"{DOMAIN}_{self._hub.HUB_ID}_{ex.NameToId(self._attr_name)}"
         sm = sessmaker
         super().__init__(
             self._attr_name,

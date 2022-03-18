@@ -1,9 +1,9 @@
 
 import logging
-import custom_components.peaq.constants as constants
-from custom_components.peaq.chargecontroller import ChargeController
-from custom_components.peaq.prediction import Prediction
-from custom_components.peaq.threshold import Threshold
+import custom_components.peaq.peaq.constants
+from custom_components.peaq.peaq.chargecontroller import ChargeController
+from custom_components.peaq.peaq.prediction import Prediction
+from custom_components.peaq.peaq.threshold import Threshold
 from homeassistant.helpers.event import async_track_state_change
 from homeassistant.core import (
     CALLBACK_TYPE,

@@ -1,25 +1,22 @@
 from datetime import datetime
 from threading import Thread
-import custom_components.peaq.constants as constants
-from custom_components.peaq.prediction import Prediction as p
-from custom_components.peaq.threshold import Threshold as th
+import custom_components.peaq.peaq.constants
+from custom_components.peaq.peaq.prediction import Prediction
+from custom_components.peaq.peaq.threshold import Threshold
 
 class ChargeController():
     def __init__(self, hub, _status = constants.CHARGECONTROLLER.Idle):
         self.hub = hub
-        self.LessThanStartThreshold
-        self.MoreThanStopThreshold
-        self.TotalEnergyThisHourIsNotZero
         self.Name = "ChargeController"
         self.status = _status
     
     @property
     def LessThanStartThreshold(self) -> bool: 
-        return (p.PredictedEnergyThisHour.__get__(self) * 1000) < (self.hub.currentPeak * (th.Start.__get__(self)/100))
+        return (Prediction.PredictedEnergyThisHour.__get__(self) * 1000) < (self.hub.currentPeak * (Threshold.Start.__get__(self)/100))
     
     @property
     def MoreThanStopThreshold(self) -> bool: 
-        return (p.PredictedEnergyThisHour.__get__(self) * 1000) > (self.hub.currentPeak * (th.Stop.__get__(self)/100))
+        return (Prediction.PredictedEnergyThisHour.__get__(self) * 1000) > (self.hub.currentPeak * (Threshold.Stop.__get__(self)/100))
     
     @property
     def TotalEnergyThisHourIsNotZero(self) -> bool: 

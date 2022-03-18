@@ -1,4 +1,4 @@
-import custom_components.peaq.constants as constants
+import custom_components.peaq.peaq.constants
 
 """Init the service"""
 class ChargerTypeData():
