@@ -1,6 +1,6 @@
 
 import logging
-import custom_components.peaq.peaq.constants
+import custom_components.peaq.peaq.constants as constants
 from custom_components.peaq.peaq.chargecontroller import ChargeController
 from custom_components.peaq.peaq.prediction import Prediction
 from custom_components.peaq.peaq.threshold import Threshold

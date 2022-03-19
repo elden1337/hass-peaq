@@ -1,5 +1,5 @@
 from datetime import datetime
-import custom_components.peaq.peaq.constants
+import custom_components.peaq.peaq.constants as constants
 
 class Threshold:
     def __init__(self, hub):

@@ -1,6 +1,6 @@
 from datetime import datetime
 from threading import Thread
-import custom_components.peaq.peaq.constants
+import custom_components.peaq.peaq.constants as constants
 from custom_components.peaq.peaq.prediction import Prediction
 from custom_components.peaq.peaq.threshold import Threshold
 
@@ -32,19 +32,19 @@ class ChargeController():
 
     #main method, make event out of this that other methods can subscribe to.
     def Charge(self) -> str:
-            if self.hub.chargeamps == "Available":
+            if self.hub.ChargerEntity == "Available":
                 return constants.CHARGECONTROLLER.Idle
-            elif self.hub.chargeamps != "Available" and self.hub.charging_done == True:
+            elif self.hub.ChargerEntity != "Available" and self.hub.charging_done == True:
                 return constants.CHARGECONTROLLER.Done
             elif datetime.now().hour in self.hub.nonhours:
                 return constants.CHARGECONTROLLER.Stop
-            elif self.hub.chargeamps == "Connected":
+            elif self.hub.ChargerEntity == "Connected":
                 if self.LessThanStartThreshold and self.TotalEnergyThisHourIsNotZero:
                     return constants.CHARGECONTROLLER.Start
                 else:
                     return constants.CHARGECONTROLLER.Stop
-            elif self.hub.chargeamps == "Charging":
-                #condition1 = int(self.hub.chargeampsswitch["current_power"]) < 1 and self.hub.carpowersensor > 0
+            elif self.hub.ChargerEntity == "Charging":
+                #condition1 = int(self.hub.ChargerEntity_Switch["current_power"]) < 1 and self.hub.carpowersensor > 0
                 condition1 = False
                 condition2 = self.MoreThanStopThreshold and self.TotalEnergyThisHourIsNotZero
                 if condition1 and not condition2:
