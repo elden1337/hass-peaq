@@ -16,3 +16,6 @@ class PeaqSensor(SensorBase):
     @property
     def icon(self) -> str:
         return "mdi:gate-xor"
+
+    def update(self) -> None:
+        self._state = self._hub.ChargeController.status.name

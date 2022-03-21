@@ -24,3 +24,6 @@ class PeaqPredictionSensor(SensorBase):
     @property
     def icon(self) -> str:
         return "mdi:magic-staff"
+
+    def update(self) -> None:
+        self._state = self._hub.Prediction.PredictedEnergyThisHour

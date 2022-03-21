@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from custom_components.peaq.peaq.extensionmethods import Extensions as ex
+import custom_components.peaq.peaq.extensionmethods as ex
 from custom_components.peaq.peaq.chargecontroller import ChargeController
 from custom_components.peaq.peaq.prediction import Prediction
 from custom_components.peaq.peaq.threshold import Threshold
@@ -26,11 +26,11 @@ class Hub:
     """for getters and setters internals"""
     _CurrentPeakSensor = 0 #sensor
     _PowerSensor = 0
-    _CarPowerSensor = 0
     _TotalHourlyEnergy = 0
     _PowerSensorMovingAverage = 0
-    _ChargerObject = {}
-    _ChargerObject_Switch = {}
+    _ChargerObject = ""
+    _ChargerObject_Switch = ""
+    _CarPowerSensor = 0
     """for getters and setters internals"""
 
     def __init__(
@@ -38,39 +38,44 @@ class Hub:
         hass: HomeAssistant, 
         configInputs: dict
         ):
-
+        self.hass = hass
+        
         """from the config inputs"""
+        self.LocaleData = LocaleData(configInputs["locale"])
+        self.ChargerTypeData = ChargerTypeData(hass, configInputs["chargertype"])
         self._powersensor_includes_car = configInputs["powersensorincludescar"]
         self._monthlystartpeak = configInputs["monthlystartpeak"]
-        self.nonhours = configInputs["nonhours"]
-        self.cautionhours = configInputs["cautionhours"]
+        self.NonHours = configInputs["nonhours"]
+        self.CautionHours = configInputs["cautionhours"]
         self.powersensorentity = self._SetPowerSensors(configInputs["powersensor"])
         """from the config inputs"""
         
         #self.currentPeaksensorentity = f"sensor.{self._name}_{self.CONSUMPTION_TOTAL_NAME}_hourly"
         self.TotalHourlyEnergy_Entity = f"sensor.{self.NAME.lower()}_{ex.NameToId(self.CONSUMPTION_TOTAL_NAME)}_hourly"
+
         self.PowerSensorMovingAverage_Entity = "sensor.peaq_average_consumption"       
 
         self.charging_done = False
         self.ChargerEnabled = True
 
         """Init the subclasses"""
-        self.LocaleData = LocaleData(configInputs["locale"])
-        self.ChargerTypeData = ChargerTypeData(hass, configInputs["chargertype"])
         self.TotalPowerSensor = MiniSensor("Total Power")
         self.Prediction = Prediction(self)
         self.Threshold = Threshold(self)
         self.ChargeController = ChargeController(self)
         """Init the subclasses"""
 
-        self._ChargerEntity = self.ChargerTypeData.Charger.ChargerEntity
-        self._ChargerEntity_Power = self.ChargerTypeData.Charger.PowerMeter
-        self._ChargerEntity_Switch = self.ChargerTypeData.Charger.PowerSwitch
-
+        #init values
+        self.ChargerObject = self.hass.states.get(self.ChargerTypeData.Charger.ChargerEntity)
+        self.ChargerObject_Switch = self.hass.states.get(self.ChargerTypeData.Charger.PowerSwitch)
+        self.CarPowerSensor = self.hass.states.get(self.ChargerTypeData.Charger.PowerMeter)
+        self.TotalEnergyThisHour = self.hass.states.get(self.TotalHourlyEnergy_Entity)
+        #init values
+        
         trackerEntities = []
-        trackerEntities.append(self._ChargerEntity)
-        trackerEntities.append(self._ChargerEntity_Power)
-        trackerEntities.append(self._ChargerEntity_Switch)
+        trackerEntities.append(self.ChargerTypeData.Charger.ChargerEntity)
+        trackerEntities.append(self.ChargerTypeData.Charger.PowerMeter)
+        trackerEntities.append(self.ChargerTypeData.Charger.PowerSwitch)
 
         trackerEntities.append(self.powersensorentity)
         #mock
@@ -79,23 +84,21 @@ class Hub:
         #mock
         async_track_state_change(hass, trackerEntities, self.state_changed)
     
-    """Moving average house powersensor"""
     @property
     def ChargerEntity(self):
         return self._ChargerObject
 
     @ChargerEntity.setter
     def ChargerEntity(self, value):
-        self._ChargerObject = int(float(value))
+        self._ChargerObject = value
 
-    """Moving average house powersensor"""
     @property
     def ChargerEntity_Switch(self):
         return self._ChargerObject_Switch
 
     @ChargerEntity_Switch.setter
     def ChargerEntity_Switch(self, value):
-        self._ChargerObject_Switch = int(float(value))
+        self._ChargerObject_Switch = value
         
     """Moving average house powersensor"""
     @property
@@ -113,7 +116,10 @@ class Hub:
 
     @TotalEnergyThisHour.setter
     def TotalEnergyThisHour(self, value):
-        self._TotalHourlyEnergy = float(value)
+        if value is None:
+            self._TotalHourlyEnergy = 0
+        else:    
+            self._TotalHourlyEnergy = float(value)
 
     """House powersensor"""
     @property
@@ -127,7 +133,10 @@ class Hub:
     """Car powersensor"""
     @property
     def carpowersensor(self):
-        return self._CarPowerSensor
+        if self._CarPowerSensor is None:
+            return 0
+        else:
+            return self._CarPowerSensor
 
     @carpowersensor.setter
     def carpowersensor(self, value):
@@ -135,7 +144,7 @@ class Hub:
 
     """Current peak"""
     @property
-    def currentPeak(self):
+    def currentPeak(self) -> float:
         return max(self._CurrentPeakSensor, float(self._monthlystartpeak[datetime.now().month]))
 
     @currentPeak.setter
@@ -144,16 +153,12 @@ class Hub:
 
     @callback
     async def state_changed(self, entity_id, old_state, new_state):
-        if  new_state is None:
-            _LOGGER.warn("State was None: ", entity_id)
-            return
         try:
-            if old_state.state != new_state.state:
+            if old_state is None or old_state.state != new_state.state:
                 self._UpdateSensor(entity_id, new_state.state)
         except Exception as e:
-            _LOGGER.warn("Unable to handle data: ", entity_id)
+            _LOGGER.warn("Unable to handle data: ", entity_id, e)
             pass
-
 
     def _SetPowerSensors(self, powerSensorName) -> str: 
         if powerSensorName.startswith("sensor."):
@@ -161,17 +166,16 @@ class Hub:
         else:
             return "sensor." + powerSensorName
 
-
     def _UpdateSensor(self,entity,value):
         if entity == self.powersensorentity:
             self.powersensor = value
-            self.TotalPowerSensor.State = int(float(value)) + self.carpowersensor
-        elif entity == self._ChargerEntity:
+            self.TotalPowerSensor.State = (int(float(value)) + self.carpowersensor)
+        elif entity == self.ChargerTypeData.Charger.ChargerEntity:
             self.ChargerEntity = value
-        elif entity == self._ChargerEntity_Power:
-            self.carpowersensor = int(float(value))
-            self.TotalPowerSensor.State = int(float(value)) + self.powersensor
-        elif entity == self._ChargerEntity_Switch:
+        elif entity == self.ChargerTypeData.Charger.PowerMeter:
+            self.carpowersensor = value
+            self.TotalPowerSensor.State = (int(float(value)) + self.powersensor)
+        elif entity == self.ChargerTypeData.Charger.PowerSwitch:
             self.ChargerEntity_Switch = value
         #elif entity == self.currentPeaksensorentity:
             #self.currentPeak = value

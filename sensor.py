@@ -1,4 +1,5 @@
 """Platform for sensor integration."""
+import logging
 from custom_components.peaq.sensors.peaqutilitysensor import (
     PeaqUtilitySensor,
     METER_OFFSET,
@@ -12,7 +13,7 @@ from custom_components.peaq.sensors.peaqpowersensor import (PeaqPowerSensor, Pea
 from custom_components.peaq.sensors.peaqpredictionsensor import PeaqPredictionSensor
 from custom_components.peaq.sensors.peaqthresholdsensor import PeaqThresholdSensor
 from custom_components.peaq.sensors.peaqsensor import PeaqSensor
-from custom_components.peaq.peaq.extensionmethods import Extensions as ex
+import custom_components.peaq.peaq.extensionmethods as ex
 
 from homeassistant.components.sensor import SensorEntity
 
@@ -20,13 +21,17 @@ from homeassistant.core import (
     HomeAssistant,
 )
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
-
+from datetime import timedelta
 import sqlalchemy
 from sqlalchemy.orm import scoped_session, sessionmaker
 from homeassistant.components.recorder import DEFAULT_DB_FILE, DEFAULT_URL
 
 from .const import (
     DOMAIN)
+
+_LOGGER = logging.getLogger(__name__)
+
+SCAN_INTERVAL = timedelta(seconds=5)
 
 async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_entities):
     """Add sensors for passed config_entry in HA."""
@@ -56,16 +61,17 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
 
     #sql sensors
     peaqsqlsensors = []
+    peaks = hub.LocaleData
+
     db_url = DEFAULT_URL.format(hass_config_path=hass.config.path(DEFAULT_DB_FILE))
     engine = sqlalchemy.create_engine(db_url)
     sessmaker = scoped_session(sessionmaker(bind=engine))
     sqlsensor = hub.TotalHourlyEnergy_Entity
-    sql = PeaqSQLSensorHelper(sqlsensor).GetQueryType(hub.LocaleData.ChargedPeak)
-    
+    sql = PeaqSQLSensorHelper(sqlsensor).GetQueryType(peaks.ChargedPeak)
     peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql))
 
-    if hub.LocaleData.ChargedPeak != hub.LocaleData.ObservedPeak:
-        sql2 = PeaqSQLSensorHelper(sqlsensor).GetQueryType(hub.LocaleData.ObservedPeak)
+    if peaks.ChargedPeak != peaks.ObservedPeak:
+        sql2 = PeaqSQLSensorHelper(sqlsensor).GetQueryType(peaks.ObservedPeak)
         peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql2))
     #sql sensors
     

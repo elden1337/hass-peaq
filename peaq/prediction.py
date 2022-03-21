@@ -3,8 +3,6 @@ from datetime import datetime
 class Prediction:
     def __init__(self, hub):
         self.hub = hub
-        self.PredictedEnergyThisHour
-        self.PredictedPercentageOfPeak
     
     @property
     def PredictedEnergyThisHour(self) -> float:
