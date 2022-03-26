@@ -1,51 +1,66 @@
-
 from .const import (
     DOMAIN)
 
-from homeassistant.components.binary_sensor import BinarySensorEntity
+from homeassistant.components.binary_sensor import BinarySensorEntity, ENTITY_ID_FORMAT
 from homeassistant.core import HomeAssistant
-# from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 async def async_setup_entry(hass : HomeAssistant, config_entry, async_add_entities):
     hub = hass.data[DOMAIN]["hub"]
 
     peaqsensors = []
     
-    peaqsensors.append(PeaqBinarySensor(hub, "Charging done", "none", hub.charging_done))
-    peaqsensors.append(PeaqBinarySensor(hub, "Charger enabled", "none"))
+    peaqsensors.append(PeaqBinarySensorDone(hub))
+    peaqsensors.append(PeaqBinarySensorEnabled(hub))
     async_add_entities(peaqsensors)
 
-class PeaqBinarySensor(BinarySensorEntity):  
-    
-    should_poll = True
+class PeaqBinarySensorEnabled(BinarySensorEntity):  
+    #should_poll = True
 
-    def __init__(self, hub, name, deviceclass, internalsensor = None) -> None:
+    def __init__(self, hub) -> None:
         """Initialize a Peaq Binary sensor."""
-        self._name = f"{hub.NAME} {name}"
-        self._sensor = internalsensor if internalsensor is not None else None
-        self._state = "on" if self._sensor == True else "off"
+        self._attr_name = f"{hub.NAME} Charger enabled"
         self.hub = hub
-        self._deviceclass = deviceclass
+        self._attr_device_class = "none"
+        #self._state = "on" if hub.ChargerEnabled == True else False
 
     @property
     def unique_id(self):
-        return f"{DOMAIN.lower()}_{self._name}"
+        return f"{DOMAIN.lower()}_{self._attr_name}"
 
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self.hub.HUB_ID)}}
 
     @property
-    def name(self) -> str:
-        return self._name
+    def is_on(self) -> bool:
+        return self.hub.ChargerEnabled
+
+    # def update(self) -> None: 
+    #     self._state = "on" if self.hub.ChargerEnabled == True else False
+
+
+class PeaqBinarySensorDone(BinarySensorEntity):  
+    #should_poll = True
+
+    def __init__(self, hub) -> None:
+        """Initialize a Peaq Binary sensor."""
+        self._attr_name = f"{hub.NAME} Charging done"
+        self.hub = hub
+        self._attr_device_class = "none"
+        #self._state = "on" if hub.ChargingDone == True else False
+        #super().__init__(system, parameter_id, None, ENTITY_ID_FORMAT)
+
+    @property
+    def unique_id(self):
+        return f"{DOMAIN.lower()}_{self._attr_name}"
+
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self.hub.HUB_ID)}}
 
     @property
     def is_on(self) -> bool:
-        return True if self._state == "on" else False
+        return self.hub.ChargingDone
 
-    @property
-    def device_class(self):
-        return self._deviceclass
-
-    def update(self) -> None:
-        self._state = "on" if self._sensor == True else "off"
+    # def update(self) -> None:
+    #     self._state = "on" if self.hub.ChargingDone == True else False

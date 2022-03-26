@@ -84,10 +84,7 @@ class ChargeAmps():
         self._ChargerEntity = None
         self._PowerMeter = None
         self._PowerSwitch = None
-        # self.ChargerEntity = "sensor.hake_2012019145m_1"
-        # self.PowerMeter = "sensor.hake_2012019145m_1_power"
-        # self.PowerSwitch = "switch.hake_2012019145m_1" 
-        self.ServiceCalls = {}
+        self._ServiceCalls = {}
         self.GetEntities(self._hass)
         #super().__init__()
 
@@ -109,15 +106,17 @@ class ChargeAmps():
             self.ChargerEntity = f"sensor.{candidate}_1"
             self.PowerMeter = f"sensor.{candidate}_1_power"
             self.PowerSwitch = f"switch.{candidate}_1"
-
-        # ret = {
-        #     "powersensor": powersensor,
-        #     "switch": switch,
-        #     "mainsensor":mainsensor
-        # }
-        
-        # return ret
+            self.ServiceCalls = {
+                "domain": "chargeamps",
+                "on": "enable",
+                "off": "disable",
+                "updatecurrent": "set_max_current"
+            }
     
+    @property
+    def AllowUpdateCurrent(self) -> bool:
+        return True
+
     """Power meter"""
     @property
     def PowerMeter(self):

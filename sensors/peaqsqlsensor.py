@@ -22,20 +22,24 @@ class PeaqSQLSensorHelper():
         QUERYTYPES = {
         f"{BASICMAX}" : {
             'query': f'SELECT IFNULL(MAX(state),0) AS state FROM "{self.STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{self.STATISTICS_META_TABLE}" WHERE statistic_id = "{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 1',
-            'name': f'{self.BASENAME}'
+            'name': f'{self.BASENAME}',
+            'entity': ''
         },
         f"{AVERAGEOFTHREEDAYS}" : {
             'query': f'SELECT IFNULL(ROUND(AVG(daymax),2),0) as state FROM ( SELECT MAX(state) as daymax FROM "{self.STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{self.STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 3)',
-            'name': f'{self.BASENAME}, Average of three'
+            'name': f'{self.BASENAME}, Average of three',
+            'entity': ''
             },
         f"{AVERAGEOFTHREEDAYS_MIN}" : {
             'query': f'SELECT IFNULL(min(daymax),0) as state FROM ( SELECT MAX(state) as daymax FROM "{self.STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{self.STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 3)',
-            'name': f'{self.BASENAME}, Min of three'
+            'name': f'{self.BASENAME}, Min of three',
+            'entity': ''
         },
         #höglast (karlstad). Bara i effekt nov tom mars
         f"{HIGHLOAD}" : {
             'query': f'SELECT IFNULL(MAX(state),0) as state FROM "{self.STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{self.STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) AND cast(strftime(\'%w\', start) as int) <= 4 AND cast(strftime(\'%H\', start) as int) between 8 AND 18 GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 1',
-            'name': f'{self.BASENAME}, High load'
+            'name': f'{self.BASENAME}, High load',
+            'entity': ''
             }
         }
 

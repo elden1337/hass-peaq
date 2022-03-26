@@ -6,10 +6,10 @@ import logging
 _LOGGER = logging.getLogger(__name__)
 
 class ChargeController():
-    def __init__(self, hub, _status = constants.CHARGECONTROLLER.Idle):
+    def __init__(self, hub, inputstatus = constants.CHARGECONTROLLER.Idle):
         self._hub = hub
         self.Name = "ChargeController"
-        self.status = _status
+        self._status = inputstatus
     
     @property
     def LessThanStartThreshold(self) -> bool: 
@@ -18,11 +18,6 @@ class ChargeController():
     @property
     def MoreThanStopThreshold(self) -> bool: 
         return (self._hub.Prediction.PredictedEnergyThisHour * 1000) > ((self._hub.currentPeak*1000) * (self._hub.Threshold.Stop/100))
-    
-    # @property
-    # def TotalEnergyThisHourIsNotZero(self) -> bool:
-    #     _LOGGER.error("totalenergythis hour: ", self._hub.TotalEnergyThisHour) 
-    #     return self._hub.TotalEnergyThisHour > 0
 
     @property
     def status(self):
@@ -36,7 +31,7 @@ class ChargeController():
             self._hub = hub    
             if self._hub.ChargerEntity.lower() == "available":
                 return constants.CHARGECONTROLLER.Idle
-            elif self._hub.ChargerEntity.lower() != "available" and self._hub.charging_done == True:
+            elif self._hub.ChargerEntity.lower() != "available" and self._hub.ChargingDone == True:
                 return constants.CHARGECONTROLLER.Done
             elif datetime.now().hour in self._hub.NonHours:
                 return constants.CHARGECONTROLLER.Stop
