@@ -69,6 +69,7 @@ class Hub:
         self.ChargerObject_Switch = self.hass.states.get(self.ChargerTypeData.Charger.PowerSwitch)
         self.CarPowerSensor = self.hass.states.get(self.ChargerTypeData.Charger.PowerMeter)
         self.TotalEnergyThisHour = self.hass.states.get(self.TotalHourlyEnergy_Entity)
+        self.currentPeak = self.hass.states.get(self.currentPeaksensorentity)
         #init values
         
         trackerEntities = [
@@ -82,6 +83,8 @@ class Hub:
         #mocks in this one. make them work generic
         self.chargingTrackerEntities = [self.PowerSensorMovingAverage_Entity, self.ChargerEnabled_Entity, self.ChargingDone_Entity, self.ChargerTypeData.Charger.ChargerEntity, "sensor.peaq_chargercontroller"]
         self.chargerblocked = False
+        self.chargerStart = False
+        self.chargerStop = False
         #mocks in this one. make them work generic
 
         trackerEntities += self.chargingTrackerEntities
@@ -175,24 +178,22 @@ class Hub:
     def ChargingDone(self, value):
         self._ChargingDone = True if value.lower() == "on" else False
 
-    @callback
-    async def state_changed(self, entity_id, old_state, new_state):
-        try:
-            if old_state is None or old_state.state != new_state.state:
-                self._UpdateSensor(entity_id, new_state.state)
-        except Exception as e:
-            _LOGGER.warn("Unable to handle data: ", entity_id, e)
-            pass
-
     def _SetPowerSensors(self, powerSensorName) -> str: 
         if powerSensorName.startswith("sensor."):
             return powerSensorName
         else:
             return "sensor." + powerSensorName
-    
-    
 
-    def _UpdateSensor(self,entity,value):
+    @callback
+    async def state_changed(self, entity_id, old_state, new_state):
+        try:
+            if old_state is None or old_state.state != new_state.state:
+                await self._UpdateSensor(entity_id, new_state.state)
+        except Exception as e:
+            _LOGGER.warn("Unable to handle data: ", entity_id, e)
+            pass
+
+    async def _UpdateSensor(self,entity,value):
         if entity == self.powersensorentity:
             self.powersensor = value
             self.TotalPowerSensor.State = (self.powersensor + self.carpowersensor)
@@ -211,29 +212,29 @@ class Hub:
             self.PowerSensorMovingAverage = value
         
         if entity in self.chargingTrackerEntities and not self.chargerblocked:
-            self.Charge()
+            await self._Charge(self.ChargerTypeData.Charger.ServiceCalls['domain'], self.ChargerTypeData.Charger.ServiceCalls['on'], self.ChargerTypeData.Charger.ServiceCalls['off'])
             
-    def Charge(self):
+    async def _Charge(self, domain:str, call_on:str, call_off:str):
         self.chargerblocked = True
-        _LOGGER.error("init chargefunction")  
         if self.ChargerEnabled == True:
-            _LOGGER.error("chargerenabled is true")  
             if self.ChargeController.status.name == "Start":
-                _LOGGER.error("status is Start")  
-                if self.ChargerEntity_Switch == "off": 
-                    _LOGGER.error("switch is seen as off")
-                    self.hass.services.call(self.ChargerTypeData.Charger.ServiceCalls["domain"],self.ChargerTypeData.Charger.ServiceCalls["on"],{})
-                    
+                if self.ChargerEntity_Switch == "off" and self.chargerStart == False: 
+                    _LOGGER.info("before call")
+                    self.chargerStart = True
+                    self.chargerStop = False
+                    await self.hass.services.async_call(domain,call_on)
+                    _LOGGER.info("after call")
             elif self.ChargeController.status.name == "Stop" or self.ChargingDone == True or self.ChargeController.status.name == "Idle":
-                if self.ChargerEntity_Switch == "on":   
-                    self.hass.services.call(self.ChargerTypeData.Charger.ServiceCalls["domain"],self.ChargerTypeData.Charger.ServiceCalls["off"],{})       
-        else:
-           _LOGGER.error("chargerenabled is false")  
-           if self.ChargerEntity_Switch == "on":
-                self.hass.services.call(self.ChargerTypeData.Charger.ServiceCalls["domain"],self.ChargerTypeData.Charger.ServiceCalls["off"],{})
-                
+                if self.ChargerEntity_Switch == "on" and self.chargerStop == False:
+                    self.chargerStop = True
+                    self.chargerStart = False 
+                    await self.hass.services.async_call(domain, call_off)              
+        else: 
+           if self.ChargerEntity_Switch == "on" and self.chargerStop == False:
+                self.chargerStop = True
+                self.chargerStart = False
+                await self.hass.services.async_call(domain, call_off)  
         self.chargerblocked = False
-
 
 class MiniSensor: 
     def __init__(self, name):
