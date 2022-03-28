@@ -17,7 +17,7 @@ class PeaqBinarySensorEnabled(BinarySensorEntity):
     def __init__(self, hub) -> None:
         """Initialize a Peaq Binary sensor."""
         self._attr_name = f"{hub.NAME} Charger enabled"
-        self.hub = hub
+        self._hub = hub
         self._attr_device_class = "none"
 
     @property
@@ -26,17 +26,17 @@ class PeaqBinarySensorEnabled(BinarySensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self.hub.HUB_ID)}}
+        return {"identifiers": {(DOMAIN, self._hub.HUB_ID)}}
 
     @property
     def is_on(self) -> bool:
-        return self.hub.chargerenabled.value
+        return self._hub.chargerenabled.value
     
 class PeaqBinarySensorDone(BinarySensorEntity):  
     def __init__(self, hub) -> None:
         """Initialize a Peaq Binary sensor."""
         self._attr_name = f"{hub.NAME} Charging done"
-        self.hub = hub
+        self._hub = hub
         self._attr_device_class = "none"
 
     @property
@@ -45,8 +45,8 @@ class PeaqBinarySensorDone(BinarySensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self.hub.HUB_ID)}}
+        return {"identifiers": {(DOMAIN, self._hub.HUB_ID)}}
 
     @property
     def is_on(self) -> bool:
-        return self.hub.ChargingDone
+        return self._hub.ChargingDone

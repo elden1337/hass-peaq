@@ -6,16 +6,16 @@ class PeaqSensor(SensorBase):
         super().__init__(hub, name.lower())
 
         self._attr_name = name
-        self._state = self._hub.ChargeController.status.name
+        self._state = self._hub.chargecontroller.status.name
 
     @property
     def state(self):
         """Return the state of the sensor."""
-        return self._hub.ChargeController.status.name
+        return self._hub.chargecontroller.status.name
 
     @property
     def icon(self) -> str:
         return "mdi:gate-xor"
 
     def update(self) -> None:
-        self._state = self._hub.ChargeController.status.name
+        self._state = self._hub.chargecontroller.status.name

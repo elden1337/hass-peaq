@@ -69,7 +69,7 @@ class Hub:
         self.TotalPowerSensor = MiniSensor("Total Power")
         self.Prediction = Prediction(self)
         self.Threshold = Threshold(self)
-        self.ChargeController = ChargeController(self)
+        self.chargecontroller = ChargeController(self)
         """Init the subclasses"""
 
         #init values
@@ -206,12 +206,12 @@ class Hub:
     async def _Charge(self, domain:str, call_on:str, call_off:str):
         self.chargerblocked = True
         if self.chargerenabled.value == True:
-            if self.ChargeController.status.name == "Start":
+            if self.chargecontroller.status.name == "Start":
                 if self.ChargerEntity_Switch == "off" and self.chargerStart == False: 
                     self.chargerStart = True
                     self.chargerStop = False
                     await self.hass.services.async_call(domain,call_on)
-            elif self.ChargeController.status.name == "Stop" or self.ChargingDone == True or self.ChargeController.status.name == "Idle":
+            elif self.chargecontroller.status.name == "Stop" or self.ChargingDone == True or self.chargecontroller.status.name == "Idle":
                 if self.ChargerEntity_Switch == "on" and self.chargerStop == False:
                     self.chargerStop = True
                     self.chargerStart = False 
@@ -223,6 +223,7 @@ class Hub:
                 await self.hass.services.async_call(domain, call_off)  
         self.chargerblocked = False
 
+#this can probably be removed in favor of HubMember-class
 class MiniSensor: 
     def __init__(self, name):
         self.Name = name
@@ -236,6 +237,7 @@ class MiniSensor:
     @State.setter
     def State(self, value):
         self._state = int(float(value))
+#this can probably be removed in favor of HubMember-class
 
 class HubMember:
     def __init__(self, type: type, listenerentity = None):
