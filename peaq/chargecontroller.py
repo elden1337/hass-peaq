@@ -13,11 +13,11 @@ class ChargeController():
     
     @property
     def LessThanStartThreshold(self) -> bool: 
-        return (self._hub.Prediction.PredictedEnergyThisHour * 1000) < ((self._hub.currentPeak*1000) * (self._hub.Threshold.Start/100))
+        return (self._hub.Prediction.PredictedEnergyThisHour * 1000) < ((self._hub.currentpeak.value*1000) * (self._hub.Threshold.Start/100))
         
     @property
     def MoreThanStopThreshold(self) -> bool: 
-        return (self._hub.Prediction.PredictedEnergyThisHour * 1000) > ((self._hub.currentPeak*1000) * (self._hub.Threshold.Stop/100))
+        return (self._hub.Prediction.PredictedEnergyThisHour * 1000) > ((self._hub.currentpeak.value*1000) * (self._hub.Threshold.Stop/100))
 
     @property
     def status(self):

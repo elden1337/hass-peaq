@@ -15,8 +15,8 @@ class Prediction:
     
     @property
     def PredictedPercentageOfPeak(self) -> float:
-        if self._hub.currentPeak == 0.0 or self._hub.currentPeak is None:
+        if self._hub.currentpeak.value == 0.0 or self._hub.currentpeak.value is None:
             return 0
         elif self.PredictedEnergyThisHour == 0.0 or self.PredictedEnergyThisHour is None:
             return 0
-        return round((self.PredictedEnergyThisHour / self._hub.currentPeak) * 100,2)
+        return round((self.PredictedEnergyThisHour / self._hub.currentpeak.value) * 100,2)

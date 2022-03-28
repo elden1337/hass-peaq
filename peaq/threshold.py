@@ -26,7 +26,7 @@ class Threshold:
         ret = 6
         nowmin = datetime.now().minute
         for key, value in constants.CURRENTS.items():
-            if (((((self._hub.powersensormovingaverage.value + key) / 60) * (60-nowmin)+ self._hub.TotalEnergyThisHour*1000)/1000) < self._hub.currentPeak):
+            if (((((self._hub.powersensormovingaverage.value + key) / 60) * (60-nowmin)+ self._hub.TotalEnergyThisHour*1000)/1000) < self._hub.currentpeak.value):
                 ret = value
                 break
         return ret

@@ -26,13 +26,12 @@ refactorera alla members i hub, stökigt nu (gör miniclass med sökande sensor 
 """
 
 class Hub:
-    NAME = "Peaq"
+    NAME = "Peaq"  #hardcoded, get from domain instead
     HUB_ID = 1342
     CONSUMPTION_INTEGRAL_NAME = "Energy excluding car"
     CONSUMPTION_TOTAL_NAME = "Energy including car" 
 
     """for getters and setters internals"""
-    _currentpeaksensor = 0 #sensor
     _powersensor = 0
     _TotalHourlyEnergy = 0
     _chargerobject = ""
@@ -57,13 +56,12 @@ class Hub:
         self.CautionHours = configInputs["cautionhours"]
         self.powersensorentity = self._SetPowerSensors(configInputs["powersensor"])
         """from the config inputs"""
-        
-        self.currentPeaksensorentity = "sensor.peaq_monthly_max_peak_min_of_three" #mock, fix later
-        self.chargerenabled = HubMember(bool, "binary_sensor.peaq_charger_enabled")
-        self.ChargingDone_Entity = "binary_sensor.peaq_charging_done" #mock, fix later
+       
+        self.chargerenabled = HubMember(bool, "binary_sensor.peaq_charger_enabled")  #hardcoded, fix
+        self.ChargingDone_Entity = "binary_sensor.peaq_charging_done"  #hardcoded, fix
         self.TotalHourlyEnergy_Entity = f"sensor.{self.NAME.lower()}_{ex.NameToId(self.CONSUMPTION_TOTAL_NAME)}_hourly" #ugly, fix probably
    
-        self.powersensormovingaverage = HubMember(int, "sensor.peaq_average_consumption")
+        self.powersensormovingaverage = HubMember(int, "sensor.peaq_average_consumption") #hardcoded, fix
         
         """Init the subclasses"""
         self.TotalPowerSensor = MiniSensor("Total Power")
@@ -72,12 +70,14 @@ class Hub:
         self.chargecontroller = ChargeController(self)
         """Init the subclasses"""
 
+        self.currentpeak = CurrentPeak(float, "sensor.peaq_monthly_max_peak_min_of_three", self._monthlystartpeak[datetime.now().month]) #hardcoded, fix
+
         #init values
         self.ChargerObject = self.hass.states.get(self.chargertypedata.charger.chargerentity)
         self.ChargerObject_Switch = self.hass.states.get(self.chargertypedata.charger.powerswitch)
         self.CarPowerSensor = self.hass.states.get(self.chargertypedata.charger.powermeter)
         self.TotalEnergyThisHour = self.hass.states.get(self.TotalHourlyEnergy_Entity)
-        self.currentPeak = self.hass.states.get(self.currentPeaksensorentity)
+        self.currentpeak.value = self.hass.states.get(self.currentpeak.entity)
         #init values
         
         trackerEntities = [
@@ -85,7 +85,7 @@ class Hub:
             self.chargertypedata.charger.powerswitch,
             self.powersensorentity,
             self.TotalHourlyEnergy_Entity,
-            self.currentPeaksensorentity
+            self.currentpeak.entity
         ]
 
         #mocks in this one. make them work generic
@@ -148,16 +148,6 @@ class Hub:
         if ex.Is_Float(value):
             self._carpowersensor = int(float(value))
 
-    """Current peak"""
-    @property
-    def currentPeak(self) -> float:
-        return max(self._currentpeaksensor, float(self._monthlystartpeak[datetime.now().month]))
-
-    @currentPeak.setter
-    def currentPeak(self, value):
-        if ex.Is_Float(value):
-            self._currentpeaksensor = float(value)
-
     """Charging Done"""
     @property
     def ChargingDone(self) -> bool:
@@ -193,8 +183,8 @@ class Hub:
             self.TotalPowerSensor.State = (self.carpowersensor + self.powersensor)
         elif entity == self.chargertypedata.charger.powerswitch:
             self.ChargerEntity_Switch = value
-        elif entity == self.currentPeaksensorentity:
-            self.currentPeak = value
+        elif entity == self.currentpeak.entity:
+            self.currentpeak.value = value
         elif entity == self.TotalHourlyEnergy_Entity:
             self.TotalEnergyThisHour = value
         elif entity == self.powersensormovingaverage.entity:
@@ -266,3 +256,13 @@ class HubMember:
                 self._value = False
         elif  self._type is str:
             self._value = str(value)
+
+class CurrentPeak(HubMember):
+    def __init__(self, type: type, listenerentity, startpeak):
+        self._startpeak = startpeak
+        super().__init__(type, listenerentity)
+
+    @property
+    def value(self):
+        return max(super()._value, float(self._startpeak))
+
