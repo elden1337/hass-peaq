@@ -82,7 +82,7 @@ class ChargeAmps():
     """Power Switch"""
     @property
     def powerswitch(self):
-        return self._powerSwitch
+        return self._powerswitch
 
     @powerswitch.setter
     def powerswitch(self, val):

@@ -1,4 +1,3 @@
-from _typeshed import NoneType
 import logging
 from datetime import datetime
 
@@ -57,11 +56,13 @@ class Hub:
         self.powersensorentity = self._SetPowerSensors(configInputs["powersensor"])
         """from the config inputs"""
        
-        self.chargerenabled = HubMember(bool, "binary_sensor.peaq_charger_enabled")  #hardcoded, fix
+        self.chargerenabled = HubMember(bool, "binary_sensor.peaq_charger_enabled", False)  #hardcoded, fix
+        #self.chargerenabled.value = False
+
         self.ChargingDone_Entity = "binary_sensor.peaq_charging_done"  #hardcoded, fix
         self.TotalHourlyEnergy_Entity = f"sensor.{self.NAME.lower()}_{ex.NameToId(self.CONSUMPTION_TOTAL_NAME)}_hourly" #ugly, fix probably
    
-        self.powersensormovingaverage = HubMember(int, "sensor.peaq_average_consumption") #hardcoded, fix
+        self.powersensormovingaverage = HubMember(int, "sensor.peaq_average_consumption", 0) #hardcoded, fix
         
         """Init the subclasses"""
         self.TotalPowerSensor = MiniSensor("Total Power")
@@ -70,7 +71,7 @@ class Hub:
         self.chargecontroller = ChargeController(self)
         """Init the subclasses"""
 
-        self.currentpeak = CurrentPeak(float, "sensor.peaq_monthly_max_peak_min_of_three", self._monthlystartpeak[datetime.now().month]) #hardcoded, fix
+        self.currentpeak = CurrentPeak(float, "sensor.peaq_monthly_max_peak_min_of_three", 0, self._monthlystartpeak[datetime.now().month]) #hardcoded, fix
 
         #init values
         self.ChargerObject = self.hass.states.get(self.chargertypedata.charger.chargerentity)
@@ -230,8 +231,8 @@ class MiniSensor:
 #this can probably be removed in favor of HubMember-class
 
 class HubMember:
-    def __init__(self, type: type, listenerentity = None):
-        self._value = None
+    def __init__(self, type: type, listenerentity = None, initval = None):
+        self._value = initval
         self._type = type
         self._listenerentity = listenerentity
 
@@ -258,11 +259,12 @@ class HubMember:
             self._value = str(value)
 
 class CurrentPeak(HubMember):
-    def __init__(self, type: type, listenerentity, startpeak):
+    def __init__(self, type: type, listenerentity, initval, startpeak):
         self._startpeak = startpeak
-        super().__init__(type, listenerentity)
+        self._value = initval
+        super().__init__(type, listenerentity, initval)
 
-    @property
+    @HubMember.value.getter
     def value(self):
-        return max(super()._value, float(self._startpeak))
+        return max(self._value, float(self._startpeak)) if self._value is not None else float(self._startpeak)
 
