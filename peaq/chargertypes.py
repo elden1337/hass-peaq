@@ -9,82 +9,34 @@ _LOGGER = logging.getLogger(__name__)
 """Init the service"""
 class ChargerTypeData():
     def __init__(self, hass: HomeAssistant, input):
-        self._Charger = None
-        self._Type = input
+        self._charger = None
+        self._type = input
         self._hass = hass
 
         if input == constants.CHARGERTYPE_CHARGEAMPS:
-            self.Charger = ChargeAmps(self._hass)
+            self.charger = ChargeAmps(self._hass)
         elif  input == constants.CHARGERTYPE_EASEE:
-            self.Charger = Easee(self._hass)
+            self.charger = Easee(self._hass)
     
     @property
-    def Type(self) -> str:
-        return self._Type
+    def type(self) -> str:
+        return self._type
 
     @property
-    def Charger(self):
-        return self._Charger
+    def charger(self):
+        return self._charger
 
-    @Charger.setter
-    def Charger(self, obj):
-        self._Charger = obj
-
-"""Shared baseclass"""
-class ChargerTypeBase():
-    def __init__(self):
-        self._PowerMeter = ""
-        self._PowerSwitch = ""
-        self._ChargerEntity = ""
-        self._ServiceCalls = {}     
-
-    """Power meter"""
-    @property
-    def PowerMeter(self):
-        return self._PowerMeter
-
-    @PowerMeter.setter
-    def PowerMeter(self, val):
-        assert type(val) is str
-        self._PowerMeter = val
-
-    """Power Switch"""
-    @property
-    def PowerSwitch(self):
-        return self._PowerSwitch
-
-    @PowerSwitch.setter
-    def PowerSwitch(self, val):
-        assert type(val) is str
-        self._PowerSwitch = val
-
-    """Charger entity"""
-    @property
-    def ChargerEntity(self):
-        return self._ChargerEntity
-
-    @ChargerEntity.setter
-    def ChargerEntity(self, val):
-        assert type(val) is str
-        self._ChargerEntity = val
-
-    """Service calls"""
-    @property
-    def ServiceCalls(self) -> dict:
-        return self._ServiceCalls
-
-    @ServiceCalls.setter
-    def ServiceCalls(self, obj):
-        assert type(obj) is dict
-        self._ServiceCalls = obj
+    @charger.setter
+    def charger(self, obj):
+        self._charger = obj
 
 class ChargeAmps():
     def __init__(self, hass: HomeAssistant):
         self._hass = hass
-        self._ChargerEntity = None
-        self._PowerMeter = None
-        self._PowerSwitch = None
-        self._ServiceCalls = {}
+        self._chargerEntity = None
+        self._powermeter = None
+        self._powerswitch = None
+        self._servicecalls = {}
         self.GetEntities(self._hass)
         #super().__init__()
 
@@ -103,10 +55,10 @@ class ChargeAmps():
                 if namelrg[1].endswith(e):
                     candidate = namelrg[1].replace(e, '') 
 
-            self.ChargerEntity = f"sensor.{candidate}_1"
-            self.PowerMeter = f"sensor.{candidate}_1_power"
-            self.PowerSwitch = f"switch.{candidate}_1"
-            self.ServiceCalls = {
+            self.chargerentity = f"sensor.{candidate}_1"
+            self.powermeter = f"sensor.{candidate}_1_power"
+            self.powerswitch = f"switch.{candidate}_1"
+            self.servicecalls = {
                 "domain": "chargeamps",
                 "on": "enable",
                 "off": "disable",
@@ -114,49 +66,49 @@ class ChargeAmps():
             }
     
     @property
-    def AllowUpdateCurrent(self) -> bool:
+    def allowupdatecurrent(self) -> bool:
         return True
 
     """Power meter"""
     @property
-    def PowerMeter(self):
-        return self._PowerMeter
+    def powermeter(self):
+        return self._powermeter
 
-    @PowerMeter.setter
-    def PowerMeter(self, val):
+    @powermeter.setter
+    def powermeter(self, val):
         assert type(val) is str
-        self._PowerMeter = val
+        self._powermeter = val
 
     """Power Switch"""
     @property
-    def PowerSwitch(self):
-        return self._PowerSwitch
+    def powerswitch(self):
+        return self._powerSwitch
 
-    @PowerSwitch.setter
-    def PowerSwitch(self, val):
+    @powerswitch.setter
+    def powerswitch(self, val):
         assert type(val) is str
-        self._PowerSwitch = val
+        self._powerswitch = val
 
     """Charger entity"""
     @property
-    def ChargerEntity(self):
-        return self._ChargerEntity
+    def chargerentity(self):
+        return self._chargerentity
 
-    @ChargerEntity.setter
-    def ChargerEntity(self, val):
+    @chargerentity.setter
+    def chargerentity(self, val):
         assert type(val) is str
-        self._ChargerEntity = val
+        self._chargerentity = val
 
     """Service calls"""
     @property
-    def ServiceCalls(self) -> dict:
-        return self._ServiceCalls
+    def servicecalls(self) -> dict:
+        return self._servicecalls
 
-    @ServiceCalls.setter
-    def ServiceCalls(self, obj):
+    @servicecalls.setter
+    def servicecalls(self, obj):
         assert type(obj) is dict
-        self._ServiceCalls = obj
+        self._servicecalls = obj
 
-class Easee(ChargerTypeBase):
+class Easee():
     def __init__(self):
-        super().__init__()
+        pass

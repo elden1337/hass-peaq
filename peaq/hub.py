@@ -15,6 +15,15 @@ from homeassistant.core import (
 
 _LOGGER = logging.getLogger(__name__)
 
+"""
+todo:
+fixa så att elmätare inte inkluderar laddare (om bool)
+fixa config flow med månaderna och nonhours
+fixa updatecurrent
+fixa easee
+refactorera alla members i hub, stökigt nu (gör miniclass med sökande sensor och property)
+"""
+
 class Hub:
     NAME = "Peaq"
     HUB_ID = 1342
@@ -22,15 +31,15 @@ class Hub:
     CONSUMPTION_TOTAL_NAME = "Energy including car" 
 
     """for getters and setters internals"""
-    _CurrentPeakSensor = 0 #sensor
-    _PowerSensor = 0
+    _currentpeaksensor = 0 #sensor
+    _powersensor = 0
     _TotalHourlyEnergy = 0
-    _PowerSensorMovingAverage = 0
-    _ChargerObject = ""
-    _ChargerObject_Switch = ""
-    _CarPowerSensor = 0
-    _ChargerEnabled = False
-    _ChargingDone = False
+    _powersensormovingaverage = 0
+    _chargerobject = ""
+    _chargerobject_switch = ""
+    _carpowersensor = 0
+    _charger_enabled = False
+    _charger_done = False
     """for getters and setters internals"""
 
     def __init__(
@@ -42,7 +51,7 @@ class Hub:
         
         """from the config inputs"""
         self.LocaleData = LocaleData(configInputs["locale"])
-        self.ChargerTypeData = ChargerTypeData(hass, configInputs["chargertype"])
+        self.chargertypedata = ChargerTypeData(hass, configInputs["chargertype"])
         self._powersensor_includes_car = configInputs["powersensorincludescar"]
         self._monthlystartpeak = configInputs["monthlystartpeak"]
         self.NonHours = configInputs["nonhours"]
@@ -65,23 +74,23 @@ class Hub:
         """Init the subclasses"""
 
         #init values
-        self.ChargerObject = self.hass.states.get(self.ChargerTypeData.Charger.ChargerEntity)
-        self.ChargerObject_Switch = self.hass.states.get(self.ChargerTypeData.Charger.PowerSwitch)
-        self.CarPowerSensor = self.hass.states.get(self.ChargerTypeData.Charger.PowerMeter)
+        self.ChargerObject = self.hass.states.get(self.chargertypedata.charger.chargerentity)
+        self.ChargerObject_Switch = self.hass.states.get(self.chargertypedata.charger.powerswitch)
+        self.CarPowerSensor = self.hass.states.get(self.chargertypedata.charger.powermeter)
         self.TotalEnergyThisHour = self.hass.states.get(self.TotalHourlyEnergy_Entity)
         self.currentPeak = self.hass.states.get(self.currentPeaksensorentity)
         #init values
         
         trackerEntities = [
-            self.ChargerTypeData.Charger.PowerMeter,
-            self.ChargerTypeData.Charger.PowerSwitch,
+            self.chargertypedata.charger.powermeter,
+            self.chargertypedata.charger.powerswitch,
             self.powersensorentity,
             self.TotalHourlyEnergy_Entity,
             self.currentPeaksensorentity
         ]
 
         #mocks in this one. make them work generic
-        self.chargingTrackerEntities = [self.PowerSensorMovingAverage_Entity, self.ChargerEnabled_Entity, self.ChargingDone_Entity, self.ChargerTypeData.Charger.ChargerEntity, "sensor.peaq_chargercontroller"]
+        self.chargingTrackerEntities = [self.PowerSensorMovingAverage_Entity, self.ChargerEnabled_Entity, self.ChargingDone_Entity, self.chargertypedata.charger.chargerentity, "sensor.peaq_chargercontroller"]
         self.chargerblocked = False
         self.chargerStart = False
         self.chargerStop = False
@@ -93,29 +102,29 @@ class Hub:
     
     @property
     def ChargerEntity(self):
-        return self._ChargerObject
+        return self._chargerobject
 
     @ChargerEntity.setter
     def ChargerEntity(self, value):
-        self._ChargerObject = value
+        self._chargerobject = value
 
     @property
     def ChargerEntity_Switch(self):
-        return self._ChargerObject_Switch
+        return self._chargerobject_switch
 
     @ChargerEntity_Switch.setter
     def ChargerEntity_Switch(self, value):
-        self._ChargerObject_Switch = value
+        self._chargerobject_switch = value
         
     """Moving average house powersensor"""
     @property
     def PowerSensorMovingAverage(self):
-        return self._PowerSensorMovingAverage
+        return self._powersensormovingaverage
 
     @PowerSensorMovingAverage.setter
     def PowerSensorMovingAverage(self, value):
         if ex.Is_Float(value):
-            self._PowerSensorMovingAverage = int(float(value))
+            self._powersensormovingaverage = int(float(value))
 
     """Total hourly energy"""
     @property
@@ -130,53 +139,53 @@ class Hub:
     """House powersensor"""
     @property
     def powersensor(self):
-        return self._PowerSensor
+        return self._powersensor
 
     @powersensor.setter
     def powersensor(self, value):
         if ex.Is_Float(value):
-            self._PowerSensor = int(float(value))
+            self._powersensor = int(float(value))
 
     """Car powersensor"""
     @property
     def carpowersensor(self):
-        if self._CarPowerSensor is None:
+        if self._carpowersensor is None:
             return 0
         else:
-            return self._CarPowerSensor
+            return self._carpowersensor
 
     @carpowersensor.setter
     def carpowersensor(self, value):
         if ex.Is_Float(value):
-            self._CarPowerSensor = int(float(value))
+            self._carpowersensor = int(float(value))
 
     """Current peak"""
     @property
     def currentPeak(self) -> float:
-        return max(self._CurrentPeakSensor, float(self._monthlystartpeak[datetime.now().month]))
+        return max(self._currentpeaksensor, float(self._monthlystartpeak[datetime.now().month]))
 
     @currentPeak.setter
     def currentPeak(self, value):
         if ex.Is_Float(value):
-            self._CurrentPeakSensor = float(value)
+            self._currentpeaksensor = float(value)
 
     """Charger enabled"""
     @property
     def ChargerEnabled(self) -> bool:
-        return self._ChargerEnabled
+        return self._charger_enabled
 
     @ChargerEnabled.setter
     def ChargerEnabled(self, value):
-        self._ChargerEnabled = True if value.lower() == "on" else False
+        self._charger_enabled = True if value.lower() == "on" else False
 
     """Charging Done"""
     @property
     def ChargingDone(self) -> bool:
-        return self._ChargingDone
+        return self._charger_done
 
     @ChargingDone.setter
     def ChargingDone(self, value):
-        self._ChargingDone = True if value.lower() == "on" else False
+        self._charger_done = True if value.lower() == "on" else False
 
     def _SetPowerSensors(self, powerSensorName) -> str: 
         if powerSensorName.startswith("sensor."):
@@ -197,12 +206,12 @@ class Hub:
         if entity == self.powersensorentity:
             self.powersensor = value
             self.TotalPowerSensor.State = (self.powersensor + self.carpowersensor)
-        elif entity == self.ChargerTypeData.Charger.ChargerEntity:
+        elif entity == self.chargertypedata.charger.chargerentity:
             self.ChargerEntity = value
-        elif entity == self.ChargerTypeData.Charger.PowerMeter:
+        elif entity == self.chargertypedata.charger.powermeter:
             self.carpowersensor = value
             self.TotalPowerSensor.State = (self.carpowersensor + self.powersensor)
-        elif entity == self.ChargerTypeData.Charger.PowerSwitch:
+        elif entity == self.chargertypedata.charger.powerswitch:
             self.ChargerEntity_Switch = value
         elif entity == self.currentPeaksensorentity:
             self.currentPeak = value
@@ -212,7 +221,7 @@ class Hub:
             self.PowerSensorMovingAverage = value
         
         if entity in self.chargingTrackerEntities and not self.chargerblocked:
-            await self._Charge(self.ChargerTypeData.Charger.ServiceCalls['domain'], self.ChargerTypeData.Charger.ServiceCalls['on'], self.ChargerTypeData.Charger.ServiceCalls['off'])
+            await self._Charge(self.chargertypedata.charger.servicecalls['domain'], self.chargertypedata.charger.servicecalls['on'], self.chargertypedata.charger.servicecalls['off'])
             
     async def _Charge(self, domain:str, call_on:str, call_off:str):
         self.chargerblocked = True
@@ -249,3 +258,31 @@ class MiniSensor:
     @State.setter
     def State(self, value):
         self._state = int(float(value))
+
+class HubMember():
+    def __init__(self, listenerentity : str, type: type):
+        self._value = None
+        self._type = type
+        self._listenerentity = listenerentity
+
+    @property
+    def entity(self):
+        return self._listenerentity
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        if type(value) is self._type:
+            self._value = value
+        elif self._type is int:
+            self._value = int(float(value))
+        elif self._type is bool:
+            if value.lower() == "on":
+                self._value = True
+            elif value.lower() == "off":
+                self._value = False
+        elif  self._type is str:
+            self._value = str(value)
