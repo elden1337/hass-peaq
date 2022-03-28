@@ -1,3 +1,4 @@
+from _typeshed import NoneType
 import logging
 from datetime import datetime
 
@@ -34,11 +35,9 @@ class Hub:
     _currentpeaksensor = 0 #sensor
     _powersensor = 0
     _TotalHourlyEnergy = 0
-    _powersensormovingaverage = 0
     _chargerobject = ""
     _chargerobject_switch = ""
     _carpowersensor = 0
-    _charger_enabled = False
     _charger_done = False
     """for getters and setters internals"""
 
@@ -54,18 +53,18 @@ class Hub:
         self.chargertypedata = ChargerTypeData(hass, configInputs["chargertype"])
         self._powersensor_includes_car = configInputs["powersensorincludescar"]
         self._monthlystartpeak = configInputs["monthlystartpeak"]
-        self.NonHours = configInputs["nonhours"]
+        self.nonhours = configInputs["nonhours"]
         self.CautionHours = configInputs["cautionhours"]
         self.powersensorentity = self._SetPowerSensors(configInputs["powersensor"])
         """from the config inputs"""
         
         self.currentPeaksensorentity = "sensor.peaq_monthly_max_peak_min_of_three" #mock, fix later
-        self.ChargerEnabled_Entity = "binary_sensor.peaq_charger_enabled" #mock, fix later
+        self.chargerenabled = HubMember(bool, "binary_sensor.peaq_charger_enabled")
         self.ChargingDone_Entity = "binary_sensor.peaq_charging_done" #mock, fix later
         self.TotalHourlyEnergy_Entity = f"sensor.{self.NAME.lower()}_{ex.NameToId(self.CONSUMPTION_TOTAL_NAME)}_hourly" #ugly, fix probably
-
-        self.PowerSensorMovingAverage_Entity = "sensor.peaq_average_consumption"       
-
+   
+        self.powersensormovingaverage = HubMember(int, "sensor.peaq_average_consumption")
+        
         """Init the subclasses"""
         self.TotalPowerSensor = MiniSensor("Total Power")
         self.Prediction = Prediction(self)
@@ -90,7 +89,7 @@ class Hub:
         ]
 
         #mocks in this one. make them work generic
-        self.chargingTrackerEntities = [self.PowerSensorMovingAverage_Entity, self.ChargerEnabled_Entity, self.ChargingDone_Entity, self.chargertypedata.charger.chargerentity, "sensor.peaq_chargercontroller"]
+        self.chargingTrackerEntities = [self.powersensormovingaverage.entity, self.chargerenabled.entity, self.ChargingDone_Entity, self.chargertypedata.charger.chargerentity, "sensor.peaq_chargercontroller"]
         self.chargerblocked = False
         self.chargerStart = False
         self.chargerStop = False
@@ -114,17 +113,7 @@ class Hub:
 
     @ChargerEntity_Switch.setter
     def ChargerEntity_Switch(self, value):
-        self._chargerobject_switch = value
-        
-    """Moving average house powersensor"""
-    @property
-    def PowerSensorMovingAverage(self):
-        return self._powersensormovingaverage
-
-    @PowerSensorMovingAverage.setter
-    def PowerSensorMovingAverage(self, value):
-        if ex.Is_Float(value):
-            self._powersensormovingaverage = int(float(value))
+        self._chargerobject_switch = value        
 
     """Total hourly energy"""
     @property
@@ -169,15 +158,6 @@ class Hub:
         if ex.Is_Float(value):
             self._currentpeaksensor = float(value)
 
-    """Charger enabled"""
-    @property
-    def ChargerEnabled(self) -> bool:
-        return self._charger_enabled
-
-    @ChargerEnabled.setter
-    def ChargerEnabled(self, value):
-        self._charger_enabled = True if value.lower() == "on" else False
-
     """Charging Done"""
     @property
     def ChargingDone(self) -> bool:
@@ -217,22 +197,20 @@ class Hub:
             self.currentPeak = value
         elif entity == self.TotalHourlyEnergy_Entity:
             self.TotalEnergyThisHour = value
-        elif entity == self.PowerSensorMovingAverage_Entity:
-            self.PowerSensorMovingAverage = value
+        elif entity == self.powersensormovingaverage.entity:
+            self.powersensormovingaverage.value = value
         
         if entity in self.chargingTrackerEntities and not self.chargerblocked:
             await self._Charge(self.chargertypedata.charger.servicecalls['domain'], self.chargertypedata.charger.servicecalls['on'], self.chargertypedata.charger.servicecalls['off'])
             
     async def _Charge(self, domain:str, call_on:str, call_off:str):
         self.chargerblocked = True
-        if self.ChargerEnabled == True:
+        if self.chargerenabled.value == True:
             if self.ChargeController.status.name == "Start":
                 if self.ChargerEntity_Switch == "off" and self.chargerStart == False: 
-                    _LOGGER.info("before call")
                     self.chargerStart = True
                     self.chargerStop = False
                     await self.hass.services.async_call(domain,call_on)
-                    _LOGGER.info("after call")
             elif self.ChargeController.status.name == "Stop" or self.ChargingDone == True or self.ChargeController.status.name == "Idle":
                 if self.ChargerEntity_Switch == "on" and self.chargerStop == False:
                     self.chargerStop = True
@@ -259,8 +237,8 @@ class MiniSensor:
     def State(self, value):
         self._state = int(float(value))
 
-class HubMember():
-    def __init__(self, listenerentity : str, type: type):
+class HubMember:
+    def __init__(self, type: type, listenerentity = None):
         self._value = None
         self._type = type
         self._listenerentity = listenerentity

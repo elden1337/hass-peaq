@@ -37,11 +37,9 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
     
     """SERVICE CALLS"""
     async def servicehandler_enable(call):
-        hub.ChargerEnabled = "on"
-        #hass.states.async_set("binary_sensor.peaq_charger_enabled", "on")
+        hub.chargerenabled.value = "on"
     async def servicehandler_disable(call):
-        hub.ChargerEnabled = "off"
-        #hass.states.async_set("binary_sensor.peaq_charger_enabled", "off")
+        hub.chargerenabled.value = "off"
 
     hass.services.async_register(DOMAIN, "enable", servicehandler_enable)
     hass.services.async_register(DOMAIN, "disable", servicehandler_disable)

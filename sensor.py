@@ -102,6 +102,6 @@ class DeviceSensor(SensorEntity):
             "identifiers": {(DOMAIN, self._hub.HUB_ID)},
             "name": self._attr_name,
             "sw_version": 1,
-            "model": f"{self._hub.LocaleData.Type} ({self._hub.ChargerTypeData.Type})",
+            "model": f"{self._hub.LocaleData.Type} ({self._hub.chargertypedata.type})",
             "manufacturer": "Peaq systems",
         }

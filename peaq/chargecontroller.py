@@ -33,7 +33,7 @@ class ChargeController():
                 return constants.CHARGECONTROLLER.Idle
             elif self._hub.ChargerEntity.lower() != "available" and self._hub.ChargingDone == True:
                 return constants.CHARGECONTROLLER.Done
-            elif datetime.now().hour in self._hub.NonHours:
+            elif datetime.now().hour in self._hub.nonhours:
                 return constants.CHARGECONTROLLER.Stop
             elif self._hub.ChargerEntity.lower() == "connected":
                 if self.LessThanStartThreshold and self._hub.TotalEnergyThisHour > 0:
