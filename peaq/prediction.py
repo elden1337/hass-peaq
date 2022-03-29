@@ -5,7 +5,7 @@ class Prediction:
         self._hub = hub
     
     @property
-    def PredictedEnergyThisHour(self) -> float:
+    def predictedenergy(self) -> float:
         ret = 0.0
         poweravg = self._hub.powersensormovingaverage.value if self._hub.powersensormovingaverage.value is not None else 0
         if self._hub.totalhourlyenergy.value > 0 and (datetime.now().minute > 0 or (datetime.now().minute + datetime.now().second) > 30):
@@ -15,9 +15,9 @@ class Prediction:
         return round(ret,3)
     
     @property
-    def PredictedPercentageOfPeak(self) -> float:
+    def predictedpercentageofpeak(self) -> float:
         if self._hub.currentpeak.value == 0.0 or self._hub.currentpeak.value is None:
             return 0
-        elif self.PredictedEnergyThisHour == 0.0 or self.PredictedEnergyThisHour is None:
+        elif self.predictedenergy == 0.0 or self.predictedenergy is None:
             return 0
-        return round((self.PredictedEnergyThisHour / self._hub.currentpeak.value) * 100,2)
+        return round((self.predictedenergy / self._hub.currentpeak.value) * 100,2)

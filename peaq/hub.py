@@ -7,6 +7,7 @@ from custom_components.peaq.peaq.chargecontroller import ChargeController
 from custom_components.peaq.peaq.prediction import Prediction
 from custom_components.peaq.peaq.threshold import Threshold
 from custom_components.peaq.peaq.locale import LocaleData
+from custom_components.peaq.peaq.charger import Charger
 from custom_components.peaq.peaq.chargertypes import ChargerTypeData
 from homeassistant.helpers.event import async_track_state_change
 from homeassistant.core import (
@@ -59,6 +60,7 @@ class Hub:
         self.prediction = Prediction(self)
         self.threshold = Threshold(self)
         self.chargecontroller = ChargeController(self)
+        self.charger = Charger(self)
         """Init the subclasses"""
         
         #init values
@@ -86,9 +88,9 @@ class Hub:
             ]
 
         #remove?
-        self.chargerblocked = False
-        self.chargerStart = False
-        self.chargerStop = False
+        #self.chargerblocked = False
+        #self.chargerStart = False
+        #self.chargerStop = False
         #remove?
         trackerEntities += self.chargingtracker_entities
         
@@ -123,27 +125,27 @@ class Hub:
             self.powersensormovingaverage.value = value
         
         if entity in self.chargingtracker_entities and not self.chargerblocked:
-            await self._Charge(self.chargertypedata.charger.servicecalls['domain'], self.chargertypedata.charger.servicecalls['on'], self.chargertypedata.charger.servicecalls['off'])
+            await self.charger.Charge(self.chargertypedata.charger.servicecalls['domain'], self.chargertypedata.charger.servicecalls['on'], self.chargertypedata.charger.servicecalls['off'])
             
-    async def _Charge(self, domain:str, call_on:str, call_off:str):
-        self.chargerblocked = True
-        if self.chargerenabled.value == True:
-            if self.chargecontroller.status.name == "Start":
-                if self.ChargerEntity_Switch == "off" and self.chargerStart == False: 
-                    self.chargerStart = True
-                    self.chargerStop = False
-                    await self.hass.services.async_call(domain,call_on)
-            elif self.chargecontroller.status.name == "Stop" or self.ChargingDone == True or self.chargecontroller.status.name == "Idle":
-                if self.ChargerEntity_Switch == "on" and self.chargerStop == False:
-                    self.chargerStop = True
-                    self.chargerStart = False 
-                    await self.hass.services.async_call(domain, call_off)              
-        else: 
-           if self.ChargerEntity_Switch == "on" and self.chargerStop == False:
-                self.chargerStop = True
-                self.chargerStart = False
-                await self.hass.services.async_call(domain, call_off)  
-        self.chargerblocked = False
+    #async def _Charge(self, domain:str, call_on:str, call_off:str):
+    #    self.chargerblocked = True
+    #    if self.chargerenabled.value == True:
+    #        if self.chargecontroller.status.name == "Start":
+    #            if self.chargerobject_switch.value == "off" and self.chargerStart == False: 
+    #                self.chargerStart = True
+    #                self.chargerStop = False
+    #                await self.hass.services.async_call(domain,call_on)
+    #        elif self.chargecontroller.status.name == "Stop" or self.ChargingDone == True or self.chargecontroller.status.name == "Idle":
+    #            if self.chargerobject_switch.value == "on" and self.chargerStop == False:
+    #                self.chargerStop = True
+    #                self.chargerStart = False 
+    #                await self.hass.services.async_call(domain, call_off)              
+    #    else: 
+    #       if self.chargerobject_switch.value == "on" and self.chargerStop == False:
+    #            self.chargerStop = True
+    #            self.chargerStart = False
+    #            await self.hass.services.async_call(domain, call_off)  
+    #    self.chargerblocked = False
 
 class HubMember:
     def __init__(self, type: type, listenerentity = None, initval = None, name = None):

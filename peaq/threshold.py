@@ -6,7 +6,7 @@ class Threshold:
         self._hub = hub
         
     @property
-    def Stop(self) -> float:
+    def stop(self) -> float:
         nowmin = datetime.now().minute
         stopthreshold = (((nowmin+pow(1.071,nowmin))*0.00165)+0.8) * 100
         if str(datetime.now().hour) in self._hub.cautionhours and nowmin < 45:
@@ -14,7 +14,7 @@ class Threshold:
         return round(stopthreshold,2) 
 
     @property
-    def Start(self) -> float:
+    def start(self) -> float:
         nowmin = datetime.now().minute
         startthreshold = (((nowmin+pow(1.066,nowmin))*0.0045)+0.5) * 100
         if str(datetime.now().hour) in self._hub.cautionhours and nowmin < 45:
@@ -22,7 +22,7 @@ class Threshold:
         return round(startthreshold,2)
     
     @property
-    def AllowedCurrent(self) -> int:
+    def allowedcurrent(self) -> int:
         ret = 6
         nowmin = datetime.now().minute
         for key, value in constants.CURRENTS.items():
