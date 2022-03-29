@@ -1,9 +1,6 @@
 from datetime import datetime
 from threading import Thread
 import custom_components.peaq.peaq.constants as constants
-import logging
-
-_LOGGER = logging.getLogger(__name__)
 
 class ChargeController():
     def __init__(self, hub, inputstatus = constants.CHARGECONTROLLER.Idle):
@@ -21,13 +18,13 @@ class ChargeController():
 
     @property
     def status(self):
-        return self.Charge(self._hub)
+        return self._Charge(self._hub)
 
     @status.setter
     def status(self, value):
-        self._status = self.Charge(self._hub)
+        self._status = self._Charge(self._hub)
 
-    def Charge(self, hub) -> str:
+    def _Charge(self, hub) -> str:
             self._hub = hub    
             if self._hub.chargerobject.value.lower() == "available":
                 return constants.CHARGECONTROLLER.Idle

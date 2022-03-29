@@ -56,6 +56,7 @@ class Hub:
         self.currentpeak = CurrentPeak(float, "sensor.peaq_monthly_max_peak_min_of_three", 0, self._monthlystartpeak[datetime.now().month]) #hardcoded, fix
         self.chargerobject = HubMember(str, self.chargertypedata.charger.chargerentity)
         self.chargerobject_switch = ChargerSwitch(str, self.chargertypedata.charger.powerswitch, "", "Max current") #hardcoded, fix in chargertypes.
+
         """Init the subclasses"""
         self.prediction = Prediction(self)
         self.threshold = Threshold(self)
@@ -87,11 +88,6 @@ class Hub:
             "sensor.peaq_chargercontroller" #hardcoded, fix
             ]
 
-        #remove?
-        #self.chargerblocked = False
-        #self.chargerStart = False
-        #self.chargerStop = False
-        #remove?
         trackerEntities += self.chargingtracker_entities
         
         async_track_state_change(hass, trackerEntities, self.state_changed)
@@ -126,26 +122,6 @@ class Hub:
         
         if entity in self.chargingtracker_entities and not self.chargerblocked:
             await self.charger.Charge(self.chargertypedata.charger.servicecalls['domain'], self.chargertypedata.charger.servicecalls['on'], self.chargertypedata.charger.servicecalls['off'])
-            
-    #async def _Charge(self, domain:str, call_on:str, call_off:str):
-    #    self.chargerblocked = True
-    #    if self.chargerenabled.value == True:
-    #        if self.chargecontroller.status.name == "Start":
-    #            if self.chargerobject_switch.value == "off" and self.chargerStart == False: 
-    #                self.chargerStart = True
-    #                self.chargerStop = False
-    #                await self.hass.services.async_call(domain,call_on)
-    #        elif self.chargecontroller.status.name == "Stop" or self.ChargingDone == True or self.chargecontroller.status.name == "Idle":
-    #            if self.chargerobject_switch.value == "on" and self.chargerStop == False:
-    #                self.chargerStop = True
-    #                self.chargerStart = False 
-    #                await self.hass.services.async_call(domain, call_off)              
-    #    else: 
-    #       if self.chargerobject_switch.value == "on" and self.chargerStop == False:
-    #            self.chargerStop = True
-    #            self.chargerStart = False
-    #            await self.hass.services.async_call(domain, call_off)  
-    #    self.chargerblocked = False
 
 class HubMember:
     def __init__(self, type: type, listenerentity = None, initval = None, name = None):
