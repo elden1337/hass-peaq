@@ -29,18 +29,18 @@ class ChargeController():
 
     def Charge(self, hub) -> str:
             self._hub = hub    
-            if self._hub.ChargerEntity.lower() == "available":
+            if self._hub.chargerobject.value.lower() == "available":
                 return constants.CHARGECONTROLLER.Idle
-            elif self._hub.ChargerEntity.lower() != "available" and self._hub.charger_done.value == True:
+            elif self._hub.chargerobject.value.lower() != "available" and self._hub.charger_done.value == True:
                 return constants.CHARGECONTROLLER.Done
             elif datetime.now().hour in self._hub.nonhours:
                 return constants.CHARGECONTROLLER.Stop
-            elif self._hub.ChargerEntity.lower() == "connected":
+            elif self._hub.chargerobject.value.lower() == "connected":
                 if self.LessThanStartThreshold and self._hub.totalhourlyenergy.value > 0:
                     return constants.CHARGECONTROLLER.Start
                 else:
                     return constants.CHARGECONTROLLER.Stop
-            elif self._hub.ChargerEntity.lower() == "charging":
+            elif self._hub.chargerobject.value.lower() == "charging":
                 #condition1 = self._hub.carpowersensor.value < 1 and self._hub.car_energy_hourly > 0
                 condition1 = False
                 condition2 = self.MoreThanStopThreshold and self._hub.totalhourlyenergy.value > 0
