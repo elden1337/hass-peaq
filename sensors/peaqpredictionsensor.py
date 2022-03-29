@@ -14,16 +14,16 @@ class PeaqPredictionSensor(SensorBase):
         super().__init__(hub, name.lower())
 
         self._attr_name = name
-        self._state = self._hub.Prediction.PredictedEnergyThisHour
+        self._state = self._hub.prediction.PredictedEnergyThisHour
 
     @property
     def state(self):
         """Return the state of the sensor."""
-        return self._hub.Prediction.PredictedEnergyThisHour
+        return self._hub.prediction.PredictedEnergyThisHour
 
     @property
     def icon(self) -> str:
         return "mdi:magic-staff"
 
     def update(self) -> None:
-        self._state = self._hub.Prediction.PredictedEnergyThisHour
+        self._state = self._hub.prediction.PredictedEnergyThisHour

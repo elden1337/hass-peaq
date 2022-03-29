@@ -10,7 +10,7 @@ class PeaqThresholdSensor(SensorBase):
         super().__init__(hub, name.lower())
 
         self._attr_name = name
-        self._state = self._hub.Prediction.PredictedPercentageOfPeak
+        self._state = self._hub.prediction.PredictedPercentageOfPeak
         self._start_threshold = None
         self._stop_threshold = None
         
@@ -23,9 +23,9 @@ class PeaqThresholdSensor(SensorBase):
         return "mdi:stairs"
 
     def update(self) -> None:
-        self._start_threshold = self._hub.Threshold.Start
-        self._stop_threshold = self._hub.Threshold.Stop
-        self._state = self._hub.Prediction.PredictedPercentageOfPeak
+        self._start_threshold = self._hub.threshold.Start
+        self._stop_threshold = self._hub.threshold.Stop
+        self._state = self._hub.prediction.PredictedPercentageOfPeak
 
     @property
     def extra_state_attributes(self) -> dict:

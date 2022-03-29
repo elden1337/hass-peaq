@@ -47,7 +47,7 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
 
     peaqintegrationsensors = []
     peaqintegrationsensors.append(PeaqIntegrationSensor(hub, hub.powersensorentity, f"{ex.NameToId(hub.CONSUMPTION_INTEGRAL_NAME)}"))
-    peaqintegrationsensors.append(PeaqIntegrationSensor(hub, f"sensor.{DOMAIN}_{ex.NameToId(hub.TotalPowerSensor.Name)}", f"{ex.NameToId(hub.CONSUMPTION_TOTAL_NAME)}"))
+    peaqintegrationsensors.append(PeaqIntegrationSensor(hub, f"sensor.{DOMAIN}_{ex.NameToId(hub.totalpowersensor.name)}", f"{ex.NameToId(hub.CONSUMPTION_TOTAL_NAME)}"))
     async_add_entities(peaqintegrationsensors, update_before_add = True)
 
     integrationsensors = [ex.NameToId(hub.CONSUMPTION_TOTAL_NAME), ex.NameToId(hub.CONSUMPTION_INTEGRAL_NAME)]
@@ -61,7 +61,7 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
 
     #sql sensors
     peaqsqlsensors = []
-    peaks = hub.LocaleData
+    peaks = hub.localedata
 
     db_url = DEFAULT_URL.format(hass_config_path=hass.config.path(DEFAULT_DB_FILE))
     engine = sqlalchemy.create_engine(db_url)
@@ -102,6 +102,6 @@ class DeviceSensor(SensorEntity):
             "identifiers": {(DOMAIN, self._hub.HUB_ID)},
             "name": self._attr_name,
             "sw_version": 1,
-            "model": f"{self._hub.LocaleData.Type} ({self._hub.chargertypedata.type})",
+            "model": f"{self._hub.localedata.Type} ({self._hub.chargertypedata.type})",
             "manufacturer": "Peaq systems",
         }

@@ -13,11 +13,11 @@ class ChargeController():
     
     @property
     def LessThanStartThreshold(self) -> bool: 
-        return (self._hub.Prediction.PredictedEnergyThisHour * 1000) < ((self._hub.currentpeak.value*1000) * (self._hub.Threshold.Start/100))
+        return (self._hub.prediction.PredictedEnergyThisHour * 1000) < ((self._hub.currentpeak.value*1000) * (self._hub.threshold.Start/100))
         
     @property
     def MoreThanStopThreshold(self) -> bool: 
-        return (self._hub.Prediction.PredictedEnergyThisHour * 1000) > ((self._hub.currentpeak.value*1000) * (self._hub.Threshold.Stop/100))
+        return (self._hub.prediction.PredictedEnergyThisHour * 1000) > ((self._hub.currentpeak.value*1000) * (self._hub.threshold.Stop/100))
 
     @property
     def status(self):
@@ -31,19 +31,19 @@ class ChargeController():
             self._hub = hub    
             if self._hub.ChargerEntity.lower() == "available":
                 return constants.CHARGECONTROLLER.Idle
-            elif self._hub.ChargerEntity.lower() != "available" and self._hub.ChargingDone == True:
+            elif self._hub.ChargerEntity.lower() != "available" and self._hub.charger_done.value == True:
                 return constants.CHARGECONTROLLER.Done
             elif datetime.now().hour in self._hub.nonhours:
                 return constants.CHARGECONTROLLER.Stop
             elif self._hub.ChargerEntity.lower() == "connected":
-                if self.LessThanStartThreshold and self._hub.TotalEnergyThisHour > 0:
+                if self.LessThanStartThreshold and self._hub.totalhourlyenergy.value > 0:
                     return constants.CHARGECONTROLLER.Start
                 else:
                     return constants.CHARGECONTROLLER.Stop
             elif self._hub.ChargerEntity.lower() == "charging":
                 #condition1 = self._hub.carpowersensor < 1 and self._hub.car_energy_hourly > 0
                 condition1 = False
-                condition2 = self.MoreThanStopThreshold and self._hub.TotalEnergyThisHour > 0
+                condition2 = self.MoreThanStopThreshold and self._hub.totalhourlyenergy.value > 0
                 if condition1 and not condition2:
                     return constants.CHARGECONTROLLER.Done
                 elif condition2:

@@ -15,7 +15,7 @@ class PeaqAmpSensor(SensorBase):
         name = f"{hub.NAME} Allowed current"
         super().__init__(hub, name.lower())
         self._hub = hub
-        self._state = self._hub.Threshold.AllowedCurrent
+        self._state = self._hub.threshold.AllowedCurrent
         self._attr_icon = "mdi:current-ac"
 
     @property
@@ -23,7 +23,7 @@ class PeaqAmpSensor(SensorBase):
         return self._state
 
     def update(self) -> None:
-        self._state = self._hub.Threshold.AllowedCurrent
+        self._state = self._hub.threshold.AllowedCurrent
 
 
 class PeaqPowerSensor(SensorBase):
@@ -31,10 +31,10 @@ class PeaqPowerSensor(SensorBase):
     unit_of_measurement = POWER_WATT
     
     def __init__(self, hub, hass):
-        name = f"{hub.NAME} {hub.TotalPowerSensor.Name}"
+        name = f"{hub.NAME} {hub.totalpowersensor.name}"
         super().__init__(hub, name.lower())
         self._hub = hub
-        self._state = self._hub.TotalPowerSensor.State
+        self._state = self._hub.totalpowersensor.value
         self._attr_icon = "mdi:flash"
 
     @property
@@ -42,4 +42,4 @@ class PeaqPowerSensor(SensorBase):
         return self._state
 
     def update(self) -> None:
-        self._state = self._hub.TotalPowerSensor.State
+        self._state = self._hub.totalpowersensor.value
