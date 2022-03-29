@@ -6,7 +6,7 @@ class PeaqThresholdSensor(SensorBase):
 
     def __init__(self, hub):
         """Initialize the sensor."""
-        name = f"{hub.NAME} Threshold"
+        name = f"{hub.hubname} Threshold"
         super().__init__(hub, name.lower())
 
         self._attr_name = name

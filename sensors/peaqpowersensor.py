@@ -12,7 +12,7 @@ class PeaqAmpSensor(SensorBase):
     unit_of_measurement = ELECTRIC_CURRENT_AMPERE
     
     def __init__(self, hub, hass):
-        name = f"{hub.NAME} Allowed current"
+        name = f"{hub.hubname} Allowed current"
         super().__init__(hub, name.lower())
         self._hub = hub
         self._state = self._hub.threshold.AllowedCurrent
@@ -31,7 +31,7 @@ class PeaqPowerSensor(SensorBase):
     unit_of_measurement = POWER_WATT
     
     def __init__(self, hub, hass):
-        name = f"{hub.NAME} {hub.totalpowersensor.name}"
+        name = f"{hub.hubname} {hub.totalpowersensor.name}"
         super().__init__(hub, name.lower())
         self._hub = hub
         self._state = self._hub.totalpowersensor.value

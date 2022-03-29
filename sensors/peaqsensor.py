@@ -2,7 +2,7 @@ from custom_components.peaq.sensors.sensorbase import SensorBase
 
 class PeaqSensor(SensorBase):
     def __init__(self, hub):
-        name = f"{hub.NAME} ChargerController"
+        name = f"{hub.hubname} ChargerController"
         super().__init__(hub, name.lower())
 
         self._attr_name = name

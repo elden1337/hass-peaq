@@ -13,13 +13,13 @@ LOCALE_SE_KRISTINEHAMN = "Kristinehamn, Sweden"
 LOCALE_SE_NACKA = "Nacka, Sweden"
 LOCALE_SE_PARTILLE = "Partille, Sweden"
 
-"""Expose as options"""
+"""Lookup types for config flow"""
 CHARGERTYPES = [
     CHARGERTYPE_CHARGEAMPS, 
     CHARGERTYPE_EASEE
     ]
 
-"""Expose as options"""
+"""Lookup locales for config flow"""
 LOCALES = [
     LOCALE_SE_GOTHENBURG,
     LOCALE_SE_KARLSTAD,
@@ -28,4 +28,19 @@ LOCALES = [
     LOCALE_SE_PARTILLE
     ]
 
+"""Naming constants"""
+PEAQCONTROLLER = "Peaq controller"
+TOTALPOWER = "Total Power"
+CONSUMPTION_INTEGRAL_NAME = "Energy excluding car"
+CONSUMPTION_TOTAL_NAME = "Energy including car" 
 
+"""Peak querytypes"""
+QUERYTYPE.BASICMAX = "BasicMax"
+QUERYTYPE.AVERAGEOFTHREEDAYS = "AverageOfThreeDays"
+QUERYTYPE.AVERAGEOFTHREEDAYS_MIN = "AverageOfThreeDays_Min"
+QUERYTYPE.HIGHLOAD = "HighLoad"
+
+"""Sql sensor helpers"""
+SQLSENSOR.STATISTICS_TABLE = "statistics"
+SQLSENSOR.STATISTICS_META_TABLE= "statistics_meta"
+SQLSENSOR.BASENAME = "Monthly max peak"

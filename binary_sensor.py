@@ -16,7 +16,7 @@ async def async_setup_entry(hass : HomeAssistant, config_entry, async_add_entiti
 class PeaqBinarySensorEnabled(BinarySensorEntity):  
     def __init__(self, hub) -> None:
         """Initialize a Peaq Binary sensor."""
-        self._attr_name = f"{hub.NAME} Charger enabled"
+        self._attr_name = f"{hub.hubname} Charger enabled"
         self._hub = hub
         self._attr_device_class = "none"
 
@@ -26,7 +26,7 @@ class PeaqBinarySensorEnabled(BinarySensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._hub.HUB_ID)}}
+        return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
 
     @property
     def is_on(self) -> bool:
@@ -35,7 +35,7 @@ class PeaqBinarySensorEnabled(BinarySensorEntity):
 class PeaqBinarySensorDone(BinarySensorEntity):  
     def __init__(self, hub) -> None:
         """Initialize a Peaq Binary sensor."""
-        self._attr_name = f"{hub.NAME} Charging done"
+        self._attr_name = f"{hub.hubname} Charging done"
         self._hub = hub
         self._attr_device_class = "none"
 
@@ -45,7 +45,7 @@ class PeaqBinarySensorDone(BinarySensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._hub.HUB_ID)}}
+        return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
 
     @property
     def is_on(self) -> bool:

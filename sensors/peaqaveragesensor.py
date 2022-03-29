@@ -9,8 +9,8 @@ from homeassistant.components.filter.sensor import (
 class PeaqAverageSensor(SensorFilter):
     def __init__(self, hub):
         self._hub = hub
-        self._attr_name = f"{hub.NAME} Average Consumption"
-        self._attr_unique_id = f"{hub.HUB_ID}_average_consumption"
+        self._attr_name = f"{hub.hubname} Average Consumption"
+        self._attr_unique_id = f"{hub.hub_id}_average_consumption"
         super().__init__(
             self._attr_name,
             self._attr_unique_id,
@@ -20,7 +20,7 @@ class PeaqAverageSensor(SensorFilter):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._hub.HUB_ID)}}
+        return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
 
     def _SetFilters(self, hub):
         FILTERS = []

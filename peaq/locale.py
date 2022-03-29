@@ -1,5 +1,5 @@
 import custom_components.peaq.peaq.constants as constants
-from custom_components.peaq.sensors.peaqsqlsensor import (BASICMAX,AVERAGEOFTHREEDAYS,AVERAGEOFTHREEDAYS_MIN,HIGHLOAD)
+#from custom_components.peaq.sensors.peaqsqlsensor import (BASICMAX,AVERAGEOFTHREEDAYS,AVERAGEOFTHREEDAYS_MIN,HIGHLOAD)
 
 """Init the service"""
 class LocaleData():
@@ -9,10 +9,10 @@ class LocaleData():
         self._Type = input
 
         if input == constants.LOCALE_SE_GOTHENBURG:
-            self.ObservedPeak = AVERAGEOFTHREEDAYS_MIN
-            self.ChargedPeak = AVERAGEOFTHREEDAYS
+            self.ObservedPeak = constants.QUERYTYPE.AVERAGEOFTHREEDAYS_MIN
+            self.ChargedPeak = constants.QUERYTYPE.AVERAGEOFTHREEDAYS
         elif  input == constants.LOCALE_SE_PARTILLE:
-            self.ObservedPeak, self.ChargedPeak = BASICMAX
+            self.ObservedPeak, self.ChargedPeak = constants.QUERYTYPE.BASICMAX
         elif  input == constants.LOCALE_SE_KARLSTAD:
             self.ObservedPeak = ""
             self.ChargedPeak = ""

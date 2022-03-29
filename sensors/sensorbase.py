@@ -9,13 +9,13 @@ class SensorBase(SensorEntity):
         """Initialize the sensor."""
         self._hub = hub
         self._attr_name = name
-        self._attr_unique_id = f"{DOMAIN}_{self._hub.HUB_ID}_{ex.NameToId(self._attr_name)}"
+        self._attr_unique_id = f"{DOMAIN}_{self._hub.hub_id}_{ex.NameToId(self._attr_name)}"
         self._attr_available = True
         
     @property
     def device_info(self):
         """Return information to link this entity with the correct device."""
-        return {"identifiers": {(DOMAIN, self._hub.HUB_ID)}}
+        return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
 
     # @property
     # def unique_id(self): 

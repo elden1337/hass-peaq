@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 import custom_components.peaq.peaq.extensionmethods as ex
+import custom_components.peaq.peaq.constants as constants
 from custom_components.peaq.peaq.chargecontroller import ChargeController
 from custom_components.peaq.peaq.prediction import Prediction
 from custom_components.peaq.peaq.threshold import Threshold
@@ -25,10 +26,7 @@ refactorera alla members i hub, stökigt nu (gör miniclass med sökande sensor 
 """
 
 class Hub:
-    NAME = "Peaq"  #hardcoded, get from domain instead
-    HUB_ID = 1342
-    CONSUMPTION_INTEGRAL_NAME = "Energy excluding car"
-    CONSUMPTION_TOTAL_NAME = "Energy including car" 
+    hub_id = 1342
 
     """for getters and setters internals"""
     _chargerobject = ""
@@ -38,10 +36,11 @@ class Hub:
     def __init__(
         self, 
         hass: HomeAssistant, 
-        config_inputs: dict
+        config_inputs: dict,
+        domain: str
         ):
         self.hass = hass
-        
+        self.hubname = domain
         """from the config inputs"""
         self.localedata = LocaleData(config_inputs["locale"])
         self.chargertypedata = ChargerTypeData(hass, config_inputs["chargertype"])
@@ -51,25 +50,24 @@ class Hub:
         self.cautionhours = config_inputs["cautionhours"]
         """from the config inputs"""
        
-        self.powersensor = HubMember(int, self._SetPowerSensors(config_inputs["powersensor"], 0)
+        self.powersensor = HubMember(int, config_inputs["powersensor"], 0)
         self.chargerenabled = HubMember(bool, "binary_sensor.peaq_charger_enabled", False)  #hardcoded, fix
         self.powersensormovingaverage = HubMember(int, "sensor.peaq_average_consumption", 0) #hardcoded, fix
-        self.totalhourlyenergy = HubMember(float, f"sensor.{self.NAME.lower()}_{ex.NameToId(self.CONSUMPTION_TOTAL_NAME)}_hourly", 0) #ugly, fix probably
+        self.totalhourlyenergy = HubMember(float, f"sensor.{self.hubname.lower()}_{ex.NameToId(constants.CONSUMPTION_TOTAL_NAME)}_hourly", 0) #ugly, fix probably
         self.charger_done = HubMember(bool, "binary_sensor.peaq_charging_done", False) #hardcoded, fix
-        self.totalpowersensor = HubMember(int, name = "Total Power")
+        self.totalpowersensor = HubMember(int, name = constants.TOTALPOWER)
         self.carpowersensor = HubMember(int, self.chargertypedata.charger.powermeter, 0)
+        self.currentpeak = CurrentPeak(float, "sensor.peaq_monthly_max_peak_min_of_three", 0, self._monthlystartpeak[datetime.now().month]) #hardcoded, fix
 
         """Init the subclasses"""
         self.prediction = Prediction(self)
         self.threshold = Threshold(self)
         self.chargecontroller = ChargeController(self)
         """Init the subclasses"""
-
-        self.currentpeak = CurrentPeak(float, "sensor.peaq_monthly_max_peak_min_of_three", 0, self._monthlystartpeak[datetime.now().month]) #hardcoded, fix
-
+        
         #init values
         self.ChargerObject = self.hass.states.get(self.chargertypedata.charger.chargerentity)
-        self.ChargerObject_Switch = self.hass.states.get(self.chargertypedata.charger.powerswitch)
+        self.ChargerObject_Switch = self.hass.states.get(self.chargertypedata.charger.powerswitch)  
         self.carpowersensor.value = self.hass.states.get(self.carpowersensor.entity)
         self.totalhourlyenergy.value = self.hass.states.get(self.totalhourlyenergy.entity)
         self.currentpeak.value = self.hass.states.get(self.currentpeak.entity)
@@ -83,13 +81,18 @@ class Hub:
             self.currentpeak.entity
         ]
 
-        #mocks in this one. make them work generic
-        self.chargingtracker_entities = [self.powersensormovingaverage.entity, self.chargerenabled.entity, self.charger_done.entity, self.chargertypedata.charger.chargerentity, "sensor.peaq_chargercontroller"]
+        self.chargingtracker_entities = [
+            self.powersensormovingaverage.entity, 
+            self.chargerenabled.entity, 
+            self.charger_done.entity, 
+            self.chargertypedata.charger.chargerentity, 
+            "sensor.peaq_chargercontroller" #hardcoded, fix
+            ]
+        #remove?
         self.chargerblocked = False
         self.chargerStart = False
         self.chargerStop = False
-        #mocks in this one. make them work generic
-
+        #remove?
         trackerEntities += self.chargingtracker_entities
         
         async_track_state_change(hass, trackerEntities, self.state_changed)
@@ -110,12 +113,6 @@ class Hub:
     def ChargerEntity_Switch(self, value):
         self._chargerobject_switch = value        
             
-    def _SetPowerSensors(self, powerSensorName) -> str: 
-        if powerSensorName.startswith("sensor."):
-            return powerSensorName
-        else:
-            return "sensor." + powerSensorName
-
     @callback
     async def state_changed(self, entity_id, old_state, new_state):
         try:
@@ -187,8 +184,10 @@ class HubMember:
         if type(value) is self._type:
             self._value = value
         elif self._type is int:
-            self._value = int(float(value))
+            self._value = int(float(value)) if value is not None else 0
         elif self._type is bool:
+            if value is None:
+                self._value = False
             if value.lower() == "on":
                 self._value = True
             elif value.lower() == "off":
