@@ -14,7 +14,7 @@ class PeaqAverageSensor(SensorFilter):
         super().__init__(
             self._attr_name,
             self._attr_unique_id,
-            self._hub.powersensorentity,
+            self._hub.powersensor.entity,
             self._SetFilters(self._hub)
         )
 
@@ -25,9 +25,9 @@ class PeaqAverageSensor(SensorFilter):
     def _SetFilters(self, hub):
         FILTERS = []
 
-        FILTERS.append(LowPassFilter(1,0,hub.powersensorentity,10))
-        FILTERS.append(TimeSMAFilter(timedelta(minutes=5), 0, hub.powersensorentity, TIME_SMA_LAST ))
-        FILTERS.append(OutlierFilter(4,0,hub.powersensorentity,2))
+        FILTERS.append(LowPassFilter(1,0,hub.powersensor.entity,10))
+        FILTERS.append(TimeSMAFilter(timedelta(minutes=5), 0, hub.powersensor.entity, TIME_SMA_LAST ))
+        FILTERS.append(OutlierFilter(4,0,hub.powersensor.entity,2))
         
         return FILTERS
 

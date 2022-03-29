@@ -41,7 +41,7 @@ class ChargeController():
                 else:
                     return constants.CHARGECONTROLLER.Stop
             elif self._hub.ChargerEntity.lower() == "charging":
-                #condition1 = self._hub.carpowersensor < 1 and self._hub.car_energy_hourly > 0
+                #condition1 = self._hub.carpowersensor.value < 1 and self._hub.car_energy_hourly > 0
                 condition1 = False
                 condition2 = self.MoreThanStopThreshold and self._hub.totalhourlyenergy.value > 0
                 if condition1 and not condition2:

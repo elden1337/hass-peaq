@@ -46,7 +46,7 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
     async_add_entities(peaqsensors, update_before_add = True)
 
     peaqintegrationsensors = []
-    peaqintegrationsensors.append(PeaqIntegrationSensor(hub, hub.powersensorentity, f"{ex.NameToId(hub.CONSUMPTION_INTEGRAL_NAME)}"))
+    peaqintegrationsensors.append(PeaqIntegrationSensor(hub, hub.powersensor.entity, f"{ex.NameToId(hub.CONSUMPTION_INTEGRAL_NAME)}"))
     peaqintegrationsensors.append(PeaqIntegrationSensor(hub, f"sensor.{DOMAIN}_{ex.NameToId(hub.totalpowersensor.name)}", f"{ex.NameToId(hub.CONSUMPTION_TOTAL_NAME)}"))
     async_add_entities(peaqintegrationsensors, update_before_add = True)
 
