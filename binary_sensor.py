@@ -30,7 +30,7 @@ class PeaqBinarySensorEnabled(BinarySensorEntity):
 
     @property
     def is_on(self) -> bool:
-        return self._hub.chargerenabled.value
+        return self._hub.charger_enabled.value
     
 class PeaqBinarySensorDone(BinarySensorEntity):  
     def __init__(self, hub) -> None:

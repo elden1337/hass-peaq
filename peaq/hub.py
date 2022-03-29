@@ -18,8 +18,6 @@ from homeassistant.core import (
 _LOGGER = logging.getLogger(__name__)
 
 """
-todo:
-fixa så att elmätare inte inkluderar laddare (om bool)
 fixa config flow med månaderna och nonhours
 fixa updatecurrent
 fixa easee
@@ -47,7 +45,7 @@ class Hub:
         """from the config inputs"""
        
         self.powersensor = HubMember(int, config_inputs["powersensor"], 0)
-        self.chargerenabled = HubMember(bool, "binary_sensor.peaq_charger_enabled", False)  #hardcoded, fix
+        self.charger_enabled = HubMember(bool, "binary_sensor.peaq_charger_enabled", False)  #hardcoded, fix
         self.powersensormovingaverage = HubMember(int, "sensor.peaq_average_consumption", 0) #hardcoded, fix
         self.totalhourlyenergy = HubMember(float, f"sensor.{self.hubname.lower()}_{ex.NameToId(constants.CONSUMPTION_TOTAL_NAME)}_hourly", 0) #ugly, fix probably
         self.charger_done = HubMember(bool, "binary_sensor.peaq_charging_done", False) #hardcoded, fix
@@ -55,7 +53,7 @@ class Hub:
         self.carpowersensor = HubMember(int, self.chargertypedata.charger.powermeter, 0)
         self.currentpeak = CurrentPeak(float, "sensor.peaq_monthly_max_peak_min_of_three", 0, self._monthlystartpeak[datetime.now().month]) #hardcoded, fix
         self.chargerobject = HubMember(str, self.chargertypedata.charger.chargerentity)
-        self.chargerobject_switch = ChargerSwitch(str, self.chargertypedata.charger.powerswitch, "", "Max current") #hardcoded, fix in chargertypes.
+        self.chargerobject_switch = ChargerSwitch(bool, self.chargertypedata.charger.powerswitch, False, "Max current") #hardcoded, fix in chargertypes.
 
         """Init the subclasses"""
         self.prediction = Prediction(self)
@@ -82,7 +80,7 @@ class Hub:
 
         self.chargingtracker_entities = [
             self.powersensormovingaverage.entity, 
-            self.chargerenabled.entity, 
+            self.charger_enabled.entity, 
             self.charger_done.entity, 
             self.chargerobject.entity,
             "sensor.peaq_chargercontroller" #hardcoded, fix
@@ -103,16 +101,23 @@ class Hub:
 
     async def _UpdateSensor(self,entity,value):
         if entity == self.powersensor.entity:
-            self.powersensor.value = value
-            self.totalpowersensor.value = (self.powersensor.value + self.carpowersensor.value)
-        elif entity == self.chargerobject.entity:
-            self.chargerobject.value = value
+            if not self._powersensor_includes_car:
+                self.powersensor.value = value
+                self.totalpowersensor.value = (self.powersensor.value + self.carpowersensor.value)
+            else:
+                self.totalpowersensor.value = value
+                self.powersensor.value = (self.totalpowersensor.value - self.carpowersensor.value)
         elif entity == self.carpowersensor.entity:
             self.carpowersensor.value = value
-            self.totalpowersensor.value = (self.carpowersensor.value + self.powersensor.value)
+            if not self._powersensor_includes_car:
+                self.totalpowersensor.value = (self.carpowersensor.value + self.powersensor.value)
+            else:
+                self.powersensor.value = (self.totalpowersensor.value - self.carpowersensor.value)
+        elif entity == self.chargerobject.entity:
+            self.chargerobject.value = value
         elif entity == self.chargerobject_switch.entity:
             self.chargerobject_switch.value = value
-            self.chargerobject_switch.current = str(hass.states.get(self.chargerobject_switch.entity).attributes.get(self.chargerobject_switch._current_attr_name))
+            self.chargerobject_switch.current = str(self.hass.states.get(self.chargerobject_switch.entity).attributes.get(self.chargerobject_switch._current_attr_name))
         elif entity == self.currentpeak.entity:
             self.currentpeak.value = value
         elif entity == self.totalhourlyenergy.entity:
@@ -120,7 +125,7 @@ class Hub:
         elif entity == self.powersensormovingaverage.entity:
             self.powersensormovingaverage.value = value
         
-        if entity in self.chargingtracker_entities and not self.chargerblocked:
+        if entity in self.chargingtracker_entities and not self.charger.chargerblocked:
             await self.charger.Charge(self.chargertypedata.charger.servicecalls['domain'], self.chargertypedata.charger.servicecalls['on'], self.chargertypedata.charger.servicecalls['off'])
 
 class HubMember:
@@ -148,7 +153,7 @@ class HubMember:
         elif self._type is bool:
             if value is None:
                 self._value = False
-            if value.lower() == "on":
+            elif value.lower() == "on":
                 self._value = True
             elif value.lower() == "off":
                 self._value = False
@@ -178,7 +183,7 @@ class ChargerSwitch(HubMember):
 
     @current.setter
     def current(self, value):
-        if value is not None:
+        if value is int:
             self._current = int(value)
 
 

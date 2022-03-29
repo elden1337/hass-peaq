@@ -14,7 +14,11 @@ from custom_components.peaq.sensors.peaqpredictionsensor import PeaqPredictionSe
 from custom_components.peaq.sensors.peaqthresholdsensor import PeaqThresholdSensor
 from custom_components.peaq.sensors.peaqsensor import PeaqSensor
 import custom_components.peaq.peaq.extensionmethods as ex
-import custom_components.peaq.peaq.constants as constants
+from custom_components.peaq.peaq.constants import (
+    CONSUMPTION_TOTAL_NAME,
+    CONSUMPTION_INTEGRAL_NAME,
+    PEAQCONTROLLER
+    )
 
 from homeassistant.components.sensor import SensorEntity
 
@@ -40,18 +44,18 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
     hub = hass.data[DOMAIN]["hub"]
     
     devicesensor = []
-    devicesensor.append(DeviceSensor(hub, constants.PEAQCONTROLLER))
+    devicesensor.append(DeviceSensor(hub, PEAQCONTROLLER))
     async_add_entities(devicesensor, update_before_add = True)
 
     peaqsensors = await gather_Sensors(hass, hub)
     async_add_entities(peaqsensors, update_before_add = True)
 
     peaqintegrationsensors = []
-    peaqintegrationsensors.append(PeaqIntegrationSensor(hub, hub.powersensor.entity, f"{ex.NameToId(constants.CONSUMPTION_INTEGRAL_NAME)}"))
-    peaqintegrationsensors.append(PeaqIntegrationSensor(hub, f"sensor.{DOMAIN}_{hub.totalpowersensor.id}", f"{ex.NameToId(constants.CONSUMPTION_TOTAL_NAME)}"))
+    peaqintegrationsensors.append(PeaqIntegrationSensor(hub, hub.powersensor.entity, f"{ex.NameToId(CONSUMPTION_INTEGRAL_NAME)}"))
+    peaqintegrationsensors.append(PeaqIntegrationSensor(hub, f"sensor.{DOMAIN}_{hub.totalpowersensor.id}", f"{ex.NameToId(CONSUMPTION_TOTAL_NAME)}"))
     async_add_entities(peaqintegrationsensors, update_before_add = True)
 
-    integrationsensors = [ex.NameToId(constants.CONSUMPTION_TOTAL_NAME), ex.NameToId(constants.CONSUMPTION_INTEGRAL_NAME)]
+    integrationsensors = [ex.NameToId(CONSUMPTION_TOTAL_NAME), ex.NameToId(CONSUMPTION_INTEGRAL_NAME)]
     peaqutilitysensors = []
 
     for i in integrationsensors:
