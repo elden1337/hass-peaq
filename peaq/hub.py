@@ -60,7 +60,7 @@ class Hub:
         self.prediction = Prediction(self)
         self.threshold = Threshold(self)
         self.chargecontroller = ChargeController(self)
-        self.charger = Charger(self, self.chargertypedata.charger.servicecalls)
+        self.charger = Charger(self, hass, self.chargertypedata.charger.servicecalls)
         """Init the subclasses"""
         
         #init values
@@ -126,7 +126,7 @@ class Hub:
         elif entity == self.powersensormovingaverage.entity:
             self.powersensormovingaverage.value = value
         
-        if entity in self.chargingtracker_entities and not self.charger.chargerblocked:
+        if entity in self.chargingtracker_entities and not self.charger._chargerblocked:
             await self.charger.Charge()
 
 class HubMember:
