@@ -3,6 +3,7 @@ from .const import (
 
 from homeassistant.components.binary_sensor import BinarySensorEntity, ENTITY_ID_FORMAT
 from homeassistant.core import HomeAssistant
+from custom_components.peaq.peaq.constants import CHARGERENABLED, CHARGERDONE
 
 async def async_setup_entry(hass : HomeAssistant, config_entry, async_add_entities):
     hub = hass.data[DOMAIN]["hub"]
@@ -16,7 +17,7 @@ async def async_setup_entry(hass : HomeAssistant, config_entry, async_add_entiti
 class PeaqBinarySensorEnabled(BinarySensorEntity):  
     def __init__(self, hub) -> None:
         """Initialize a Peaq Binary sensor."""
-        self._attr_name = f"{hub.hubname} Charger enabled"
+        self._attr_name = f"{hub.hubname} {CHARGERENABLED}"
         self._hub = hub
         self._attr_device_class = "none"
 
@@ -35,7 +36,7 @@ class PeaqBinarySensorEnabled(BinarySensorEntity):
 class PeaqBinarySensorDone(BinarySensorEntity):  
     def __init__(self, hub) -> None:
         """Initialize a Peaq Binary sensor."""
-        self._attr_name = f"{hub.hubname} Charging done"
+        self._attr_name = f"{hub.hubname} {CHARGERDONE}"
         self._hub = hub
         self._attr_device_class = "none"
 

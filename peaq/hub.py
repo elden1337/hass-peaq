@@ -9,6 +9,7 @@ from custom_components.peaq.peaq.threshold import Threshold
 from custom_components.peaq.peaq.locale import LocaleData
 from custom_components.peaq.peaq.charger import Charger
 from custom_components.peaq.peaq.chargertypes import ChargerTypeData
+from custom_components.peaq.sensors.peaqsqlsensor import PeaqSQLSensorHelper
 from homeassistant.helpers.event import async_track_state_change
 from homeassistant.core import (
     HomeAssistant,
@@ -19,7 +20,6 @@ _LOGGER = logging.getLogger(__name__)
 
 """
 fixa config flow med månaderna och nonhours
-fixa updatecurrent
 fixa easee
 """
 
@@ -33,7 +33,8 @@ class Hub:
         domain: str
         ):
         self.hass = hass
-        self.hubname = domain
+        self.hubname = domain.capitalize()
+        self.domain = domain
 
         """from the config inputs"""
         self.localedata = LocaleData(config_inputs["locale"])
@@ -42,24 +43,24 @@ class Hub:
         self._monthlystartpeak = config_inputs["monthlystartpeak"]
         self.nonhours = config_inputs["nonhours"]
         self.cautionhours = config_inputs["cautionhours"]
-        """from the config inputs"""
-       
         self.powersensor = HubMember(int, config_inputs["powersensor"], 0)
-        self.charger_enabled = HubMember(bool, "binary_sensor.peaq_charger_enabled", False)  #hardcoded, fix
-        self.powersensormovingaverage = HubMember(int, "sensor.peaq_average_consumption", 0) #hardcoded, fix
-        self.totalhourlyenergy = HubMember(float, f"sensor.{self.hubname.lower()}_{ex.NameToId(constants.CONSUMPTION_TOTAL_NAME)}_hourly", 0) #ugly, fix probably
-        self.charger_done = HubMember(bool, "binary_sensor.peaq_charging_done", False) #hardcoded, fix
+        """from the config inputs"""
+
+        self.charger_enabled = HubMember(bool, f"binary_sensor.{self.domain}_{ex.NameToId(constants.CHARGERENABLED)}", False)
+        self.powersensormovingaverage = HubMember(int, f"sensor.{self.domain}_{ex.NameToId(constants.AVERAGECONSUMPTION)}", 0)
+        self.totalhourlyenergy = HubMember(float, f"sensor.{self.domain}_{ex.NameToId(constants.CONSUMPTION_TOTAL_NAME)}_{constants.HOURLY}", 0)
+        self.charger_done = HubMember(bool, f"binary_sensor.{self.domain}_{ex.NameToId(constants.CHARGERDONE)}", False)
         self.totalpowersensor = HubMember(int, name = constants.TOTALPOWER)
         self.carpowersensor = HubMember(int, self.chargertypedata.charger.powermeter, 0)
-        self.currentpeak = CurrentPeak(float, "sensor.peaq_monthly_max_peak_min_of_three", 0, self._monthlystartpeak[datetime.now().month]) #hardcoded, fix
+        self.currentpeak = CurrentPeak(float, f"sensor.{self.domain}_{ex.NameToId(PeaqSQLSensorHelper('').GetQueryType(self.localedata.observedpeak)['name'])}", 0, self._monthlystartpeak[datetime.now().month])
         self.chargerobject = HubMember(str, self.chargertypedata.charger.chargerentity)
-        self.chargerobject_switch = ChargerSwitch(bool, self.chargertypedata.charger.powerswitch, False, "Max current") #hardcoded, fix in chargertypes.
+        self.chargerobject_switch = ChargerSwitch(str, self.chargertypedata.charger.powerswitch, False, "Max current") #hardcoded, fix in chargertypes.
 
         """Init the subclasses"""
         self.prediction = Prediction(self)
         self.threshold = Threshold(self)
         self.chargecontroller = ChargeController(self)
-        self.charger = Charger(self)
+        self.charger = Charger(self, self.chargertypedata.charger.servicecalls)
         """Init the subclasses"""
         
         #init values
@@ -83,7 +84,7 @@ class Hub:
             self.charger_enabled.entity, 
             self.charger_done.entity, 
             self.chargerobject.entity,
-            "sensor.peaq_chargercontroller" #hardcoded, fix
+            f"sensor.{self.domain}_{ex.NameToId(constants.CHARGERCONTROLLER)}"
             ]
 
         trackerEntities += self.chargingtracker_entities
@@ -126,7 +127,7 @@ class Hub:
             self.powersensormovingaverage.value = value
         
         if entity in self.chargingtracker_entities and not self.charger.chargerblocked:
-            await self.charger.Charge(self.chargertypedata.charger.servicecalls['domain'], self.chargertypedata.charger.servicecalls['on'], self.chargertypedata.charger.servicecalls['off'])
+            await self.charger.Charge()
 
 class HubMember:
     def __init__(self, type: type, listenerentity = None, initval = None, name = None):
@@ -148,14 +149,20 @@ class HubMember:
     def value(self, value):
         if type(value) is self._type:
             self._value = value
+        elif self._type is float:
+            self._value = float(value) if value is not None else 0
         elif self._type is int:
             self._value = int(float(value)) if value is not None else 0
         elif self._type is bool:
-            if value is None:
-                self._value = False
-            elif value.lower() == "on":
-                self._value = True
-            elif value.lower() == "off":
+            try:
+                if value is None:
+                    self._value = False
+                elif value.lower() == "on":
+                    self._value = True
+                elif value.lower() == "off":
+                    self._value = False
+            except:
+                _LOGGER.warn("Could not parse bool", value, self._listenerentity)
                 self._value = False
         elif  self._type is str:
             self._value = str(value)

@@ -87,9 +87,9 @@ async def gather_Sensors(hass: HomeAssistant, hub) -> list:
     peaqsensors.append(PeaqPowerSensor(hub, hass))
     peaqsensors.append(PeaqAmpSensor(hub, hass))
     peaqsensors.append(PeaqAverageSensor(hub))
-    peaqsensors.append(PeaqPredictionSensor(hub)) #predictions
-    peaqsensors.append(PeaqThresholdSensor(hub)) #thresholds
-    peaqsensors.append(PeaqSensor(hub)) #chargecontroller
+    peaqsensors.append(PeaqPredictionSensor(hub))
+    peaqsensors.append(PeaqThresholdSensor(hub))
+    peaqsensors.append(PeaqSensor(hub))
     return peaqsensors
     
 class DeviceSensor(SensorEntity):

@@ -14,9 +14,9 @@ class ChargerTypeData():
         self._hass = hass
 
         if input == constants.CHARGERTYPE_CHARGEAMPS:
-            self.charger = ChargeAmps(self._hass)
+            self._charger = ChargeAmps(self._hass)
         elif  input == constants.CHARGERTYPE_EASEE:
-            self.charger = Easee(self._hass)
+            self._charger = Easee(self._hass)
     
     @property
     def type(self) -> str:
@@ -25,10 +25,6 @@ class ChargerTypeData():
     @property
     def charger(self):
         return self._charger
-
-    @charger.setter
-    def charger(self, obj):
-        self._charger = obj
 
 class ChargeAmps():
     def __init__(self, hass: HomeAssistant):
@@ -62,7 +58,10 @@ class ChargeAmps():
                 "domain": "chargeamps",
                 "on": "enable",
                 "off": "disable",
-                "updatecurrent": "set_max_current"
+                "updatecurrent": {
+                   "name": "set_max_current",
+                   "param": "max_current"
+                }
             }
     
     @property

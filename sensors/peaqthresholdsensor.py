@@ -1,12 +1,12 @@
 from homeassistant.const import PERCENTAGE
 from custom_components.peaq.sensors.sensorbase import SensorBase
+from custom_components.peaq.peaq.constants import THRESHOLD
 
 class PeaqThresholdSensor(SensorBase):
     _attr_unit_of_measurement = PERCENTAGE
 
     def __init__(self, hub):
-        """Initialize the sensor."""
-        name = f"{hub.hubname} Threshold"
+        name = f"{hub.hubname} {THRESHOLD}"
         super().__init__(hub, name.lower())
 
         self._attr_name = name

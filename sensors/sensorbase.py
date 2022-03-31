@@ -16,7 +16,3 @@ class SensorBase(SensorEntity):
     def device_info(self):
         """Return information to link this entity with the correct device."""
         return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
-
-    # @property
-    # def unique_id(self): 
-    #     return self._attr_unique_id

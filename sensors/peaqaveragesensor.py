@@ -5,12 +5,14 @@ from homeassistant.components.filter.sensor import (
     TimeSMAFilter, SensorFilter,
     TIME_SMA_LAST 
     )
+import custom_components.peaq.peaq.extensionmethods as ex
+from custom_components.peaq.peaq.constants import AVERAGECONSUMPTION
 
 class PeaqAverageSensor(SensorFilter):
     def __init__(self, hub):
         self._hub = hub
-        self._attr_name = f"{hub.hubname} Average Consumption"
-        self._attr_unique_id = f"{hub.hub_id}_average_consumption"
+        self._attr_name = f"{hub.hubname} {AVERAGECONSUMPTION}"
+        self._attr_unique_id = f"{hub.hub_id}_{ex.NameToId(AVERAGECONSUMPTION)}"
         super().__init__(
             self._attr_name,
             self._attr_unique_id,
