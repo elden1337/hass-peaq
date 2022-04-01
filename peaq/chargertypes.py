@@ -1,3 +1,4 @@
+from marshmallow import ValidationError
 import custom_components.peaq.peaq.constants as constants
 import homeassistant.helpers.template as template
 from homeassistant.core import HomeAssistant
@@ -17,7 +18,19 @@ class ChargerTypeData():
             self._charger = ChargeAmps(self._hass)
         elif  input == constants.CHARGERTYPE_EASEE:
             self._charger = Easee(self._hass)
-    
+
+        try:
+            assert self._charger.chargerentity.len > 0
+            assert self._charger.powermeter.len > 0
+            assert self._charger.powerswitch.len > 0
+            assert self._charger.servicecalls["domain"] is not None
+            assert self._charger.servicecalls["on"] is not None
+            assert self._charger.servicecalls["off"] is not None
+            if self._charger.allowupdatecurrent:
+                assert self._charger.servicecalls["updatecurrent"] is not None
+        except:
+            raise ValidationError("")
+
     @property
     def type(self) -> str:
         return self._type

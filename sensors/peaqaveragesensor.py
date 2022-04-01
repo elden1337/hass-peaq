@@ -12,7 +12,7 @@ class PeaqAverageSensor(SensorFilter):
     def __init__(self, hub):
         self._hub = hub
         self._attr_name = f"{hub.hubname} {AVERAGECONSUMPTION}"
-        self._attr_unique_id = f"{hub.hub_id}_{ex.NameToId(AVERAGECONSUMPTION)}"
+        self._attr_unique_id = f"{hub.hub_id}_{ex.nametoid(AVERAGECONSUMPTION)}"
         super().__init__(
             self._attr_name,
             self._attr_unique_id,

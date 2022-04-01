@@ -33,9 +33,10 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
     }
 
     hub = Hub(hass, configinputs, DOMAIN)
+    await hub.initialize()
     hass.data[DOMAIN]["hub"] = hub
     
-    """SERVICE CALLS"""
+    """Create Service calls"""
     async def servicehandler_enable(call):
         hub.charger_enabled.value = "on"
     async def servicehandler_disable(call):
@@ -43,6 +44,7 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
 
     hass.services.async_register(DOMAIN, "enable", servicehandler_enable)
     hass.services.async_register(DOMAIN, "disable", servicehandler_disable)
+    """/Create Service calls"""
 
     hass.config_entries.async_setup_platforms(config, PLATFORMS)
 
@@ -50,6 +52,7 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
 
 def unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
+
     unload_ok = hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)

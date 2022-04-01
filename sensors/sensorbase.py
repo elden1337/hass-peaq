@@ -9,7 +9,7 @@ class SensorBase(SensorEntity):
         """Initialize the sensor."""
         self._hub = hub
         self._attr_name = name
-        self._attr_unique_id = f"{DOMAIN}_{self._hub.hub_id}_{ex.NameToId(self._attr_name)}"
+        self._attr_unique_id = f"{DOMAIN}_{self._hub.hub_id}_{ex.nametoid(self._attr_name)}"
         self._attr_available = True
         
     @property

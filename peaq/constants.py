@@ -1,5 +1,7 @@
 from enum import Enum
 
+from peaq.prediction import Prediction
+
 CHARGECONTROLLER = Enum("chargestate", "Idle Start Stop Done Error")
 CURRENTS = {3600: 16,3200: 14,2700: 12,	2300: 10,1800: 8,1300: 6}
 CURRENTS_3_PHASE = {11000: 16,9600: 14,8200: 12,6900: 10,5500: 8,4100: 6}
@@ -31,7 +33,9 @@ LOCALES = [
 """Naming constants"""
 PEAQCONTROLLER = "Peaq controller"
 CHARGERCONTROLLER = "Charger controller"
+PREDICTION = "Prediction"
 TOTALPOWER = "Total power"
+ALLOWEDCURRENT = "Allowed current"
 CONSUMPTION_INTEGRAL_NAME = "Energy excluding car"
 CONSUMPTION_TOTAL_NAME = "Energy including car" 
 CHARGERENABLED = "Charger enabled"

@@ -46,13 +46,13 @@ class Hub:
         self.powersensor = HubMember(int, config_inputs["powersensor"], 0)
         """from the config inputs"""
 
-        self.charger_enabled = HubMember(bool, f"binary_sensor.{self.domain}_{ex.NameToId(constants.CHARGERENABLED)}", False)
-        self.powersensormovingaverage = HubMember(int, f"sensor.{self.domain}_{ex.NameToId(constants.AVERAGECONSUMPTION)}", 0)
-        self.totalhourlyenergy = HubMember(float, f"sensor.{self.domain}_{ex.NameToId(constants.CONSUMPTION_TOTAL_NAME)}_{constants.HOURLY}", 0)
-        self.charger_done = HubMember(bool, f"binary_sensor.{self.domain}_{ex.NameToId(constants.CHARGERDONE)}", False)
+        self.charger_enabled = HubMember(bool, f"binary_sensor.{self.domain}_{ex.nametoid(constants.CHARGERENABLED)}", False)
+        self.powersensormovingaverage = HubMember(int, f"sensor.{self.domain}_{ex.nametoid(constants.AVERAGECONSUMPTION)}", 0)
+        self.totalhourlyenergy = HubMember(float, f"sensor.{self.domain}_{ex.nametoid(constants.CONSUMPTION_TOTAL_NAME)}_{constants.HOURLY}", 0)
+        self.charger_done = HubMember(bool, f"binary_sensor.{self.domain}_{ex.nametoid(constants.CHARGERDONE)}", False)
         self.totalpowersensor = HubMember(int, name = constants.TOTALPOWER)
         self.carpowersensor = HubMember(int, self.chargertypedata.charger.powermeter, 0)
-        self.currentpeak = CurrentPeak(float, f"sensor.{self.domain}_{ex.NameToId(PeaqSQLSensorHelper('').GetQueryType(self.localedata.observedpeak)['name'])}", 0, self._monthlystartpeak[datetime.now().month])
+        self.currentpeak = CurrentPeak(float, f"sensor.{self.domain}_{ex.nametoid(PeaqSQLSensorHelper('').getquerytype(self.localedata.observedpeak)['name'])}", 0, self._monthlystartpeak[datetime.now().month])
         self.chargerobject = HubMember(str, self.chargertypedata.charger.chargerentity)
         self.chargerobject_switch = ChargerSwitch(str, self.chargertypedata.charger.powerswitch, False, "Max current") #hardcoded, fix in chargertypes.
 
@@ -84,23 +84,32 @@ class Hub:
             self.charger_enabled.entity, 
             self.charger_done.entity, 
             self.chargerobject.entity,
-            f"sensor.{self.domain}_{ex.NameToId(constants.CHARGERCONTROLLER)}"
+            f"sensor.{self.domain}_{ex.nametoid(constants.CHARGERCONTROLLER)}"
             ]
 
         trackerEntities += self.chargingtracker_entities
         
         async_track_state_change(hass, trackerEntities, self.state_changed)
  
+    async def initialize(self):
+        """initialize the session and set initial data"""
+        try:
+            pass
+        except:
+            pass
+        
+        pass
+
     @callback
     async def state_changed(self, entity_id, old_state, new_state):
         try:
             if old_state is None or old_state.state != new_state.state:
-                await self._UpdateSensor(entity_id, new_state.state)
+                await self._updatesensor(entity_id, new_state.state)
         except Exception as e:
             _LOGGER.warn("Unable to handle data: ", entity_id, e)
             pass
 
-    async def _UpdateSensor(self,entity,value):
+    async def _updatesensor(self,entity,value):
         if entity == self.powersensor.entity:
             if not self._powersensor_includes_car:
                 self.powersensor.value = value
@@ -135,7 +144,7 @@ class HubMember:
         self._type = type
         self._listenerentity = listenerentity
         self.name = name
-        self.id = ex.NameToId(self.name) if self.name is not None else None
+        self.id = ex.nametoid(self.name) if self.name is not None else None
 
     @property
     def entity(self):
@@ -162,7 +171,7 @@ class HubMember:
                 elif value.lower() == "off":
                     self._value = False
             except:
-                _LOGGER.warn("Could not parse bool", value, self._listenerentity)
+                _LOGGER.warn("Could not parse bool, setting to false to be sure", value, self._listenerentity)
                 self._value = False
         elif  self._type is str:
             self._value = str(value)

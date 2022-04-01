@@ -51,11 +51,11 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
     async_add_entities(peaqsensors, update_before_add = True)
 
     peaqintegrationsensors = []
-    peaqintegrationsensors.append(PeaqIntegrationSensor(hub, hub.powersensor.entity, f"{ex.NameToId(CONSUMPTION_INTEGRAL_NAME)}"))
-    peaqintegrationsensors.append(PeaqIntegrationSensor(hub, f"sensor.{DOMAIN}_{hub.totalpowersensor.id}", f"{ex.NameToId(CONSUMPTION_TOTAL_NAME)}"))
+    peaqintegrationsensors.append(PeaqIntegrationSensor(hub, hub.powersensor.entity, f"{ex.nametoid(CONSUMPTION_INTEGRAL_NAME)}"))
+    peaqintegrationsensors.append(PeaqIntegrationSensor(hub, f"sensor.{DOMAIN}_{hub.totalpowersensor.id}", f"{ex.nametoid(CONSUMPTION_TOTAL_NAME)}"))
     async_add_entities(peaqintegrationsensors, update_before_add = True)
 
-    integrationsensors = [ex.NameToId(CONSUMPTION_TOTAL_NAME), ex.NameToId(CONSUMPTION_INTEGRAL_NAME)]
+    integrationsensors = [ex.nametoid(CONSUMPTION_TOTAL_NAME), ex.nametoid(CONSUMPTION_INTEGRAL_NAME)]
     peaqutilitysensors = []
 
     for i in integrationsensors:
@@ -72,11 +72,11 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
     engine = sqlalchemy.create_engine(db_url)
     sessmaker = scoped_session(sessionmaker(bind=engine))
     sqlsensor = hub.totalhourlyenergy.entity
-    sql = PeaqSQLSensorHelper(sqlsensor).GetQueryType(peaks.chargedpeak)
+    sql = PeaqSQLSensorHelper(sqlsensor).getquerytype(peaks.chargedpeak)
     peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql))
 
     if peaks.chargedpeak != peaks.observedpeak:
-        sql2 = PeaqSQLSensorHelper(sqlsensor).GetQueryType(peaks.observedpeak)
+        sql2 = PeaqSQLSensorHelper(sqlsensor).getquerytype(peaks.observedpeak)
         peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql2))
     #sql sensors
     

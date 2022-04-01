@@ -1,4 +1,5 @@
 from custom_components.peaq.sensors.sensorbase import SensorBase
+from custom_components.peaq.peaq.constants import ALLOWEDCURRENT
 
 from homeassistant.const import (
     DEVICE_CLASS_POWER,
@@ -12,8 +13,8 @@ class PeaqAmpSensor(SensorBase):
     unit_of_measurement = ELECTRIC_CURRENT_AMPERE
     
     def __init__(self, hub, hass):
-        name = f"{hub.hubname} Allowed current"
-        super().__init__(hub, name.lower())
+        name = f"{hub.hubname} {ALLOWEDCURRENT}"
+        super().__init__(hub, name)
         self._hub = hub
         self._state = self._hub.threshold.allowedcurrent
         self._attr_icon = "mdi:current-ac"
@@ -32,7 +33,7 @@ class PeaqPowerSensor(SensorBase):
     
     def __init__(self, hub, hass):
         name = f"{hub.hubname} {hub.totalpowersensor.name}"
-        super().__init__(hub, name.lower())
+        super().__init__(hub, name)
         self._hub = hub
         self._state = self._hub.totalpowersensor.value
         self._attr_icon = "mdi:flash"

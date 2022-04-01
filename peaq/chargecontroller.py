@@ -21,10 +21,9 @@ class ChargeController():
 
     @property
     def status(self):
-        return self._Let_Charge(self._hub)
+        return self._let_charge()
 
-    def _Let_Charge(self, hub) -> str:
-            self._hub = hub    
+    def _let_charge(self) -> str:
             if self._hub.chargerobject.value.lower() == "available":
                 return constants.CHARGECONTROLLER.Idle
             elif self._hub.chargerobject.value.lower() != "available" and self._hub.charger_done.value == True:

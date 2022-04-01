@@ -7,7 +7,7 @@ class PeaqThresholdSensor(SensorBase):
 
     def __init__(self, hub):
         name = f"{hub.hubname} {THRESHOLD}"
-        super().__init__(hub, name.lower())
+        super().__init__(hub, name)
 
         self._attr_name = name
         self._state = self._hub.prediction.predictedpercentageofpeak
