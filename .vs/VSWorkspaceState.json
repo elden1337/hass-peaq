@@ -1,0 +1,10 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\custom_components",
+    "\\custom_components\\peaq",
+    "\\custom_components\\peaq\\sensors"
+  ],
+  "SelectedNode": "\\custom_components\\peaq\\sensors",
+  "PreviewInSolutionExplorer": false
+}
