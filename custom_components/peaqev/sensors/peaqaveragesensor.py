@@ -1,12 +1,12 @@
-from .const import DOMAIN
+from custom_components.peaqev.const import DOMAIN
 from datetime import timedelta
 from homeassistant.components.filter.sensor import (
     OutlierFilter, LowPassFilter,
     TimeSMAFilter, SensorFilter,
     TIME_SMA_LAST 
     )
-import custom_components.peaq.extensionmethods as ex
-from custom_components.peaq.constants import AVERAGECONSUMPTION
+import custom_components.peaqev.peaqservice.extensionmethods as ex
+from custom_components.peaqev.peaqservice.constants import AVERAGECONSUMPTION
 
 class PeaqAverageSensor(SensorFilter):
     def __init__(self, hub):

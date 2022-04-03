@@ -1,6 +1,6 @@
 from homeassistant.components.sensor import SensorEntity
-from .const import DOMAIN
-import custom_components.peaq.extensionmethods as ex
+from custom_components.peaqev.const import DOMAIN
+import custom_components.peaqev.peaqservice.extensionmethods as ex
 
 class SensorBase(SensorEntity):
     should_poll = True

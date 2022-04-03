@@ -1,8 +1,8 @@
 from homeassistant.components.sql.sensor import (
     SQLSensor
 )
-from .const import DOMAIN
-from custom_components.peaq.constants import (
+from custom_components.peaqev.const import DOMAIN
+from custom_components.peaqev.peaqservice.constants import (
     SQLSENSOR_BASENAME,
     SQLSENSOR_AVERAGEOFTHREEDAYS,
     SQLSENSOR_AVERAGEOFTHREEDAYS_MIN,
@@ -14,7 +14,7 @@ from custom_components.peaq.constants import (
     SQLSENSOR_STATISTICS_TABLE,
     SQLSENSOR_STATISTICS_META_TABLE
     )
-import custom_components.peaq.extensionmethods as ex
+import custom_components.peaqev.peaqservice.extensionmethods as ex
 
 class PeaqSQLSensorHelper():
     def __init__(self, sensor :str):

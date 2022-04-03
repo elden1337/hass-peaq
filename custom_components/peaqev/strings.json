@@ -5,8 +5,15 @@
         "data": {
           "name": "[%key:common::config_flow::data::powersensor%]",
           "powersensorincludescar": "[%key:common::config_flow::data::powersensorincludescar%]",
+          "chargerid": "[%key:common::config_flow::data::chargerid%]",
           "chargertype": "[%key:common::config_flow::data::chargertype%]",
           "locale": "[%key:common::config_flow::data::locale%]"
+        }
+      },
+      "opt": {
+        "data": {
+          "nonhours": "[%key:common::config_flow::data::nonhours%]",
+          "cautionhours": "[%key:common::config_flow::data::cautionhours%]"
         }
       }
     },

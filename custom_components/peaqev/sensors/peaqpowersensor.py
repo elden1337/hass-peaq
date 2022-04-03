@@ -1,5 +1,5 @@
-from sensorbase import SensorBase
-from custom_components.peaq.constants import ALLOWEDCURRENT
+from custom_components.peaqev.sensors.sensorbase import SensorBase
+from custom_components.peaqev.peaqservice.constants import ALLOWEDCURRENT
 
 from homeassistant.const import (
     DEVICE_CLASS_POWER,

@@ -1,8 +1,7 @@
-"""The peaq integration."""
+"""The peaqev integration."""
 from __future__ import annotations
 import logging
-from custom_components.peaq.hub import Hub
-import voluptuous as vol
+from custom_components.peaqev.peaqservice.hub import Hub
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
@@ -25,6 +24,7 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
         "locale": config.data["locale"],
         "chargertype": config.data["chargertype"],
         "cautionhours": config.data["options"]["cautionhours"],
+        "chargerid": config.data["chargerid"],
         "nonhours": config.data["options"]["nonhours"],
         #"cautionhours" : [11,18,19],
         #"nonhours": [12,16,17],

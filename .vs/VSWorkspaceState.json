@@ -3,8 +3,8 @@
     "",
     "\\custom_components",
     "\\custom_components\\peaq",
-    "\\custom_components\\peaq\\sensors"
+    "\\custom_components\\peaq\\translations"
   ],
-  "SelectedNode": "\\custom_components\\peaq\\sensors",
+  "SelectedNode": "\\custom_components\\peaq\\chargecontroller.py",
   "PreviewInSolutionExplorer": false
 }

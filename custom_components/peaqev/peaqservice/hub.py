@@ -1,15 +1,15 @@
 import logging
 from datetime import datetime
 
-import custom_components.peaq.extensionmethods as ex
-import custom_components.peaq.constants as constants
-from custom_components.peaq.chargecontroller import ChargeController
-from custom_components.peaq.prediction import Prediction
-from custom_components.peaq.threshold import Threshold
-from custom_components.peaq.locale import LocaleData
-from custom_components.peaq.charger import Charger
-from custom_components.peaq.chargertypes import ChargerTypeData
-from custom_components.peaq.peaqsqlsensor import PeaqSQLSensorHelper
+import custom_components.peaqev.peaqservice.extensionmethods as ex
+import custom_components.peaqev.peaqservice.constants as constants
+from custom_components.peaqev.peaqservice.chargecontroller import ChargeController
+from custom_components.peaqev.peaqservice.prediction import Prediction
+from custom_components.peaqev.peaqservice.threshold import Threshold
+from custom_components.peaqev.peaqservice.locale import LocaleData
+from custom_components.peaqev.peaqservice.charger import Charger
+from custom_components.peaqev.peaqservice.chargertypes import ChargerTypeData
+from custom_components.peaqev.sensors.peaqsqlsensor import PeaqSQLSensorHelper
 from homeassistant.helpers.event import async_track_state_change
 from homeassistant.core import (
     HomeAssistant,
@@ -155,8 +155,9 @@ class Hub:
         elif entity == self.powersensormovingaverage.entity:
             self.powersensormovingaverage.value = value
         
-        if entity in self.chargingtracker_entities and not self.charger._chargerblocked:
+        if entity in self.chargingtracker_entities:
             await self.charger.charge()
+
 
 class HubMember:
     def __init__(self, type: type, listenerentity = None, initval = None, name = None):

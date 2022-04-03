@@ -7,7 +7,7 @@ from homeassistant.components.integration.sensor import (
     TRAPEZOIDAL_METHOD,
     IntegrationSensor
 )
-from .const import DOMAIN
+from custom_components.peaqev.const import DOMAIN
 
 class PeaqIntegrationSensor(IntegrationSensor):
     def __init__(self, hub, sensor, name):

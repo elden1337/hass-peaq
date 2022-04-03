@@ -3,7 +3,7 @@ from homeassistant.components.utility_meter.sensor import (
     UtilityMeterSensor,
     HOURLY
 )
-from .const import DOMAIN
+from custom_components.peaqev.const import DOMAIN
 
 class Object(object):
     pass

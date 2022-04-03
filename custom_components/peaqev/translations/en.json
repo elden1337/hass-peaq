@@ -1,0 +1,29 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "This integration has already been configured"
+    },
+    "error": {
+      "cannot_connect": "Cannot create Peaq-instance",
+      "invalid_auth": "Invalid authentication",
+      "unknown": "Unknown error has occured"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "name": "PowerSensor",
+          "powersensorincludescar": "PowerSensor includes car",
+          "chargerid": "Chargepoint Id (single chargepoint)",
+          "chargertype": "Charger brand",
+          "locale": "City and country"
+        }
+      },
+      "opt": {
+        "data": {
+          "nonhours": "Hours when the charger is always disabled",
+          "cautionhours": "Hours when the charger takes extra precaution to not burst peak energy"
+        }
+      }
+    }
+  }
+}

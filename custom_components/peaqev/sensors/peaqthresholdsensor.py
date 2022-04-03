@@ -1,6 +1,6 @@
 from homeassistant.const import PERCENTAGE
-from sensorbase import SensorBase
-from custom_components.peaq.constants import THRESHOLD
+from custom_components.peaqev.sensors.sensorbase import SensorBase
+from custom_components.peaqev.peaqservice.constants import THRESHOLD
 
 class PeaqThresholdSensor(SensorBase):
     _attr_unit_of_measurement = PERCENTAGE

@@ -1,13 +1,13 @@
-import custom_components.peaq.constants as constants
+import custom_components.peaqev.peaqservice.constants as constants
 import homeassistant.helpers.template as template
 from homeassistant.core import HomeAssistant
 import logging
-import json
 
 _LOGGER = logging.getLogger(__name__)
 
-"""Init the service"""
+
 class ChargerTypeData():
+    """Init the service"""
     def __init__(self, hass: HomeAssistant, input, chargerid):
         self._charger = None
         self._type = input
@@ -42,12 +42,15 @@ class ChargerTypeData():
         except:
             pass
 
+
 class ChargerBase():
-    def __init__(self):
+    def __init__(self, currentupdate:bool):
         self._chargerEntity = None
         self._powermeter = None
         self._powerswitch = None
-        self._allowupdatecurrent = False
+        self._allowupdatecurrent = currentupdate
+        self.ampmeter = None
+        self.ampmeter_is_attribute = None
         self._servicecalls = {}
         self._chargerstates = {
             "idle": [],
@@ -105,9 +108,9 @@ class ChargerBase():
 
 class ChargeAmps(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid):
-        super().__init__()
+        self._hass = hass
+        super().__init__(currentupdate=True)
         self._chargerid = chargerid
-        self._allowupdatecurrent = True
         self._setchargerstates()
         self._getentities()
 
@@ -117,31 +120,55 @@ class ChargeAmps(ChargerBase):
         self._chargerstates["charging"] = ["charging"]
 
     def _getentities(self):
-        self.chargerentity = f"sensor.{self._chargerid}_1"
-        self.powermeter = f"sensor.{self._chargerid}_1_power"
-        self.powerswitch = f"switch.{self._chargerid}_1"
-        self.servicecalls = {
-            "domain": "chargeamps",
-            "on": "enable",
-            "off": "disable",
-            "updatecurrent": {
-                "name": "set_max_current",
-                "params": {
-                    "charger": "chargepoint",
-                    "chargerid": self._chargerid,
-                    "current":"max_current"
-                    }
+        entities = template.integration_entities(self._hass, "chargeamps")
+
+        if len(entities) < 1:
+            _LOGGER.error("no entities!")
+        else:
+            _endings = [
+                "_power",
+                "_1",
+                "_2",
+                "_status",
+                "_dimmer",
+                "_downlight",
+                "_current",
+                "_voltage",
+            ]
+
+            namelrg = entities[0].split(".")
+            candidate = ""
+
+            for e in _endings:
+                if namelrg[1].endswith(e):
+                    candidate = namelrg[1].replace(e, '')
+
+            self.chargerentity = f"sensor.{candidate}_1"
+            self.powermeter = f"sensor.{candidate}_1_power"
+            self.powerswitch = f"switch.{candidate}_1"
+            self.ampmeter = ""
+            self.ampmeter_is_attribute = True
+            self.servicecalls = {
+                "domain": "chargeamps",
+                "on": "enable",
+                "off": "disable",
+                "updatecurrent": {
+                    "name": "set_max_current",
+                    "params": {
+                        "charger": "chargepoint",
+                        "chargerid": self._chargerid,
+                        "current":"max_current"
+                        }
+                }
             }
-        }
    
 class Easee(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid):
         self._hass = hass
-        super().__init__()
+        super().__init__(currentupdate=True)
         self._chargerid = chargerid
-        self._allowupdatecurrent = True
         self._setchargerstates()
-        self._getentities(self._hass)
+        self._getentities()
         
 # disconnected
 # awaiting_start
@@ -155,8 +182,8 @@ class Easee(ChargerBase):
         self._chargerstates["connected"] = ["awaiting_start", "ready_to_charge"]
         self._chargerstates["charging"] = ["charging"]
 
-    def _getentities(self, hass):
-        entities = template.integration_entities(hass, "easee")
+    def _getentities(self):
+        entities = template.integration_entities(self._hass, "easee")
         
         if len(entities) < 1:
             _LOGGER.error("no entities!")
@@ -185,6 +212,8 @@ class Easee(ChargerBase):
             self.chargerentity = f"sensor.{candidate}_status" 
             self.powermeter = f"sensor.{candidate}_power"
             self.powerswitch = f"switch.{candidate}_is_enabled"
+            self.ampmeter = f"sensor.{candidate}_max_charger_limit"
+            self.ampmeter_is_attribute = False
             self.servicecalls = {
                 "domain": "easee",
                 "on": "start",

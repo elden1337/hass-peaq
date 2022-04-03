@@ -1,20 +1,20 @@
 """Platform for sensor integration."""
 import logging
-from peaqutilitysensor import (
+from custom_components.peaqev.sensors.peaqutilitysensor import (
     PeaqUtilitySensor,
     METER_OFFSET,
     PERIODS
 )
 
-from custom_components.peaq.peaqintegrationsensor import PeaqIntegrationSensor
-from custom_components.peaq.peaqaveragesensor import PeaqAverageSensor
-from custom_components.peaq.peaqsqlsensor import (PeaqSQLSensor, PeaqSQLSensorHelper)
-from custom_components.peaq.peaqpowersensor import (PeaqPowerSensor, PeaqAmpSensor)
-from custom_components.peaq.peaqpredictionsensor import PeaqPredictionSensor
-from custom_components.peaq.peaqthresholdsensor import PeaqThresholdSensor
-from custom_components.peaq.peaqsensor import PeaqSensor
-import custom_components.peaq.extensionmethods as ex
-from custom_components.peaq.constants import (
+from custom_components.peaqev.sensors.peaqintegrationsensor import PeaqIntegrationSensor
+from custom_components.peaqev.sensors.peaqaveragesensor import PeaqAverageSensor
+from custom_components.peaqev.sensors.peaqsqlsensor import (PeaqSQLSensor, PeaqSQLSensorHelper)
+from custom_components.peaqev.sensors.peaqpowersensor import (PeaqPowerSensor, PeaqAmpSensor)
+from custom_components.peaqev.sensors.peaqpredictionsensor import PeaqPredictionSensor
+from custom_components.peaqev.sensors.peaqthresholdsensor import PeaqThresholdSensor
+from custom_components.peaqev.sensors.peaqsensor import PeaqSensor
+import custom_components.peaqev.peaqservice.extensionmethods as ex
+from custom_components.peaqev.peaqservice.constants import (
     CONSUMPTION_TOTAL_NAME,
     CONSUMPTION_INTEGRAL_NAME,
     PEAQCONTROLLER
@@ -25,7 +25,7 @@ from homeassistant.components.sensor import SensorEntity
 from homeassistant.core import (
     HomeAssistant,
 )
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+from homeassistant.helpers.typing import ConfigType
 from datetime import timedelta
 import sqlalchemy
 from sqlalchemy.orm import scoped_session, sessionmaker
