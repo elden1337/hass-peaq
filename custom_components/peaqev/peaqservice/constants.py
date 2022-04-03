@@ -1,8 +1,8 @@
 from enum import Enum
 
 CHARGECONTROLLER = Enum("chargestate", "Idle Start Stop Done Error, CheckChargerEntity")
-CURRENTS = {3600: 16,3200: 14,2700: 12,	2300: 10,1800: 8,1300: 6}
-CURRENTS_3_PHASE = {11000: 16,9600: 14,8200: 12,6900: 10,5500: 8,4100: 6}
+CURRENTS = {3600: 16, 3200: 14, 2700: 12, 2300: 10, 1800: 8, 1300: 6}
+CURRENTS_3_PHASE = {11000: 16, 9600: 14, 8200: 12, 6900: 10, 5500: 8, 4100: 6}
 
 CHARGERTYPE_CHARGEAMPS = "Chargeamps"
 CHARGERTYPE_EASEE = "Easee"
@@ -12,6 +12,7 @@ LOCALE_SE_KARLSTAD = "Karlstad, Sweden"
 LOCALE_SE_KRISTINEHAMN = "Kristinehamn, Sweden"
 LOCALE_SE_NACKA = "Nacka, Sweden"
 LOCALE_SE_PARTILLE = "Partille, Sweden"
+LOCALE_DEFAULT = "Other, just want to test"
 
 """Lookup types for config flow"""
 CHARGERTYPES = [
@@ -25,7 +26,8 @@ LOCALES = [
     LOCALE_SE_KARLSTAD,
     LOCALE_SE_KRISTINEHAMN,
     LOCALE_SE_NACKA,
-    LOCALE_SE_PARTILLE
+    LOCALE_SE_PARTILLE,
+    LOCALE_DEFAULT
     ]
 
 """Naming constants"""

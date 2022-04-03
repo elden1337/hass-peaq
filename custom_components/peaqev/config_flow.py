@@ -122,36 +122,34 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="opt", data_schema=OPT_SCHEMA, errors=errors
         )
 
-    async def async_step_startmonth(self, user_input=None):
-        """Second step in config flow to add options"""
+    #async def async_step_startmonth(self, user_input=None):
+    #    """Second step in config flow to add options"""
 
-        errors = {}
-        if user_input is not None:
+   #     errors = {}
+    #    if user_input is not None:
             # if not errors:
             # Input is valid, set data.
-            self.data[self.OPTIONS] = {
-                "nonhours": user_input["nonhours"],
-                "cautionhours": user_input["cautionhours"]
-            }
+     #       self.data[self.OPTIONS] = {
+      #          "nonhours": user_input["nonhours"],
+       #         "cautionhours": user_input["cautionhours"]
+        #    }
 
             # User is done adding repos, create the config entry.
-            return self.async_create_entry(title=self.info["title"], data=self.data)
+      #      return self.async_create_entry(title=self.info["title"], data=self.data)
 
-        mockhours = [h for h in range(0, 24)]
+        #mockhours = [h for h in range(0, 24)]
 
-        OPT_SCHEMA = vol.Schema(
-            {
-                vol.Optional("nonhours", default=list(mockhours)): cv.multi_select(
-                    mockhours
-                ),
-                vol.Optional("cautionhours", default=list(mockhours)): cv.multi_select(
-                    mockhours
-                )
-            })
+        #OPT_SCHEMA = vol.Schema(
+         #   {
+          #      vol.Optional("nonhours", default=list(mockhours)): cv.multi_select(
+           #         mockhours
+            #    ),
+             #   vol.Optional("cautionhours", default=list(mockhours)): cv.multi_select(
+              #      mockhours
+               # )
+            #})
 
-        return self.async_show_form(
-            step_id="startmonth", data_schema=OPT_SCHEMA, errors=errors
-        )
+        #return self.async_show_form(step_id="startmonth", data_schema=OPT_SCHEMA, errors=errors)
 
     # @staticmethod
     # @callback

@@ -32,7 +32,10 @@ class Charger():
         else:
             if self._hub.chargerobject_switch.value == "on" and not self._chargerstop:
                 self._is_running(False)
-                await self._hub.hass.services.async_call(self._servicecalls['domain'], self._servicecalls['off'])
+                await self._hub.hass.services.async_call(
+                    self._servicecalls['domain'],
+                    self._servicecalls['off']
+                )
 
     async def _updatemaxcurrent(self):
         """If enabled, let the charger periodically update it's current during charging."""
@@ -40,22 +43,24 @@ class Charger():
         result1 = await self._hass.async_add_executor_job(self._wait1)
         while self._hub.chargerobject_switch.value == "on" and self._chargerstop is False:
             result2 = await self._hass.async_add_executor_job(self._wait2)
-            if self._servicecalls['updatecurrent']['params']['charger'].len > 0 and self._servicecalls['updatecurrent']['params']['chargerid'].len > 0:
-                serviceparams = {
-                    self._servicecalls['updatecurrent']['params']['charger']:
-                        self._servicecalls['updatecurrent']['params']['chargerid'],
-                    self._servicecalls['updatecurrent']['params']['current']: self._hub.threshold.allowedcurrent
-                }
-            else:
-                serviceparams = {
-                    self._servicecalls['updatecurrent']['params']['current']: self._hub.threshold.allowedcurrent
-                }
-            await self._hub.hass.services.async_call(
-                self._servicecalls['domain'],
-                self._servicecalls['updatecurrent']['name'],
-                serviceparams
-            )
-            result3 = await self._hass.async_add_executor_job(self._wait3)
+            if self._chargerstart is True and self._chargerstop is False:
+                if len(self._servicecalls['updatecurrent']['params']['charger']) > 0 and len(self._servicecalls['updatecurrent']['params']['chargerid']) > 0:
+                    serviceparams = {
+                        self._servicecalls['updatecurrent']['params']['charger']:
+                            self._servicecalls['updatecurrent']['params']['chargerid'],
+                        self._servicecalls['updatecurrent']['params']['current']: self._hub.threshold.allowedcurrent
+                    }
+                else:
+                    serviceparams = {
+                        self._servicecalls['updatecurrent']['params']['current']: self._hub.threshold.allowedcurrent
+                    }
+
+                await self._hub.hass.services.async_call(
+                    self._servicecalls['domain'],
+                    self._servicecalls['updatecurrent']['name'],
+                    serviceparams
+                )
+                result3 = await self._hass.async_add_executor_job(self._wait3)
 
     def _wait1(self) -> bool:
         """Wait for the chargerswitch to be turned on before commencing the _UpdateMaxCurrent-method"""
@@ -77,7 +82,7 @@ class Charger():
 
         timer = 180
         starttime = time.time()
-        while self._hub.chargerobject_switch.value == "on" and self._chargerstop is False and time.time() - starttime < timer:
+        while (self._hub.chargerobject_switch.value == "on" and self._chargerstop is False) or time.time() - starttime < timer:
             time.sleep(3)
         return True
 

@@ -10,17 +10,19 @@ class LocaleData():
         if input == constants.LOCALE_SE_GOTHENBURG:
             self.observedpeak = constants.QUERYTYPE_AVERAGEOFTHREEDAYS_MIN
             self.chargedpeak = constants.QUERYTYPE_AVERAGEOFTHREEDAYS
-        elif  input == constants.LOCALE_SE_PARTILLE:
+        elif input == constants.LOCALE_SE_PARTILLE:
             self.observedpeak, self.chargedpeak = constants.QUERYTYPE_BASICMAX
-        elif  input == constants.LOCALE_SE_KARLSTAD:
+        elif input == constants.LOCALE_SE_KARLSTAD:
             self.observedpeak = ""
             self.chargedpeak = ""
-        elif  input == constants.LOCALE_SE_KRISTINEHAMN:
+        elif input == constants.LOCALE_SE_KRISTINEHAMN:
             self.observedpeak = ""
             self.chargedpeak = ""
-        elif  input == constants.LOCALE_SE_NACKA:
+        elif input == constants.LOCALE_SE_NACKA:
             self.observedpeak = ""
             self.chargedpeak = ""
+        elif input == constants.LOCALE_DEFAULT:
+            self.observedpeak, self.chargedpeak = constants.QUERYTYPE_BASICMAX
 
     @property
     def type(self) -> str:
