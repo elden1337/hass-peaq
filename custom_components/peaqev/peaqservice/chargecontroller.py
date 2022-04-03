@@ -55,28 +55,3 @@ class ChargeController():
         else:
             _LOGGER.warn("let_charge reported error!", self._hub.chargerobject.value.lower())
             return constants.CHARGECONTROLLER.Error
-
-    # def _let_charge(self) -> str:
-    #         if self._hub.chargerobject.value.lower() == "available":
-    #             return constants.CHARGECONTROLLER.Idle
-    #         elif self._hub.chargerobject.value.lower() != "available" and self._hub.charger_done.value == True:
-    #             return constants.CHARGECONTROLLER.Done
-    #         elif datetime.now().hour in self._hub.nonhours:
-    #             return constants.CHARGECONTROLLER.Stop
-    #         elif self._hub.chargerobject.value.lower() == "connected":
-    #             if self.below_startthreshold and self._hub.totalhourlyenergy.value > 0:
-    #                 return constants.CHARGECONTROLLER.Start
-    #             else:
-    #                 return constants.CHARGECONTROLLER.Stop
-    #         elif self._hub.chargerobject.value.lower() == "charging":
-    #             #condition1 = self._hub.carpowersensor.value < 1 and self._hub.car_energy_hourly > 0
-    #             condition1 = False
-    #             condition2 = self.above_stopthreshold and self._hub.totalhourlyenergy.value > 0
-    #             if condition1 and not condition2:
-    #                 return constants.CHARGECONTROLLER.Done
-    #             elif condition2:
-    #                 return constants.CHARGECONTROLLER.Stop
-    #             else:
-    #                 return constants.CHARGECONTROLLER.Start
-    #         else:
-    #             return constants.CHARGECONTROLLER.Error
