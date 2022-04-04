@@ -133,18 +133,18 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         
         OPT_SCHEMA = vol.Schema(
         {
-           vol.Optional("jan", default=1.5): cv.float(),
-           vol.Optional("feb", default=1.5): cv.float(),
-           vol.Optional("mar", default=1.5): cv.float(),
-           vol.Optional("apr", default=1.5): cv.float(),
-           vol.Optional("may", default=1.5): cv.float(),
-           vol.Optional("jun", default=1.5): cv.float(),
-           vol.Optional("jul", default=1.5): cv.float(),
-           vol.Optional("aug", default=1.5): cv.float(),
-           vol.Optional("sep", default=1.5): cv.float(),
-           vol.Optional("oct", default=1.5): cv.float(),
-           vol.Optional("nov", default=1.5): cv.float(),
-           vol.Optional("dec", default=1.5): cv.float(),
+           vol.Optional("jan", default=1.5): cv.positive_float,
+           vol.Optional("feb", default=1.5): cv.positive_float,
+           vol.Optional("mar", default=1.5): cv.positive_float,
+           vol.Optional("apr", default=1.5): cv.positive_float,
+           vol.Optional("may", default=1.5): cv.positive_float,
+           vol.Optional("jun", default=1.5): cv.positive_float,
+           vol.Optional("jul", default=1.5): cv.positive_float,
+           vol.Optional("aug", default=1.5): cv.positive_float,
+           vol.Optional("sep", default=1.5): cv.positive_float,
+           vol.Optional("oct", default=1.5): cv.positive_float,
+           vol.Optional("nov", default=1.5): cv.positive_float,
+           vol.Optional("dec", default=1.5): cv.positive_float
         })
 
         return self.async_show_form(

@@ -46,10 +46,10 @@ class Hub:
         self.totalhourlyenergy = HubMember(float, f"sensor.{self.domain}_{ex.nametoid(constants.CONSUMPTION_TOTAL_NAME)}_{constants.HOURLY}", 0)
         self.charger_done = HubMember(bool, f"binary_sensor.{self.domain}_{ex.nametoid(constants.CHARGERDONE)}", False)
         self.totalpowersensor = HubMember(int, name = constants.TOTALPOWER)
-        self.carpowersensor = HubMember(int, self.chargertypedata.charger.powermeter, 0)
-        self.currentpeak = CurrentPeak(float, f"sensor.{self.domain}_{ex.nametoid(PeaqSQLSensorHelper('').getquerytype(self.localedata.observedpeak)['name'])}", 0, self._monthlystartpeak[datetime.now().month])
+        self.carpowersensor = HubMember(int, self.chargertypedata.charger.powermeter, 0) 
+        self.currentpeak = CurrentPeak(float, f"sensor.{self.domain}_{ex.nametoid(PeaqSQLSensorHelper('').getquerytype(self.localedata.observedpeak)['name'])}", 0, self._monthlystartpeak[str(datetime.now().month)])
         self.chargerobject = HubMember(str, self.chargertypedata.charger.chargerentity)
-        self.chargerobject_switch = ChargerSwitch(str, self.hass, self.chargertypedata.charger.powerswitch, False, self.chargertypedata.charger.ampmeter, self.chargertypedata.charger.ampmeter_is_attribute)
+        self.chargerobject_switch = ChargerSwitch(self.hass, str, self.chargertypedata.charger.powerswitch, False, self.chargertypedata.charger.ampmeter, self.chargertypedata.charger.ampmeter_is_attribute)
 
         """Init the subclasses"""
         self.prediction = Prediction(self)
@@ -197,8 +197,13 @@ class ChargerSwitch(HubMember):
 
     def updatecurrent(self):
         if self._ampmeter_is_attribute is True:
-            self.current = str(self.hass.states.get(self.entity).attributes.get(self._current_attr_name))
+            ret = self._hass.states.get(self.entity)
+            if ret is not None:
+                self.current = str(ret.attributes.get(self._current_attr_name))
         else:
-            self.current = self.hass.states.get(self._current_attr_name)
+            ret = self.current = self._hass.states.get(self._current_attr_name)
+            if ret is not None:
+                self.current = ret
+            
 
     

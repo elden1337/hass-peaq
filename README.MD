@@ -1,19 +1,22 @@
 # peaq ev-charging
 
-bla bla bla introduction
+Welcome.
+Peaq ev-charging is an attempt of charging an ev without breaching a preset monthly max-peak energy level. 
 
 ## Installation
 
-- Copy this folder to `<config_dir>/custom_components/peaqev/` or install via HACS.
+- Copy `custom_components/peaqev` folder to `<config_dir>/custom_components/peaqev/`
+- Restart Home assistant
+- Go to Configuration > Devices & Services > Add integration
 
 ### Config setup:
 
 Search for peaqev in your integrations setup. Fill in the following parameters:
 
-- `Power sensor` - The already existing power sensor in your setup. This is vital 
+- `Power sensor` - The already existing power sensor in your setup. This is required to get the reading to work. Examples of devices sending such data is Tibber Pulse/Watty, Shelly DIN-mounted devices or similar.
 - `Power sensor includes car` - Check this option if the above sensor includes your car's power draw. The calutions will be altered accordingly
 - `Locale` - Chose your city from the list. The characteristics differ in how peak hours are stored and measured. If you don't live in a supported location but just want to test the integration, or lower your peaks for other reasons, you may check *"Other, just want to test"*
-- `Charger type` - Pick the installed ev-charger you have. Currently Chargeamps and Easee are supported. 
+- `Charger type` - Pick the installed ev-charger you have. Currently Chargeamps and Easee are supported. Check links for required custom components per charger-type: [Chargeamps](https://github.com/kirei/hass-chargeamps), [Easee](https://github.com/fondberg/easee_hass/)
 - `Non hours` - Click to select the hours (if any) where you do not wish to charge.  
 - `Caution hours` - Click to select the hours (if any) where you want the charger to be extra cautious to not break the peak. 
 - `Monthly allowed peak` - Needs to be set in order to determine a minimum allowed peak. In the beginning of each month this is necessary to be able to charge at all. *Format is in kW. See examples below*
@@ -41,7 +44,7 @@ Locale | Characteristics
 Gothenburg, Sweden | The average of three max peak hours from different days is what your are charged for. The algorithm tries to stay below the minimun value of these three peaks.
 Partille, Sweden | Single monthly peak hour is what is being avoided by the algorithm
 Other, just want to test | Single monthly peak hour is what is being avoided by the algorithm
-
+*More cities will come in future updates*
 
 ## Usage
 

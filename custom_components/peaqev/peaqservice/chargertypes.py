@@ -44,7 +44,8 @@ class ChargerTypeData():
 
 
 class ChargerBase():
-    def __init__(self, currentupdate:bool):
+    def __init__(self, hass, currentupdate:bool):
+        self._hass = hass
         self._chargerEntity = None
         self._powermeter = None
         self._powerswitch = None
@@ -108,8 +109,7 @@ class ChargerBase():
 
 class ChargeAmps(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid):
-        self._hass = hass
-        super().__init__(currentupdate=True)
+        super().__init__(hass, currentupdate=True)
         self._chargerid = chargerid
         self._setchargerstates()
         self._getentities()
@@ -164,8 +164,7 @@ class ChargeAmps(ChargerBase):
    
 class Easee(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid):
-        self._hass = hass
-        super().__init__(currentupdate=True)
+        super().__init__(hass, currentupdate=True)
         self._chargerid = chargerid
         self._setchargerstates()
         self._getentities()
