@@ -1,7 +1,11 @@
 # peaq ev-charging
 
-Welcome.
 Peaq ev-charging is an attempt of charging an ev without breaching a preset monthly max-peak energy level. 
+In order for this integration to function, you will need to have a sensor/device that reads your current power-draw with good resolution *examples below*. You will also have to disable any other smart-charging capability you may have, such as scheduled charging or energy-price-aware charging, the latter will come as parameter here in a future update.
+
+This integration does not communicate with any properitary API's, everything is handled locally in your Home Assistant. However, the chargers selected will use the integrations set for them, and may include cloud polling of data.
+
+While this integration will try to not break your monthly energy peak hour, there is off course no guarantee. Various factors beyond control of this logic do occur, so for those aiming at staying below their threshold, I do suggest you think about the non-hours, caution-hours etc in the setup. These hours should be set when you commonly utilize a lot of extra energy in your home, such as cooking, doing laundry etc. 
 
 ## Installation
 
@@ -41,9 +45,10 @@ Dec| 2.0 | 4.0
 
 Locale | Characteristics
 --- | ---
-Gothenburg, Sweden | The average of three max peak hours from different days is what your are charged for. The algorithm tries to stay below the minimun value of these three peaks.
+Gothenburg, Sweden | The average of three max peak hours from different days is what your are charged for. The algorithm tries to stay below the minimum value of these three peaks.
 Partille, Sweden | Single monthly peak hour is what is being avoided by the algorithm
 Other, just want to test | Single monthly peak hour is what is being avoided by the algorithm
+
 *More cities will come in future updates*
 
 ## Usage
