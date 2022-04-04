@@ -8,13 +8,35 @@
           "chargerid": "[%key:common::config_flow::data::chargerid%]",
           "chargertype": "[%key:common::config_flow::data::chargertype%]",
           "locale": "[%key:common::config_flow::data::locale%]"
-        }
+        },
+        "description": "",
+        "title": "Peaq installation"
       },
       "opt": {
         "data": {
           "nonhours": "[%key:common::config_flow::data::nonhours%]",
           "cautionhours": "[%key:common::config_flow::data::cautionhours%]"
-        }
+        },
+        "description": "Select the hours you wish to completely stop the charger, and hours you wish to let the charger charge, but with extra caution.",
+        "title": "Non- and Caution-hours"
+      },
+      "startmonth": {
+        "data": {
+          "jan": "[%key:common::config_flow::data::jan%]",
+          "feb": "[%key:common::config_flow::data::feb%]",
+          "mar": "[%key:common::config_flow::data::mar%]",
+          "apr": "[%key:common::config_flow::data::apr%]",
+          "may": "[%key:common::config_flow::data::may%]",
+          "jun": "[%key:common::config_flow::data::jun%]",
+          "jul": "[%key:common::config_flow::data::jul%]",
+          "aug": "[%key:common::config_flow::data::aug%]",
+          "sep": "[%key:common::config_flow::data::sep%]",
+          "oct": "[%key:common::config_flow::data::oct%]",
+          "nov": "[%key:common::config_flow::data::nov%]",
+          "dec": "[%key:common::config_flow::data::dec%]"
+        },
+        "description": "Set the allowed peak (tolerance) per month. This is to allow the charger to charge up to a certain level before a peak energy is reached.",
+        "title": "Monthly allowed peak"
       }
     },
     "error": {

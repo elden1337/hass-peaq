@@ -31,16 +31,16 @@ class ChargerTypeData():
 
     def validatecharger(self):
         try:
-            assert self._charger.chargerentity.len > 0
-            assert self._charger.powermeter.len > 0
-            assert self._charger.powerswitch.len > 0
+            assert len(self._charger.chargerentity) > 0
+            assert len(self._charger.powermeter) > 0
+            assert len(self._charger.powerswitch) > 0
             assert self._charger.servicecalls["domain"] is not None
             assert self._charger.servicecalls["on"] is not None
             assert self._charger.servicecalls["off"] is not None
             if self._charger.allowupdatecurrent:
                 assert self._charger.servicecalls["updatecurrent"] is not None
-        except:
-            pass
+        except Exception as e:
+            _LOGGER.error("Peaq could not initialize charger", e)
 
 
 class ChargerBase():
@@ -146,7 +146,7 @@ class ChargeAmps(ChargerBase):
             self.chargerentity = f"sensor.{candidate}_1"
             self.powermeter = f"sensor.{candidate}_1_power"
             self.powerswitch = f"switch.{candidate}_1"
-            self.ampmeter = ""
+            self.ampmeter = "Max current"
             self.ampmeter_is_attribute = True
             self.servicecalls = {
                 "domain": "chargeamps",

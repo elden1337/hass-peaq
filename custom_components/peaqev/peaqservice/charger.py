@@ -1,3 +1,4 @@
+import datetime
 import time
 import logging
 
@@ -19,7 +20,11 @@ class Charger():
             if self._hub.chargecontroller.status.name == "Start":
                 if self._hub.chargerobject_switch.value == "off" and self._chargerstart is False:
                     self._is_running(True)
-                    await self._hub.hass.services.async_call(self._servicecalls['domain'], self._servicecalls['on'])
+                    await self._hub.hass.services.async_call(
+                        self._servicecalls['domain'], 
+                        self._servicecalls['on']
+                        )
+                    self._hub.chargecontroller.latestchargerstart = 1
                     if self._hub.chargertypedata.charger.allowupdatecurrent is True:
                         self._hass.async_create_task(self._updatemaxcurrent())
             elif self._hub.chargecontroller.status.name == "Stop" or self._hub.charger_done.value or self._hub.chargecontroller.status.name == "Idle":
@@ -72,17 +77,16 @@ class Charger():
     def _wait2(self) -> bool:
         """Wait for the perceived max current to become different than the currently set one by the charger"""
 
-        while int(self._hub.chargerobject_switch.current) == int(
-                self._hub.threshold.allowedcurrent) and self._chargerstop is False:
+        while int(self._hub.chargerobject_switch.current) == int(self._hub.threshold.allowedcurrent) and self._chargerstop is False and datetime.now().minute >= 55:
             time.sleep(3)
         return True
 
     def _wait3(self) -> bool:
-        """Wait for a maximum of three minutes or until the charger is switched off or stopped by the script"""
+        """Wait for three minutes before commencing main loop"""
 
         timer = 180
         starttime = time.time()
-        while (self._hub.chargerobject_switch.value == "on" and self._chargerstop is False) or time.time() - starttime < timer:
+        while time.time() - starttime < timer:
             time.sleep(3)
         return True
 

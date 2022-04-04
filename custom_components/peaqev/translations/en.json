@@ -23,6 +23,22 @@
           "nonhours": "Hours when the charger is always disabled",
           "cautionhours": "Hours when the charger takes extra precaution to not burst peak energy"
         }
+      },
+      "startmonth": {
+        "data": {
+          "jan": "January",
+          "feb": "February",
+          "mar": "March",
+          "apr": "April",
+          "may": "May",
+          "jun": "June",
+          "jul": "July",
+          "aug": "August",
+          "sep": "September",
+          "oct": "October",
+          "nov": "November",
+          "dec": "December"
+        }
       }
     }
   }

@@ -49,7 +49,7 @@ class Hub:
         self.carpowersensor = HubMember(int, self.chargertypedata.charger.powermeter, 0)
         self.currentpeak = CurrentPeak(float, f"sensor.{self.domain}_{ex.nametoid(PeaqSQLSensorHelper('').getquerytype(self.localedata.observedpeak)['name'])}", 0, self._monthlystartpeak[datetime.now().month])
         self.chargerobject = HubMember(str, self.chargertypedata.charger.chargerentity)
-        self.chargerobject_switch = ChargerSwitch(str, self.chargertypedata.charger.powerswitch, False, "Max current") #hardcoded, fix in chargertypes.
+        self.chargerobject_switch = ChargerSwitch(str, self.hass, self.chargertypedata.charger.powerswitch, False, self.chargertypedata.charger.ampmeter, self.chargertypedata.charger.ampmeter_is_attribute)
 
         """Init the subclasses"""
         self.prediction = Prediction(self)
@@ -61,6 +61,7 @@ class Hub:
         #init values
         self.chargerobject.value = self.hass.states.get(self.chargerobject.entity)
         self.chargerobject_switch.value = self.hass.states.get(self.chargerobject_switch.entity)
+        self.chargerobject_switch.updatecurrent()
         self.carpowersensor.value = self.hass.states.get(self.carpowersensor.entity)
         self.totalhourlyenergy.value = self.hass.states.get(self.totalhourlyenergy.entity)
         self.currentpeak.value = self.hass.states.get(self.currentpeak.entity)
@@ -88,38 +89,7 @@ class Hub:
  
     async def initialize(self):
         pass
-        # """initialize the session and set initial data"""
-
-        # try:
-        #     self.chargerobject.value = self.hass.states.get(self.chargerobject.entity)
-        #     self.chargerobject_switch.value = self.hass.states.get(self.chargerobject_switch.entity)
-        #     self.carpowersensor.value = self.hass.states.get(self.carpowersensor.entity)
-        #     self.totalhourlyenergy.value = self.hass.states.get(self.totalhourlyenergy.entity)
-        #     self.currentpeak.value = self.hass.states.get(self.currentpeak.entity)
-        # except:
-        #     _LOGGER.warn("Peaq initialization failed. Some of the base entities could not be updated. Please reboot Home Assistant.")
-        #     pass
-        
-        # trackerEntities = [
-        #     self.carpowersensor.entity,
-        #     self.chargerobject_switch.entity,
-        #     self.powersensor.entity,
-        #     self.totalhourlyenergy.entity,
-        #     self.currentpeak.entity
-        # ]
-
-        # self.chargingtracker_entities = [
-        #     self.powersensormovingaverage.entity, 
-        #     self.charger_enabled.entity, 
-        #     self.charger_done.entity, 
-        #     self.chargerobject.entity,
-        #     f"sensor.{self.domain}_{ex.nametoid(constants.CHARGERCONTROLLER)}"
-        #     ]
-
-        # trackerEntities += self.chargingtracker_entities
-        
-        # async_track_state_change(self.hass, trackerEntities, self.state_changed)
-
+       
     @callback
     async def state_changed(self, entity_id, old_state, new_state):
         try:
@@ -129,7 +99,7 @@ class Hub:
             _LOGGER.warn("Unable to handle data: ", entity_id, e)
             pass
 
-    async def _updatesensor(self,entity,value):
+    async def _updatesensor(self, entity, value):
         if entity == self.powersensor.entity:
             if not self._powersensor_includes_car:
                 self.powersensor.value = value
@@ -147,7 +117,7 @@ class Hub:
             self.chargerobject.value = value
         elif entity == self.chargerobject_switch.entity:
             self.chargerobject_switch.value = value
-            self.chargerobject_switch.current = str(self.hass.states.get(self.chargerobject_switch.entity).attributes.get(self.chargerobject_switch._current_attr_name))
+            self.chargerobject_switch.updatecurrent()
         elif entity == self.currentpeak.entity:
             self.currentpeak.value = value
         elif entity == self.totalhourlyenergy.entity:
@@ -208,10 +178,12 @@ class CurrentPeak(HubMember):
         return max(self._value, float(self._startpeak)) if self._value is not None else float(self._startpeak)
 
 class ChargerSwitch(HubMember):
-    def __init__(self, type: type, listenerentity, initval, currentname):
+    def __init__(self, hass, type: type, listenerentity, initval, currentname:str, ampmeter_is_attribute:bool):
+        self._hass = hass
         self._value = initval
         self._current = 6
         self._current_attr_name = currentname
+        self._ampmeter_is_attribute = ampmeter_is_attribute
         super().__init__(type, listenerentity, initval)
 
     @property
@@ -223,6 +195,10 @@ class ChargerSwitch(HubMember):
         if value is int:
             self._current = int(value)
 
-
+    def updatecurrent(self):
+        if self._ampmeter_is_attribute is True:
+            self.current = str(self.hass.states.get(self.entity).attributes.get(self._current_attr_name))
+        else:
+            self.current = self.hass.states.get(self._current_attr_name)
 
     

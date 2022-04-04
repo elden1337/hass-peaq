@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 import logging
 import custom_components.peaqev.peaqservice.constants as constants
 from custom_components.peaqev.peaqservice.constants import CHARGERCONTROLLER
@@ -11,6 +12,15 @@ class ChargeController():
         self._hub = hub
         self.name = f"{self._hub.hubname} {CHARGERCONTROLLER}"
         self._status = inputstatus
+        self._latestchargerstart = time.time()
+
+    @property
+    def latestchargerstart(self):
+        return self._latestchargerstart
+
+    @latestchargerstart.setter
+    def latestchargerstart(self, val):
+        self._latestchargerstart = time.time()
 
     @property
     def below_startthreshold(self) -> bool:
@@ -28,7 +38,6 @@ class ChargeController():
 
     def _let_charge(self) -> str:
         if self._hub.chargerobject.value.lower() not in self._hub.chargertypedata.charger.chargerstates["idle"] and self._hub.chargerobject.value.lower() not in self._hub.chargertypedata.charger.chargerstates["connected"] and self._hub.chargerobject.value.lower() not in self._hub.chargertypedata.charger.chargerstates["charging"]:
-            _LOGGER.warn("let_charge couldnt process chargerobjectstate", self._hub.chargerobject.value.lower())
             return constants.CHARGECONTROLLER.CheckChargerEntity
 
         if self._hub.chargerobject.value.lower() in self._hub.chargertypedata.charger.chargerstates["idle"]:
@@ -43,8 +52,7 @@ class ChargeController():
             else:
                 return constants.CHARGECONTROLLER.Stop
         elif self._hub.chargerobject.value.lower() in self._hub.chargertypedata.charger.chargerstates["charging"]:
-            # condition1 = self._hub.carpowersensor.value < 1 and self._hub.car_energy_hourly > 0
-            condition1 = False
+            condition1 = self._hub.carpowersensor.value < 1 and self._hub.car_energy_hourly > 0 and time.time() - self.latestchargerstart > 120
             condition2 = self.above_stopthreshold and self._hub.totalhourlyenergy.value > 0
             if condition1 and not condition2:
                 return constants.CHARGECONTROLLER.Done
@@ -53,5 +61,4 @@ class ChargeController():
             else:
                 return constants.CHARGECONTROLLER.Start
         else:
-            _LOGGER.warn("let_charge reported error!", self._hub.chargerobject.value.lower())
             return constants.CHARGECONTROLLER.Error
