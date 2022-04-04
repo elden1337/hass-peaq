@@ -19,7 +19,7 @@ class PeaqPredictionSensor(SensorBase):
 
     @property
     def state(self):
-        return self._hub.prediction.predictedenergy
+        return self._state
 
     @property
     def icon(self) -> str:
