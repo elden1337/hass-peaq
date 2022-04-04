@@ -16,13 +16,17 @@
           "chargerid": "Chargepoint Id (single chargepoint)",
           "chargertype": "Charger brand",
           "locale": "City and country"
-        }
+        },
+        "description": "",
+        "title": "Peaq installation"
       },
       "opt": {
         "data": {
           "nonhours": "Hours when the charger is always disabled",
           "cautionhours": "Hours when the charger takes extra precaution to not burst peak energy"
-        }
+        },
+        "description": "Select the hours you wish to completely stop the charger, and hours you wish to let the charger charge, but with extra caution.",
+        "title": "Non- and Caution-hours"
       },
       "startmonth": {
         "data": {
@@ -38,7 +42,9 @@
           "oct": "October",
           "nov": "November",
           "dec": "December"
-        }
+        },
+        "description": "Set the allowed peak (tolerance) per month. This is to allow the charger to charge up to a certain level before a peak energy is reached.",
+        "title": "Monthly allowed peak"
       }
     }
   }
