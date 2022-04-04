@@ -25,8 +25,15 @@ class Threshold:
     def allowedcurrent(self) -> int:
         ret = 6
         nowmin = datetime.now().minute
-        for key, value in constants.CURRENTS.items():
+        currents = self._setcurrentdict()
+        for key, value in currents.items():
             if (((((self._hub.powersensormovingaverage.value + key if self._hub.powersensormovingaverage.value is not None else key) / 60) * (60-nowmin)+ self._hub.totalhourlyenergy.value*1000)/1000) < self._hub.currentpeak.value):
                 ret = value
                 break
         return ret
+
+    def _setcurrentdict(self):
+        if int(self._hub.carpowersensor.value) > 3700:
+            return constants.CURRENTS_3_PHASE
+        
+        return constants.CURRENTS
