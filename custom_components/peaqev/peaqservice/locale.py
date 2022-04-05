@@ -18,9 +18,9 @@ class LocaleData():
         elif input == constants.LOCALE_SE_KRISTINEHAMN:
             self.observedpeak = ""
             self.chargedpeak = ""
-        elif input == constants.LOCALE_SE_NACKA:
-            self.observedpeak = ""
-            self.chargedpeak = ""
+        elif input == constants.LOCALE_SE_NACKA_NORMAL:
+            self.observedpeak = constants.QUERYTYPE_AVERAGEOFTHREEHOURS_MIN
+            self.chargedpeak = constants.QUERYTYPE_AVERAGEOFTHREEHOURS
         elif input == constants.LOCALE_DEFAULT:
             self.observedpeak, self.chargedpeak = constants.QUERYTYPE_BASICMAX
 

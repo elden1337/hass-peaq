@@ -10,7 +10,8 @@ CHARGERTYPE_EASEE = "Easee"
 LOCALE_SE_GOTHENBURG = "Gothenburg, Sweden"
 LOCALE_SE_KARLSTAD = "Karlstad, Sweden"
 LOCALE_SE_KRISTINEHAMN = "Kristinehamn, Sweden"
-LOCALE_SE_NACKA = "Nacka, Sweden"
+LOCALE_SE_NACKA_NORMAL = "Nacka, Sweden (Normal tariffe)"
+#LOCALE_SE_NACKA_TIMEDIFF = "Nacka, Sweden (Time differentiated tariffe)"
 LOCALE_SE_PARTILLE = "Partille, Sweden"
 LOCALE_DEFAULT = "Other, just want to test"
 
@@ -24,6 +25,7 @@ CHARGERTYPES = [
 LOCALES = [
     LOCALE_SE_GOTHENBURG,
     LOCALE_SE_PARTILLE,
+    LOCALE_SE_NACKA_NORMAL,
     LOCALE_DEFAULT
     ]
 
@@ -41,14 +43,16 @@ AVERAGECONSUMPTION = "Average consumption"
 HOURLY = "hourly"
 THRESHOLD = "Threshold"
 SQLSENSOR_BASENAME = "Monthly max peak"
-SQLSENSOR_AVERAGEOFTHREEDAYS = "Average of three"
-SQLSENSOR_AVERAGEOFTHREEDAYS_MIN = "Min of three"
+SQLSENSOR_AVERAGEOFTHREE = "Average of three"
+SQLSENSOR_AVERAGEOFTHREE_MIN = "Min of three"
 SQLSENSOR_HIGHLOAD = "High load"
 
 """Peak querytypes"""
 QUERYTYPE_BASICMAX = "BasicMax"
 QUERYTYPE_AVERAGEOFTHREEDAYS = "AverageOfThreeDays"
+QUERYTYPE_AVERAGEOFTHREEHOURS = "AverageOfThreeHours"
 QUERYTYPE_AVERAGEOFTHREEDAYS_MIN = "AverageOfThreeDays_Min"
+QUERYTYPE_AVERAGEOFTHREEHOURS_MIN = "AverageOfThreeHours_Min"
 QUERYTYPE_HIGHLOAD = "HighLoad"
 
 """Sql sensor helpers"""

@@ -4,8 +4,8 @@ from homeassistant.components.sql.sensor import (
 from custom_components.peaqev.const import DOMAIN
 from custom_components.peaqev.peaqservice.constants import (
     SQLSENSOR_BASENAME,
-    SQLSENSOR_AVERAGEOFTHREEDAYS,
-    SQLSENSOR_AVERAGEOFTHREEDAYS_MIN,
+    SQLSENSOR_AVERAGEOFTHREE,
+    SQLSENSOR_AVERAGEOFTHREE_MIN,
     SQLSENSOR_HIGHLOAD,
     QUERYTYPE_BASICMAX,
     QUERYTYPE_AVERAGEOFTHREEDAYS,
@@ -28,11 +28,21 @@ class PeaqSQLSensorHelper():
         },
         f"{QUERYTYPE_AVERAGEOFTHREEDAYS}" : {
             'query': f'SELECT IFNULL(ROUND(AVG(daymax),2),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 3)',
-            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREEDAYS}'
+            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE}'
             },
+        #Nacka chargedpeak
+        f"{QUERYTYPE_AVERAGEOFTHREEHOURS}": {
+            'query': f'SELECT IFNULL(ROUND(AVG(daymax),2),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%h\', start) ORDER BY MAX(state) DESC LIMIT 3)',
+            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE}'
+        },
+        #Nacka observedpeak
+        f"{QUERYTYPE_AVERAGEOFTHREEHOURS_MIN}": {
+            'query': f'SELECT IFNULL(min(daymax),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%h\', start) ORDER BY MAX(state) DESC LIMIT 3)',
+            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE_MIN}'
+        },
         f"{QUERYTYPE_AVERAGEOFTHREEDAYS_MIN}" : {
             'query': f'SELECT IFNULL(min(daymax),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 3)',
-            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREEDAYS_MIN}'
+            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE_MIN}'
         },
         #highload (karlstad etc). Only used Nov - Mar
         f"{QUERYTYPE_HIGHLOAD}" : {

@@ -27,7 +27,7 @@ class Charger():
                     self._hub.chargecontroller.latestchargerstart = 1
                     if self._hub.chargertypedata.charger.allowupdatecurrent is True:
                         self._hass.async_create_task(self._updatemaxcurrent())
-            elif self._hub.chargecontroller.status.name == "Stop" or self._hub.charger_done.value or self._hub.chargecontroller.status.name == "Idle":
+            elif self._hub.chargecontroller.status.name == "Stop" or self._hub.charger_done.value is True or self._hub.chargecontroller.status.name == "Idle":
                 if self._hub.chargerobject_switch.value == "on" and self._chargerstop is False:
                     self._is_running(False)
                     await self._hub.hass.services.async_call(
