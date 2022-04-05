@@ -10,6 +10,8 @@ from custom_components.peaqev.peaqservice.constants import (
     QUERYTYPE_BASICMAX,
     QUERYTYPE_AVERAGEOFTHREEDAYS,
     QUERYTYPE_AVERAGEOFTHREEDAYS_MIN,
+    QUERYTYPE_AVERAGEOFTHREEHOURS,
+    QUERYTYPE_AVERAGEOFTHREEHOURS_MIN,
     QUERYTYPE_HIGHLOAD,
     SQLSENSOR_STATISTICS_TABLE,
     SQLSENSOR_STATISTICS_META_TABLE
@@ -30,12 +32,10 @@ class PeaqSQLSensorHelper():
             'query': f'SELECT IFNULL(ROUND(AVG(daymax),2),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 3)',
             'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE}'
             },
-        #Nacka chargedpeak
         f"{QUERYTYPE_AVERAGEOFTHREEHOURS}": {
             'query': f'SELECT IFNULL(ROUND(AVG(daymax),2),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%h\', start) ORDER BY MAX(state) DESC LIMIT 3)',
             'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE}'
         },
-        #Nacka observedpeak
         f"{QUERYTYPE_AVERAGEOFTHREEHOURS_MIN}": {
             'query': f'SELECT IFNULL(min(daymax),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%h\', start) ORDER BY MAX(state) DESC LIMIT 3)',
             'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE_MIN}'
