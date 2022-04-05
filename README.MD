@@ -49,6 +49,7 @@ Locale | Characteristics
 --- | ---
 Gothenburg, Sweden | The average of three max peak hours from different days is what your are charged for. The algorithm tries to stay below the minimum value of these three peaks.
 Partille, Sweden | Single monthly peak hour is what is being avoided by the algorithm
+Nacka, Sweden (Normal tariffe) | The average of three max peak hours is what your are charged for. The algorithm tries to stay below the minimum value of these three peaks.
 Other, just want to test | Single monthly peak hour is what is being avoided by the algorithm
 
 *More cities will come in future updates*
