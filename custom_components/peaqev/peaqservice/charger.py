@@ -24,7 +24,7 @@ class Charger():
                         self._servicecalls['domain'], 
                         self._servicecalls['on']
                         )
-                    self._hub.chargecontroller.latestchargerstart = 1
+                    self._hub.chargecontroller.latestchargerstart = time.time()
                     if self._hub.chargertypedata.charger.allowupdatecurrent is True:
                         self._hass.async_create_task(self._updatemaxcurrent())
             elif self._hub.chargecontroller.status.name == "Stop" or self._hub.charger_done.value is True or self._hub.chargecontroller.status.name == "Idle":

@@ -20,7 +20,7 @@ class ChargeController():
 
     @latestchargerstart.setter
     def latestchargerstart(self, val):
-        self._latestchargerstart = time.time()
+        self._latestchargerstart = val
 
     @property
     def below_startthreshold(self) -> bool:
