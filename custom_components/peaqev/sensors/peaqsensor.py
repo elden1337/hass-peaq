@@ -8,6 +8,8 @@ class PeaqSensor(SensorBase):
 
         self._attr_name = name
         self._state = self._hub.chargecontroller.status.name
+        self._nonhours = None
+        self._cautionhours = None
 
     @property
     def state(self):
@@ -19,3 +21,12 @@ class PeaqSensor(SensorBase):
 
     def update(self) -> None:
         self._state = self._hub.chargecontroller.status.name
+        self._nonhours = self._hub.hours.nonhours
+        self._cautionhours = self._hub.hours.cautionhours
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        return {
+            "non_hours": self._nonhours,
+            "caution_hours": self._cautionhours,
+        }
