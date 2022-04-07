@@ -45,7 +45,7 @@ class ChargeController():
             return constants.CHARGECONTROLLER.Connected
         elif self._hub.chargerobject.value.lower() not in self._hub.chargertypedata.charger.chargerstates["idle"] and self._hub.charger_done.value is True:
             return constants.CHARGECONTROLLER.Done
-        elif datetime.now().hour in self._hub.nonhours:
+        elif datetime.now().hour in self._hub.hours.nonhours:
             return constants.CHARGECONTROLLER.Stop
         elif self._hub.chargerobject.value.lower() in self._hub.chargertypedata.charger.chargerstates["connected"]:
             if self.below_startthreshold and self._hub.totalhourlyenergy.value > 0:

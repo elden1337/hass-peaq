@@ -8,6 +8,7 @@ from custom_components.peaqev.peaqservice.prediction import Prediction
 from custom_components.peaqev.peaqservice.threshold import Threshold
 from custom_components.peaqev.peaqservice.locale import LocaleData
 from custom_components.peaqev.peaqservice.charger import Charger
+from custom_components.peaqev.peaqservice.hourselection import Hours
 from custom_components.peaqev.peaqservice.util.hubmember import (
     HubMember,
     CurrentPeak,
@@ -41,8 +42,7 @@ class Hub:
         self.chargertypedata = ChargerTypeData(hass, config_inputs["chargertype"], config_inputs["chargerid"])
         self._powersensor_includes_car = config_inputs["powersensorincludescar"]
         self._monthlystartpeak = config_inputs["monthlystartpeak"]
-        self.nonhours = config_inputs["nonhours"]
-        self.cautionhours = config_inputs["cautionhours"]
+        self.hours = Hours(config_inputs["priceaware"], config_inputs["nonhours"], config_inputs["cautionhours"])
         self.powersensor = HubMember(int, config_inputs["powersensor"], 0)
 
         self.charger_enabled = HubMember(bool, f"binary_sensor.{self.domain}_{ex.nametoid(constants.CHARGERENABLED)}", False)

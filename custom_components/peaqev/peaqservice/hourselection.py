@@ -8,11 +8,13 @@ if user has set that bool in config flow.
 
 
 class Hours:
-    def __init__(self):
+    def __init__(self, priceaware: bool, nonhours: list = None, cautionhours: dict = None):
         self._prices = []
-        self._nonhours = []
-        self._cautionhours = []
+        self._nonhours = nonhours
+        self._cautionhours = cautionhours
         self._last_run = time.time()
+        if priceaware is True:
+            self._update()
 
     @property
     def nonhours(self):

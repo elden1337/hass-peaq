@@ -9,7 +9,7 @@ class Threshold:
     def stop(self) -> float:
         nowmin = datetime.now().minute
         stopthreshold = (((nowmin+pow(1.071,nowmin))*0.00165)+0.8) * 100
-        if str(datetime.now().hour) in self._hub.cautionhours and nowmin < 45:
+        if str(datetime.now().hour) in self._hub.hours.cautionhours and nowmin < 45:
             stopthreshold = (((nowmin+pow(1.075,nowmin))*0.0032)+0.7) * 100
         return round(stopthreshold,2) 
 
@@ -17,7 +17,7 @@ class Threshold:
     def start(self) -> float:
         nowmin = datetime.now().minute
         startthreshold = (((nowmin+pow(1.066,nowmin))*0.0045)+0.5) * 100
-        if str(datetime.now().hour) in self._hub.cautionhours and nowmin < 45:
+        if str(datetime.now().hour) in self._hub.hours.cautionhours and nowmin < 45:
             startthreshold = (((nowmin+pow(1.081,nowmin))*0.0049)+0.4) * 100
         return round(startthreshold,2)
     
@@ -35,5 +35,4 @@ class Threshold:
     def _setcurrentdict(self):
         if int(self._hub.carpowersensor.value) > 3700:
             return constants.CURRENTS_3_PHASE
-        
         return constants.CURRENTS
