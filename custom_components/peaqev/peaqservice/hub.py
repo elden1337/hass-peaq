@@ -8,6 +8,11 @@ from custom_components.peaqev.peaqservice.prediction import Prediction
 from custom_components.peaqev.peaqservice.threshold import Threshold
 from custom_components.peaqev.peaqservice.locale import LocaleData
 from custom_components.peaqev.peaqservice.charger import Charger
+from custom_components.peaqev.peaqservice.util.hubmember import (
+    HubMember,
+    CurrentPeak,
+    ChargerSwitch
+)
 from custom_components.peaqev.peaqservice.chargertypes import ChargerTypeData
 from custom_components.peaqev.sensors.peaqsqlsensor import PeaqSQLSensorHelper
 from homeassistant.helpers.event import async_track_state_change
@@ -39,7 +44,6 @@ class Hub:
         self.nonhours = config_inputs["nonhours"]
         self.cautionhours = config_inputs["cautionhours"]
         self.powersensor = HubMember(int, config_inputs["powersensor"], 0)
-        """from the config inputs"""
 
         self.charger_enabled = HubMember(bool, f"binary_sensor.{self.domain}_{ex.nametoid(constants.CHARGERENABLED)}", False)
         self.powersensormovingaverage = HubMember(int, f"sensor.{self.domain}_{ex.nametoid(constants.AVERAGECONSUMPTION)}", 0)
@@ -56,16 +60,8 @@ class Hub:
         self.threshold = Threshold(self)
         self.chargecontroller = ChargeController(self)
         self.charger = Charger(self, hass, self.chargertypedata.charger.servicecalls)
-        """Init the subclasses"""
         
-        #init values
-        self.chargerobject.value = self.hass.states.get(self.chargerobject.entity)
-        self.chargerobject_switch.value = self.hass.states.get(self.chargerobject_switch.entity)
-        self.chargerobject_switch.updatecurrent()
-        self.carpowersensor.value = self.hass.states.get(self.carpowersensor.entity)
-        self.totalhourlyenergy.value = self.hass.states.get(self.totalhourlyenergy.entity)
-        self.currentpeak.value = self.hass.states.get(self.currentpeak.entity)
-        #init values
+        self.init_hub_values()
         
         trackerEntities = [
             self.carpowersensor.entity,
@@ -87,8 +83,15 @@ class Hub:
         
         async_track_state_change(hass, trackerEntities, self.state_changed)
  
-    async def initialize(self):
-        pass
+    def init_hub_values(self):
+        """Initialize values from Home Assistant on the set objects"""
+
+        self.chargerobject.value = self.hass.states.get(self.chargerobject.entity)
+        self.chargerobject_switch.value = self.hass.states.get(self.chargerobject_switch.entity)
+        self.chargerobject_switch.updatecurrent()
+        self.carpowersensor.value = self.hass.states.get(self.carpowersensor.entity)
+        self.totalhourlyenergy.value = self.hass.states.get(self.totalhourlyenergy.entity)
+        self.currentpeak.value = self.hass.states.get(self.currentpeak.entity)
        
     @callback
     async def state_changed(self, entity_id, old_state, new_state):
@@ -127,83 +130,3 @@ class Hub:
         
         if entity in self.chargingtracker_entities:
             await self.charger.charge()
-
-
-class HubMember:
-    def __init__(self, type: type, listenerentity = None, initval = None, name = None):
-        self._value = initval
-        self._type = type
-        self._listenerentity = listenerentity
-        self.name = name
-        self.id = ex.nametoid(self.name) if self.name is not None else None
-
-    @property
-    def entity(self):
-        return self._listenerentity
-
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, value):
-        if type(value) is self._type:
-            self._value = value
-        elif self._type is float:
-            self._value = float(value) if value is not None else 0
-        elif self._type is int:
-            self._value = int(float(value)) if value is not None else 0
-        elif self._type is bool:
-            try:
-                if value is None:
-                    self._value = False
-                elif value.lower() == "on":
-                    self._value = True
-                elif value.lower() == "off":
-                    self._value = False
-            except:
-                _LOGGER.warn("Could not parse bool, setting to false to be sure", value, self._listenerentity)
-                self._value = False
-        elif  self._type is str:
-            self._value = str(value)
-
-class CurrentPeak(HubMember):
-    def __init__(self, type: type, listenerentity, initval, startpeak):
-        self._startpeak = startpeak
-        self._value = initval
-        super().__init__(type, listenerentity, initval)
-
-    @HubMember.value.getter
-    def value(self):
-        return max(self._value, float(self._startpeak)) if self._value is not None else float(self._startpeak)
-
-class ChargerSwitch(HubMember):
-    def __init__(self, hass, type: type, listenerentity, initval, currentname:str, ampmeter_is_attribute:bool):
-        self._hass = hass
-        self._value = initval
-        self._current = 6
-        self._current_attr_name = currentname
-        self._ampmeter_is_attribute = ampmeter_is_attribute
-        super().__init__(type, listenerentity, initval)
-
-    @property
-    def current(self):
-        return self._current
-
-    @current.setter
-    def current(self, value):
-        if value is int:
-            self._current = int(value)
-
-    def updatecurrent(self):
-        if self._ampmeter_is_attribute is True:
-            ret = self._hass.states.get(self.entity)
-            if ret is not None:
-                self.current = str(ret.attributes.get(self._current_attr_name))
-        else:
-            ret = self.current = self._hass.states.get(self._current_attr_name)
-            if ret is not None:
-                self.current = ret
-            
-
-    
