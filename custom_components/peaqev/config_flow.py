@@ -99,7 +99,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 # Input is valid, set data.
             self.data[self.OPTIONS]= {
                 "nonhours": user_input["nonhours"],
-                "cautionhours": user_input["cautionhours"]
+                "cautionhours": user_input["cautionhours"],
+                "priceaware": user_input["priceaware"]
             }
                 
             return await self.async_step_startmonth()
@@ -108,12 +109,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         OPT_SCHEMA = vol.Schema(
         {
-           vol.Optional("nonhours", default=list(mockhours)): cv.multi_select(
+            vol.Optional("nonhours", default=list(mockhours)): cv.multi_select(
                mockhours
                 ),
-                vol.Optional("cautionhours", default=list(mockhours)): cv.multi_select(
-                    mockhours
-                )
+            vol.Optional("cautionhours", default=list(mockhours)): cv.multi_select(
+                mockhours
+            ),
+            vol.Optional("priceaware", default=False): cv.boolean
         })
 
         return self.async_show_form(

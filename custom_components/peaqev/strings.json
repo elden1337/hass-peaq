@@ -15,7 +15,8 @@
       "opt": {
         "data": {
           "nonhours": "[%key:common::config_flow::data::nonhours%]",
-          "cautionhours": "[%key:common::config_flow::data::cautionhours%]"
+          "cautionhours": "[%key:common::config_flow::data::cautionhours%]",
+          "priceaware": "[%key:common::config_flow::data::priceaware%]"
         },
         "description": "Select the hours you wish to completely stop the charger, and hours you wish to let the charger charge, but with extra caution.",
         "title": "Non- and Caution-hours"

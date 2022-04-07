@@ -23,7 +23,8 @@
       "opt": {
         "data": {
           "nonhours": "Hours when the charger is always disabled",
-          "cautionhours": "Hours when the charger takes extra precaution to not burst peak energy"
+          "cautionhours": "Hours when the charger takes extra precaution to not burst peak energy",
+          "priceaware": "Check this to let NordPool pricing set your nonhours and cautionhours. Requires Nordpool-integration"
         },
         "description": "Select the hours you wish to completely stop the charger, and hours you wish to let the charger charge, but with extra caution.",
         "title": "Non- and Caution-hours"
