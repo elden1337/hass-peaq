@@ -18,6 +18,9 @@
     "after_dependencies": [
       "chargeamps",
       "easee",
-      "nordpool"
+      "nordpool",
+      "filter",
+      "integration",
+      "sql"
     ]
   }
