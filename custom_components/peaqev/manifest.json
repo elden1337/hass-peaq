@@ -12,10 +12,7 @@
     "version": "0.2.1",
     "iot_class": "calculated",
     "dependencies": [
-      "filter",
-      "integration",
       "recorder",
-      "sql",
       "utility_meter"
     ],
     "after_dependencies": [
