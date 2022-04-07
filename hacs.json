@@ -5,9 +5,8 @@
     "sensor"
   ],
   "homeassistant": "2022.2",
-  "iot_class": [
-    "calculated"
-  ],
+  "country": "SE",
   "zip_release": true,
-  "filename": "peaqev.zip"
+  "filename": "peaqev.zip",
+  "render_readme": true
 }
