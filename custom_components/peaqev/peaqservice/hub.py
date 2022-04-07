@@ -92,7 +92,10 @@ class Hub:
         self.carpowersensor.value = self.hass.states.get(self.carpowersensor.entity)
         self.totalhourlyenergy.value = self.hass.states.get(self.totalhourlyenergy.entity)
         self.currentpeak.value = self.hass.states.get(self.currentpeak.entity)
-       
+
+    async def is_initialized(self) -> bool:
+        return True
+
     @callback
     async def state_changed(self, entity_id, old_state, new_state):
         try:

@@ -33,7 +33,7 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
     }
 
     hub = Hub(hass, configinputs, DOMAIN)
-    await hub.initialize()
+    await hub.is_initialized()
     hass.data[DOMAIN]["hub"] = hub
     
     """Create Service calls"""
