@@ -16,7 +16,7 @@ from custom_components.peaqev.peaqservice.constants import (
     SQLSENSOR_STATISTICS_TABLE,
     SQLSENSOR_STATISTICS_META_TABLE
     )
-import custom_components.peaqev.peaqservice.extensionmethods as ex
+import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 
 class PeaqSQLSensorHelper():
     def __init__(self, sensor :str):

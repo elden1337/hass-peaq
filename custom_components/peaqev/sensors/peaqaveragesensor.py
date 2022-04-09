@@ -5,7 +5,7 @@ from homeassistant.components.filter.sensor import (
     TimeSMAFilter, SensorFilter,
     TIME_SMA_LAST 
     )
-import custom_components.peaqev.peaqservice.extensionmethods as ex
+import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.constants import AVERAGECONSUMPTION
 
 class PeaqAverageSensor(SensorFilter):
