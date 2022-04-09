@@ -2,8 +2,8 @@ import custom_components.peaqev.peaqservice.constants as constants
 from homeassistant.core import HomeAssistant
 import logging
 
-from custom_components.peaqev.peaqservice.chargertype.chargeamps import ChargeAmps
-from custom_components.peaqev.peaqservice.chargertype.easee import Easee
+from custom_components.peaqev.peaqservice.chargertypes.types.chargeamps import ChargeAmps
+from custom_components.peaqev.peaqservice.chargertypes.types.easee import Easee
 
 _LOGGER = logging.getLogger(__name__)
 
