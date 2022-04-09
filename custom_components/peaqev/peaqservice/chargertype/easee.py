@@ -1,4 +1,4 @@
-from custom_components.peaqev.peaqservice.chargertypes import ChargerBase
+from custom_components.peaqev.peaqservice.chargertype.chargerbase import ChargerBase
 import logging
 import homeassistant.helpers.template as template
 from homeassistant.core import HomeAssistant
