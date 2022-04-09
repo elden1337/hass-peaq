@@ -13,7 +13,7 @@ from custom_components.peaqev.sensors.peaqpowersensor import (PeaqPowerSensor, P
 from custom_components.peaqev.sensors.peaqpredictionsensor import PeaqPredictionSensor
 from custom_components.peaqev.sensors.peaqthresholdsensor import PeaqThresholdSensor
 from custom_components.peaqev.sensors.peaqsensor import PeaqSensor
-import custom_components.peaqev.peaqservice.extensionmethods as ex
+import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.constants import (
     CONSUMPTION_TOTAL_NAME,
     CONSUMPTION_INTEGRAL_NAME,

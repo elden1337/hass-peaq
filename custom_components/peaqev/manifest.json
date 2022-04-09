@@ -1,6 +1,6 @@
 {
     "domain": "peaqev",
-    "name": "peaq ev-charging",
+    "name": "peaqev ev-charging",
     "config_flow": true,
     "documentation": "https://github.com/elden1337/hass_peaq",
     "issue_tracker": "https://github.com/elden1337/hass_peaq/issues",
@@ -9,7 +9,7 @@
     "codeowners": [
       "@elden1337"
     ],
-    "version": "0.2.1",
+    "version": "0.2.2",
     "iot_class": "calculated",
     "dependencies": [
       "recorder",
