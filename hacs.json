@@ -1,5 +1,5 @@
 {
-  "name": "Peaq ev-Charging",
+  "name": "Peaqev ev-Charging",
   "domains": [
     "binary_sensor",
     "sensor"
