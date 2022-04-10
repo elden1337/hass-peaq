@@ -13,7 +13,7 @@ from custom_components.peaqev.peaqservice.util.hubmember import (
     CurrentPeak,
     ChargerSwitch
 )
-from custom_components.peaqev.peaqservice.chargertypes import ChargerTypeData
+from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
 from custom_components.peaqev.sensors.peaqsqlsensor import PeaqSQLSensorHelper
 from homeassistant.helpers.event import async_track_state_change
 from homeassistant.core import (
