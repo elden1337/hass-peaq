@@ -13,9 +13,6 @@ class Easee(ChargerBase):
         super().__init__(hass, currentupdate=True)
         self._chargerid = chargerid
         self.getentities(DOMAIN, ENTITYENDINGS)
-        self._setchargerstates()
-
-    def _setchargerstates(self):
         self._chargerstates["idle"] = ["disconnected"]
         self._chargerstates["connected"] = ["awaiting_start", "ready_to_charge"]
         self._chargerstates["charging"] = ["charging"]
@@ -24,19 +21,14 @@ class Easee(ChargerBase):
         self.powerswitch = f"switch.{self._entityschema}_is_enabled"
         self.ampmeter = f"sensor.{self._entityschema}_max_charger_limit"
         self.ampmeter_is_attribute = False
-        self.servicecalls = {
-            "domain": "easee",
-            "on": "start",
-            "off": "stop",
-            "pause": "pause",
-            "resume": "resume",
-            "updatecurrent": {
-                "name": "set_charger_max_limit",
-                "params": {
+
+        servicecall_params = {
                     "charger": "charger_id",
                     "chargerid": self._chargerid,
                     "current": "current"
                 }
-            }
-        }
+
+        self._set_servicecalls(DOMAIN, "start", "stop", "pause", "resume", "set_charger_max_limit", servicecall_params)
+
+
 

@@ -64,10 +64,27 @@ class ChargerBase():
     def servicecalls(self) -> dict:
         return self._servicecalls
 
-    @servicecalls.setter
-    def servicecalls(self, obj):
-        assert type(obj) is dict
-        self._servicecalls = obj
+    def _set_servicecalls(
+            self,
+            domain: str,
+            on_call: str,
+            off_call: str,
+            pause_call: str = None,
+            resume_call: str = None,
+            update_current_call: str = None,
+            update_current_params: dict = None
+    ) -> None:
+        self._servicecalls = {
+                "domain": domain,
+                "on": on_call,
+                "off": off_call,
+                "pause": pause_call if pause_call is not None else off_call,
+                "resume": resume_call if resume_call is not None else on_call,
+                "updatecurrent": {
+                    "name": update_current_call,
+                    "params": update_current_params
+                }
+            }
 
     def validatecharger(self):
         try:
@@ -99,3 +116,4 @@ class ChargerBase():
                     candidate = namelrg[1].replace(e, '')
 
             self._entityschema = candidate
+
