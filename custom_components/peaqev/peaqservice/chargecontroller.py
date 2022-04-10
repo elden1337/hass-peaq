@@ -8,10 +8,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class ChargeController():
-    def __init__(self, hub, inputstatus=constants.CHARGECONTROLLER.Idle):
+    def __init__(self, hub):
         self._hub = hub
         self.name = f"{self._hub.hubname} {CHARGERCONTROLLER}"
-        self._status = inputstatus
+        self._status = constants.CHARGECONTROLLER.Idle
         self._latestchargerstart = time.time()
 
     @property
@@ -36,7 +36,7 @@ class ChargeController():
     def status(self):
         return self._let_charge()
 
-    def _let_charge(self) -> str:
+    def _let_charge(self):
         if self._hub.chargerobject.value.lower() not in self._hub.chargertypedata.charger.chargerstates["idle"] and self._hub.chargerobject.value.lower() not in self._hub.chargertypedata.charger.chargerstates["connected"] and self._hub.chargerobject.value.lower() not in self._hub.chargertypedata.charger.chargerstates["charging"]:
             return constants.CHARGECONTROLLER.CheckChargerEntity
         if self._hub.chargerobject.value.lower() in self._hub.chargertypedata.charger.chargerstates["idle"]:
