@@ -38,6 +38,8 @@ class ChargerTypeData():
             assert self._charger.servicecalls["domain"] is not None
             assert self._charger.servicecalls["on"] is not None
             assert self._charger.servicecalls["off"] is not None
+            assert self._charger.servicecalls["pause"] is not None
+            assert self._charger.servicecalls["resume"] is not None
             if self._charger.allowupdatecurrent:
                 assert self._charger.servicecalls["updatecurrent"] is not None
         except Exception as e:

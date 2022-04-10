@@ -50,6 +50,8 @@ class ChargeAmps(ChargerBase):
                 "domain": "chargeamps",
                 "on": "enable",
                 "off": "disable",
+                "resume": "enable",
+                "pause": "disable",
                 "updatecurrent": {
                     "name": "set_max_current",
                     "params": {

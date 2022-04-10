@@ -61,6 +61,8 @@ class Easee(ChargerBase):
                 "domain": "easee",
                 "on": "start",
                 "off": "stop",
+                "pause": "pause",
+                "resume": "resume",
                 "updatecurrent": {
                     "name": "set_charger_max_limit",
                     "params": {
