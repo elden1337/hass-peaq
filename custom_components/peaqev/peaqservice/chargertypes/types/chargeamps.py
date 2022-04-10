@@ -8,6 +8,7 @@ _LOGGER = logging.getLogger(__name__)
 ENTITYENDINGS = ["_power", "_1", "_2", "_status", "_dimmer", "_downlight", "_current", "_voltage"]
 DOMAIN = "chargeamps"
 
+
 class ChargeAmps(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid):
         super().__init__(hass, currentupdate=True)
@@ -28,4 +29,4 @@ class ChargeAmps(ChargerBase):
             "current": "max_current"
         }
 
-        self._set_servicecalls(DOMAIN, "start", "stop", None, None, "set_max_current", servicecall_params)
+        self._set_servicecalls(DOMAIN, "enable", "disable", None, None, "set_max_current", servicecall_params)

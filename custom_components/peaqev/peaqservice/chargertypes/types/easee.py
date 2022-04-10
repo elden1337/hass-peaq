@@ -8,6 +8,7 @@ _LOGGER = logging.getLogger(__name__)
 ENTITYENDINGS = ["_power", "_status", "_dimmer", "_downlight", "_lifetime_energy", "_online", "_current", "_voltage", "_output_limit", "_cost_per_kwh", "_enable_idle_current"]
 DOMAIN = "easee"
 
+
 class Easee(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid):
         super().__init__(hass, currentupdate=True)
