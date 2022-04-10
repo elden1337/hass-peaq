@@ -47,14 +47,14 @@ async def validate_input_user(hass: HomeAssistant, data: dict) -> dict[str, Any]
     """ Validate the data can be used to set up a connection."""
 
     if len(data["chargerid"]) < 3:
-        raise InvalidChargerId
+        raise ValueError
 
     if len(data["name"]) < 3:
-        raise InvalidPowerSensor
+        raise ValueError
     elif not data["name"].startswith("sensor."):
         data["name"] = f"sensor.{data['name']}"
     if await _check_power_sensor(hass, data["name"]) is False:
-        raise InvalidPowerSensor
+        raise ValueError
 
     return {"title": data["name"]}
 
@@ -73,12 +73,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         
         errors = {}
         if user_input is not None:
-            # try:
-            self.info = await validate_input_user(self.hass, user_input)
-            self.data = user_input
-            self.data[self.OPTIONS] = []
+            try:
+                self.info = await validate_input_user(self.hass, user_input)
+            except ValueError:
+                errors["base"] = "invalid_setup"
+            if not errors:
+                self.data = user_input
+                self.data[self.OPTIONS] = []
 
-            return await self.async_step_opt()
+                return await self.async_step_opt()
 
         return self.async_show_form(
             step_id="user", data_schema=DATA_SCHEMA, errors=errors

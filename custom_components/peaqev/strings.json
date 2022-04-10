@@ -40,6 +40,7 @@
       }
     },
     "error": {
+      "invalid_setup": "[%key:common::config_flow::error::invalid_setup%]",
       "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
       "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
       "unknown": "[%key:common::config_flow::error::unknown%]"
