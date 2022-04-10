@@ -36,5 +36,4 @@ class Threshold:
     def _setcurrentdict(self):
         if int(self._hub.carpowersensor.value) > 3700:
             return constants.CURRENTS_THREEPHASE_1_16
-        
         return constants.CURRENTS_ONEPHASE_1_16
