@@ -24,6 +24,8 @@ class Threshold:
     @property
     def allowedcurrent(self) -> int:
         ret = 6
+        if self._hub.charger_enabled.value is False:
+            return ret
         nowmin = datetime.now().minute
         currents = self._setcurrentdict()
         for key, value in currents.items():
