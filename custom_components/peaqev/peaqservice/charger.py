@@ -21,9 +21,11 @@ class Charger():
             if self._hub.chargecontroller.status is CHARGECONTROLLER.Start:
                 if self._hub.chargerobject_switch.value == "off" and self._chargerstart is False:
                     await self._start_charger()
-            elif self._hub.chargecontroller.status is CHARGECONTROLLER.Stop or self._hub.charger_done.value is True or self._hub.chargecontroller.status is CHARGECONTROLLER.Idle:
+            elif self._hub.chargecontroller.status is CHARGECONTROLLER.Stop or self._hub.chargecontroller.status is CHARGECONTROLLER.Idle:
                 if self._hub.chargerobject_switch.value == "on" and self._chargerstop is False:
                     await self._pause_charger()
+            elif self._hub.chargecontroller.status is CHARGECONTROLLER.Done and self._hub.charger_done.value is False:
+                await self._terminate_charger()
         else:
             if self._hub.chargerobject_switch.value == "on" and self._chargerstop is False:
                 await self._terminate_charger()
@@ -52,6 +54,7 @@ class Charger():
             self._servicecalls['domain'],
             self._servicecalls['off']
         )
+        self._hub.charger_done.value = True
 
     async def _pause_charger(self):
         self._is_running(False)

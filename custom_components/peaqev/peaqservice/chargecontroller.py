@@ -48,16 +48,14 @@ class ChargeController():
         elif datetime.now().hour in self._hub.nonhours:
             return constants.CHARGECONTROLLER.Stop
         elif self._hub.chargerobject.value.lower() in self._hub.chargertypedata.charger.chargerstates["connected"]:
-            if self.below_startthreshold and self._hub.totalhourlyenergy.value > 0:
+            if self._hub.carpowersensor.value < 1 and time.time() - self.latestchargerstart > 120:
+                return constants.CHARGECONTROLLER.Done
+            elif self.below_startthreshold and self._hub.totalhourlyenergy.value > 0:
                 return constants.CHARGECONTROLLER.Start
             else:
                 return constants.CHARGECONTROLLER.Stop
         elif self._hub.chargerobject.value.lower() in self._hub.chargertypedata.charger.chargerstates["charging"]:
-            condition1 = self._hub.carpowersensor.value < 1 and time.time() - self.latestchargerstart > 120
-            condition2 = self.above_stopthreshold and self._hub.totalhourlyenergy.value > 0
-            if condition1 and not condition2:
-                return constants.CHARGECONTROLLER.Done
-            elif condition2:
+            if self.above_stopthreshold and self._hub.totalhourlyenergy.value > 0:
                 return constants.CHARGECONTROLLER.Stop
             else:
                 return constants.CHARGECONTROLLER.Start
