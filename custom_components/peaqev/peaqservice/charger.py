@@ -92,21 +92,18 @@ class Charger():
 
     def _wait1(self) -> bool:
         """Wait for the chargerswitch to be turned on before commencing the _UpdateMaxCurrent-method"""
-
         while self._hub.chargerobject_switch.value == "off" and self._chargerstop is False:
             time.sleep(3)
         return True
 
     def _wait2(self) -> bool:
         """Wait for the perceived max current to become different than the currently set one by the charger"""
-
-        while int(self._hub.chargerobject_switch.current) == int(self._hub.threshold.allowedcurrent) and self._chargerstop is False and datetime.now().minute >= 55:
+        while (int(self._hub.chargerobject_switch.current) == int(self._hub.threshold.allowedcurrent) and self._chargerstop is False) or datetime.now().minute >= 55:
             time.sleep(3)
         return True
 
     def _wait3(self) -> bool:
         """Wait for three minutes before commencing main loop"""
-
         timer = 180
         starttime = time.time()
         while time.time() - starttime < timer:
