@@ -33,37 +33,31 @@ DATA_SCHEMA = vol.Schema(
     }
 )
 
+
+async def _check_power_sensor(hass: HomeAssistant, powersensor:str) -> bool:
+    ret = hass.states.get(powersensor)
+    try:
+        float(ret)
+        return True
+    except:
+        return False
+
+
 async def validate_input_user(hass: HomeAssistant, data: dict) -> dict[str, Any]:
     """ Validate the data can be used to set up a connection."""
 
-    #if type is chargeamps or easee
-        #check if chargerid is set. otherwise be angry.
+    if len(data["chargerid"]) < 3:
+        raise InvalidChargerId
 
-
-
-    # This is a simple example to show an error in the UI for a short hostname
-    # The exceptions are defined at the end of this file, and are used in the
-    # `async_step_user` method below.
-    # if len(data["host"]) < 3:
-    #     raise InvalidHost
-
-    # hub = Hub(hass, data["host"])
-    # result = await hub.test_connection()
-    # if not result:
-    #     raise CannotConnect
-
-    # If your PyPI package is not built with async, pass your methods
-    # to the executor:
-    # await hass.async_add_executor_job(
-    #     your_validate_func, data["username"], data["password"]
-    # )
-
-    # If you cannot connect:
-    # throw CannotConnect
-    # If the authentication is wrong:
-    # InvalidAuth
+    if len(data["name"]) < 3:
+        raise InvalidPowerSensor
+    elif not data["name"].startswith("sensor."):
+        data["name"] = f"sensor.{data['name']}"
+    if await _check_power_sensor(hass, data["name"]) is False:
+        raise InvalidPowerSensor
 
     return {"title": data["name"]}
+
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle config flow for Peaq."""
@@ -167,8 +161,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         ret[12] = user_input["dec"]
         return ret
 
-class CannotConnect(exceptions.HomeAssistantError):
-    """Error to indicate we cannot connect."""
 
-class InvalidHost(exceptions.HomeAssistantError):
+class InvalidChargerId(exceptions.HomeAssistantError):
+    """Error to indicate there is an invalid hostname."""
+
+
+class InvalidPowerSensor(exceptions.HomeAssistantError):
     """Error to indicate there is an invalid hostname."""
