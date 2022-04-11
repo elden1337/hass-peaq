@@ -6,7 +6,8 @@
     "error": {
       "cannot_connect": "Cannot create Peaq-instance",
       "invalid_auth": "Invalid authentication",
-      "unknown": "Unknown error has occured"
+      "unknown": "Unknown error has occured",
+      "invalid_setup": "Some of the sensors are not reachable or wrong type."
     },
     "step": {
       "user": {
