@@ -37,8 +37,6 @@ class ChargeController():
         return self._let_charge()
 
     def _let_charge(self):
-        if self._hub.chargerobject.value.lower() not in self._hub.chargertypedata.charger.chargerstates["idle"] and self._hub.chargerobject.value.lower() not in self._hub.chargertypedata.charger.chargerstates["connected"] and self._hub.chargerobject.value.lower() not in self._hub.chargertypedata.charger.chargerstates["charging"]:
-            return constants.CHARGECONTROLLER.CheckChargerEntity
         if self._hub.chargerobject.value.lower() in self._hub.chargertypedata.charger.chargerstates["idle"]:
             return constants.CHARGECONTROLLER.Idle
         elif self._hub.chargerobject.value.lower() in self._hub.chargertypedata.charger.chargerstates["connected"] and self._hub.charger_enabled.value is False:
