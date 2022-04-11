@@ -1,7 +1,5 @@
 import custom_components.peaqev.peaqservice.constants as constants
 from homeassistant.core import HomeAssistant
-import logging
-
 from custom_components.peaqev.peaqservice.chargertypes.types.chargeamps import ChargeAmps
 from custom_components.peaqev.peaqservice.chargertypes.types.easee import Easee
 

@@ -1,4 +1,5 @@
 from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
+from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
 import logging
 
 from homeassistant.core import HomeAssistant
@@ -14,9 +15,9 @@ class Easee(ChargerBase):
         super().__init__(hass, currentupdate=True)
         self._chargerid = chargerid
         self.getentities(DOMAIN, ENTITYENDINGS)
-        self._chargerstates["idle"] = ["disconnected"]
-        self._chargerstates["connected"] = ["awaiting_start", "ready_to_charge"]
-        self._chargerstates["charging"] = ["charging"]
+        self._chargerstates[CHARGECONTROLLER.Idle] = ["disconnected"]
+        self._chargerstates[CHARGECONTROLLER.Connected] = ["awaiting_start", "ready_to_charge"]
+        self._chargerstates[CHARGECONTROLLER.Charging] = ["charging"]
         self.chargerentity = f"sensor.{self._entityschema}_status"
         self.powermeter = f"sensor.{self._entityschema}_power"
         self.powerswitch = f"switch.{self._entityschema}_is_enabled"

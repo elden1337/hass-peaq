@@ -2,13 +2,12 @@ from datetime import datetime
 import custom_components.peaqev.peaqservice.constants as constants
 
 class Threshold:
-    def __init__(self, hub = None):
+    def __init__(self, hub):
         self._hub = hub
-        self._cautionhours = hub if hub is not None else []
-        
+
     @property
     def stop(self, nowmin =datetime.now().minute) -> float:
-        if str(datetime.now().hour) in self._cautionhours and nowmin < 45:
+        if str(datetime.now().hour) in self._hub.cautionhours and nowmin < 45:
             ret = (((nowmin+pow(1.075, nowmin)) * 0.0032) + 0.7)
         else:
             ret = (((nowmin + pow(1.071, nowmin)) * 0.00165) + 0.8)
@@ -16,7 +15,7 @@ class Threshold:
 
     @property
     def start(self, nowmin =datetime.now().minute) -> float:
-        if str(datetime.now().hour) in self._cautionhours and nowmin < 45:
+        if str(datetime.now().hour) in self._hub.cautionhours and nowmin < 45:
             ret = (((nowmin+pow(1.081, nowmin)) * 0.0049) + 0.4)
         else:
             ret = (((nowmin + pow(1.066, nowmin)) * 0.0045) + 0.5)

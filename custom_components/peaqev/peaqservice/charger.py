@@ -1,7 +1,7 @@
 from datetime import datetime
 import time
 import logging
-from custom_components.peaqev.peaqservice.constants import CHARGECONTROLLER
+from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
 
 _LOGGER = logging.getLogger(__name__)
 
