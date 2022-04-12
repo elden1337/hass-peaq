@@ -24,11 +24,10 @@ class Easee(ChargerBase):
         self.ampmeter = f"sensor.{self._entityschema}_max_charger_limit"
         self.ampmeter_is_attribute = False
 
-        servicecall_params = {
-                    CHARGERTYPEHELPERS.CHARGER: "charger_id",
-                    CHARGERTYPEHELPERS.CHARGERID: self._chargerid,
-                    CHARGERTYPEHELPERS.CURRENT: "current"
-                }
+        servicecall_params = {}
+        servicecall_params[CHARGERTYPEHELPERS.CHARGER] = "charger_id"
+        servicecall_params[CHARGERTYPEHELPERS.CHARGERID] = self._chargerid
+        servicecall_params[CHARGERTYPEHELPERS.CURRENT] = "current"
 
         self._set_servicecalls(DOMAIN, "start", "stop", "pause", "resume", "set_charger_max_limit", servicecall_params)
 

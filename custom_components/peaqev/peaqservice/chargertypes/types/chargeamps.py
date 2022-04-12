@@ -24,10 +24,9 @@ class ChargeAmps(ChargerBase):
         self.ampmeter = "Max current"
         self.ampmeter_is_attribute = True
 
-        servicecall_params = {
-            CHARGERTYPEHELPERS.CHARGER: "chargepoint",
-            CHARGERTYPEHELPERS.CHARGERID: self._chargerid,
-            CHARGERTYPEHELPERS.CURRENT: "max_current"
-        }
+        servicecall_params = {}
+        servicecall_params[CHARGERTYPEHELPERS.CHARGER] = "chargepoint"
+        servicecall_params[CHARGERTYPEHELPERS.CHARGERID] = self._chargerid
+        servicecall_params[CHARGERTYPEHELPERS.CURRENT] = "max_current"
 
         self._set_servicecalls(DOMAIN, "enable", "disable", None, None, "set_max_current", servicecall_params)
