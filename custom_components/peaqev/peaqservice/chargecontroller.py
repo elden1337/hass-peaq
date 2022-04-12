@@ -6,6 +6,7 @@ from custom_components.peaqev.peaqservice.constants import CHARGERCONTROLLER
 
 _LOGGER = logging.getLogger(__name__)
 
+DONETIMEOUT = 180
 
 class ChargeController():
     def __init__(self, hub):
@@ -36,6 +37,9 @@ class ChargeController():
     def status(self):
         return self._let_charge()
 
+    def _update_latestchargerstart(self):
+        self.latestchargerstart = time.time()
+
     def _let_charge(self):
         chargerstate = self._hub.chargerobject.value.lower()
 
@@ -46,11 +50,13 @@ class ChargeController():
         elif chargerstate not in self._hub.chargertypedata.charger.chargerstates[CHARGECONTROLLER.Idle] and self._hub.charger_done.value is True:
             return CHARGECONTROLLER.Done
         elif datetime.now().hour in self._hub.nonhours:
+            self._update_latestchargerstart()
             return CHARGECONTROLLER.Stop
         elif chargerstate in self._hub.chargertypedata.charger.chargerstates[CHARGECONTROLLER.Connected]:
-            if self._hub.carpowersensor.value < 1 and time.time() - self.latestchargerstart > 120:
+            if self._hub.carpowersensor.value < 1 and time.time() - self.latestchargerstart > DONETIMEOUT:
                 return CHARGECONTROLLER.Done
             elif self.below_startthreshold and self._hub.totalhourlyenergy.value > 0:
+                self._update_latestchargerstart()
                 return CHARGECONTROLLER.Start
             else:
                 return CHARGECONTROLLER.Stop
@@ -58,6 +64,7 @@ class ChargeController():
             if self.above_stopthreshold and self._hub.totalhourlyenergy.value > 0:
                 return CHARGECONTROLLER.Stop
             else:
+                self._update_latestchargerstart()
                 return CHARGECONTROLLER.Start
         else:
             return CHARGECONTROLLER.Error
