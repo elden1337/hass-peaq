@@ -2,7 +2,19 @@ from datetime import datetime
 import time
 import logging
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
-from custom_components.peaqev.peaqservice.util.constants import CHARGERTYPEHELPERS as h
+from custom_components.peaqev.peaqservice.util.constants import (
+CHARGERTYPEHELPERS_DOMAIN,
+CHARGERTYPEHELPERS_ON,
+CHARGERTYPEHELPERS_OFF,
+CHARGERTYPEHELPERS_RESUME,
+CHARGERTYPEHELPERS_PAUSE,
+CHARGERTYPEHELPERS_CHARGER,
+CHARGERTYPEHELPERS_PARAMS,
+CHARGERTYPEHELPERS_UPDATECURRENT,
+CHARGERTYPEHELPERS_CURRENT,
+CHARGERTYPEHELPERS_CHARGERID,
+CHARGERTYPEHELPERS_NAME
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,14 +46,14 @@ class Charger():
         self._is_running(True)
         if self._sessionrunning is False:
             await self._hub.hass.services.async_call(
-                self._servicecalls[h.DOMAIN],
-                self._servicecalls[h.ON]
+                self._servicecalls[CHARGERTYPEHELPERS_DOMAIN],
+                self._servicecalls[CHARGERTYPEHELPERS_ON]
             )
             self._sessionrunning = True
         else:
             await self._hub.hass.services.async_call(
-                self._servicecalls[h.DOMAIN],
-                self._servicecalls[h.RESUME]
+                self._servicecalls[CHARGERTYPEHELPERS_DOMAIN],
+                self._servicecalls[CHARGERTYPEHELPERS_RESUME]
             )
         self._hub.chargecontroller.update_latestchargerstart()
         if self._hub.chargertypedata.charger.allowupdatecurrent is True:
@@ -51,8 +63,8 @@ class Charger():
         self._is_running(False)
         self._sessionrunning = False
         await self._hub.hass.services.async_call(
-            self._servicecalls[h.DOMAIN],
-            self._servicecalls[h.OFF]
+            self._servicecalls[CHARGERTYPEHELPERS_DOMAIN],
+            self._servicecalls[CHARGERTYPEHELPERS_OFF]
         )
         self._hub.charger_done.value = True
 
@@ -62,8 +74,8 @@ class Charger():
             await self._terminate_charger()
         else:
             await self._hub.hass.services.async_call(
-                self._servicecalls[h.DOMAIN],
-                self._servicecalls[h.PAUSE]
+                self._servicecalls[CHARGERTYPEHELPERS_DOMAIN],
+                self._servicecalls[CHARGERTYPEHELPERS_PAUSE]
             )
 
 
@@ -75,20 +87,20 @@ class Charger():
         while self._hub.chargerobject_switch.value == "on" and self._chargerstopped is False:
             result2 = await self._hass.async_add_executor_job(self._wait2)
             if self._chargerrunning is True and self._chargerstopped is False:
-                if len(self._servicecalls[h.UPDATECURRENT][h.PARAMS][h.CHARGER]) > 0 and len(self._servicecalls[h.UPDATECURRENT][h.PARAMS][h.CHARGERID]) > 0:
+                if len(self._servicecalls[CHARGERTYPEHELPERS_UPDATECURRENT][CHARGERTYPEHELPERS_PARAMS][CHARGERTYPEHELPERS_CHARGER]) > 0 and len(self._servicecalls[CHARGERTYPEHELPERS_UPDATECURRENT][CHARGERTYPEHELPERS_PARAMS][CHARGERTYPEHELPERS_CHARGERID]) > 0:
                     serviceparams = {
-                        self._servicecalls[h.UPDATECURRENT][h.PARAMS][h.CHARGER]:
-                            self._servicecalls[h.UPDATECURRENT][h.PARAMS][h.CHARGERID],
-                        self._servicecalls[h.UPDATECURRENT][h.PARAMS][h.CURRENT]: self._hub.threshold.allowedcurrent
+                        self._servicecalls[CHARGERTYPEHELPERS_UPDATECURRENT][CHARGERTYPEHELPERS_PARAMS][CHARGERTYPEHELPERS_CHARGER]:
+                            self._servicecalls[CHARGERTYPEHELPERS_UPDATECURRENT][CHARGERTYPEHELPERS_PARAMS][CHARGERTYPEHELPERS_CHARGERID],
+                        self._servicecalls[CHARGERTYPEHELPERS_UPDATECURRENT][CHARGERTYPEHELPERS_PARAMS][CHARGERTYPEHELPERS_CURRENT]: self._hub.threshold.allowedcurrent
                     }
                 else:
                     serviceparams = {
-                        self._servicecalls[h.UPDATECURRENT][h.PARAMS][h.CURRENT]: self._hub.threshold.allowedcurrent
+                        self._servicecalls[CHARGERTYPEHELPERS_UPDATECURRENT][CHARGERTYPEHELPERS_PARAMS][CHARGERTYPEHELPERS_CURRENT]: self._hub.threshold.allowedcurrent
                     }
 
                 await self._hub.hass.services.async_call(
-                    self._servicecalls[h.DOMAIN],
-                    self._servicecalls[h.UPDATECURRENT][h.NAME],
+                    self._servicecalls[CHARGERTYPEHELPERS_DOMAIN],
+                    self._servicecalls[CHARGERTYPEHELPERS_UPDATECURRENT][CHARGERTYPEHELPERS_NAME],
                     serviceparams
                 )
                 result3 = await self._hass.async_add_executor_job(self._wait3)

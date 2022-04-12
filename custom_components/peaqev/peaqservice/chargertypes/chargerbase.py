@@ -1,7 +1,16 @@
 import logging
 import homeassistant.helpers.template as template
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
-from custom_components.peaqev.peaqservice.util.constants import CHARGERTYPEHELPERS
+from custom_components.peaqev.peaqservice.util.constants import (
+    CHARGERTYPEHELPERS_DOMAIN,
+    CHARGERTYPEHELPERS_ON,
+    CHARGERTYPEHELPERS_OFF,
+    CHARGERTYPEHELPERS_PAUSE,
+    CHARGERTYPEHELPERS_RESUME,
+    CHARGERTYPEHELPERS_UPDATECURRENT,
+    CHARGERTYPEHELPERS_NAME,
+    CHARGERTYPEHELPERS_PARAMS,
+)
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -76,14 +85,14 @@ class ChargerBase():
             update_current_params: dict = None
     ) -> None:
         self._servicecalls = {
-                CHARGERTYPEHELPERS.DOMAIN: domain,
-                CHARGERTYPEHELPERS.ON: on_call,
-                CHARGERTYPEHELPERS.OFF: off_call,
-                CHARGERTYPEHELPERS.PAUSE: pause_call if pause_call is not None else off_call,
-                CHARGERTYPEHELPERS.RESUME: resume_call if resume_call is not None else on_call,
-                CHARGERTYPEHELPERS.UPDATECURRENT: {
-                    CHARGERTYPEHELPERS.NAME: update_current_call,
-                    CHARGERTYPEHELPERS.PARAMS: update_current_params
+                CHARGERTYPEHELPERS_DOMAIN: domain,
+                CHARGERTYPEHELPERS_ON: on_call,
+                CHARGERTYPEHELPERS_OFF: off_call,
+                CHARGERTYPEHELPERS_PAUSE: pause_call if pause_call is not None else off_call,
+                CHARGERTYPEHELPERS_RESUME: resume_call if resume_call is not None else on_call,
+                CHARGERTYPEHELPERS_UPDATECURRENT: {
+                    CHARGERTYPEHELPERS_NAME: update_current_call,
+                    CHARGERTYPEHELPERS_PARAMS: update_current_params
                 }
             }
 
@@ -92,13 +101,13 @@ class ChargerBase():
             assert len(self.chargerentity) > 0
             assert len(self.powermeter) > 0
             assert len(self.powerswitch) > 0
-            assert self.servicecalls[CHARGERTYPEHELPERS.DOMAIN] is not None
-            assert self.servicecalls[CHARGERTYPEHELPERS.ON] is not None
-            assert self.servicecalls[CHARGERTYPEHELPERS.OFF] is not None
-            assert self.servicecalls[CHARGERTYPEHELPERS.PAUSE] is not None
-            assert self.servicecalls[CHARGERTYPEHELPERS.RESUME] is not None
+            assert self.servicecalls[CHARGERTYPEHELPERS_DOMAIN] is not None
+            assert self.servicecalls[CHARGERTYPEHELPERS_ON] is not None
+            assert self.servicecalls[CHARGERTYPEHELPERS_OFF] is not None
+            assert self.servicecalls[CHARGERTYPEHELPERS_PAUSE] is not None
+            assert self.servicecalls[CHARGERTYPEHELPERS_RESUME] is not None
             if self.allowupdatecurrent:
-                assert self.servicecalls[CHARGERTYPEHELPERS.UPDATECURRENT] is not None
+                assert self.servicecalls[CHARGERTYPEHELPERS_UPDATECURRENT] is not None
         except Exception as e:
             _LOGGER.error("Peaqev could not initialize charger", e)
 

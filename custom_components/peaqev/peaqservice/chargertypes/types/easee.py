@@ -1,6 +1,10 @@
 from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
-from custom_components.peaqev.peaqservice.util.constants import CHARGERTYPEHELPERS
+from custom_components.peaqev.peaqservice.util.constants import (
+    CHARGERTYPEHELPERS_CHARGER,
+    CHARGERTYPEHELPERS_CHARGERID,
+    CHARGERTYPEHELPERS_CURRENT,
+)
 import logging
 from homeassistant.core import HomeAssistant
 
@@ -25,9 +29,9 @@ class Easee(ChargerBase):
         self.ampmeter_is_attribute = False
 
         servicecall_params = {}
-        servicecall_params[CHARGERTYPEHELPERS.CHARGER] = "charger_id"
-        servicecall_params[CHARGERTYPEHELPERS.CHARGERID] = self._chargerid
-        servicecall_params[CHARGERTYPEHELPERS.CURRENT] = "current"
+        servicecall_params[CHARGERTYPEHELPERS_CHARGER] = "charger_id"
+        servicecall_params[CHARGERTYPEHELPERS_CHARGERID] = self._chargerid
+        servicecall_params[CHARGERTYPEHELPERS_CURRENT] = "current"
 
         self._set_servicecalls(DOMAIN, "start", "stop", "pause", "resume", "set_charger_max_limit", servicecall_params)
 
