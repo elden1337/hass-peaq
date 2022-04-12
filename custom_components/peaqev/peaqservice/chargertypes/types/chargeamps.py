@@ -1,7 +1,7 @@
 from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
+from custom_components.peaqev.peaqservice.util.constants import CHARGERTYPEHELPERS
 import logging
-
 from homeassistant.core import HomeAssistant
 
 _LOGGER = logging.getLogger(__name__)
@@ -25,9 +25,9 @@ class ChargeAmps(ChargerBase):
         self.ampmeter_is_attribute = True
 
         servicecall_params = {
-            "charger": "chargepoint",
-            "chargerid": self._chargerid,
-            "current": "max_current"
+            CHARGERTYPEHELPERS.CHARGER: "chargepoint",
+            CHARGERTYPEHELPERS.CHARGERID: self._chargerid,
+            CHARGERTYPEHELPERS.CURRENT: "max_current"
         }
 
         self._set_servicecalls(DOMAIN, "enable", "disable", None, None, "set_max_current", servicecall_params)

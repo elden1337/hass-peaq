@@ -1,6 +1,7 @@
 import logging
 import homeassistant.helpers.template as template
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
+from custom_components.peaqev.peaqservice.util.constants import CHARGERTYPEHELPERS
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -75,14 +76,14 @@ class ChargerBase():
             update_current_params: dict = None
     ) -> None:
         self._servicecalls = {
-                "domain": domain,
-                "on": on_call,
-                "off": off_call,
-                "pause": pause_call if pause_call is not None else off_call,
-                "resume": resume_call if resume_call is not None else on_call,
-                "updatecurrent": {
-                    "name": update_current_call,
-                    "params": update_current_params
+                CHARGERTYPEHELPERS.DOMAIN: domain,
+                CHARGERTYPEHELPERS.ON: on_call,
+                CHARGERTYPEHELPERS.OFF: off_call,
+                CHARGERTYPEHELPERS.PAUSE: pause_call if pause_call is not None else off_call,
+                CHARGERTYPEHELPERS.RESUME: resume_call if resume_call is not None else on_call,
+                CHARGERTYPEHELPERS.UPDATECURRENT: {
+                    CHARGERTYPEHELPERS.NAME: update_current_call,
+                    CHARGERTYPEHELPERS.PARAMS: update_current_params
                 }
             }
 
@@ -91,13 +92,13 @@ class ChargerBase():
             assert len(self.chargerentity) > 0
             assert len(self.powermeter) > 0
             assert len(self.powerswitch) > 0
-            assert self.servicecalls["domain"] is not None
-            assert self.servicecalls["on"] is not None
-            assert self.servicecalls["off"] is not None
-            assert self.servicecalls["pause"] is not None
-            assert self.servicecalls["resume"] is not None
+            assert self.servicecalls[CHARGERTYPEHELPERS.DOMAIN] is not None
+            assert self.servicecalls[CHARGERTYPEHELPERS.ON] is not None
+            assert self.servicecalls[CHARGERTYPEHELPERS.OFF] is not None
+            assert self.servicecalls[CHARGERTYPEHELPERS.PAUSE] is not None
+            assert self.servicecalls[CHARGERTYPEHELPERS.RESUME] is not None
             if self.allowupdatecurrent:
-                assert self.servicecalls["updatecurrent"] is not None
+                assert self.servicecalls[CHARGERTYPEHELPERS.UPDATECURRENT] is not None
         except Exception as e:
             _LOGGER.error("Peaqev could not initialize charger", e)
 

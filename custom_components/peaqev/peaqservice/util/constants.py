@@ -59,3 +59,30 @@ QUERYTYPE_HIGHLOAD = "HighLoad"
 """Sql sensor helpers"""
 SQLSENSOR_STATISTICS_TABLE = "statistics"
 SQLSENSOR_STATISTICS_META_TABLE= "statistics_meta"
+
+"""Chargertype helpers"""
+UPDATECURRENT = "updatecurrent"
+PARAMS = "params"
+CHARGER = "charger"
+CHARGERID = "chargerid"
+CURRENT = "current"
+DOMAIN = "domain"
+NAME = "name"
+ON = "on"
+OFF = "off"
+RESUME = "resume"
+PAUSE = "pause"
+
+CHARGERTYPEHELPERS = [
+    UPDATECURRENT,
+    PARAMS,
+    CHARGER,
+    CHARGERID,
+    CURRENT,
+    DOMAIN,
+    NAME,
+    ON,
+    OFF,
+    RESUME,
+    PAUSE,
+]

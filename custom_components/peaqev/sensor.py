@@ -14,7 +14,7 @@ from custom_components.peaqev.sensors.peaqpredictionsensor import PeaqPrediction
 from custom_components.peaqev.sensors.peaqthresholdsensor import PeaqThresholdSensor
 from custom_components.peaqev.sensors.peaqsensor import PeaqSensor
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
-from custom_components.peaqev.peaqservice.constants import (
+from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_TOTAL_NAME,
     CONSUMPTION_INTEGRAL_NAME,
     PEAQCONTROLLER

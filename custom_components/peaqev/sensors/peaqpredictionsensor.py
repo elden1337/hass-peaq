@@ -1,5 +1,5 @@
 from custom_components.peaqev.sensors.sensorbase import SensorBase
-from custom_components.peaqev.peaqservice.constants import PREDICTION
+from custom_components.peaqev.peaqservice.util.constants import PREDICTION
 
 from homeassistant.const import (
     DEVICE_CLASS_ENERGY,

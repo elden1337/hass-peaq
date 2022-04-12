@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
-import custom_components.peaqev.peaqservice.constants as constants
+import custom_components.peaqev.peaqservice.util.constants as constants
 from custom_components.peaqev.peaqservice.chargecontroller import ChargeController
 from custom_components.peaqev.peaqservice.prediction import Prediction
 from custom_components.peaqev.peaqservice.threshold import Threshold

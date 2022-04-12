@@ -1,12 +1,13 @@
 from datetime import datetime
-import custom_components.peaqev.peaqservice.constants as constants
+import custom_components.peaqev.peaqservice.util.constants as constants
 
 class Threshold:
     def __init__(self, hub):
         self._hub = hub
 
     @property
-    def stop(self, nowmin =datetime.now().minute) -> float:
+    def stop(self) -> float:
+        nowmin = datetime.now().minute
         if str(datetime.now().hour) in self._hub.cautionhours and nowmin < 45:
             ret = (((nowmin+pow(1.075, nowmin)) * 0.0032) + 0.7)
         else:
@@ -14,7 +15,8 @@ class Threshold:
         return round(ret * 100, 2)
 
     @property
-    def start(self, nowmin =datetime.now().minute) -> float:
+    def start(self) -> float:
+        nowmin = datetime.now().minute
         if str(datetime.now().hour) in self._hub.cautionhours and nowmin < 45:
             ret = (((nowmin+pow(1.081, nowmin)) * 0.0049) + 0.4)
         else:
@@ -22,12 +24,13 @@ class Threshold:
         return round(ret * 100, 2)
     
     @property
-    def allowedcurrent(self, nowmin =datetime.now().minute) -> int:
+    def allowedcurrent(self) -> int:
+        nowmin = datetime.now().minute
+        movingavg = self._hub.powersensormovingaverage.value if self._hub.powersensormovingaverage.value is not None else 0
         ret = 6
-        if self._hub.charger_enabled.value is False or self._hub.charger_done.value is True:
+        if self._hub.charger_enabled.value is False or self._hub.charger_done.value is True or movingavg == 0:
             return ret
         currents = self._setcurrentdict()
-        movingavg = self._hub.powersensormovingaverage.value if self._hub.powersensormovingaverage.value is not None else 0
         for key, value in currents.items():
             if ((((movingavg + key) / 60) * (60 - nowmin) + self._hub.totalhourlyenergy.value * 1000) / 1000) < self._hub.currentpeak.value:
                 ret = value

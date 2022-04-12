@@ -6,7 +6,7 @@ from homeassistant.components.filter.sensor import (
     TIME_SMA_LAST 
     )
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
-from custom_components.peaqev.peaqservice.constants import AVERAGECONSUMPTION
+from custom_components.peaqev.peaqservice.util.constants import AVERAGECONSUMPTION
 
 class PeaqAverageSensor(SensorFilter):
     def __init__(self, hub):
