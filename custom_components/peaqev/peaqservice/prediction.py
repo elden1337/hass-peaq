@@ -5,10 +5,12 @@ class Prediction:
         self._hub = hub
     
     @property
-    def predictedenergy(self, nowmin =datetime.now().minute, nowsec =datetime.now().second) -> float:
+    def predictedenergy(self) -> float:
+        nowmin = datetime.now().minute
+        nowsec = datetime.now().second
         poweravg = self._hub.powersensormovingaverage.value if self._hub.powersensormovingaverage.value is not None else 0
         if self._hub.totalhourlyenergy.value > 0 and (nowmin > 0 or (nowmin + nowsec) > 30):
-                ret = (((poweravg / 60 / 60) * (3600 - ((nowmin * 60)+nowsec))+self._hub.totalhourlyenergy.value*1000)/1000)
+            ret = (((poweravg / 60 / 60) * (3600 - ((nowmin * 60)+nowsec))+self._hub.totalhourlyenergy.value*1000)/1000)
         else:
             ret = poweravg / 1000
         return round(ret, 3)
