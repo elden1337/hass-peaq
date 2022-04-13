@@ -99,23 +99,21 @@ class Charger:
             finalserviceparams
         )
 
-    async def _setchargerparams(self, calls, ampoverride:int = 0):
+    async def _setchargerparams(self, calls:dict, ampoverride:int = 0):
         amps = ampoverride if ampoverride >= 6 else self._hub.threshold.allowedcurrent
-        if await self._checkchargerparams() is True:
+        if await self._checkchargerparams(calls) is True:
             serviceparams = {
-                self._service_calls[UPDATECURRENT][PARAMS][CHARGER]: self._service_calls[UPDATECURRENT][PARAMS][
-                    CHARGERID],
-                self._service_calls[UPDATECURRENT][PARAMS][CURRENT]: amps
+                calls[PARAMS][CHARGER]: calls[UPDATECURRENT][PARAMS][CHARGERID],
+                calls[PARAMS][CURRENT]: amps
             }
         else:
             serviceparams = {
-                self._service_calls[UPDATECURRENT][PARAMS][CURRENT]: amps
+                calls[PARAMS][CURRENT]: amps
             }
         return serviceparams
 
-    async def _checkchargerparams(self) -> bool:
-        return len(self._service_calls[UPDATECURRENT][PARAMS][CHARGER]) > 0 \
-               and len(self._service_calls[UPDATECURRENT][PARAMS][CHARGERID]) > 0
+    async def _checkchargerparams(self, calls:dict) -> bool:
+        return len(calls[PARAMS][CHARGER]) > 0 and len(calls[PARAMS][CHARGERID]) > 0
 
     def _wait_turn_on(self) -> None:
         while self._hub.chargerobject_switch.value == "off" and self._chargerstopped is False:
