@@ -18,6 +18,7 @@
     "after_dependencies": [
       "chargeamps",
       "easee",
+      "garo_wallbox",
       "nordpool",
       "filter",
       "integration",
