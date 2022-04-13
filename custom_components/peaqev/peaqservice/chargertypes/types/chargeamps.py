@@ -1,9 +1,9 @@
 from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
 from custom_components.peaqev.peaqservice.util.constants import (
-    CHARGERTYPEHELPERS_CHARGER,
-    CHARGERTYPEHELPERS_CHARGERID,
-    CHARGERTYPEHELPERS_CURRENT,
+    CHARGER,
+    CHARGERID,
+    CURRENT,
 )
 import logging
 from homeassistant.core import HomeAssistant
@@ -11,14 +11,14 @@ from homeassistant.core import HomeAssistant
 _LOGGER = logging.getLogger(__name__)
 
 ENTITYENDINGS = ["_power", "_1", "_2", "_status", "_dimmer", "_downlight", "_current", "_voltage"]
-DOMAIN = "chargeamps"
-
+DOMAINNAME = "chargeamps"
+UPDATECURRENT = True
 
 class ChargeAmps(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid):
-        super().__init__(hass, currentupdate=True)
+        super().__init__(hass)
         self._chargerid = chargerid
-        self.getentities(DOMAIN, ENTITYENDINGS)
+        self.getentities(DOMAINNAME, ENTITYENDINGS)
         self._chargerstates[CHARGECONTROLLER.Idle] = ["available"]
         self._chargerstates[CHARGECONTROLLER.Connected] = ["connected"]
         self._chargerstates[CHARGECONTROLLER.Charging] = ["charging"]
@@ -29,8 +29,9 @@ class ChargeAmps(ChargerBase):
         self.ampmeter_is_attribute = True
 
         servicecall_params = {}
-        servicecall_params[CHARGERTYPEHELPERS_CHARGER] = "chargepoint"
-        servicecall_params[CHARGERTYPEHELPERS_CHARGERID] = self._chargerid
-        servicecall_params[CHARGERTYPEHELPERS_CURRENT] = "max_current"
+        servicecall_params[CHARGER] = "chargepoint"
+        servicecall_params[CHARGERID] = self._chargerid
+        servicecall_params[CURRENT] = "max_current"
 
-        self._set_servicecalls(DOMAIN, "enable", "disable", None, None, "set_max_current", servicecall_params)
+        self._set_servicecalls(DOMAINNAME, "enable", "disable", None, None, "set_max_current", servicecall_params)
+        self._set_servicecalls(DOMAINNAME, "enable", "disable", None, None, )

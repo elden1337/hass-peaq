@@ -8,7 +8,8 @@ _LOGGER = logging.getLogger(__name__)
 
 DONETIMEOUT = 180
 
-class ChargeController():
+
+class ChargeController:
     def __init__(self, hub):
         self._hub = hub
         self.name = f"{self._hub.hubname} {CHARGERCONTROLLER}"
