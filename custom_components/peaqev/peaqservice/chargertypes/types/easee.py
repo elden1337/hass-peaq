@@ -14,6 +14,15 @@ ENTITYENDINGS = ["_power", "_status", "_dimmer", "_downlight", "_lifetime_energy
 DOMAINNAME = "easee"
 UPDATECURRENT = True
 
+"""
+This is the class that implements a specific chargertype into peaqev.
+Note that you need to change:
+
+-manifest.json: add the domain of the charger to after_dependencies
+-constants.py: alter the CHARGERTYPES with a new type-constant for your charger. If not, it will not be selectable in config_flow
+-chargertypes.py|init: update the clause with your type to return this class as the charger.
+"""
+
 
 class Easee(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid):
