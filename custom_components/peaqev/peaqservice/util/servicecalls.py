@@ -7,6 +7,10 @@ from custom_components.peaqev.peaqservice.util.constants import (
     PARAMS,
     UPDATECURRENT,
 )
+import logging
+
+_LOGGER = logging.getLogger(__name__)
+
 
 class ServiceCalls:
     def __init__(
@@ -27,7 +31,7 @@ class ServiceCalls:
         self._pause = pause_call if pause_call is not None else off_call
         self._resume = resume_call if resume_call is not None else on_call
         self._update_current = UpdateCurrent(update_current_call, update_current_params)
-        self._test_servicecalls()
+        self._validate_servicecalls()
 
     @property
     def allowupdatecurrent(self) -> bool:
@@ -75,10 +79,13 @@ class ServiceCalls:
         }
         return _callsdict.get(call)
 
-    def _test_servicecalls(self):
+    def _validate_servicecalls(self):
         assertions = [self.domain, self.on, self.off, self.pause, self.resume]
-        for a in assertions:
-            assert len(a) > 0
+        try:
+            for a in assertions:
+                assert len(a) > 0
+        except Exception as e:
+            _LOGGER.error("Peaqev could not initialize servicecalls", e)
 
 
 class UpdateCurrent:

@@ -100,7 +100,7 @@ class ChargerBase:
             assert self.servicecalls[OFF] is not None
             assert self.servicecalls[PAUSE] is not None
             assert self.servicecalls[RESUME] is not None
-            if self.allowupdatecurrent:
+            if self.servicecalls.allowupdatecurrent is True:
                 assert self.servicecalls[UPDATECURRENT] is not None
         except Exception as e:
             _LOGGER.error("Peaqev could not initialize charger", e)
