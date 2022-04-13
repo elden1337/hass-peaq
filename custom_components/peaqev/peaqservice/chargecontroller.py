@@ -58,7 +58,6 @@ class ChargeController():
             if self._hub.carpowersensor.value < 1 and time.time() - self.latestchargerstart > DONETIMEOUT:
                 return CHARGECONTROLLER.Done
             else:
-                self.update_latestchargerstart()
                 if self.below_startthreshold and self._hub.totalhourlyenergy.value > 0:
                     return CHARGECONTROLLER.Start
                 else:
