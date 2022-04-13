@@ -2,6 +2,9 @@ name: Validate with HACS
 
 on:
   push:
+    # branches to consider in the event; optional, defaults to all
+    branches:
+      - main
   pull_request:
   schedule:
     - cron: "0 0 * * *"
