@@ -1,29 +1,27 @@
 import logging
 import homeassistant.helpers.template as template
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
+from custom_components.peaqev.peaqservice.util.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.util.constants import (
-    CHARGERTYPEHELPERS_DOMAIN,
-    CHARGERTYPEHELPERS_ON,
-    CHARGERTYPEHELPERS_OFF,
-    CHARGERTYPEHELPERS_PAUSE,
-    CHARGERTYPEHELPERS_RESUME,
-    CHARGERTYPEHELPERS_UPDATECURRENT,
-    CHARGERTYPEHELPERS_NAME,
-    CHARGERTYPEHELPERS_PARAMS,
+    DOMAIN,
+    ON,
+    OFF,
+    PAUSE,
+    RESUME,
+    UPDATECURRENT
 )
 _LOGGER = logging.getLogger(__name__)
 
 
-class ChargerBase():
-    def __init__(self, hass, currentupdate: bool):
+class ChargerBase:
+    def __init__(self, hass):
         self._hass = hass
         self._chargerEntity = None
         self._powermeter = None
         self._powerswitch = None
-        self._allowupdatecurrent = currentupdate
         self.ampmeter = None
         self.ampmeter_is_attribute = None
-        self._servicecalls = {}
+        self._servicecalls = None
         self._chargerstates = {
             CHARGECONTROLLER.Idle: [],
             CHARGECONTROLLER.Connected: [],
@@ -34,10 +32,6 @@ class ChargerBase():
     @property
     def chargerstates(self) -> dict:
         return self._chargerstates
-
-    @property
-    def allowupdatecurrent(self) -> bool:
-        return self._allowupdatecurrent
 
     """Power meter"""
     @property
@@ -71,7 +65,7 @@ class ChargerBase():
 
     """Service calls"""
     @property
-    def servicecalls(self) -> dict:
+    def servicecalls(self):
         return self._servicecalls
 
     def _set_servicecalls(
@@ -81,33 +75,33 @@ class ChargerBase():
             off_call: str,
             pause_call: str = None,
             resume_call: str = None,
+            allowupdatecurrent: bool = False,
             update_current_call: str = None,
             update_current_params: dict = None
     ) -> None:
-        self._servicecalls = {
-                CHARGERTYPEHELPERS_DOMAIN: domain,
-                CHARGERTYPEHELPERS_ON: on_call,
-                CHARGERTYPEHELPERS_OFF: off_call,
-                CHARGERTYPEHELPERS_PAUSE: pause_call if pause_call is not None else off_call,
-                CHARGERTYPEHELPERS_RESUME: resume_call if resume_call is not None else on_call,
-                CHARGERTYPEHELPERS_UPDATECURRENT: {
-                    CHARGERTYPEHELPERS_NAME: update_current_call,
-                    CHARGERTYPEHELPERS_PARAMS: update_current_params
-                }
-            }
+        self._servicecalls = ServiceCalls(
+            domain,
+            on_call,
+            off_call,
+            pause_call,
+            resume_call,
+            allowupdatecurrent,
+            update_current_call,
+            update_current_params
+        )
 
     def validatecharger(self):
         try:
             assert len(self.chargerentity) > 0
             assert len(self.powermeter) > 0
             assert len(self.powerswitch) > 0
-            assert self.servicecalls[CHARGERTYPEHELPERS_DOMAIN] is not None
-            assert self.servicecalls[CHARGERTYPEHELPERS_ON] is not None
-            assert self.servicecalls[CHARGERTYPEHELPERS_OFF] is not None
-            assert self.servicecalls[CHARGERTYPEHELPERS_PAUSE] is not None
-            assert self.servicecalls[CHARGERTYPEHELPERS_RESUME] is not None
-            if self.allowupdatecurrent:
-                assert self.servicecalls[CHARGERTYPEHELPERS_UPDATECURRENT] is not None
+            assert self.servicecalls[DOMAIN] is not None
+            assert self.servicecalls[ON] is not None
+            assert self.servicecalls[OFF] is not None
+            assert self.servicecalls[PAUSE] is not None
+            assert self.servicecalls[RESUME] is not None
+            if self.servicecalls.allowupdatecurrent is True:
+                assert self.servicecalls[UPDATECURRENT] is not None
         except Exception as e:
             _LOGGER.error("Peaqev could not initialize charger", e)
 
