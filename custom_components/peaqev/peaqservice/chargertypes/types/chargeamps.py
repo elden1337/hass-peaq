@@ -13,6 +13,7 @@ _LOGGER = logging.getLogger(__name__)
 ENTITYENDINGS = ["_power", "_1", "_2", "_status", "_dimmer", "_downlight", "_current", "_voltage"]
 DOMAINNAME = "chargeamps"
 UPDATECURRENT = True
+#docs: https://github.com/kirei/hass-chargeamps
 
 """
 This is the class that implements a specific chargertype into peaqev.

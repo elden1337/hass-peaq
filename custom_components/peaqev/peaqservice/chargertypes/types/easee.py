@@ -13,6 +13,7 @@ _LOGGER = logging.getLogger(__name__)
 ENTITYENDINGS = ["_power", "_status", "_dimmer", "_downlight", "_lifetime_energy", "_online", "_current", "_voltage", "_output_limit", "_cost_per_kwh", "_enable_idle_current"]
 DOMAINNAME = "easee"
 UPDATECURRENT = True
+#docs: https://github.com/fondberg/easee_hass
 
 """
 This is the class that implements a specific chargertype into peaqev.

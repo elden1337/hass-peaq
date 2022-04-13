@@ -13,6 +13,7 @@ _LOGGER = logging.getLogger(__name__)
 ENTITYENDINGS = [] #fix
 DOMAINNAME = "garo_wallbox"
 UPDATECURRENT = True
+#docs: https://github.com/sockless-coding/garo_wallbox/
 
 """
 This is the class that implements a specific chargertype into peaqev.
@@ -23,15 +24,37 @@ Note that you need to change:
 -chargertypes.py|init: update the clause with your type to return this class as the charger.
 """
 
+"""
+states:
+'CHANGING'
+'SEARCH_COMM'
+'INITIALIZATION'
+'RCD_FAULT'
+'DISABLED'
+'OVERHEAT'
+'CRITICAL_TEMPERATURE'
+'CABLE_FAULT'
+'LOCK_FAULT'
+'CONTACTOR_FAULT'
+'VENT_FAULT'
+'DC_ERROR'
+'UNKNOWN'
+'UNAVAILABLE'
+"""
 
 class GaroWallbox(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid):
         super().__init__(hass)
         self._chargerid = chargerid
         self.getentities(DOMAINNAME, ENTITYENDINGS)
-        self._chargerstates[CHARGECONTROLLER.Idle] = [] #fix
-        self._chargerstates[CHARGECONTROLLER.Connected] = [] #fix
-        self._chargerstates[CHARGECONTROLLER.Charging] = [] #fix
+        self._chargerstates[CHARGECONTROLLER.Idle] = ['NOT_CONNECTED']
+        self._chargerstates[CHARGECONTROLLER.Connected] = [
+            'CONNECTED',
+            'CHARGING_PAUSED',
+            'CHARGING_FINISHED',
+            'CHARGING_CANCELLED'
+        ]
+        self._chargerstates[CHARGECONTROLLER.Charging] = ['CHARGING']
         #self.chargerentity = f"sensor.{self._entityschema}_1"
         #self.powermeter = f"sensor.{self._entityschema}_1_power"
         #self.powerswitch = f"switch.{self._entityschema}_1"
