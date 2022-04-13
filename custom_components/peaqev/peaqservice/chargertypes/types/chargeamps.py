@@ -14,6 +14,7 @@ ENTITYENDINGS = ["_power", "_1", "_2", "_status", "_dimmer", "_downlight", "_cur
 DOMAINNAME = "chargeamps"
 UPDATECURRENT = True
 
+
 class ChargeAmps(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid):
         super().__init__(hass)
@@ -34,4 +35,3 @@ class ChargeAmps(ChargerBase):
         servicecall_params[CURRENT] = "max_current"
 
         self._set_servicecalls(DOMAINNAME, "enable", "disable", None, None, "set_max_current", servicecall_params)
-        self._set_servicecalls(DOMAINNAME, "enable", "disable", None, None, )

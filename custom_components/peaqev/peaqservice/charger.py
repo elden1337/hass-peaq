@@ -11,8 +11,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
     PARAMS,
     UPDATECURRENT,
     CURRENT,
-    CHARGERID,
-    NAME
+    CHARGERID
 )
 
 _LOGGER = logging.getLogger(__name__)

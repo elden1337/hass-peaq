@@ -8,9 +8,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
     OFF,
     PAUSE,
     RESUME,
-    UPDATECURRENT,
-    NAME,
-    PARAMS,
+    UPDATECURRENT
 )
 _LOGGER = logging.getLogger(__name__)
 
