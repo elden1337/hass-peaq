@@ -7,7 +7,7 @@ from homeassistant import config_entries, exceptions
 from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_NAME
 import homeassistant.helpers.config_validation as cv
-import custom_components.peaqev.peaqservice.constants as pk
+import custom_components.peaqev.peaqservice.util.constants as pk
 # from homeassistant.helpers.entity_registry import (
 #     async_entries_for_config_entry,
 #     async_get_registry,

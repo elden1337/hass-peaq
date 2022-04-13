@@ -2,7 +2,7 @@ from homeassistant.components.sql.sensor import (
     SQLSensor
 )
 from custom_components.peaqev.const import DOMAIN
-from custom_components.peaqev.peaqservice.constants import (
+from custom_components.peaqev.peaqservice.util.constants import (
     SQLSENSOR_BASENAME,
     SQLSENSOR_AVERAGEOFTHREE,
     SQLSENSOR_AVERAGEOFTHREE_MIN,

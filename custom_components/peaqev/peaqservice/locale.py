@@ -1,4 +1,4 @@
-import custom_components.peaqev.peaqservice.constants as constants
+import custom_components.peaqev.peaqservice.util.constants as constants
 
 """Init the service"""
 class LocaleData():

@@ -3,7 +3,7 @@ from .const import (
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.core import HomeAssistant
-from custom_components.peaqev.peaqservice.constants import CHARGERENABLED, CHARGERDONE
+from custom_components.peaqev.peaqservice.util.constants import CHARGERENABLED, CHARGERDONE
 
 async def async_setup_entry(hass : HomeAssistant, config_entry, async_add_entities):
     hub = hass.data[DOMAIN]["hub"]
