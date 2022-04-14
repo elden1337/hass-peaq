@@ -50,6 +50,7 @@ class Charger:
             await self._call_charger(RESUME)
         self._hub.chargecontroller.update_latestchargerstart()
         if self._hub.chargertypedata.charger.servicecalls.allowupdatecurrent is True:
+            _LOGGER.info("peaqev init updatemaxcurrent")
             self._hass.async_create_task(self._updatemaxcurrent())
 
     async def _terminate_charger(self):
@@ -83,7 +84,8 @@ class Charger:
 
             if self._chargerrunning is True and self._chargerstopped is False:
                 serviceparams = await self._setchargerparams(calls)
-
+                info = f"peaqev updating charging current with: {calls[DOMAIN]}, {calls[UPDATECURRENT]} and params: {serviceparams}"
+                _LOGGER.info(info)
                 await self._hub.hass.services.async_call(
                     calls[DOMAIN],
                     calls[UPDATECURRENT],
