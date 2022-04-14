@@ -100,20 +100,16 @@ class Charger:
             finalserviceparams
         )
 
-    async def _setchargerparams(self, calls:dict, ampoverride:int = 0):
+    async def _setchargerparams(self, calls, ampoverride:int = 0):
         amps = ampoverride if ampoverride >= 6 else self._hub.threshold.allowedcurrent
+        serviceparams = {}
         if await self._checkchargerparams(calls) is True:
-            serviceparams = {
-                calls[PARAMS][CHARGER]: calls[UPDATECURRENT][PARAMS][CHARGERID],
-                calls[PARAMS][CURRENT]: amps
-            }
-        else:
-            serviceparams = {
-                calls[PARAMS][CURRENT]: amps
-            }
+            serviceparams[calls[PARAMS][CHARGER]] = calls[PARAMS][CHARGERID]
+
+        serviceparams[calls[PARAMS][CURRENT]] = amps
         return serviceparams
 
-    async def _checkchargerparams(self, calls:dict) -> bool:
+    async def _checkchargerparams(self, calls) -> bool:
         return len(calls[PARAMS][CHARGER]) > 0 and len(calls[PARAMS][CHARGERID]) > 0
 
     def _wait_turn_on(self) -> None:
