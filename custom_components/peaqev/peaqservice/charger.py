@@ -50,7 +50,6 @@ class Charger:
             await self._call_charger(RESUME)
         self._hub.chargecontroller.update_latestchargerstart()
         if self._hub.chargertypedata.charger.servicecalls.allowupdatecurrent is True:
-            _LOGGER.info("peaqev init updatemaxcurrent")
             self._hass.async_create_task(self._updatemaxcurrent())
 
     async def _terminate_charger(self):
@@ -79,10 +78,8 @@ class Charger:
         calls = self._service_calls.get_call(UPDATECURRENT)
         await self._hass.async_add_executor_job(self._wait_turn_on)
 
-        while self._hub.chargerobject_switch.value == "on" and self._chargerstopped is False:
-            await self._hass.async_add_executor_job(self._wait_update_current)
-
-            if self._chargerrunning is True and self._chargerstopped is False:
+        while self._hub.chargerobject_switch.value == "on" and self._chargerrunning is True:
+            if await self._hass.async_add_executor_job(self._wait_update_current) is True:
                 serviceparams = await self._setchargerparams(calls)
                 info = f"peaqev updating charging current with: {calls[DOMAIN]}, {calls[UPDATECURRENT]} and params: {serviceparams}"
                 _LOGGER.info(info)
@@ -105,27 +102,31 @@ class Charger:
         serviceparams = {}
         if await self._checkchargerparams(calls) is True:
             serviceparams[calls[PARAMS][CHARGER]] = calls[PARAMS][CHARGERID]
-
         serviceparams[calls[PARAMS][CURRENT]] = amps
         return serviceparams
 
     async def _checkchargerparams(self, calls) -> bool:
         return len(calls[PARAMS][CHARGER]) > 0 and len(calls[PARAMS][CHARGERID]) > 0
 
-    def _wait_turn_on(self) -> None:
+    def _wait_turn_on(self):
         while self._hub.chargerobject_switch.value == "off" and self._chargerstopped is False:
             time.sleep(3)
+        return True
 
-    def _wait_update_current(self) -> None:
-        while (int(self._hub.chargerobject_switch.current) == int(self._hub.threshold.allowedcurrent) and self._chargerstopped is False):
+    def _wait_update_current(self):
+        while int(self._hub.chargerobject_switch.current) == int(self._hub.threshold.allowedcurrent) and self._chargerstopped is False:
             #or (datetime.now().minute >= 55 and allowed_current > switch_current and self._chargerstopped is False):
             time.sleep(3)
+        if self._chargerstopped is True:
+            return False
+        return True
 
-    def _wait_loop_cycle(self) -> None:
+    def _wait_loop_cycle(self):
         timer = 180
         starttime = time.time()
         while time.time() - starttime < timer:
             time.sleep(3)
+        return True
 
     def _is_running(self, determinator: bool):
         if determinator:
