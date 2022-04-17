@@ -133,3 +133,14 @@ class Hub:
         
         if entity in self.chargingtracker_entities:
             await self.charger.charge()
+
+    """Methods called from servicecalls"""
+    async def call_enable_peaq(self):
+        """peaqev.enable"""
+        self.charger_enabled.value = True
+        self.charger_done.value = False
+
+    async def call_disable_peaq(self):
+        """peaqev.disable"""
+        self.charger_enabled.value = False
+        self.charger_done.value = False

@@ -34,4 +34,11 @@ class ChargeAmps(ChargerBase):
         servicecall_params[CHARGERID] = self._chargerid
         servicecall_params[CURRENT] = "max_current"
 
-        self._set_servicecalls(DOMAINNAME, "enable", "disable", None, None, "set_max_current", servicecall_params)
+        self._set_servicecalls(
+            domain=DOMAINNAME,
+            on_call="enable",
+            off_call="disable",
+            allowupdatecurrent= True,
+            update_current_call="set_max_current",
+            update_current_params=servicecall_params
+        )

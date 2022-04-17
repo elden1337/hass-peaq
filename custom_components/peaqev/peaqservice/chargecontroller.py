@@ -62,6 +62,7 @@ class ChargeController:
                 if self.below_startthreshold and self._hub.totalhourlyenergy.value > 0:
                     return CHARGECONTROLLER.Start
                 else:
+                    self.update_latestchargerstart()
                     return CHARGECONTROLLER.Stop
         elif chargerstate in self._hub.chargertypedata.charger.chargerstates[CHARGECONTROLLER.Charging]:
             self.update_latestchargerstart()
