@@ -5,7 +5,7 @@ import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 import custom_components.peaqev.peaqservice.util.constants as constants
 from custom_components.peaqev.peaqservice.chargecontroller import ChargeController
 from custom_components.peaqev.peaqservice.prediction.prediction import Prediction
-from custom_components.peaqev.peaqservice.threshold import Threshold
+from custom_components.peaqev.peaqservice.threshold.threshold import Threshold
 from custom_components.peaqev.peaqservice.localetypes.locale import LocaleData
 from custom_components.peaqev.peaqservice.charger import Charger
 from custom_components.peaqev.peaqservice.util.hubmember import (
