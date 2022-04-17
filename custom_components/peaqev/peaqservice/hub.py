@@ -6,7 +6,7 @@ import custom_components.peaqev.peaqservice.util.constants as constants
 from custom_components.peaqev.peaqservice.chargecontroller import ChargeController
 from custom_components.peaqev.peaqservice.prediction import Prediction
 from custom_components.peaqev.peaqservice.threshold import Threshold
-from custom_components.peaqev.peaqservice.locale import LocaleData
+from custom_components.peaqev.peaqservice.localetypes.locale import LocaleData
 from custom_components.peaqev.peaqservice.charger import Charger
 from custom_components.peaqev.peaqservice.util.hubmember import (
     HubMember,
@@ -37,29 +37,71 @@ class Hub:
         self.domain = domain
 
         """from the config inputs"""
-        self.localedata = LocaleData(config_inputs["locale"])
-        self.chargertypedata = ChargerTypeData(hass, config_inputs["chargertype"], config_inputs["chargerid"])
+        self.locale = LocaleData(config_inputs["locale"], self.domain)
+        self.chargertype = ChargerTypeData(hass, config_inputs["chargertype"], config_inputs["chargerid"])
         self._powersensor_includes_car = config_inputs["powersensorincludescar"]
         self._monthlystartpeak = config_inputs["monthlystartpeak"]
         self.nonhours = config_inputs["nonhours"]
         self.cautionhours = config_inputs["cautionhours"]
         self.powersensor = HubMember(int, config_inputs["powersensor"], 0)
 
-        self.charger_enabled = HubMember(bool, f"binary_sensor.{self.domain}_{ex.nametoid(constants.CHARGERENABLED)}", False)
-        self.powersensormovingaverage = HubMember(int, f"sensor.{self.domain}_{ex.nametoid(constants.AVERAGECONSUMPTION)}", 0)
-        self.totalhourlyenergy = HubMember(float, f"sensor.{self.domain}_{ex.nametoid(constants.CONSUMPTION_TOTAL_NAME)}_{constants.HOURLY}", 0)
-        self.charger_done = HubMember(bool, f"binary_sensor.{self.domain}_{ex.nametoid(constants.CHARGERDONE)}", False)
-        self.totalpowersensor = HubMember(int, name = constants.TOTALPOWER)
-        self.carpowersensor = HubMember(int, self.chargertypedata.charger.powermeter, 0) 
-        self.currentpeak = CurrentPeak(float, f"sensor.{self.domain}_{ex.nametoid(PeaqSQLSensorHelper('').getquerytype(self.localedata.observedpeak)['name'])}", 0, self._monthlystartpeak[str(datetime.now().month)])
-        self.chargerobject = HubMember(str, self.chargertypedata.charger.chargerentity)
-        self.chargerobject_switch = ChargerSwitch(self.hass, bool, self.chargertypedata.charger.powerswitch, False, self.chargertypedata.charger.ampmeter, self.chargertypedata.charger.ampmeter_is_attribute)
+        self.charger_enabled = HubMember(
+            type=bool,
+            listenerentity=f"binary_sensor.{self.domain}_{ex.nametoid(constants.CHARGERENABLED)}",
+            initval=False
+        )
+        self.powersensormovingaverage = HubMember(
+            type=int,
+            listenerentity=f"sensor.{self.domain}_{ex.nametoid(constants.AVERAGECONSUMPTION)}",
+            initval=0
+        )
+        self.totalhourlyenergy = HubMember(
+            type=float,
+            listenerentity=f"sensor.{self.domain}_{ex.nametoid(constants.CONSUMPTION_TOTAL_NAME)}_{constants.HOURLY}",
+            initval=0
+        )
+        self.charger_done = HubMember(
+            type=bool,
+            listenerentity=f"binary_sensor.{self.domain}_{ex.nametoid(constants.CHARGERDONE)}",
+            initval=False
+        )
+        self.totalpowersensor = HubMember(
+            type=int,
+            name=constants.TOTALPOWER
+        )
+        self.carpowersensor = HubMember(
+            type=int,
+            listenerentity=self.chargertype.charger.powermeter,
+            initval=0
+        )
+        self.currentpeak = CurrentPeak(
+            type=float,
+            listenerentity=self.locale.current_peak_entity,
+            initval=0,
+            startpeak=self._monthlystartpeak[str(datetime.now().month)]
+        )
+        self.chargerobject = HubMember(
+            type=str,
+            listenerentity=self.chargertype.charger.chargerentity
+        )
+        self.chargerobject_switch = ChargerSwitch(
+            hass=self.hass,
+            type=bool,
+            listenerentity=self.chargertype.charger.powerswitch,
+            initval=False,
+            currentname=self.chargertype.charger.ampmeter,
+            ampmeter_is_attribute=self.chargertype.charger.ampmeter_is_attribute
+        )
 
         """Init the subclasses"""
         self.prediction = Prediction(self)
         self.threshold = Threshold(self)
         self.chargecontroller = ChargeController(self)
-        self.charger = Charger(self, hass, self.chargertypedata.charger.servicecalls)
+        self.charger = Charger(
+            self,
+            hass,
+            self.chargertype.charger.servicecalls
+        )
         
         self.init_hub_values()
         

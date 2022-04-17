@@ -66,17 +66,17 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
 
     #sql sensors
     peaqsqlsensors = []
-    peaks = hub.localedata
+    peaks = hub.locale
 
     db_url = DEFAULT_URL.format(hass_config_path=hass.config.path(DEFAULT_DB_FILE))
     engine = sqlalchemy.create_engine(db_url)
     sessmaker = scoped_session(sessionmaker(bind=engine))
     sqlsensor = hub.totalhourlyenergy.entity
-    sql = PeaqSQLSensorHelper(sqlsensor).getquerytype(peaks.chargedpeak)
+    sql = PeaqSQLSensorHelper(sqlsensor).getquerytype(peaks.data.charged_peak)
     peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql))
 
-    if peaks.chargedpeak != peaks.observedpeak:
-        sql2 = PeaqSQLSensorHelper(sqlsensor).getquerytype(peaks.observedpeak)
+    if peaks.data.charged_peak != peaks.data.observed_peak:
+        sql2 = PeaqSQLSensorHelper(sqlsensor).getquerytype(peaks.data.observed_peak)
         peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql2))
     #sql sensors
     
@@ -107,6 +107,6 @@ class DeviceSensor(SensorEntity):
             "identifiers": {(DOMAIN, self._hub.hub_id)},
             "name": self._attr_name,
             "sw_version": 1,
-            "model": f"{self._hub.localedata.type} ({self._hub.chargertypedata.type})",
+            "model": f"{self._hub.locale.type} ({self._hub.chargertype.type})",
             "manufacturer": "Peaq systems",
         }
