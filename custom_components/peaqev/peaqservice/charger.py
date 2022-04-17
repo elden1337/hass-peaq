@@ -78,7 +78,7 @@ class Charger:
         calls = self._service_calls.get_call(UPDATECURRENT)
         await self._hass.async_add_executor_job(self._wait_turn_on)
 
-        while self._hub.chargerobject_switch.value == "on" and self._chargerrunning is True:
+        while self._hub.chargerobject_switch.value is True and self._chargerrunning is True:
             if await self._hass.async_add_executor_job(self._wait_update_current) is True:
                 serviceparams = await self._setchargerparams(calls)
                 info = f"peaqev updating current with: {calls[DOMAIN]}, {calls[UPDATECURRENT]} and params: {serviceparams}"
@@ -90,11 +90,11 @@ class Charger:
                 )
                 await self._hass.async_add_executor_job(self._wait_loop_cycle)
 
-        finalserviceparams = await self._setchargerparams(calls, ampoverride=6)
+        final_service_params = await self._setchargerparams(calls, ampoverride=6)
         await self._hub.hass.services.async_call(
             calls[DOMAIN],
             calls[UPDATECURRENT],
-            finalserviceparams
+            final_service_params
         )
 
     async def _setchargerparams(self, calls, ampoverride:int = 0):
@@ -109,7 +109,7 @@ class Charger:
         return len(calls[PARAMS][CHARGER]) > 0 and len(calls[PARAMS][CHARGERID]) > 0
 
     def _wait_turn_on(self):
-        while self._hub.chargerobject_switch.value == "off" and self._chargerstopped is False:
+        while self._hub.chargerobject_switch.value is False and self._chargerstopped is False:
             time.sleep(3)
         return True
 

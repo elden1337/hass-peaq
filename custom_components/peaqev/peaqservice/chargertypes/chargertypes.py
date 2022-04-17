@@ -4,7 +4,7 @@ from custom_components.peaqev.peaqservice.chargertypes.types.chargeamps import C
 from custom_components.peaqev.peaqservice.chargertypes.types.easee import Easee
 
 
-class ChargerTypeData():
+class ChargerTypeData:
     def __init__(self, hass: HomeAssistant, input, chargerid):
         self._charger = None
         self._type = input
