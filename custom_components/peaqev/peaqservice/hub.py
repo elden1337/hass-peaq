@@ -4,7 +4,7 @@ from datetime import datetime
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 import custom_components.peaqev.peaqservice.util.constants as constants
 from custom_components.peaqev.peaqservice.chargecontroller import ChargeController
-from custom_components.peaqev.peaqservice.prediction import Prediction
+from custom_components.peaqev.peaqservice.prediction.prediction import Prediction
 from custom_components.peaqev.peaqservice.threshold import Threshold
 from custom_components.peaqev.peaqservice.localetypes.locale import LocaleData
 from custom_components.peaqev.peaqservice.charger import Charger
@@ -14,7 +14,6 @@ from custom_components.peaqev.peaqservice.util.hubmember import (
     ChargerSwitch
 )
 from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
-from custom_components.peaqev.sensors.peaqsqlsensor import PeaqSQLSensorHelper
 from homeassistant.helpers.event import async_track_state_change
 from homeassistant.core import (
     HomeAssistant,
