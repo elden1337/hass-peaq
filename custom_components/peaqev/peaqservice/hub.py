@@ -53,7 +53,7 @@ class Hub:
         self.carpowersensor = HubMember(int, self.chargertypedata.charger.powermeter, 0) 
         self.currentpeak = CurrentPeak(float, f"sensor.{self.domain}_{ex.nametoid(PeaqSQLSensorHelper('').getquerytype(self.localedata.observedpeak)['name'])}", 0, self._monthlystartpeak[str(datetime.now().month)])
         self.chargerobject = HubMember(str, self.chargertypedata.charger.chargerentity)
-        self.chargerobject_switch = ChargerSwitch(self.hass, str, self.chargertypedata.charger.powerswitch, False, self.chargertypedata.charger.ampmeter, self.chargertypedata.charger.ampmeter_is_attribute)
+        self.chargerobject_switch = ChargerSwitch(self.hass, bool, self.chargertypedata.charger.powerswitch, False, self.chargertypedata.charger.ampmeter, self.chargertypedata.charger.ampmeter_is_attribute)
 
         """Init the subclasses"""
         self.prediction = Prediction(self)

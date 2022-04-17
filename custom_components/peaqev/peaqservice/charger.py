@@ -30,15 +30,15 @@ class Charger:
         """Main function to turn charging on or off"""
         if self._hub.charger_enabled.value is True:
             if self._hub.chargecontroller.status is CHARGECONTROLLER.Start:
-                if self._hub.chargerobject_switch.value == "off" and self._chargerrunning is False:
+                if self._hub.chargerobject_switch.value is False and self._chargerrunning is False:
                     await self._start_charger()
             elif self._hub.chargecontroller.status is CHARGECONTROLLER.Stop or self._hub.chargecontroller.status is CHARGECONTROLLER.Idle:
-                if self._hub.chargerobject_switch.value == "on" and self._chargerstopped is False:
+                if self._hub.chargerobject_switch.value is True and self._chargerstopped is False:
                     await self._pause_charger()
             elif self._hub.chargecontroller.status is CHARGECONTROLLER.Done and self._hub.charger_done.value is False:
                 await self._terminate_charger()
         else:
-            if self._hub.chargerobject_switch.value == "on" and self._chargerstopped is False:
+            if self._hub.chargerobject_switch.value is True and self._chargerstopped is False:
                 await self._terminate_charger()
 
     async def _start_charger(self):
@@ -81,7 +81,7 @@ class Charger:
         while self._hub.chargerobject_switch.value == "on" and self._chargerrunning is True:
             if await self._hass.async_add_executor_job(self._wait_update_current) is True:
                 serviceparams = await self._setchargerparams(calls)
-                info = f"peaqev updating charging current with: {calls[DOMAIN]}, {calls[UPDATECURRENT]} and params: {serviceparams}"
+                info = f"peaqev updating current with: {calls[DOMAIN]}, {calls[UPDATECURRENT]} and params: {serviceparams}"
                 _LOGGER.info(info)
                 await self._hub.hass.services.async_call(
                     calls[DOMAIN],
