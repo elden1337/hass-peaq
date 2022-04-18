@@ -18,10 +18,22 @@ class PredictionTests(unittest.TestCase):
         self.assertEqual(retperc, 28.25)
 
     def test_prediction_valueerrors(self):
-        self.assertRaises(ValueError, self.p._predictedenergy, nowmin=60, nowsec=37, poweravg=420,
-                          totalhourlyenergy=0.24)
-        self.assertRaises(ValueError, self.p._predictedenergy, nowmin=50, nowsec=-1, poweravg=420,
-                          totalhourlyenergy=-1)
+        self.assertRaises(
+            ValueError,
+            self.p._predictedenergy,
+            nowmin=60,
+            nowsec=37,
+            poweravg=420,
+            totalhourlyenergy=0.24
+        )
+        self.assertRaises(
+            ValueError,
+            self.p._predictedenergy,
+            nowmin=50,
+            nowsec=-1,
+            poweravg=420,
+            totalhourlyenergy=-1
+        )
         self.assertRaises(ValueError, self.p._predictedenergy, nowmin=50, nowsec=-1, poweravg=-1,
                           totalhourlyenergy=0.05)
         self.assertRaises(ValueError, self.p._predictedenergy, nowmin=50, nowsec=37, poweravg=420,
