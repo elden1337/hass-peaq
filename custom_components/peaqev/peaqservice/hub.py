@@ -132,8 +132,8 @@ class Hub:
         self.chargerobject_switch.value = self.hass.states.get(self.chargerobject_switch.entity).state
         self.chargerobject_switch.updatecurrent()
         self.carpowersensor.value = self.hass.states.get(self.carpowersensor.entity).state
-        self.totalhourlyenergy.value = self.hass.states.get(self.totalhourlyenergy.entity).state
-        self.currentpeak.value = self.hass.states.get(self.currentpeak.entity).state
+        self.totalhourlyenergy.value = self.hass.states.get(self.totalhourlyenergy.entity)
+        self.currentpeak.value = self.hass.states.get(self.currentpeak.entity)
 
     async def is_initialized(self) -> bool:
         return True
