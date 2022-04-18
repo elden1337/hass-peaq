@@ -35,7 +35,7 @@ DATA_SCHEMA = vol.Schema(
 
 
 async def _check_power_sensor(hass: HomeAssistant, powersensor:str) -> bool:
-    ret = hass.states.get(powersensor)
+    ret = hass.states.get(powersensor).state
     try:
         float(ret)
         return True
