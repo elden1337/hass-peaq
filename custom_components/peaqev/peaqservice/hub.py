@@ -128,12 +128,12 @@ class Hub:
     def init_hub_values(self):
         """Initialize values from Home Assistant on the set objects"""
 
-        self.chargerobject.value = self.hass.states.get(self.chargerobject.entity)
-        self.chargerobject_switch.value = self.hass.states.get(self.chargerobject_switch.entity)
+        self.chargerobject.value = self.hass.states.get(self.chargerobject.entity).state
+        self.chargerobject_switch.value = self.hass.states.get(self.chargerobject_switch.entity).state
         self.chargerobject_switch.updatecurrent()
-        self.carpowersensor.value = self.hass.states.get(self.carpowersensor.entity)
-        self.totalhourlyenergy.value = self.hass.states.get(self.totalhourlyenergy.entity)
-        self.currentpeak.value = self.hass.states.get(self.currentpeak.entity)
+        self.carpowersensor.value = self.hass.states.get(self.carpowersensor.entity).state
+        self.totalhourlyenergy.value = self.hass.states.get(self.totalhourlyenergy.entity).state
+        self.currentpeak.value = self.hass.states.get(self.currentpeak.entity).state
 
     async def is_initialized(self) -> bool:
         return True
