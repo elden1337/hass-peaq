@@ -1,8 +1,8 @@
 
 from homeassistant.const import (
-    TIME_HOURS,
-    METHOD_TRAPEZOIDAL
+    TIME_HOURS
 )
+from homeassistant.components.integration.const import METHOD_TRAPEZOIDAL
 
 from homeassistant.components.integration.sensor import (
     IntegrationSensor
