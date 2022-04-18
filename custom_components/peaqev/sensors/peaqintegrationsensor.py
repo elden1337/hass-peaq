@@ -1,10 +1,10 @@
 
 from homeassistant.const import (
-    TIME_HOURS
+    TIME_HOURS,
+    METHOD_TRAPEZOIDAL
 )
 
 from homeassistant.components.integration.sensor import (
-    TRAPEZOIDAL_METHOD,
     IntegrationSensor
 )
 from custom_components.peaqev.const import DOMAIN
@@ -22,7 +22,7 @@ class PeaqIntegrationSensor(IntegrationSensor):
             "k",
             TIME_HOURS,
             None,
-            TRAPEZOIDAL_METHOD
+            METHOD_TRAPEZOIDAL
         )
 
     @property
