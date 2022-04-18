@@ -1,4 +1,5 @@
 import logging
+
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 
 _LOGGER = logging.getLogger(__name__)

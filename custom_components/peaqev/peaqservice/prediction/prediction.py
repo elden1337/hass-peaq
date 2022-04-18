@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from custom_components.peaqev.peaqservice.prediction.predictionbase import PredictionBase
 
 

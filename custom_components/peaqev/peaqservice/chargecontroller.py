@@ -1,7 +1,6 @@
-from datetime import datetime
-import time
 import logging
-from typing import Tuple
+import time
+from datetime import datetime
 
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER

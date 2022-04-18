@@ -1,3 +1,7 @@
+import logging
+
+from homeassistant.core import HomeAssistant
+
 from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
 from custom_components.peaqev.peaqservice.util.constants import (
@@ -5,8 +9,6 @@ from custom_components.peaqev.peaqservice.util.constants import (
     CHARGERID,
     CURRENT,
 )
-import logging
-from homeassistant.core import HomeAssistant
 
 _LOGGER = logging.getLogger(__name__)
 

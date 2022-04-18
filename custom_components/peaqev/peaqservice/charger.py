@@ -1,5 +1,6 @@
-import time
 import logging
+import time
+
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
 from custom_components.peaqev.peaqservice.util.constants import (
     DOMAIN,
