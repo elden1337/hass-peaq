@@ -26,9 +26,15 @@ class HubMember:
         if type(value) is self._type:
             self._value = value
         elif self._type is float:
-            self._value = float(value) if value is not None else 0
+            try:
+                self._value = float(value)
+            except:
+                self._value = 0
         elif self._type is int:
-            self._value = int(float(value)) if value is not None else 0
+            try:
+                self._value = int(float(value))
+            except:
+                self._value = 0
         elif self._type is bool:
             try:
                 if value is None:
