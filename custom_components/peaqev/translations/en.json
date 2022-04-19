@@ -7,7 +7,8 @@
       "cannot_connect": "Cannot create Peaq-instance",
       "invalid_auth": "Invalid authentication",
       "unknown": "Unknown error has occured",
-      "invalid_setup": "Some of the sensors are not reachable or wrong type."
+      "invalid_powersensor": "The powersensor provided is not reachable or wrong type  (state must be numeric)",
+      "invalid_chargerid": "You must provide a chargerId"
     },
     "step": {
       "user": {

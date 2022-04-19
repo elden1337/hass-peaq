@@ -46,16 +46,20 @@ async def _check_power_sensor(hass: HomeAssistant, powersensor:str) -> bool:
 
 
 async def validate_input_user(hass: HomeAssistant, data: dict) -> dict[str, Any]:
-    """ Validate the data can be used to set up a connection."""
-
-    if len(data["chargerid"]) < 3:
-        raise ValueError
-
+    """ Validate the powersensor"""
     if len(data["name"]) < 3:
         raise ValueError
     elif not data["name"].startswith("sensor."):
         data["name"] = f"sensor.{data['name']}"
     if await _check_power_sensor(hass, data["name"]) is False:
+        raise ValueError
+
+    return {"title": data["name"]}
+
+
+async def validate_input_user_chargerid(data: dict) -> dict[str, Any]:
+    """ Validate the chargerId"""
+    if len(data["chargerid"]) < 1:
         raise ValueError
 
     return {"title": data["name"]}
@@ -78,7 +82,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 self.info = await validate_input_user(self.hass, user_input)
             except ValueError:
-                errors["base"] = "invalid_setup"
+                errors["base"] = "invalid_powersensor"
+            try:
+                self.info = await validate_input_user(self.hass, user_input)
+            except ValueError:
+                errors["base"] = "invalid_chargerid"
             if not errors:
                 self.data = user_input
                 self.data[self.OPTIONS] = []
