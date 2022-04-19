@@ -1,8 +1,7 @@
 import logging
 import time
 from datetime import datetime
-
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontrollerbase import ChargeControllerBase
+from Peaqevcore.Chargecontroller import ChargeContollerBase as core_chargecontroller
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
@@ -10,7 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 DONETIMEOUT = 180
 
 
-class ChargeController(ChargeControllerBase):
+class ChargeController:
     def __init__(self, hub):
         self._hub = hub
         self.name = f"{self._hub.hubname} {CHARGERCONTROLLER}"
@@ -27,7 +26,7 @@ class ChargeController(ChargeControllerBase):
 
     @property
     def below_startthreshold(self) -> bool:
-        return self._below_startthreshold(
+        return core_chargecontroller.below_start_threshold(
             predicted_energy=self._hub.prediction.predictedenergy,
             current_peak=self._hub.currentpeak.value,
             threshold_start=self._hub.threshold.start
@@ -35,7 +34,7 @@ class ChargeController(ChargeControllerBase):
 
     @property
     def above_stopthreshold(self) -> bool:
-        return self._above_stopthreshold(
+        return core_chargecontroller.above_stop_threshold(
             predicted_energy=self._hub.prediction.predictedenergy,
             current_peak=self._hub.currentpeak.value,
             threshold_stop=self._hub.threshold.stop
@@ -52,17 +51,6 @@ class ChargeController(ChargeControllerBase):
         ret = CHARGECONTROLLER.Error
         update_timer = False
         charger_state = self._hub.chargerobject.value.lower()
-
-        # return self._let_charge(
-        #     charger_state = self._hub.chargerobject.value.lower(),
-        #     charger_enabled = self._hub.charger_enabled.value,
-        #     charger_done = self._hub.charger_done.value,
-        #     total_hourly_energy = self._hub.totalhourlyenergy.value,
-        #     car_power_sensor = self._hub.carpowersensor.value,
-        #     non_hours = self._hub.nonhours,
-        #     now_hour = datetime.now().hour,
-        #     charger_states = self._hub.chargertype.charger.chargerstates
-        # )
 
         if charger_state in self._hub.chargertype.charger.chargerstates[CHARGECONTROLLER.Idle]:
             update_timer = True
