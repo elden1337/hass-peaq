@@ -59,8 +59,7 @@ class ChargeControllerBase:
             current_peak: float,
             threshold_start: float
     ) -> bool:
-        return (predicted_energy * 1000) < (
-                (current_peak * 1000) * (threshold_start / 100))
+        return (predicted_energy * 1000) < ((current_peak * 1000) * (threshold_start / 100))
 
     @staticmethod
     def _above_stopthreshold(
@@ -68,5 +67,4 @@ class ChargeControllerBase:
             current_peak: float,
             threshold_stop: float
     ) -> bool:
-        return (predicted_energy * 1000) > (
-                (current_peak * 1000) * (threshold_stop / 100))
+        return (predicted_energy * 1000) > ((current_peak * 1000) * (threshold_stop / 100))
