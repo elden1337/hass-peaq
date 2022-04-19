@@ -13,8 +13,8 @@ from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller impo
 from custom_components.peaqev.peaqservice.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
 from custom_components.peaqev.peaqservice.localetypes.locale import LocaleData
-from custom_components.peaqev.peaqservice.prediction.prediction import Prediction
-from custom_components.peaqev.peaqservice.threshold.threshold import Threshold
+from custom_components.peaqev.peaqservice.prediction import Prediction
+from custom_components.peaqev.peaqservice.threshold import Threshold
 from custom_components.peaqev.peaqservice.util.hubmember import (
     HubMember,
     CurrentPeak,
