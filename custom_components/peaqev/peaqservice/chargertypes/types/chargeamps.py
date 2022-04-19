@@ -28,7 +28,7 @@ class ChargeAmps(ChargerBase):
         self.chargerentity = f"sensor.{self._entityschema}_1"
         self.powermeter = f"sensor.{self._entityschema}_1_power"
         self.powerswitch = f"switch.{self._entityschema}_1"
-        self.ampmeter = "Max current"
+        self.ampmeter = "max_current"
         self.ampmeter_is_attribute = True
 
         servicecall_params = {}
