@@ -16,11 +16,8 @@ from custom_components.peaqev.sensors.peaqsensor import PeaqSensor
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_TOTAL_NAME,
-    CONSUMPTION_INTEGRAL_NAME,
-    PEAQCONTROLLER
+    CONSUMPTION_INTEGRAL_NAME
     )
-
-from homeassistant.components.sensor import SensorEntity
 
 from homeassistant.core import (
     HomeAssistant,
@@ -42,10 +39,6 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
     """Add sensors for passed config_entry in HA."""
     
     hub = hass.data[DOMAIN]["hub"]
-    
-    devicesensor = []
-    devicesensor.append(DeviceSensor(hub, PEAQCONTROLLER))
-    async_add_entities(devicesensor, update_before_add = True)
 
     peaqsensors = await gather_Sensors(hass, hub)
     async_add_entities(peaqsensors, update_before_add = True)
@@ -91,22 +84,3 @@ async def gather_Sensors(hass: HomeAssistant, hub) -> list:
     peaqsensors.append(PeaqThresholdSensor(hub))
     peaqsensors.append(PeaqSensor(hub))
     return peaqsensors
-    
-class DeviceSensor(SensorEntity):
-    should_poll = True
-
-    def __init__(self, hub, name):
-        self._hub = hub
-        self._attr_name = name
-        self._attr_unique_id = f"{self._hub.hub_id}_wrapper"
-        self._attr_available = True
-
-    @property
-    def device_info(self):
-        return {
-            "identifiers": {(DOMAIN, self._hub.hub_id)},
-            "name": self._attr_name,
-            "sw_version": 1,
-            "model": f"{self._hub.locale.type} ({self._hub.chargertype.type})",
-            "manufacturer": "Peaq systems",
-        }
