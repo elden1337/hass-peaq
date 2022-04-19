@@ -40,6 +40,8 @@ async def _check_power_sensor(hass: HomeAssistant, powersensor:str) -> bool:
         float(ret)
         return True
     except:
+        msg = f"{powersensor} did not produce a valid state for {DOMAIN}. State was {ret}"
+        _LOGGER.error(msg)
         return False
 
 
