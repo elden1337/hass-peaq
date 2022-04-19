@@ -43,12 +43,12 @@ class ChargeController(ChargeControllerBase):
 
     @property
     def status(self):
-        return self._status()
+        return self._get_status()
 
     def update_latestchargerstart(self):
         self.latest_charger_start = time.time()
 
-    def _status(self):
+    def _get_status(self):
         ret = CHARGECONTROLLER.Error
         update_timer = False
         charger_state = self._hub.chargerobject.value.lower()
