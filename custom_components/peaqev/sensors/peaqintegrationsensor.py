@@ -14,7 +14,7 @@ class PeaqIntegrationSensor(IntegrationSensor):
         self._hub = hub
         self._attr_name = f"{self._hub.hubname} {name}"
         self._attr_unique_id = f"{DOMAIN}_{self._hub.hub_id}_{self._attr_name}"
-        self._unit_of_measurement = "kW"
+        self._unit_of_measurement = "kWh"
 
         super().__init__(
             integration_method=METHOD_TRAPEZOIDAL,
