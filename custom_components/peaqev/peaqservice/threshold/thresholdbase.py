@@ -1,5 +1,3 @@
-
-
 class ThresholdBase:
 
     @staticmethod
