@@ -65,13 +65,16 @@ class ChargerSwitch(HubMember):
     def __init__(self, hass, type: type, listenerentity, initval, currentname: str, ampmeter_is_attribute: bool):
         self._hass = hass
         self._value = initval
-        self._current = 6
+        self._current = 0
         self._current_attr_name = currentname
         self._ampmeter_is_attribute = ampmeter_is_attribute
         super().__init__(type, listenerentity, initval)
 
     @property
     def current(self) -> int:
+        if self._current == 0:
+            _LOGGER.error("could not retrieve amp-setting from charger")
+            return 6
         return self._current
 
     @current.setter
