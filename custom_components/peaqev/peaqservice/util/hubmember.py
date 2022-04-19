@@ -62,7 +62,7 @@ class CurrentPeak(HubMember):
 
 
 class ChargerSwitch(HubMember):
-    def __init__(self, hass, type: type, listenerentity, initval, currentname:str, ampmeter_is_attribute:bool):
+    def __init__(self, hass, type: type, listenerentity, initval, currentname: str, ampmeter_is_attribute: bool):
         self._hass = hass
         self._value = initval
         self._current = 6
@@ -71,20 +71,24 @@ class ChargerSwitch(HubMember):
         super().__init__(type, listenerentity, initval)
 
     @property
-    def current(self):
+    def current(self) -> int:
         return self._current
 
     @current.setter
     def current(self, value):
         if value is int:
             self._current = int(value)
+        else:
+            _LOGGER.warn("could not set value as chargercurrent", value)
 
     def updatecurrent(self):
         if self._ampmeter_is_attribute is True:
             ret = self._hass.states.get(self.entity)
             if ret is not None:
-                self.current = str(ret.attributes.get(self._current_attr_name))
+                ret_attr = str(ret.attributes.get(self._current_attr_name))
+                _LOGGER.info("current as attribute is", ret_attr)
+                self.current = ret_attr
         else:
-            ret = self.current = self._hass.states.get(self._current_attr_name)
+            ret = self._hass.states.get(self._current_attr_name)
             if ret is not None:
                 self.current = ret

@@ -1,5 +1,6 @@
 import logging
 import time
+from datetime import datetime
 
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
 from custom_components.peaqev.peaqservice.util.constants import (
@@ -22,8 +23,8 @@ class Charger:
     def __init__(self, hub, hass, servicecalls):
         self._hass = hass
         self._hub = hub
-        self._chargerrunning = False
-        self._chargerstopped = False
+        self._charger_running = False
+        self._charger_stopped = False
         self._service_calls = servicecalls
         self._sessionrunning = False
 
@@ -31,15 +32,15 @@ class Charger:
         """Main function to turn charging on or off"""
         if self._hub.charger_enabled.value is True:
             if self._hub.chargecontroller.status is CHARGECONTROLLER.Start:
-                if self._hub.chargerobject_switch.value is False and self._chargerrunning is False:
+                if self._hub.chargerobject_switch.value is False and self._charger_running is False:
                     await self._start_charger()
             elif self._hub.chargecontroller.status is CHARGECONTROLLER.Stop or self._hub.chargecontroller.status is CHARGECONTROLLER.Idle:
-                if self._hub.chargerobject_switch.value is True and self._chargerstopped is False:
+                if self._hub.chargerobject_switch.value is True and self._charger_stopped is False:
                     await self._pause_charger()
             elif self._hub.chargecontroller.status is CHARGECONTROLLER.Done and self._hub.charger_done.value is False:
                 await self._terminate_charger()
         else:
-            if self._hub.chargerobject_switch.value is True and self._chargerstopped is False:
+            if self._hub.chargerobject_switch.value is True and self._charger_stopped is False:
                 await self._terminate_charger()
 
     async def _start_charger(self):
@@ -79,8 +80,9 @@ class Charger:
         calls = self._service_calls.get_call(UPDATECURRENT)
         await self._hass.async_add_executor_job(self._wait_turn_on)
 
-        while self._hub.chargerobject_switch.value is True and self._chargerrunning is True:
-            if await self._hass.async_add_executor_job(self._wait_update_current) is True:
+        while self._hub.chargerobject_switch.value is True and self._charger_running is True:
+            do_update = await self._hass.async_add_executor_job(self._wait_update_current)
+            if do_update:
                 serviceparams = await self._setchargerparams(calls)
                 info = f"peaqev updating current with: {calls[DOMAIN]}, {calls[UPDATECURRENT]} and params: {serviceparams}"
                 _LOGGER.info(info)
@@ -110,29 +112,28 @@ class Charger:
         return len(calls[PARAMS][CHARGER]) > 0 and len(calls[PARAMS][CHARGERID]) > 0
 
     def _wait_turn_on(self):
-        while self._hub.chargerobject_switch.value is False and self._chargerstopped is False:
+        while self._hub.chargerobject_switch.value is False and self._charger_stopped is False:
             time.sleep(3)
         return True
 
     def _wait_update_current(self):
-        while int(self._hub.chargerobject_switch.current) == int(self._hub.threshold.allowedcurrent) and self._chargerstopped is False:
-            #or (datetime.now().minute >= 55 and allowed_current > switch_current and self._chargerstopped is False):
+        while (int(self._hub.chargerobject_switch.current) == self._hub.threshold.allowedcurrent
+               or (datetime.now().minute >= 55 and self._hub.threshold.allowedcurrent > int(self._hub.chargerobject_switch.current))) and self._charger_stopped is False:
             time.sleep(3)
-        if self._chargerstopped is True:
+        if self._charger_stopped is True:
             return False
         return True
 
     def _wait_loop_cycle(self):
         timer = 180
-        starttime = time.time()
-        while time.time() - starttime < timer:
+        start_time = time.time()
+        while time.time() - start_time < timer:
             time.sleep(3)
-        return True
 
     def _is_running(self, determinator: bool):
         if determinator:
-            self._chargerrunning = True
-            self._chargerstopped = False
+            self._charger_running = True
+            self._charger_stopped = False
         elif not determinator:
-            self._chargerrunning = False
-            self._chargerstopped = True
+            self._charger_running = False
+            self._charger_stopped = True
