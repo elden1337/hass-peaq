@@ -7,30 +7,11 @@ if user has set that bool in config flow.
 """
 
 
-class Hours:
-    def __init__(self, priceaware: bool, nonhours: list = None, cautionhours: dict = None):
+class PriceAwareHours:
+    def __init__(self):
         self._prices = []
-        self._nonhours = nonhours
-        self._cautionhours = cautionhours
         self._last_run = time.time()
-        if priceaware is True:
-            self._update()
-
-    @property
-    def nonhours(self):
-        return self._nonhours
-
-    @nonhours.setter
-    def nonhours(self, val):
-        self._nonhours = val
-
-    @property
-    def cautionhours(self):
-        return self._cautionhours
-
-    @cautionhours.setter
-    def cautionhours(self, val):
-        self._cautionhours = val
+        self._update()
 
     @property
     def prices(self):
@@ -42,6 +23,7 @@ class Hours:
         self._update()
 
     def _update(self):
+        # get new prices from nordpool here
         pricedict = self._create_dict(self.prices)
         rank = self._rank_prices(pricedict)
         self._determine_hours(rank)
@@ -72,5 +54,63 @@ class Hours:
                 else:
                     _ch.append(p)
 
-        self.nonhours = _nh
-        self.cautionhours = _ch
+        self.non_hours = _nh
+        self.caution_hours = _ch
+
+
+class HoursBase:
+    def __init__(
+            self,
+            non_hours: list = None,
+            caution_hours: dict = None
+    ):
+        self._non_hours = non_hours
+        self._caution_hours = caution_hours
+
+    @property
+    def non_hours(self):
+        return self._non_hours
+
+    @non_hours.setter
+    def non_hours(self, val):
+        self._non_hours = val
+
+    @property
+    def caution_hours(self):
+        return self._caution_hours
+
+    @caution_hours.setter
+    def caution_hours(self, val):
+        self._caution_hours = val
+
+
+
+class Hours(PriceAwareHours):
+    def __init__(
+            self,
+            price_aware: bool,
+            non_hours: list = None,
+            caution_hours: dict = None
+    ):
+        self._non_hours = non_hours
+        self._caution_hours = caution_hours
+        if price_aware is True:
+            super.__init__(self)
+
+    @property
+    def non_hours(self):
+        return self._non_hours
+
+    @non_hours.setter
+    def non_hours(self, val):
+        self._non_hours = val
+
+    @property
+    def caution_hours(self):
+        return self._caution_hours
+
+    @caution_hours.setter
+    def caution_hours(self, val):
+        self._caution_hours = val
+
+

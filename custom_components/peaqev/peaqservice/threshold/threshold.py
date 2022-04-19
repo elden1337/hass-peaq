@@ -12,14 +12,14 @@ class Threshold(ThresholdBase):
     def stop(self) -> float:
         return self._stop(
             datetime.now().minute,
-            str(datetime.now().hour) in self._hub.cautionhours
+            str(datetime.now().hour) in self._hub.caution_hours
         )
 
     @property
     def start(self) -> float:
         return self._start(
             datetime.now().minute,
-            str(datetime.now().hour) in self._hub.cautionhours
+            str(datetime.now().hour) in self._hub.caution_hours
         )
 
     @property

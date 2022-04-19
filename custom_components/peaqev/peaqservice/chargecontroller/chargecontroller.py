@@ -72,7 +72,7 @@ class ChargeController(ChargeControllerBase):
             ret = CHARGECONTROLLER.Connected
         elif charger_state not in self._hub.chargertype.charger.chargerstates[CHARGECONTROLLER.Idle] and self._hub.charger_done.value is True:
             ret = CHARGECONTROLLER.Done
-        elif datetime.now().hour in self._hub.nonhours:
+        elif datetime.now().hour in self._hub.non_hours:
             update_timer = True
             ret = CHARGECONTROLLER.Stop
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGECONTROLLER.Connected]:
