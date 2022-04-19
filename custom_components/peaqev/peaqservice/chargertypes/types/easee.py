@@ -1,3 +1,7 @@
+import logging
+
+from homeassistant.core import HomeAssistant
+
 from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
 from custom_components.peaqev.peaqservice.util.constants import (
@@ -5,8 +9,6 @@ from custom_components.peaqev.peaqservice.util.constants import (
     CHARGERID,
     CURRENT,
 )
-import logging
-from homeassistant.core import HomeAssistant
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -44,7 +46,14 @@ class Easee(ChargerBase):
         servicecall_params[CHARGERID] = self._chargerid
         servicecall_params[CURRENT] = "current"
 
-        self._set_servicecalls(DOMAINNAME, "start", "stop", "pause", "resume", "set_charger_max_limit", servicecall_params)
-
-
+        self._set_servicecalls(
+            domain=DOMAINNAME,
+            on_call="start",
+            off_call="stop",
+            pause_call="pause",
+            resume_call="resume",
+            allowupdatecurrent=True,
+            update_current_call="set_charger_max_limit",
+            update_current_params=servicecall_params
+        )
 

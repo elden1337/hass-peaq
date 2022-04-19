@@ -16,11 +16,8 @@ from custom_components.peaqev.sensors.peaqsensor import PeaqSensor
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_TOTAL_NAME,
-    CONSUMPTION_INTEGRAL_NAME,
-    PEAQCONTROLLER
+    CONSUMPTION_INTEGRAL_NAME
     )
-
-from homeassistant.components.sensor import SensorEntity
 
 from homeassistant.core import (
     HomeAssistant,
@@ -42,10 +39,6 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
     """Add sensors for passed config_entry in HA."""
     
     hub = hass.data[DOMAIN]["hub"]
-    
-    devicesensor = []
-    devicesensor.append(DeviceSensor(hub, PEAQCONTROLLER))
-    async_add_entities(devicesensor, update_before_add = True)
 
     peaqsensors = await gather_Sensors(hass, hub)
     async_add_entities(peaqsensors, update_before_add = True)
@@ -66,17 +59,17 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
 
     #sql sensors
     peaqsqlsensors = []
-    peaks = hub.localedata
+    peaks = hub.locale
 
     db_url = DEFAULT_URL.format(hass_config_path=hass.config.path(DEFAULT_DB_FILE))
     engine = sqlalchemy.create_engine(db_url)
     sessmaker = scoped_session(sessionmaker(bind=engine))
     sqlsensor = hub.totalhourlyenergy.entity
-    sql = PeaqSQLSensorHelper(sqlsensor).getquerytype(peaks.chargedpeak)
+    sql = PeaqSQLSensorHelper(sqlsensor).getquerytype(peaks.data.charged_peak)
     peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql))
 
-    if peaks.chargedpeak != peaks.observedpeak:
-        sql2 = PeaqSQLSensorHelper(sqlsensor).getquerytype(peaks.observedpeak)
+    if peaks.data.charged_peak != peaks.data.observed_peak:
+        sql2 = PeaqSQLSensorHelper(sqlsensor).getquerytype(peaks.data.observed_peak)
         peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql2))
     #sql sensors
     
@@ -91,22 +84,3 @@ async def gather_Sensors(hass: HomeAssistant, hub) -> list:
     peaqsensors.append(PeaqThresholdSensor(hub))
     peaqsensors.append(PeaqSensor(hub))
     return peaqsensors
-    
-class DeviceSensor(SensorEntity):
-    should_poll = True
-
-    def __init__(self, hub, name):
-        self._hub = hub
-        self._attr_name = name
-        self._attr_unique_id = f"{self._hub.hub_id}_wrapper"
-        self._attr_available = True
-
-    @property
-    def device_info(self):
-        return {
-            "identifiers": {(DOMAIN, self._hub.hub_id)},
-            "name": self._attr_name,
-            "sw_version": 1,
-            "model": f"{self._hub.localedata.type} ({self._hub.chargertypedata.type})",
-            "manufacturer": "Peaq systems",
-        }

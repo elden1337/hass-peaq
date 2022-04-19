@@ -5,11 +5,12 @@
     "documentation": "https://github.com/elden1337/hass_peaq",
     "issue_tracker": "https://github.com/elden1337/hass_peaq/issues",
     "requirements": [
+      "homeassistant>=2022.4.5"
     ],
     "codeowners": [
       "@elden1337"
     ],
-    "version": "0.3.0",
+    "version": "0.3.3",
     "iot_class": "calculated",
     "dependencies": [
       "recorder",

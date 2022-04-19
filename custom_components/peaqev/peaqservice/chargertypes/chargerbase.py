@@ -1,15 +1,10 @@
 import logging
+
 import homeassistant.helpers.template as template
+
+from custom_components.peaqev.peaqservice.chargertypes.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
-from custom_components.peaqev.peaqservice.util.servicecalls import ServiceCalls
-from custom_components.peaqev.peaqservice.util.constants import (
-    DOMAIN,
-    ON,
-    OFF,
-    PAUSE,
-    RESUME,
-    UPDATECURRENT
-)
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -95,17 +90,17 @@ class ChargerBase:
             assert len(self.chargerentity) > 0
             assert len(self.powermeter) > 0
             assert len(self.powerswitch) > 0
-            assert self.servicecalls[DOMAIN] is not None
-            assert self.servicecalls[ON] is not None
-            assert self.servicecalls[OFF] is not None
-            assert self.servicecalls[PAUSE] is not None
-            assert self.servicecalls[RESUME] is not None
+            assert self.servicecalls.domain is not None
+            assert self.servicecalls.on is not None
+            assert self.servicecalls.off is not None
+            assert self.servicecalls.pause is not None
+            assert self.servicecalls.resume is not None
             if self.servicecalls.allowupdatecurrent is True:
-                assert self.servicecalls[UPDATECURRENT] is not None
+                assert self.servicecalls.update_current.call is not None
         except Exception as e:
             _LOGGER.error("Peaqev could not initialize charger", e)
 
-    def getentities(self, domain:str, endings:list):
+    def getentities(self, domain: str, endings: list):
         entities = template.integration_entities(self._hass, domain)
 
         if len(entities) < 1:
@@ -120,4 +115,3 @@ class ChargerBase:
                     candidate = namelrg[1].replace(e, '')
 
             self._entityschema = candidate
-

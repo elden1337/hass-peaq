@@ -11,6 +11,9 @@ While this integration will try to not break your monthly energy peak hour, ther
 
 ## Installation
 
+If you have HACS installed, you can add peaqev as a custom integration. That way you'll be prompted on updates.
+
+Otherwise you may:
 - Copy `custom_components/peaqev` folder to `<config_dir>/custom_components/peaqev/`
 - Restart Home assistant
 - Go to Configuration > Devices & Services > Add integration

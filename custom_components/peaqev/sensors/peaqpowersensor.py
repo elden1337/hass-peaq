@@ -18,6 +18,7 @@ class PeaqAmpSensor(SensorBase):
         self._hub = hub
         self._state = self._hub.threshold.allowedcurrent
         self._attr_icon = "mdi:current-ac"
+        self._charger_current = self._hub.chargerobject_switch.current
 
     @property
     def state(self) -> int:
@@ -25,7 +26,13 @@ class PeaqAmpSensor(SensorBase):
 
     def update(self) -> None:
         self._state = self._hub.threshold.allowedcurrent
+        self._charger_current = self._hub.chargerobject_switch.current
 
+    @property
+    def extra_state_attributes(self) -> dict:
+        return {
+            "charger_reported_current": self._charger_current,
+        }
 
 class PeaqPowerSensor(SensorBase):
     device_class = DEVICE_CLASS_POWER

@@ -11,8 +11,13 @@ class SensorBase(SensorEntity):
         self._attr_name = name
         self._attr_unique_id = f"{DOMAIN}_{self._hub.hub_id}_{ex.nametoid(self._attr_name)}"
         self._attr_available = True
-        
+
     @property
     def device_info(self):
-        """Return information to link this entity with the correct device."""
-        return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
+        return {
+            "identifiers": {(DOMAIN, self._hub.hub_id)},
+            "name": self._attr_name,
+            "sw_version": 1,
+            "model": f"{self._hub.locale.type} ({self._hub.chargertype.type})",
+            "manufacturer": "Peaq systems",
+        }

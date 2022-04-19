@@ -1,3 +1,7 @@
+import logging
+
+from homeassistant.core import HomeAssistant
+
 from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
 from custom_components.peaqev.peaqservice.util.constants import (
@@ -5,8 +9,6 @@ from custom_components.peaqev.peaqservice.util.constants import (
     CHARGERID,
     CURRENT,
 )
-import logging
-from homeassistant.core import HomeAssistant
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,7 +38,7 @@ class ChargeAmps(ChargerBase):
         self.chargerentity = f"sensor.{self._entityschema}_1"
         self.powermeter = f"sensor.{self._entityschema}_1_power"
         self.powerswitch = f"switch.{self._entityschema}_1"
-        self.ampmeter = "Max current"
+        self.ampmeter = "max_current"
         self.ampmeter_is_attribute = True
 
         servicecall_params = {}
@@ -44,4 +46,11 @@ class ChargeAmps(ChargerBase):
         servicecall_params[CHARGERID] = self._chargerid
         servicecall_params[CURRENT] = "max_current"
 
-        self._set_servicecalls(DOMAINNAME, "enable", "disable", None, None, "set_max_current", servicecall_params)
+        self._set_servicecalls(
+            domain=DOMAINNAME,
+            on_call="enable",
+            off_call="disable",
+            allowupdatecurrent= True,
+            update_current_call="set_max_current",
+            update_current_params=servicecall_params
+        )
