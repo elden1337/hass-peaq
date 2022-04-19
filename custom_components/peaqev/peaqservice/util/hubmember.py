@@ -1,4 +1,5 @@
 import logging
+
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 
 _LOGGER = logging.getLogger(__name__)
@@ -25,9 +26,15 @@ class HubMember:
         if type(value) is self._type:
             self._value = value
         elif self._type is float:
-            self._value = float(value) if value is not None else 0
+            try:
+                self._value = float(value)
+            except:
+                self._value = 0
         elif self._type is int:
-            self._value = int(float(value)) if value is not None else 0
+            try:
+                self._value = int(float(value))
+            except:
+                self._value = 0
         elif self._type is bool:
             try:
                 if value is None:
@@ -55,29 +62,39 @@ class CurrentPeak(HubMember):
 
 
 class ChargerSwitch(HubMember):
-    def __init__(self, hass, type: type, listenerentity, initval, currentname:str, ampmeter_is_attribute:bool):
+    def __init__(self, hass, type: type, listenerentity, initval, currentname: str, ampmeter_is_attribute: bool):
         self._hass = hass
         self._value = initval
-        self._current = 6
+        self._current = 0
         self._current_attr_name = currentname
         self._ampmeter_is_attribute = ampmeter_is_attribute
         super().__init__(type, listenerentity, initval)
 
     @property
-    def current(self):
+    def current(self) -> int:
+        if self._current == 0:
+            return 6
         return self._current
 
     @current.setter
     def current(self, value):
-        if value is int:
+        try:
             self._current = int(value)
+        except:
+            msg = f"[{value}] could not set value as chargercurrent"
+            _LOGGER.warn(msg)
 
     def updatecurrent(self):
         if self._ampmeter_is_attribute is True:
             ret = self._hass.states.get(self.entity)
             if ret is not None:
-                self.current = str(ret.attributes.get(self._current_attr_name))
+                ret_attr = str(ret.attributes.get(self._current_attr_name))
+                self.current = ret_attr
+            else:
+                _LOGGER.error("chargerobject state was none")
         else:
-            ret = self.current = self._hass.states.get(self._current_attr_name)
+            ret = self._hass.states.get(self._current_attr_name)
             if ret is not None:
                 self.current = ret
+            else:
+                _LOGGER.error("chargerobject state was none")

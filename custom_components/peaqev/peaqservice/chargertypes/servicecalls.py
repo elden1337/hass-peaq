@@ -1,3 +1,5 @@
+import logging
+
 from custom_components.peaqev.peaqservice.util.constants import (
     DOMAIN,
     ON,
@@ -7,7 +9,6 @@ from custom_components.peaqev.peaqservice.util.constants import (
     PARAMS,
     UPDATECURRENT,
 )
-import logging
 
 _LOGGER = logging.getLogger(__name__)
 

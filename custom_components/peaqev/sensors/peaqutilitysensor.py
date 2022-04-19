@@ -15,6 +15,7 @@ METER_OFFSET.days = 0
 
 PERIODS = [HOURLY]
 
+
 class PeaqUtilitySensor(UtilityMeterSensor):
     def __init__(self, hub, sensor, meter_type, meter_offset):
         self._hub = hub
@@ -23,15 +24,20 @@ class PeaqUtilitySensor(UtilityMeterSensor):
         entity = f"sensor.{DOMAIN.lower()}_{sensor}"
         
         super().__init__(
-            entity,
-            entity,
-            self._attr_name,
-            meter_type,
-            meter_offset,
-            0,
-            True
+            cron_pattern="{minute} * * * *",
+            delta_values=0,
+            meter_offset=meter_offset,
+            meter_type=meter_type,
+            name=self._attr_name,
+            net_consumption=True,
+            parent_meter=entity,
+            source_entity=entity,
+            tariff_entity=None,
+            tariff=None,
+            unique_id = self._attr_unique_id
         )
 
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
+

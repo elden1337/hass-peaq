@@ -35,11 +35,13 @@ DATA_SCHEMA = vol.Schema(
 
 
 async def _check_power_sensor(hass: HomeAssistant, powersensor:str) -> bool:
-    ret = hass.states.get(powersensor)
+    ret = hass.states.get(powersensor).state
     try:
         float(ret)
         return True
     except:
+        msg = f"{powersensor} did not produce a valid state for {DOMAIN}. State was {ret}"
+        _LOGGER.error(msg)
         return False
 
 
@@ -54,6 +56,22 @@ async def validate_input_user(hass: HomeAssistant, data: dict) -> dict[str, Any]
     elif not data["name"].startswith("sensor."):
         data["name"] = f"sensor.{data['name']}"
     if await _check_power_sensor(hass, data["name"]) is False:
+        raise ValueError
+
+    return {"title": data["name"]}
+
+
+async def validate_input_user_chargerid(data: dict) -> dict[str, Any]:
+    """ Validate the chargerId"""
+    if len(data["chargerid"]) < 1:
+        raise ValueError
+
+    return {"title": data["name"]}
+
+
+async def validate_nonhours(data: dict) -> dict[str, Any]:
+    """ Validate nonhour-length"""
+    if len(data["nonhours"]) == 24:
         raise ValueError
 
     return {"title": data["name"]}
@@ -76,7 +94,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 self.info = await validate_input_user(self.hass, user_input)
             except ValueError:
-                errors["base"] = "invalid_setup"
+                errors["base"] = "invalid_powersensor"
+            try:
+                self.info = await validate_input_user(self.hass, user_input)
+            except ValueError:
+                errors["base"] = "invalid_chargerid"
             if not errors:
                 self.data = user_input
                 self.data[self.OPTIONS] = []
@@ -92,15 +114,18 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         
         errors = {}
         if user_input is not None:
-            # if not errors:
-                # Input is valid, set data.
-            self.data[self.OPTIONS]= {
-                "nonhours": user_input["nonhours"],
-                "cautionhours": user_input["cautionhours"],
-                "priceaware": user_input["priceaware"]
-            }
+            try:
+                await validate_nonhours(user_input)
+            except ValueError:
+                errors["base"] = "invalid_nonhours"
+            if not errors:
+                self.data[self.OPTIONS] = {
+                    "nonhours": user_input["nonhours"],
+                    "cautionhours": user_input["cautionhours"],
+                    "priceaware": user_input["priceaware"]
+                }
                 
-            return await self.async_step_startmonth()
+                return await self.async_step_startmonth()
         
         mockhours = [h for h in range(0, 24)]
 
@@ -126,7 +151,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             # if not errors:
                 # Input is valid, set data.
-            self.data[self.OPTIONS]["startpeaks"]= await self._set_startpeak_dict(user_input)
+            self.data[self.OPTIONS]["startpeaks"] = await self._set_startpeak_dict(user_input)
                 
             return self.async_create_entry(title=self.info["title"], data=self.data)
         

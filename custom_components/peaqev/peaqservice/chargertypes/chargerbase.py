@@ -1,7 +1,10 @@
 import logging
+
 import homeassistant.helpers.template as template
+
+from custom_components.peaqev.peaqservice.chargertypes.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
-from custom_components.peaqev.peaqservice.util.servicecalls import ServiceCalls
+
 _LOGGER = logging.getLogger(__name__)
 
 
