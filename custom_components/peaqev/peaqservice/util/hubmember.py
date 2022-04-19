@@ -96,3 +96,5 @@ class ChargerSwitch(HubMember):
             ret = self._hass.states.get(self._current_attr_name)
             if ret is not None:
                 self.current = ret
+            else:
+                _LOGGER.error("chargerobject state was none")
