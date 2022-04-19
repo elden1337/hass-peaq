@@ -39,7 +39,7 @@ class Hub:
         """from the config inputs"""
         self.locale = LocaleData(config_inputs["locale"], self.domain)
         self.chargertype = ChargerTypeData(hass, config_inputs["chargertype"], config_inputs["chargerid"])
-        self._powersensor_includes_car = config_inputs["powersensorincludescar"]
+        self._powersensor_includes_car = bool(config_inputs["powersensorincludescar"])
         self._monthlystartpeak = config_inputs["monthlystartpeak"]
         self.nonhours = config_inputs["nonhours"]
         self.cautionhours = config_inputs["cautionhours"]
@@ -149,7 +149,7 @@ class Hub:
 
     async def _updatesensor(self, entity, value):
         if entity == self.powersensor.entity:
-            if not self._powersensor_includes_car:
+            if self._powersensor_includes_car is False:
                 self.powersensor.value = value
                 self.totalpowersensor.value = (self.powersensor.value + self.carpowersensor.value)
             else:
@@ -157,7 +157,7 @@ class Hub:
                 self.powersensor.value = (self.totalpowersensor.value - self.carpowersensor.value)
         elif entity == self.carpowersensor.entity:
             self.carpowersensor.value = value
-            if not self._powersensor_includes_car:
+            if self._powersensor_includes_car is False:
                 self.totalpowersensor.value = (self.carpowersensor.value + self.powersensor.value)
             else:
                 self.powersensor.value = (self.totalpowersensor.value - self.carpowersensor.value)
