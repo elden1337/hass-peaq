@@ -42,6 +42,7 @@
     "error": {
       "invalid_powersensor": "[%key:common::config_flow::error::invalid_powersensor%]",
       "invalid_chargerid": "[%key:common::config_flow::error::invalid_chargerid%]",
+      "invalid_nonhours": "[%key:common::config_flow::error::invalid_nonhours%]",
       "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
       "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
       "unknown": "[%key:common::config_flow::error::unknown%]"

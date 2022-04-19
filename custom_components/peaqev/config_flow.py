@@ -65,6 +65,14 @@ async def validate_input_user_chargerid(data: dict) -> dict[str, Any]:
     return {"title": data["name"]}
 
 
+async def validate_nonhours(data: dict) -> dict[str, Any]:
+    """ Validate nonhour-length"""
+    if len(data["nonhours"]) == 24:
+        raise ValueError
+
+    return {"title": data["name"]}
+
+
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle config flow for Peaq."""
 
@@ -102,14 +110,17 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         
         errors = {}
         if user_input is not None:
-            # if not errors:
-                # Input is valid, set data.
-            self.data[self.OPTIONS]= {
-                "nonhours": user_input["nonhours"],
-                "cautionhours": user_input["cautionhours"]
-            }
+            try:
+                await validate_nonhours(user_input)
+            except ValueError:
+                errors["base"] = "invalid_nonhours"
+            if not errors:
+                self.data[self.OPTIONS] = {
+                    "nonhours": user_input["nonhours"],
+                    "cautionhours": user_input["cautionhours"]
+                }
                 
-            return await self.async_step_startmonth()
+                return await self.async_step_startmonth()
         
         mockhours = [h for h in range(0, 24)]
 
@@ -134,7 +145,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             # if not errors:
                 # Input is valid, set data.
-            self.data[self.OPTIONS]["startpeaks"]= await self._set_startpeak_dict(user_input)
+            self.data[self.OPTIONS]["startpeaks"] = await self._set_startpeak_dict(user_input)
                 
             return self.async_create_entry(title=self.info["title"], data=self.data)
         

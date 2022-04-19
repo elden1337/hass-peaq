@@ -8,7 +8,8 @@
       "invalid_auth": "Invalid authentication",
       "unknown": "Unknown error has occured",
       "invalid_powersensor": "The powersensor provided is not reachable or wrong type  (state must be numeric)",
-      "invalid_chargerid": "You must provide a chargerId"
+      "invalid_chargerid": "You must provide a chargerId",
+      "invalid_nonhours": "You must provide at least one hour per day when charger is available. Nonhours is currently set as every hour."
     },
     "step": {
       "user": {
