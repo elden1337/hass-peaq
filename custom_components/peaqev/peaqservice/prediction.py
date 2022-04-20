@@ -1,15 +1,14 @@
 from datetime import datetime
+from Peaqevcore.Prediction import PredictionBase as core_prediction
 
-from custom_components.peaqev.peaqservice.prediction.predictionbase import PredictionBase
 
-
-class Prediction(PredictionBase):
+class Prediction():
     def __init__(self, hub=None):
         self._hub = hub
     
     @property
     def predictedenergy(self) -> float:
-        return self._predictedenergy(
+        return core_prediction.predictedenergy(
             datetime.now().minute,
             datetime.now().second,
             self._hub.powersensormovingaverage.value if self._hub.powersensormovingaverage.value is not None else 0,
@@ -18,7 +17,7 @@ class Prediction(PredictionBase):
 
     @property
     def predictedpercentageofpeak(self) -> float:
-        return self._predictedpercentageofpeak(
+        return core_prediction.predictedpercentageofpeak(
             self._hub.currentpeak.value,
             self.predictedenergy
         )
