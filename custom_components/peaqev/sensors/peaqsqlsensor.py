@@ -13,6 +13,8 @@ from custom_components.peaqev.peaqservice.util.constants import (
     QUERYTYPE_AVERAGEOFTHREEHOURS,
     QUERYTYPE_AVERAGEOFTHREEHOURS_MIN,
     QUERYTYPE_HIGHLOAD,
+    QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19,
+    QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19_MIN,
     SQLSENSOR_STATISTICS_TABLE,
     SQLSENSOR_STATISTICS_META_TABLE
     )
@@ -26,28 +28,43 @@ class PeaqSQLSensorHelper():
         QUERYTYPES = {
         f"{QUERYTYPE_BASICMAX}" : {
             'query': f'SELECT IFNULL(MAX(state),0) AS state FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id = "{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 1',
-            'name': f'{SQLSENSOR_BASENAME}'
+            'name': f'{SQLSENSOR_BASENAME}',
+            'comment': 'Partille, SE etc'
         },
         f"{QUERYTYPE_AVERAGEOFTHREEDAYS}" : {
             'query': f'SELECT IFNULL(ROUND(AVG(daymax),2),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 3)',
-            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE}'
+            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE}',
+            'comment': 'Gothenburg, SE'
             },
         f"{QUERYTYPE_AVERAGEOFTHREEHOURS}": {
             'query': f'SELECT IFNULL(ROUND(AVG(daymax),2),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%h\', start) ORDER BY MAX(state) DESC LIMIT 3)',
-            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE}'
+            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE}',
+            'comment': ''
         },
         f"{QUERYTYPE_AVERAGEOFTHREEHOURS_MIN}": {
             'query': f'SELECT IFNULL(min(daymax),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%h\', start) ORDER BY MAX(state) DESC LIMIT 3)',
-            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE_MIN}'
+            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE_MIN}',
+            'comment': ''
         },
         f"{QUERYTYPE_AVERAGEOFTHREEDAYS_MIN}" : {
             'query': f'SELECT IFNULL(min(daymax),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 3)',
-            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE_MIN}'
+            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE_MIN}',
+            'comment': 'Gothenburg, SE'
         },
-        #highload (karlstad etc). Only used Nov - Mar
+        f"{QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19}": {
+            'query': f'SELECT IFNULL(ROUND(AVG(daymax),2),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) AND cast(strftime(\'%w\', start) as int) <= 4 AND cast(strftime(\'%H\', start) as int) between 7 AND 19 GROUP BY strftime(\'%h\', start) ORDER BY MAX(state) DESC LIMIT 3)',
+            'name': f'{SQLSENSOR_BASENAME}, {QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19}',
+            'comment': 'Sala, SE'
+        },
+        f"{QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19_MIN}": {
+            'query': f'SELECT IFNULL(min(daymax),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) AND cast(strftime(\'%w\', start) as int) <= 4 AND cast(strftime(\'%H\', start) as int) between 7 AND 19 GROUP BY strftime(\'%h\', start) ORDER BY MAX(state) DESC LIMIT 3)',
+            'name': f'{SQLSENSOR_BASENAME}, {QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19_MIN}',
+            'comment': 'Sala, SE'
+        },
         f"{QUERYTYPE_HIGHLOAD}" : {
             'query': f'SELECT IFNULL(MAX(state),0) as state FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) AND cast(strftime(\'%w\', start) as int) <= 4 AND cast(strftime(\'%H\', start) as int) between 8 AND 18 GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 1',
-            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_HIGHLOAD}'
+            'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_HIGHLOAD}',
+            'comment': '(karlstad etc). Only used Nov - Mar, weekdays between 08-18'
             }
         }
 
