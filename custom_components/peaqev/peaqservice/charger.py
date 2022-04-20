@@ -76,7 +76,9 @@ class Charger:
 
     async def _updatemaxcurrent(self):
         """If enabled, let the charger periodically update it's current during charging."""
+        self._hub.chargerobject_switch.updatecurrent()
         calls = self._service_calls.get_call(UPDATECURRENT)
+
         if await self._hass.async_add_executor_job(self._wait_turn_on):
             while self._hub.chargerobject_switch.value is True and self._charger_running is True:
                 if await self._hass.async_add_executor_job(self._wait_update_current):
@@ -116,6 +118,8 @@ class Charger:
         return True
 
     def _wait_update_current(self) -> bool:
+        self._hub.chargerobject_switch.updatecurrent()
+
         while (self._hub.chargerobject_switch.current == self._hub.threshold.allowedcurrent
                or (datetime.now().minute >= 55
                    and self._hub.threshold.allowedcurrent > self._hub.chargerobject_switch.current)) \
@@ -128,8 +132,12 @@ class Charger:
     def _wait_loop_cycle(self):
         timer = 180
         start_time = time.time()
+        self._hub.chargerobject_switch.updatecurrent()
+        
         while time.time() - start_time < timer:
             time.sleep(3)
+
+        self._hub.chargerobject_switch.updatecurrent()
 
     def _is_running(self, determinator: bool):
         if determinator:
