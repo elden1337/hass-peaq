@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class LocalTypeBase:
+class LocaleTypeBase:
     def __init__(self):
         self._observed_peak = ""
         self._charged_peak = ""
