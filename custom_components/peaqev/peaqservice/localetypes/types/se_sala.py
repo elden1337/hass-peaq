@@ -9,7 +9,13 @@ class SE_Sala(LocaleTypeBase):
     def __init__(self):
         self.observed_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19_MIN
         self.charged_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19
-
+        self._free_charge_pattern = [
+            {
+                "M": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                "D": [5, 6],
+                "H": [19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]
+            }
+        ]
 
 """
 Elnätskunder med effekttaxa får vinterpris på överföringsavgift från och med 1 november – 31 mars. 
@@ -24,3 +30,5 @@ som är möjlig från dagtid till kvällstid (19.00-07:00) eller till helger och
 Nov – Mars vardagar kl 7-19 135,00 kr/kW inkl moms
 April – Okt vardagar kl 7-19 56,00 kr/kW inkl moms
 """
+
+
