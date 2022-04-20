@@ -42,15 +42,15 @@ class LocaleTypeBase:
         self._charged_peak = val
 
     @property
-    def current_hour_is_free_charge(self) -> bool:
+    def free_charge(self) -> bool:
         return self._gather_free_charge_pattern()
 
     @property
-    def ChargeType(self) -> PeakChargeType:
+    def charge_type(self) -> PeakChargeType:
         return self._peakcharge_type
 
     @property
-    def ReaderType(self) -> PeakReaderType:
+    def reader_type(self) -> PeakReaderType:
         return self._peakreader_type
 
     def _gather_free_charge_pattern(self) -> bool:
