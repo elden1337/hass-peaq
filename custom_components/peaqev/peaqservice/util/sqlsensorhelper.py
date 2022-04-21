@@ -11,6 +11,8 @@ from custom_components.peaqev.peaqservice.util.constants import (
     QUERYTYPE_HIGHLOAD,
     QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19,
     QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19_MIN,
+    QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22,
+    QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR,
     SQLSENSOR_STATISTICS_TABLE,
     SQLSENSOR_STATISTICS_META_TABLE
     )
@@ -57,10 +59,20 @@ class SQLSensorHelper():
                 'name': f'{SQLSENSOR_BASENAME}, {QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19_MIN}',
                 'comment': 'Sala, SE'
             },
+            f"{QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR}": {
+                'query': f'SELECT IFNULL(MAX(state),0) AS state FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id = "{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) AND ((cast(strftime(\'%w\', start) as int) <= 4 AND cast(strftime(\'%H\', start) as int) between 7 AND 17 AND cast(strftime(\'%m\', start) as int) in (12,1,2,3)) OR (cast(strftime(\'%m\', start) as int) between 4 and 12) ) GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 1',
+                'name': f'{SQLSENSOR_BASENAME}, {QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR}',
+                'comment': 'Kristinehamn, SE'
+            },
+            f"{QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22}": {
+                'query': f'SELECT IFNULL(MAX(state),0) AS state FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id = "{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) AND cast(strftime(\'%w\', start) as int) <= 4 AND cast(strftime(\'%H\', start) as int) between 6 AND 22 AND cast(strftime(\'%m\', start) as int) in (11,12,1,2,3) GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 1',
+                'name': f'{SQLSENSOR_BASENAME}, {QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22}',
+                'comment': 'Skövde, SE'
+            },
             f"{QUERYTYPE_HIGHLOAD}": {
                 'query': f'SELECT IFNULL(MAX(state),0) as state FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) AND cast(strftime(\'%w\', start) as int) <= 4 AND cast(strftime(\'%H\', start) as int) between 8 AND 18 GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 1',
                 'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_HIGHLOAD}',
-                'comment': '(karlstad etc). Only used Nov - Mar, weekdays between 08-18'
+                'comment': '(karlstad). Only used Nov - Mar, weekdays between 08-18'
             }
         }
 
