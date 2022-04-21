@@ -1,26 +1,26 @@
-from enum import Enum
+#from enum import Enum
 from datetime import datetime
 
 """Determine how the peaks are charger. Monthly, weekly, bi-weekly."""
-class PeakChargeType(Enum):
-    Monthly = 1,
-    Weekly = 2,
-    BiWeekly = 3
+#class PeakChargeType(Enum):
+#    Monthly = 1,
+#    Weekly = 2,
+#    BiWeekly = 3
 
 
 """Determine how the peaks are read. Hourly to reset every hours, etc"""
-class PeakReaderType(Enum):
-    Hourly = 60,
-    Quarterly = 15,
-    MidHourly = 30
+#class PeakReaderType(Enum):
+#    Hourly = 60,
+#    Quarterly = 15,
+#    MidHourly = 30
 
 
 class LocaleTypeBase:
     def __init__(self):
         self._observed_peak = ""
         self._charged_peak = ""
-        self._peakcharge_type = PeakChargeType.Monthly
-        self._peakreader_type = PeakReaderType.Hourly
+        #self._peakcharge_type = PeakChargeType.Monthly
+        #self._peakreader_type = PeakReaderType.Hourly
         self._free_charge_pattern = []
 
     """Observed peak (only added as sensor if separated from charged peak)"""
