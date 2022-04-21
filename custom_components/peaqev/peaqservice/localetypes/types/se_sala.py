@@ -7,15 +7,20 @@ QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19_MIN
 
 class SE_Sala(LocaleTypeBase):
     def __init__(self):
-        self.observed_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19_MIN
-        self.charged_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19
-        self._free_charge_pattern = [
+        observed_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19_MIN
+        charged_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19
+        free_charge_pattern = [
             {
                 "M": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
                 "D": [5, 6],
                 "H": [19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]
             }
         ]
+        super.__init__(
+            observedpeak=observed_peak,
+            chargedpeak=charged_peak,
+            freechargepattern=free_charge_pattern
+        )
 
 """
 Elnätskunder med effekttaxa får vinterpris på överföringsavgift från och med 1 november – 31 mars. 

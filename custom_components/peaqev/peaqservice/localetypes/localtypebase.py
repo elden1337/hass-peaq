@@ -16,12 +16,12 @@ from datetime import datetime
 
 
 class LocaleTypeBase:
-    def __init__(self):
-        self._observed_peak = ""
-        self._charged_peak = ""
+    def __init__(self, observedpeak:str, chargedpeak:str, freechargepattern:list | None):
+        self._observed_peak = observedpeak
+        self._charged_peak = chargedpeak
         #self._peakcharge_type = PeakChargeType.Monthly
         #self._peakreader_type = PeakReaderType.Hourly
-        self._free_charge_pattern = []
+        self._free_charge_pattern = freechargepattern if freechargepattern is not None else []
 
     """Observed peak (only added as sensor if separated from charged peak)"""
     @property

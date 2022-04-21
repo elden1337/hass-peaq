@@ -6,9 +6,13 @@ QUERYTYPE_AVERAGEOFTHREEHOURS_MIN
 
 class SE_Nacka_normal(LocaleTypeBase):
     def __init__(self):
-        self.observed_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MIN
-        self.charged_peak = QUERYTYPE_AVERAGEOFTHREEHOURS
+        observed_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MIN
+        charged_peak = QUERYTYPE_AVERAGEOFTHREEHOURS
 
+        super.__init__(
+            observedpeak=observed_peak,
+            chargedpeak=charged_peak
+        )
 
 
 class SE_NACKA_timediff(LocaleTypeBase):
