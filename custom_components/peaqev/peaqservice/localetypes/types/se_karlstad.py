@@ -4,13 +4,14 @@ QUERYTYPE_BASICMAX
 )
 
 class SE_Karlstad(LocaleTypeBase):
-    observed_peak = QUERYTYPE_BASICMAX
-    charged_peak = QUERYTYPE_BASICMAX
+    def __init__(self):
+        observed_peak = QUERYTYPE_BASICMAX
+        charged_peak = QUERYTYPE_BASICMAX
 
-    super().__init__(
-        observedpeak=observed_peak,
-        chargedpeak=charged_peak
-    )
+        super().__init__(
+            observedpeak=observed_peak,
+            chargedpeak=charged_peak
+        )
 
 """
 Note, high load extra is added on weekdays from 6-18 during november - march. 

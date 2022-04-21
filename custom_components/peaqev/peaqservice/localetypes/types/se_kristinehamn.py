@@ -4,13 +4,14 @@ QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR
 )
 
 class SE_Kristinehamn(LocaleTypeBase):
-    observed_peak = QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR
-    charged_peak = QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR
+    def __init__(self):
+        observed_peak = QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR
+        charged_peak = QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR
 
-    super().__init__(
-        observedpeak=observed_peak,
-        chargedpeak=charged_peak
-    )
+        super().__init__(
+            observedpeak=observed_peak,
+            chargedpeak=charged_peak
+        )
 
 
 
