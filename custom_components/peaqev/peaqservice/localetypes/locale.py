@@ -26,7 +26,7 @@ LOCALETYPEDICT = {
 
 class LocaleData:
     def __init__(self, input, domain):
-        self._data = LocaleTypeBase()
+        self._data = None
         self._type = input
         self._domain = domain
 
