@@ -15,7 +15,7 @@ LOCALE_SE_NACKA_NORMAL = "Nacka, Sweden (Normal tariffe)"
 LOCALE_SE_PARTILLE = "Partille, Sweden"
 LOCALE_DEFAULT = "Other, just want to test"
 LOCALE_SE_SALA = "Sala, Sweden"
-#LOCALE_SE_MALUNG_SALEN = "Malung-Sälen, Sweden"
+LOCALE_SE_MALUNG_SALEN = "Malung-Sälen, Sweden"
 LOCALE_SE_SKOVDE = "Skövde, Sweden"
 
 """Lookup types for config flow"""
