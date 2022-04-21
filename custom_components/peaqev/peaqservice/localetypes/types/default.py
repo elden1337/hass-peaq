@@ -8,7 +8,7 @@ class Default(LocaleTypeBase):
         observed_peak = QUERYTYPE_BASICMAX
         charged_peak = QUERYTYPE_BASICMAX
 
-        super.__init__(
+        super().__init__(
             observedpeak=observed_peak,
             chargedpeak=charged_peak
         )

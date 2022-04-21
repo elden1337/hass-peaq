@@ -9,7 +9,7 @@ class SE_Nacka_normal(LocaleTypeBase):
         observed_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MIN
         charged_peak = QUERYTYPE_AVERAGEOFTHREEHOURS
 
-        super.__init__(
+        super().__init__(
             observedpeak=observed_peak,
             chargedpeak=charged_peak
         )

@@ -16,7 +16,7 @@ from datetime import datetime
 
 
 class LocaleTypeBase:
-    def __init__(self, observedpeak:str, chargedpeak:str, freechargepattern:list | None):
+    def __init__(self, observedpeak:str, chargedpeak:str, freechargepattern:list = []):
         self._observed_peak = observedpeak
         self._charged_peak = chargedpeak
         #self._peakcharge_type = PeakChargeType.Monthly
@@ -45,13 +45,13 @@ class LocaleTypeBase:
     def free_charge(self) -> bool:
         return self._gather_free_charge_pattern()
 
-    @property
-    def charge_type(self) -> PeakChargeType:
-        return self._peakcharge_type
-
-    @property
-    def reader_type(self) -> PeakReaderType:
-        return self._peakreader_type
+    # @property
+    # def charge_type(self) -> PeakChargeType:
+    #     return self._peakcharge_type
+    #
+    # @property
+    # def reader_type(self) -> PeakReaderType:
+    #     return self._peakreader_type
 
     def _gather_free_charge_pattern(self) -> bool:
         if len(self._free_charge_pattern) == 0:

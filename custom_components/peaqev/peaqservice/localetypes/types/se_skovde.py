@@ -20,7 +20,7 @@ class SE_Skovde(LocaleTypeBase):
                 "H": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
             }
         ]
-        super.__init__(
+        super().__init__(
             observedpeak=observed_peak,
             chargedpeak=charged_peak,
             freechargepattern=free_charge_pattern

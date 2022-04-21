@@ -9,7 +9,7 @@ class SE_Gothenburg(LocaleTypeBase):
         observed_peak = QUERYTYPE_AVERAGEOFTHREEDAYS_MIN
         charged_peak = QUERYTYPE_AVERAGEOFTHREEDAYS
 
-        super.__init__(
+        super().__init__(
             observedpeak=observed_peak,
             chargedpeak=charged_peak
         )

@@ -16,7 +16,7 @@ class SE_Sala(LocaleTypeBase):
                 "H": [19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]
             }
         ]
-        super.__init__(
+        super().__init__(
             observedpeak=observed_peak,
             chargedpeak=charged_peak,
             freechargepattern=free_charge_pattern
