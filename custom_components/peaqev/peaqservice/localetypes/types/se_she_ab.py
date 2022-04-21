@@ -5,7 +5,7 @@ QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19_MIN
 )
 
 
-class SE_Sala(LocaleTypeBase):
+class SE_SHE_AB(LocaleTypeBase):
     def __init__(self):
         observed_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19_MIN
         charged_peak = QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19

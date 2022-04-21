@@ -1,6 +1,5 @@
 import custom_components.peaqev.peaqservice.util.constants as constants
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
-from custom_components.peaqev.peaqservice.localetypes.localtypebase import LocaleTypeBase
 from custom_components.peaqev.peaqservice.localetypes.types.default import Default
 from custom_components.peaqev.peaqservice.localetypes.types.se_gothenburg import SE_Gothenburg
 from custom_components.peaqev.peaqservice.localetypes.types.se_karlstad import SE_Karlstad
@@ -8,7 +7,7 @@ from custom_components.peaqev.peaqservice.localetypes.types.se_kristinehamn impo
 from custom_components.peaqev.peaqservice.localetypes.types.se_malung_salen import SE_Malung_Salen
 from custom_components.peaqev.peaqservice.localetypes.types.se_nacka import SE_Nacka_normal
 from custom_components.peaqev.peaqservice.localetypes.types.se_partille import SE_Partille
-from custom_components.peaqev.peaqservice.localetypes.types.se_sala import SE_Sala
+from custom_components.peaqev.peaqservice.localetypes.types.se_she_ab import SE_SHE_AB
 from custom_components.peaqev.peaqservice.localetypes.types.se_skovde import SE_Skovde
 from custom_components.peaqev.sensors.peaqsqlsensor import PeaqSQLSensorHelper
 
@@ -20,7 +19,7 @@ LOCALETYPEDICT = {
     constants.LOCALE_SE_KRISTINEHAMN: SE_Kristinehamn(),
     constants.LOCALE_SE_NACKA_NORMAL: SE_Nacka_normal(),
     constants.LOCALE_SE_MALUNG_SALEN: SE_Malung_Salen(),
-    constants.LOCALE_SE_SALA: SE_Sala(),
+    constants.LOCALE_SE_SALA: SE_SHE_AB(),
     constants.LOCALE_SE_SKOVDE: SE_Skovde(),
 }
 
@@ -31,19 +30,6 @@ class LocaleData:
         self._domain = domain
 
         self._data = LOCALETYPEDICT[input]
-
-        # if input == constants.LOCALE_SE_GOTHENBURG:
-        #     self._data = SE_Gothenburg()
-        # elif input == constants.LOCALE_SE_PARTILLE:
-        #     self._data = SE_Partille()
-        # elif input == constants.LOCALE_SE_KARLSTAD:
-        #     self._data = SE_Karlstad()
-        # elif input == constants.LOCALE_SE_KRISTINEHAMN:
-        #     self._data = SE_Kristinehamn()
-        # elif input == constants.LOCALE_SE_NACKA_NORMAL:
-        #     self._data = SE_Nacka_normal()
-        # elif input == constants.LOCALE_DEFAULT:
-        #     self._data = Default()
 
     @property
     def type(self) -> str:
