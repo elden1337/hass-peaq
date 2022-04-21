@@ -9,7 +9,7 @@ from custom_components.peaqev.peaqservice.localetypes.types.se_nacka import SE_N
 from custom_components.peaqev.peaqservice.localetypes.types.se_partille import SE_Partille
 from custom_components.peaqev.peaqservice.localetypes.types.se_she_ab import SE_SHE_AB
 from custom_components.peaqev.peaqservice.localetypes.types.se_skovde import SE_Skovde
-from custom_components.peaqev.sensors.peaqsqlsensor import PeaqSQLSensorHelper
+from custom_components.peaqev.peaqservice.util.sqlsensorhelper import SQLSensorHelper
 
 LOCALETYPEDICT = {
     constants.LOCALE_DEFAULT: Default(),
@@ -41,6 +41,6 @@ class LocaleData:
 
     @property
     def current_peak_entity(self) -> str:
-        return f"sensor.{self._domain}_{ex.nametoid(PeaqSQLSensorHelper('').getquerytype(self.data.observed_peak)[constants.NAME])}"
+        return f"sensor.{self._domain}_{ex.nametoid(SQLSensorHelper('').getquerytype(self.data.observed_peak)[constants.NAME])}"
 
 
