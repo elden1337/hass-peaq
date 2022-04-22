@@ -22,10 +22,26 @@ class SQLSensorHelper():
     def __init__(self, sensor :str):
         self._sensor = ex.nametoid(sensor)
 
+        PREFIX_MAX = f'SELECT IFNULL(MAX(state),0) AS state FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id = "{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date())'
+        SUFFIX_MAX = f' GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 1'
+
+        PREFIX_MIN = f''
+        SUFFIX_MIN = f''
+
+        PREFIX_AVG = f''
+        SUFFIX_AVG = f''
+
+
+        self.basequeries = {
+            "max": [PREFIX_MAX, SUFFIX_MAX],
+            "min": [PREFIX_MIN, SUFFIX_MIN],
+            "avg": [PREFIX_AVG, SUFFIX_AVG]
+        }
+
     def getquerytype(self, type):
         QUERYTYPES = {
             f"{QUERYTYPE_BASICMAX}": {
-                'query': f'SELECT IFNULL(MAX(state),0) AS state FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id = "{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 1',
+                'query': self.basequeries["max"][0] + self.basequeries["max"][1],
                 'name': f'{SQLSENSOR_BASENAME}',
                 'comment': 'Partille, SE etc'
             },
@@ -60,7 +76,7 @@ class SQLSensorHelper():
                 'comment': 'Sala, SE'
             },
             f"{QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR}": {
-                'query': f'SELECT IFNULL(MAX(state),0) AS state FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id = "{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date()) AND ((cast(strftime(\'%w\', start) as int) <= 4 AND cast(strftime(\'%H\', start) as int) between 7 AND 17 AND cast(strftime(\'%m\', start) as int) in (12,1,2,3)) OR (cast(strftime(\'%m\', start) as int) between 4 and 12) ) GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 1',
+                'query': f'{self.basequeries["max"][0]} AND (({Datepart.add("lteq","weekday",4)} AND {Datepart.add("in","hour",7,8,9,10,11,12,13,14,15,16)} AND {Datepart.add("in","month",12,1,2,3)}) OR ({Datepart.add("in", "month",4,5,6,7,8,9,10,11)}) ){self.basequeries["max"][1]}',
                 'name': f'{SQLSENSOR_BASENAME}, {QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR}',
                 'comment': 'Kristinehamn, SE'
             },
@@ -77,3 +93,34 @@ class SQLSensorHelper():
         }
 
         return QUERYTYPES[type]
+
+
+class Datepart:
+    DIVIDENTS = {
+        "eq": "= ",
+        "lt": "< ",
+        "gt": "> ",
+        "not": "<> ",
+        "lteq": "<= ",
+        "gteq": ">= ",
+        "in": "IN "
+    }
+
+    DATETIMEPARTS = {
+        "weekday": "w",
+        "month": "m",
+        "hour": "H"
+    }
+
+    @staticmethod
+    def add(divident: str, dtpart: str, *args: int) -> str:
+        _base = Datepart._strftime_base(Datepart.DATETIMEPARTS[dtpart])
+        _arg = str(args) if len(args) > 1 else str(args[0])
+        _divident = Datepart.DIVIDENTS[divident]
+        return _base + _divident + _arg
+
+    @staticmethod
+    def _strftime_base(type: str) -> str:
+        return f"cast(strftime(\'%{type}\', start) as int) "
+
+
