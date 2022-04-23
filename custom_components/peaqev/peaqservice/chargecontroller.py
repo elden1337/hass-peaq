@@ -51,6 +51,7 @@ class ChargeController:
         ret = CHARGECONTROLLER.Error
         update_timer = False
         charger_state = self._hub.chargerobject.value.lower()
+        free_charge = self._hub.locale.data.free_charge
 
         if charger_state in self._hub.chargertype.charger.chargerstates[CHARGECONTROLLER.Idle]:
             update_timer = True
@@ -60,21 +61,21 @@ class ChargeController:
             ret = CHARGECONTROLLER.Connected
         elif charger_state not in self._hub.chargertype.charger.chargerstates[CHARGECONTROLLER.Idle] and self._hub.charger_done.value is True:
             ret = CHARGECONTROLLER.Done
-        elif datetime.now().hour in self._hub.non_hours:
+        elif datetime.now().hour in self._hub.non_hours and free_charge is False:
             update_timer = True
             ret = CHARGECONTROLLER.Stop
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGECONTROLLER.Connected]:
             if self._hub.carpowersensor.value < 1 and time.time() - self.latest_charger_start > DONETIMEOUT:
                 ret = CHARGECONTROLLER.Done
             else:
-                if self.below_startthreshold and self._hub.totalhourlyenergy.value > 0:
+                if (self.below_startthreshold and self._hub.totalhourlyenergy.value > 0) or free_charge is True:
                     ret = CHARGECONTROLLER.Start
                 else:
                     update_timer = True
                     ret = CHARGECONTROLLER.Stop
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGECONTROLLER.Charging]:
             update_timer = True
-            if self.above_stopthreshold and self._hub.totalhourlyenergy.value > 0:
+            if self.above_stopthreshold and self._hub.totalhourlyenergy.value > 0 and free_charge is False:
                 ret = CHARGECONTROLLER.Stop
             else:
                 ret = CHARGECONTROLLER.Start

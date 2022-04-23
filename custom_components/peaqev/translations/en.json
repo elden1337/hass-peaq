@@ -18,7 +18,7 @@
           "powersensorincludescar": "PowerSensor includes car",
           "chargerid": "Chargepoint Id (single chargepoint)",
           "chargertype": "Charger brand",
-          "locale": "City and country"
+          "locale": "City, or Grid owner company"
         },
         "description": "",
         "title": "Peaq installation"

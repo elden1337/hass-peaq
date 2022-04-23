@@ -8,7 +8,8 @@ from custom_components.peaqev.sensors.peaqutilitysensor import (
 
 from custom_components.peaqev.sensors.peaqintegrationsensor import PeaqIntegrationSensor
 from custom_components.peaqev.sensors.peaqaveragesensor import PeaqAverageSensor
-from custom_components.peaqev.sensors.peaqsqlsensor import (PeaqSQLSensor, PeaqSQLSensorHelper)
+from custom_components.peaqev.sensors.peaqsqlsensor import PeaqSQLSensor
+from custom_components.peaqev.peaqservice.util.sqlsensorhelper import SQLSensorHelper
 from custom_components.peaqev.sensors.peaqpowersensor import (PeaqPowerSensor, PeaqAmpSensor)
 from custom_components.peaqev.sensors.peaqpredictionsensor import PeaqPredictionSensor
 from custom_components.peaqev.sensors.peaqthresholdsensor import PeaqThresholdSensor
@@ -65,11 +66,11 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
     engine = sqlalchemy.create_engine(db_url)
     sessmaker = scoped_session(sessionmaker(bind=engine))
     sqlsensor = hub.totalhourlyenergy.entity
-    sql = PeaqSQLSensorHelper(sqlsensor).getquerytype(peaks.data.charged_peak)
+    sql = SQLSensorHelper(sqlsensor).getquerytype(peaks.data.charged_peak)
     peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql))
 
     if peaks.data.charged_peak != peaks.data.observed_peak:
-        sql2 = PeaqSQLSensorHelper(sqlsensor).getquerytype(peaks.data.observed_peak)
+        sql2 = SQLSensorHelper(sqlsensor).getquerytype(peaks.data.observed_peak)
         peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql2))
     #sql sensors
     
