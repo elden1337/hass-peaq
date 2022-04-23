@@ -51,7 +51,7 @@ class Charger:
         else:
             await self._call_charger(RESUME)
         self._hub.chargecontroller.update_latestchargerstart()
-        if self._hub.chargertype.charger.servicecalls.allowupdatecurrent is True:
+        if self._hub.chargertype.charger.servicecalls.allowupdatecurrent is True and self._hub.locale.data.free_charge is False:
             self._hass.async_create_task(self._updatemaxcurrent())
 
     async def _terminate_charger(self):
@@ -76,7 +76,9 @@ class Charger:
 
     async def _updatemaxcurrent(self):
         """If enabled, let the charger periodically update it's current during charging."""
+        self._hub.chargerobject_switch.updatecurrent()
         calls = self._service_calls.get_call(UPDATECURRENT)
+
         if await self._hass.async_add_executor_job(self._wait_turn_on):
             while self._hub.chargerobject_switch.value is True and self._charger_running is True:
                 if await self._hass.async_add_executor_job(self._wait_update_current):
