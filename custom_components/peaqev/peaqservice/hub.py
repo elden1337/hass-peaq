@@ -118,8 +118,11 @@ class Hub:
             self.charger_enabled.entity, 
             self.charger_done.entity, 
             self.chargerobject.entity,
-            f"sensor.{self.domain}_{ex.nametoid(constants.CHARGERCONTROLLER)}"
+            f"sensor.{self.domain}_{ex.nametoid(constants.CHARGERCONTROLLER)}",
+
             ]
+        if self.hours._nordpool_entity is not None:
+            self.chargingtracker_entities.append(self.hours._nordpool_entity)
 
         trackerEntities += self.chargingtracker_entities
         
@@ -172,6 +175,8 @@ class Hub:
             self.totalhourlyenergy.value = value
         elif entity == self.powersensormovingaverage.entity:
             self.powersensormovingaverage.value = value
+        elif entity == self.hours._nordpool_entity:
+            self.hours.update()
         
         if entity in self.chargingtracker_entities:
             await self.charger.charge()

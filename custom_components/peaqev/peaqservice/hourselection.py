@@ -33,12 +33,12 @@ class PriceAwareHours:
     ):
         self._hass = hass
         self._prices = []
-        self._nordpool_entity = ""
+        self._nordpool_entity = None
         self._absolute_top_price = absolute_top_price
         self._cautionhour_type = cautionhour_type
         self._last_run = time.time()
         self._setup_nordpool()
-        self._update()
+        self.update()
 
     @property
     def prices(self):
@@ -47,13 +47,12 @@ class PriceAwareHours:
     @prices.setter
     def prices(self, val):
         self._prices = val
-        self._update()
+        self.update()
 
-    def _update(self):
+    def update(self):
+        self._update_nordpool()
         if len(self.prices) > 1:
-            self._update_nordpool()  # get new prices from nordpool here
             pricedict = self._create_dict(self.prices)
-
             """
             Curve is too flat if stdev is <= 0.05. 
             If so we don't do any specific non or caution-hours based on pricing.
