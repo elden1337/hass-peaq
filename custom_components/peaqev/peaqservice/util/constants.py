@@ -85,3 +85,8 @@ ON = "on"
 OFF = "off"
 RESUME = "resume"
 PAUSE = "pause"
+
+"""States for the Hours-object"""
+NON_HOUR = "Charging stopped"
+CAUTION_HOUR = "Charging-permittance degraded"
+CHARGING_PERMITTED = "Charging permitted"

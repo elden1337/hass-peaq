@@ -29,4 +29,7 @@ class PeaqSensor(SensorBase):
         return {
             "non_hours": self._nonhours,
             "caution_hours": self._cautionhours,
+            #current_hour state
+            #"price aware?
+            #"max money",
         }

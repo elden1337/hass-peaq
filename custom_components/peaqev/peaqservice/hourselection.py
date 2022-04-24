@@ -1,6 +1,12 @@
 import time
+from datetime import datetime
 import statistics as stat
 import logging
+from custom_components.peaqev.peaqservice.util.constants import (
+    NON_HOUR,
+    CAUTION_HOUR,
+    CHARGING_PERMITTED
+)
 
 import homeassistant.helpers.template as template
 
@@ -121,7 +127,6 @@ class PriceAwareHours:
             # could not get the entity. supress further priceawareness.
             _LOGGER.warn("Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness.")
 
-
 class Hours(PriceAwareHours):
     def __init__(
             self,
@@ -136,6 +141,15 @@ class Hours(PriceAwareHours):
         self._caution_hours = caution_hours
         if price_aware is True:
             super().__init__(hass, absolute_top_price, cautionhour_type)
+
+    @property
+    def state(self) -> str:
+        if datetime.now().hour in self.non_hours:
+            return NON_HOUR
+        elif datetime.now().hour in self.caution_hours:
+            return CAUTION_HOUR
+        else:
+            return CHARGING_PERMITTED
 
     @property
     def non_hours(self):
