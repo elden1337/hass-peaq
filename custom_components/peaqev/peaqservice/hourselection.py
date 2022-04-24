@@ -1,5 +1,9 @@
 import time
 import statistics as stat
+import logging
+
+import homeassistant.helpers.template as template
+
 
 CAUTIONHOURTYPE_SUAVE = "Suave"
 CAUTIONHOURTYPE_INTERMEDIATE = "Intermediate"
@@ -11,6 +15,8 @@ CautionHourType = {
     CAUTIONHOURTYPE_AGGRESSIVE: 0.6
 }
 
+_LOGGER = logging.getLogger(__name__)
+
 """
 This class will return the set nonhours and cautionhours, or generate dynamic ones based on Nordpool
 if user has set that bool in config flow.
@@ -21,13 +27,17 @@ if user has set that bool in config flow.
 class PriceAwareHours:
     def __init__(
             self,
+            hass,
             absolute_top_price: float = None,
             cautionhour_type: float = CautionHourType[CAUTIONHOURTYPE_INTERMEDIATE]
     ):
+        self._hass = hass
         self._prices = []
+        self._nordpool_entity = ""
         self._absolute_top_price = absolute_top_price
         self._cautionhour_type = cautionhour_type
         self._last_run = time.time()
+        self._setup_nordpool()
         self._update()
 
     @property
@@ -41,9 +51,13 @@ class PriceAwareHours:
 
     def _update(self):
         if len(self.prices) > 1:
-            # get new prices from nordpool here
+            self._update_nordpool()  # get new prices from nordpool here
             pricedict = self._create_dict(self.prices)
 
+            """
+            Curve is too flat if stdev is <= 0.05. 
+            If so we don't do any specific non or caution-hours based on pricing.
+            """
             if stat.stdev(self.prices) > 0.05:
                 self._determine_hours(
                     self._rank_prices(pricedict)
@@ -87,10 +101,32 @@ class PriceAwareHours:
         self.non_hours = _nh
         self.caution_hours = _ch
 
+    def _update_nordpool(self):
+        ret = self._hass.states.get(self._nordpool_entity)
+        if ret is not None:
+            ret_attr = str(ret.attributes.get("Today"))
+            self.prices = ret_attr
+        else:
+            _LOGGER.error("chargerobject state was none")
+
+    def _setup_nordpool(self):
+        try:
+            entities = template.integration_entities(self._hass, "nordpool")
+            if len(entities) < 1:
+                raise Exception("no entities found for Nordpool.")
+            elif len(entities) == 1:
+                self._nordpool_entity = entities
+            else:
+                raise Exception("more than one Nordpool entity found. Cannot continue.")
+        except Exception:
+            # could not get the entity. supress further priceawareness.
+            _LOGGER.warn("Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness.")
+
 
 class Hours(PriceAwareHours):
     def __init__(
             self,
+            hass,
             price_aware: bool,
             absolute_top_price: float = None,
             cautionhour_type: float = None,
@@ -100,7 +136,7 @@ class Hours(PriceAwareHours):
         self._non_hours = non_hours
         self._caution_hours = caution_hours
         if price_aware is True:
-            super().__init__(absolute_top_price, cautionhour_type)
+            super().__init__(hass, absolute_top_price, cautionhour_type)
 
     @property
     def non_hours(self):

@@ -42,7 +42,7 @@ class Hub:
         self.chargertype = ChargerTypeData(hass, config_inputs["chargertype"], config_inputs["chargerid"])
         self._powersensor_includes_car = bool(config_inputs["powersensorincludescar"])
         self._monthlystartpeak = config_inputs["monthlystartpeak"]
-        self.hours = Hours(config_inputs["priceaware"], config_inputs["nonhours"], config_inputs["cautionhours"])
+        self.hours = Hours(self.hass, config_inputs["priceaware"], config_inputs["nonhours"], config_inputs["cautionhours"])
         self.powersensor = HubMember(int, config_inputs["powersensor"], 0)
 
         self.charger_enabled = HubMember(
