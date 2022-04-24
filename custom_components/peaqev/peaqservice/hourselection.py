@@ -16,7 +16,6 @@ This class will return the set nonhours and cautionhours, or generate dynamic on
 if user has set that bool in config flow.
 """
 
-
 # https://github.com/custom-components/nordpool
 
 class PriceAwareHours:
@@ -87,32 +86,6 @@ class PriceAwareHours:
 
         self.non_hours = _nh
         self.caution_hours = _ch
-
-
-class HoursBase:
-    def __init__(
-            self,
-            non_hours: list = None,
-            caution_hours: dict = None
-    ):
-        self._non_hours = non_hours
-        self._caution_hours = caution_hours
-
-    @property
-    def non_hours(self):
-        return self._non_hours
-
-    @non_hours.setter
-    def non_hours(self, val):
-        self._non_hours = val
-
-    @property
-    def caution_hours(self):
-        return self._caution_hours
-
-    @caution_hours.setter
-    def caution_hours(self, val):
-        self._caution_hours = val
 
 
 class Hours(PriceAwareHours):
