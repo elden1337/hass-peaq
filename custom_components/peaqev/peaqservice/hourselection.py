@@ -94,7 +94,6 @@ class PriceAwareHours(Hours):
         self._nordpool_entity = None
         self._absolute_top_price = absolute_top_price if absolute_top_price is not None else float("inf")
         self._cautionhour_type = cautionhour_type
-        #self._last_run = time.time()
         super().__init__(price_aware, non_hours, caution_hours)
         self._setup_nordpool()
         self.update()
@@ -146,8 +145,8 @@ class PriceAwareHours(Hours):
         ret = {}
         _maxval = max(hourdict.values())
         for key in hourdict:
-            #if hourdict[key] > _maxval * (1 - stat.stdev(hourdict.values())):
-            ret[key] = {"val": hourdict[key], "permax": round(hourdict[key] / _maxval, 2)}
+            if hourdict[key] > abs(_maxval * (1 - stat.stdev(hourdict.values()))):
+                ret[key] = {"val": hourdict[key], "permax": round(hourdict[key] / _maxval, 2)}
         return ret
 
     def _create_dict(self, input: list):
