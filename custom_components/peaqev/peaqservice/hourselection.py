@@ -40,11 +40,23 @@ class PriceAwareHours:
         self._hass = hass
         self._prices = []
         self._nordpool_entity = None
-        self._absolute_top_price = absolute_top_price
+        self._absolute_top_price = absolute_top_price if absolute_top_price is not None else float("inf")
         self._cautionhour_type = cautionhour_type
         self._last_run = time.time()
         self._setup_nordpool()
         self.update()
+
+    @property
+    def nordpool_entity(self) -> str:
+        return self._nordpool_entity
+
+    @nordpool_entity.setter
+    def nordpool_entity(self, val):
+        self._nordpool_entity = val
+
+    @property
+    def absolute_top_price(self):
+        return self._absolute_top_price
 
     @property
     def prices(self):
@@ -56,7 +68,6 @@ class PriceAwareHours:
         self.update()
 
     def update(self):
-        self._update_nordpool()
         if len(self.prices) > 1:
             pricedict = self._create_dict(self.prices)
             """
@@ -81,6 +92,7 @@ class PriceAwareHours:
         self.non_hours.sort()
 
     def _rank_prices(self, hourdict: dict):
+        _LOGGER.info("rank_prices", hourdict)
         ret = {}
         _maxval = max(hourdict.values())
         for key in hourdict:
@@ -95,19 +107,22 @@ class PriceAwareHours:
         return ret
 
     def _determine_hours(self, price_list: dict):
+        _LOGGER.info("determine hours", price_list)
         _nh = []
-        _ch = {}
+        #_ch = {}
+        _ch = []
         for p in price_list:
             if round(abs(price_list[p]["permax"] - 1), 2) <= self._cautionhour_type:
                 _nh.append(p)
             else:
-                _ch[p] = round(abs(price_list[p]["permax"] - 1), 2)
+                _ch.append(p)
+                #_ch[p] = round(abs(price_list[p]["permax"] - 1), 2)
 
         self.non_hours = _nh
         self.caution_hours = _ch
 
-    def _update_nordpool(self):
-        ret = self._hass.states.get(self._nordpool_entity)
+    def update_nordpool(self):
+        ret = self._hass.states.get(self.nordpool_entity)
         if ret is not None:
             ret_attr = str(ret.attributes.get("Today"))
             self.prices = ret_attr
@@ -120,12 +135,13 @@ class PriceAwareHours:
             if len(entities) < 1:
                 raise Exception("no entities found for Nordpool.")
             elif len(entities) == 1:
-                self._nordpool_entity = entities
+                self.nordpool_entity = entities[0]
+                self.update_nordpool()
             else:
                 raise Exception("more than one Nordpool entity found. Cannot continue.")
         except Exception:
-            # could not get the entity. supress further priceawareness.
             _LOGGER.warn("Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness.")
+
 
 class Hours(PriceAwareHours):
     def __init__(
@@ -135,10 +151,11 @@ class Hours(PriceAwareHours):
             absolute_top_price: float = None,
             cautionhour_type: float = None,
             non_hours: list = None,
-            caution_hours: dict = None
+            caution_hours: list = None
     ):
         self._non_hours = non_hours
         self._caution_hours = caution_hours
+        self._price_aware = price_aware
         if price_aware is True:
             super().__init__(hass, absolute_top_price, cautionhour_type)
 
@@ -150,6 +167,10 @@ class Hours(PriceAwareHours):
             return CAUTION_HOUR
         else:
             return CHARGING_PERMITTED
+
+    @property
+    def price_aware(self) -> bool:
+        return self._price_aware
 
     @property
     def non_hours(self):

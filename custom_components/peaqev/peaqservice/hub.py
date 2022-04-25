@@ -42,7 +42,13 @@ class Hub:
         self.chargertype = ChargerTypeData(hass, config_inputs["chargertype"], config_inputs["chargerid"])
         self._powersensor_includes_car = bool(config_inputs["powersensorincludescar"])
         self._monthlystartpeak = config_inputs["monthlystartpeak"]
-        self.hours = Hours(self.hass, config_inputs["priceaware"], config_inputs["nonhours"], config_inputs["cautionhours"])
+        self.hours = Hours(
+            hass=self.hass,
+            price_aware=config_inputs["priceaware"],
+            absolute_top_price=config_inputs["absolute_top_price"],
+            non_hours=config_inputs["nonhours"],
+            caution_hours=config_inputs["cautionhours"]
+        )
         self.powersensor = HubMember(int, config_inputs["powersensor"], 0)
 
         self.charger_enabled = HubMember(
@@ -119,10 +125,11 @@ class Hub:
             self.charger_done.entity, 
             self.chargerobject.entity,
             f"sensor.{self.domain}_{ex.nametoid(constants.CHARGERCONTROLLER)}",
-
             ]
-        if self.hours._nordpool_entity is not None:
-            self.chargingtracker_entities.append(self.hours._nordpool_entity)
+
+        if self.hours.price_aware is True:
+            if self.hours.nordpool_entity is not None:
+                self.chargingtracker_entities.append(self.hours.nordpool_entity)
 
         trackerEntities += self.chargingtracker_entities
         
@@ -175,8 +182,8 @@ class Hub:
             self.totalhourlyenergy.value = value
         elif entity == self.powersensormovingaverage.entity:
             self.powersensormovingaverage.value = value
-        elif entity == self.hours._nordpool_entity:
-            self.hours.update()
+        elif entity == self.hours.nordpool_entity:
+            self.hours.update_nordpool()
         
         if entity in self.chargingtracker_entities:
             await self.charger.charge()

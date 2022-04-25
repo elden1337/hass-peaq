@@ -22,17 +22,24 @@
         },
         "description": "",
         "title": "Peaq installation"
-      },
-      "opt": {
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "hours": {
         "data": {
           "nonhours": "Hours when the charger is always disabled",
           "cautionhours": "Hours when the charger takes extra precaution to not burst peak energy",
-          "priceaware": "Price aware charging"
+          "priceaware": "Price aware charging",
+          "absolute_top_price": "absolute_top_price"
         },
         "description": "Select the hours you wish to completely stop the charger, and hours you wish to let the charger charge, but with extra caution.",
         "title": "Non- and Caution-hours"
       },
-      "startmonth": {
+      "months": {
+        "title": "Monthly allowed peak",
+        "description": "Set the allowed peak (tolerance) per month. This is to allow the charger to charge up to a certain level before a peak energy is reached.",
         "data": {
           "jan": "January",
           "feb": "February",
@@ -46,9 +53,7 @@
           "oct": "October",
           "nov": "November",
           "dec": "December"
-        },
-        "description": "Set the allowed peak (tolerance) per month. This is to allow the charger to charge up to a certain level before a peak energy is reached.",
-        "title": "Monthly allowed peak"
+        }
       }
     }
   }

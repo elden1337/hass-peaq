@@ -11,17 +11,35 @@
         },
         "description": "",
         "title": "Peaq installation"
-      },
-      "opt": {
+      }
+    },
+    "error": {
+      "invalid_powersensor": "[%key:common::config_flow::error::invalid_powersensor%]",
+      "invalid_chargerid": "[%key:common::config_flow::error::invalid_chargerid%]",
+      "invalid_nonhours": "[%key:common::config_flow::error::invalid_nonhours%]",
+      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+      "unknown": "[%key:common::config_flow::error::unknown%]"
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+    }
+  },
+  "options": {
+    "step": {
+      "hours": {
         "data": {
           "nonhours": "[%key:common::config_flow::data::nonhours%]",
           "cautionhours": "[%key:common::config_flow::data::cautionhours%]",
-          "priceaware": "[%key:common::config_flow::data::priceaware%]"
+          "priceaware": "[%key:common::config_flow::data::priceaware%]",
+          "absolute_top_price": "[%key:common::config_flow::data::absolute_top_price%]"
         },
         "description": "Select the hours you wish to completely stop the charger, and hours you wish to let the charger charge, but with extra caution.",
         "title": "Non- and Caution-hours"
       },
-      "startmonth": {
+      "months": {
+        "title": "Monthly allowed peak",
+        "description": "Set the allowed peak (tolerance) per month. This is to allow the charger to charge up to a certain level before a peak energy is reached.",
         "data": {
           "jan": "[%key:common::config_flow::data::jan%]",
           "feb": "[%key:common::config_flow::data::feb%]",
@@ -35,21 +53,8 @@
           "oct": "[%key:common::config_flow::data::oct%]",
           "nov": "[%key:common::config_flow::data::nov%]",
           "dec": "[%key:common::config_flow::data::dec%]"
-        },
-        "description": "Set the allowed peak (tolerance) per month. This is to allow the charger to charge up to a certain level before a peak energy is reached.",
-        "title": "Monthly allowed peak"
+        }
       }
-    },
-    "error": {
-      "invalid_powersensor": "[%key:common::config_flow::error::invalid_powersensor%]",
-      "invalid_chargerid": "[%key:common::config_flow::error::invalid_chargerid%]",
-      "invalid_nonhours": "[%key:common::config_flow::error::invalid_nonhours%]",
-      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
-      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
-      "unknown": "[%key:common::config_flow::error::unknown%]"
-    },
-    "abort": {
-      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
     }
   }
 }
