@@ -11,7 +11,7 @@ import custom_components.peaqev.peaqservice.util.constants as constants
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.chargecontroller import ChargeController
 from custom_components.peaqev.peaqservice.charger import Charger
-from custom_components.peaqev.peaqservice.hourselection import Hours
+from custom_components.peaqev.peaqservice.hourselection import (PriceAwareHours, RegularHours)
 from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
 from custom_components.peaqev.peaqservice.localetypes.locale import LocaleData
 from custom_components.peaqev.peaqservice.prediction import Prediction
@@ -42,13 +42,21 @@ class Hub:
         self.chargertype = ChargerTypeData(hass, config_inputs["chargertype"], config_inputs["chargerid"])
         self._powersensor_includes_car = bool(config_inputs["powersensorincludescar"])
         self._monthlystartpeak = config_inputs["monthlystartpeak"]
-        self.hours = Hours(
-            hass=self.hass,
-            price_aware=config_inputs["priceaware"],
-            absolute_top_price=config_inputs["absolute_top_price"],
-            non_hours=config_inputs["nonhours"],
-            caution_hours=config_inputs["cautionhours"]
-        )
+
+        if config_inputs["priceaware"] is True:
+            self.hours = PriceAwareHours(
+                hass=self.hass,
+                price_aware=config_inputs["priceaware"],
+                absolute_top_price=config_inputs["absolute_top_price"],
+                non_hours=config_inputs["nonhours"],
+                caution_hours=config_inputs["cautionhours"]
+            )
+        else:
+            self.hours = RegularHours(
+                non_hours=config_inputs["nonhours"],
+                caution_hours=config_inputs["cautionhours"]
+            )
+
         self.powersensor = HubMember(int, config_inputs["powersensor"], 0)
 
         self.charger_enabled = HubMember(

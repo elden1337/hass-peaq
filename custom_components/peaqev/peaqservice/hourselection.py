@@ -10,7 +10,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
 
 import homeassistant.helpers.template as template
 
-
+NORDPOOL = "nordpool"
 CAUTIONHOURTYPE_SUAVE = "Suave"
 CAUTIONHOURTYPE_INTERMEDIATE = "Intermediate"
 CAUTIONHOURTYPE_AGGRESSIVE = "Aggressive"
@@ -30,19 +30,72 @@ if user has set that bool in config flow.
 
 # https://github.com/custom-components/nordpool
 
-class PriceAwareHours:
+class Hours():
+    def __init__(
+            self,
+            price_aware: bool,
+            non_hours: list = None,
+            caution_hours: list = None
+    ):
+        self._non_hours = non_hours
+        self._caution_hours = caution_hours
+        self._price_aware = price_aware
+
+    @property
+    def state(self) -> str:
+        if datetime.now().hour in self.non_hours:
+            return NON_HOUR
+        elif datetime.now().hour in self.caution_hours:
+            return CAUTION_HOUR
+        else:
+            return CHARGING_PERMITTED
+
+    @property
+    def price_aware(self) -> bool:
+        return self._price_aware
+
+    @property
+    def non_hours(self):
+        return self._non_hours
+
+    @non_hours.setter
+    def non_hours(self, val):
+        self._non_hours = val
+
+    @property
+    def caution_hours(self):
+        return self._caution_hours
+
+    @caution_hours.setter
+    def caution_hours(self, val):
+        self._caution_hours = val
+
+
+class RegularHours(Hours):
+    def __init__(self, nonhours = None, cautionhours = None):
+        super().__init__(False, nonhours, cautionhours)
+
+
+class PriceAwareHours(Hours):
     def __init__(
             self,
             hass,
+            price_aware: bool,
             absolute_top_price: float = None,
+
+            non_hours: list = None,
+            caution_hours: list = None,
             cautionhour_type: float = CautionHourType[CAUTIONHOURTYPE_INTERMEDIATE]
     ):
         self._hass = hass
         self._prices = []
+        self._non_hours = []
+        self._caution_hours = []
         self._nordpool_entity = None
         self._absolute_top_price = absolute_top_price if absolute_top_price is not None else float("inf")
         self._cautionhour_type = cautionhour_type
-        self._last_run = time.time()
+        #self._last_run = time.time()
+        super().__init__(price_aware, non_hours, caution_hours)
         self._setup_nordpool()
         self.update()
 
@@ -75,10 +128,8 @@ class PriceAwareHours:
             If so we don't do any specific non or caution-hours based on pricing.
             """
             if stat.stdev(self.prices) > 0.05:
-                self._determine_hours(
-                    self._rank_prices(pricedict)
-                )
-
+                prices_ranked = self._rank_prices(pricedict)
+                self._determine_hours(prices_ranked)
             if self._absolute_top_price is not None:
                 self._add_expensive_non_hours(pricedict)
 
@@ -92,12 +143,11 @@ class PriceAwareHours:
         self.non_hours.sort()
 
     def _rank_prices(self, hourdict: dict):
-        _LOGGER.info("rank_prices", hourdict)
         ret = {}
         _maxval = max(hourdict.values())
         for key in hourdict:
-            if hourdict[key] > _maxval * (1 - stat.stdev(hourdict.values())):
-                ret[key] = {"val": hourdict[key], "permax": round(hourdict[key] / _maxval, 2)}
+            #if hourdict[key] > _maxval * (1 - stat.stdev(hourdict.values())):
+            ret[key] = {"val": hourdict[key], "permax": round(hourdict[key] / _maxval, 2)}
         return ret
 
     def _create_dict(self, input: list):
@@ -107,7 +157,6 @@ class PriceAwareHours:
         return ret
 
     def _determine_hours(self, price_list: dict):
-        _LOGGER.info("determine hours", price_list)
         _nh = []
         #_ch = {}
         _ch = []
@@ -120,18 +169,20 @@ class PriceAwareHours:
 
         self.non_hours = _nh
         self.caution_hours = _ch
+        _LOGGER.info(_nh)
+        _LOGGER.info(_ch)
 
     def update_nordpool(self):
         ret = self._hass.states.get(self.nordpool_entity)
         if ret is not None:
-            ret_attr = str(ret.attributes.get("Today"))
+            ret_attr = list(ret.attributes.get("today"))
             self.prices = ret_attr
         else:
-            _LOGGER.error("chargerobject state was none")
+            _LOGGER.warn("could not get nordpool-prices")
 
     def _setup_nordpool(self):
         try:
-            entities = template.integration_entities(self._hass, "nordpool")
+            entities = template.integration_entities(self._hass, NORDPOOL)
             if len(entities) < 1:
                 raise Exception("no entities found for Nordpool.")
             elif len(entities) == 1:
@@ -143,49 +194,6 @@ class PriceAwareHours:
             _LOGGER.warn("Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness.")
 
 
-class Hours(PriceAwareHours):
-    def __init__(
-            self,
-            hass,
-            price_aware: bool,
-            absolute_top_price: float = None,
-            cautionhour_type: float = None,
-            non_hours: list = None,
-            caution_hours: list = None
-    ):
-        self._non_hours = non_hours
-        self._caution_hours = caution_hours
-        self._price_aware = price_aware
-        if price_aware is True:
-            super().__init__(hass, absolute_top_price, cautionhour_type)
 
-    @property
-    def state(self) -> str:
-        if datetime.now().hour in self.non_hours:
-            return NON_HOUR
-        elif datetime.now().hour in self.caution_hours:
-            return CAUTION_HOUR
-        else:
-            return CHARGING_PERMITTED
-
-    @property
-    def price_aware(self) -> bool:
-        return self._price_aware
-
-    @property
-    def non_hours(self):
-        return self._non_hours
-
-    @non_hours.setter
-    def non_hours(self, val):
-        self._non_hours = val
-
-    @property
-    def caution_hours(self):
-        return self._caution_hours
-
-    @caution_hours.setter
-    def caution_hours(self, val):
-        self._caution_hours = val
 
 
