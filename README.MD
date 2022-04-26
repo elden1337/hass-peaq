@@ -7,7 +7,7 @@ In order for this integration to function, you will need to have a sensor/device
 
 This integration does not communicate with any properitary API's, everything is handled locally in your Home Assistant. However, the chargers selected will use the integrations set for them, and may include cloud polling of data.
 
-While this integration will try to not break your monthly energy peak hour, there is off course no guarantee. Various factors beyond control of this logic do occur, so for those aiming at staying below their threshold, I do suggest you think about the non-hours, caution-hours etc in the setup. These hours should be set when you commonly utilize a lot of extra energy in your home, such as cooking, doing laundry etc. 
+*While this integration will try to not break your monthly energy peak hour, there is off course no guarantee. Various factors beyond control of this logic do occur, so for those aiming at staying below their threshold, I do suggest you think about the non-hours, caution-hours etc in the setup. These hours should be set when you commonly utilize a lot of extra energy in your home, such as cooking, doing laundry etc.* 
 
 ## Installation
 
@@ -26,10 +26,14 @@ Search for peaqev in your integrations setup. Fill in the following parameters:
 - `Power sensor includes car` - Check this option if the above sensor includes your car's power draw. The calutions will be altered accordingly
 - `City, or Grid owner company` - Chose your city from the list. The characteristics differ in how peak hours are stored and measured. If you don't live in a supported location but just want to test the integration, or lower your peaks for other reasons, you may check *"Other, just want to test"*
 - `Charger type` - Pick the installed ev-charger you have. Currently Chargeamps and Easee are supported. Check links for required custom components per charger-type: [Chargeamps](https://github.com/kirei/hass-chargeamps), [Easee](https://github.com/fondberg/easee_hass/)
+
+###Config options:
 - `Non hours` - Click to select the hours (if any) where you do not wish to charge.  
 - `Caution hours` - Click to select the hours (if any) where you want the charger to be extra cautious to not break the peak.
 - `Price aware charging` - Check this to calculate the cheapest hours from Nordpool (requires [Nordpool](https://github.com/custom-components/nordpool)). Above Non- and Caution-hours will be ignored.
+- `Absolute top price` - The limit (if any) where your charger should be stopped, regardless of the hour-algorithm.
 - `Monthly allowed peak` - Needs to be set in order to determine a minimum allowed peak. In the beginning of each month this is necessary to be able to charge at all. *Format is in kW. See examples below*
+
 
 These are two (quite restrained) examples of monthly start peaks, for 1-phase and 3-phase charging respectively. This option is always up to your house and it's other appliances. The below are made for a modern house with installed heat pump.
 

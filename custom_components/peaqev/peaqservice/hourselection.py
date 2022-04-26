@@ -62,6 +62,7 @@ class RegularHours(Hours):
     def __init__(self, non_hours=None, caution_hours=None):
         super().__init__(False, non_hours, caution_hours)
 
+
 class PriceAwareHours(Hours):
     def __init__(
             self,
@@ -71,11 +72,11 @@ class PriceAwareHours(Hours):
             non_hours: list = None,
             caution_hours: list = None,
     ):
-        self._core = core_hours(absolute_top_price)
+        self._absolute_top_price = self._set_absolute_top_price(absolute_top_price)
+        self._core = core_hours(self._absolute_top_price)
         self._hass = hass
         self._prices = []
         self._nordpool_entity = None
-        self._absolute_top_price = absolute_top_price if absolute_top_price is not None else float("inf")
         self._setup_nordpool()
         super().__init__(price_aware, non_hours, caution_hours)
 
@@ -128,7 +129,11 @@ class PriceAwareHours(Hours):
         except Exception:
             _LOGGER.warn("Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness.")
 
-
+    @staticmethod
+    def _set_absolute_top_price(input) -> float:
+        if input is None or input <= 0:
+            return float("inf")
+        return input
 
 
 
