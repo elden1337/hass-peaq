@@ -1,6 +1,6 @@
 from datetime import datetime
 import custom_components.peaqev.peaqservice.util.constants as constants
-from Peaqevcore.Threshold import ThresholdBase as core_threshold
+from peaqevcore.Threshold import ThresholdBase as core_threshold
 
 
 class Threshold():

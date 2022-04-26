@@ -1,5 +1,5 @@
 from datetime import datetime
-from Peaqevcore.Prediction import PredictionBase as core_prediction
+from peaqevcore.Prediction import PredictionBase as core_prediction
 
 
 class Prediction():
