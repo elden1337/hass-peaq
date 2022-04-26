@@ -132,7 +132,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         _transfer_nonhours = self.config_entry.options["nonhours"] if "nonhours" in self.config_entry.options.keys() else self.config_entry.data["options"]["nonhours"] if "nonhours" in self.config_entry.data["options"].keys() else mockhours
         _priceaware = self.config_entry.options["priceaware"] if "priceaware" in self.config_entry.options.keys() else False
         _absolute_top_price = self.config_entry.options["absolute_top_price"] if "absolute_top_price" in self.config_entry.options.keys() else None
-        _cautionhour_type = self.config_entry.options["cautionhour_type"] if "cautionhour_type" in self.config_entry.options.keys() else pk.CAUTIONHOURNAME_INTERMEDIATE
+        _cautionhour_type = self.config_entry.options["cautionhour_type"] if "cautionhour_type" in self.config_entry.options.keys() else pk.CAUTIONHOURTYPE_INTERMEDIATE
 
         return self.async_show_form(
             step_id="hours",
@@ -148,8 +148,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Optional("absolute_top_price", default=_absolute_top_price): cv.positive_float,
                 vol.Optional(
                     "cautionhour_type",
-                    default=pk.CAUTIONHOURNAME_INTERMEDIATE,
-                ): vol.In(pk.CAUTIONHOURNAMES),
+                    default=pk.CAUTIONHOURTYPE_INTERMEDIATE,
+                ): vol.In(pk.CAUTIONHOURTYPE_NAMES),
             }),
             last_step=False,
         )
