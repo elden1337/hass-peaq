@@ -33,7 +33,7 @@ Search for peaqev in your integrations setup. Fill in the following parameters:
 - `Price aware charging` - Check this to calculate the cheapest hours from Nordpool (requires [Nordpool](https://github.com/custom-components/nordpool)). Above Non- and Caution-hours will be ignored.
 - `Absolute top price` - The limit (if any) where your charger should be stopped, regardless of the hour-algorithm.
 - `Monthly allowed peak` - Needs to be set in order to determine a minimum allowed peak. In the beginning of each month this is necessary to be able to charge at all. *Format is in kW. See examples below*
-
+- `Cautionhour type` - Choose to what extent you would like Peaqev to hold back during caution-hours. *Suave > Aggressive* 
 
 These are two (quite restrained) examples of monthly start peaks, for 1-phase and 3-phase charging respectively. This option is always up to your house and it's other appliances. The below are made for a modern house with installed heat pump.
 
