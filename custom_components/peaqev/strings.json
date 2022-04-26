@@ -34,8 +34,8 @@
           "priceaware": "[%key:common::config_flow::data::priceaware%]",
           "absolute_top_price": "[%key:common::config_flow::data::absolute_top_price%]"
         },
-        "description": "Select the hours you wish to completely stop the charger, and hours you wish to let the charger charge, but with extra caution.",
-        "title": "Non- and Caution-hours"
+        "description": "Select the hours you wish to completely stop the charger, and hours you wish to let the charger charge, but with extra caution. Here you may also select price aware charging. If active, the non- and caution-hours will be ignored",
+        "title": "Hoursselection and price-awareness"
       },
       "months": {
         "title": "Monthly allowed peak",
