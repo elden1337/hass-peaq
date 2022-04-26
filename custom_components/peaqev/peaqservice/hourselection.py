@@ -62,7 +62,6 @@ class RegularHours(Hours):
     def __init__(self, non_hours=None, caution_hours=None):
         super().__init__(False, non_hours, caution_hours)
 
-
 class PriceAwareHours(Hours):
     def __init__(
             self,
@@ -77,14 +76,14 @@ class PriceAwareHours(Hours):
         self._prices = []
         self._nordpool_entity = None
         self._absolute_top_price = absolute_top_price if absolute_top_price is not None else float("inf")
-        super().__init__(price_aware, non_hours, caution_hours)
         self._setup_nordpool()
+        super().__init__(price_aware, non_hours, caution_hours)
 
-    @property
+    @Hours.non_hours.getter
     def non_hours(self) -> list:
         return self._core.non_hours
 
-    @property
+    @Hours.caution_hours.getter
     def caution_hours(self) -> list:
         return self._core.caution_hours
 
