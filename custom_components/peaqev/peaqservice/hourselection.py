@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from datetime import datetime
 import logging
 from custom_components.peaqev.peaqservice.util.constants import (
@@ -57,6 +58,14 @@ class Hours():
     def caution_hours(self, val):
         self._caution_hours = val
 
+    @property
+    @abstractmethod
+    def nordpool_entity(self):
+        pass
+
+    @abstractmethod
+    def update_nordpool(self):
+        pass
 
 class RegularHours(Hours):
     def __init__(self, non_hours=None, caution_hours=None):
