@@ -72,8 +72,8 @@ class Hours():
 
 
 class RegularHours(Hours):
-    def __init__(self, nonhours = None, cautionhours = None):
-        super().__init__(False, nonhours, cautionhours)
+    def __init__(self, non_hours=None, caution_hours=None):
+        super().__init__(False, non_hours, caution_hours)
 
 
 class PriceAwareHours(Hours):
