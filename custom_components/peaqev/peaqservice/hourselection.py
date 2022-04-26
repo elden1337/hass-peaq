@@ -4,9 +4,19 @@ import logging
 from custom_components.peaqev.peaqservice.util.constants import (
     NON_HOUR,
     CAUTION_HOUR,
-    CHARGING_PERMITTED
+    CHARGING_PERMITTED,
+    CAUTIONHOURTYPE_SUAVE,
+    CAUTIONHOURTYPE_INTERMEDIATE,
+    CAUTIONHOURTYPE_AGGRESSIVE,
+    CAUTIONHOURTYPES,
+    CAUTIONHOURMAP_REV
 )
-
+#from peaqevcore.Models import (
+#    CAUTIONHOURTYPE_SUAVE,
+#    CAUTIONHOURTYPE_INTERMEDIATE,
+#    CAUTIONHOURTYPE_AGGRESSIVE,
+#    CAUTIONHOURTYPE
+#)
 import homeassistant.helpers.template as template
 from peaqevcore.hoursselection import Hoursselectionbase as core_hours
 
@@ -80,14 +90,20 @@ class PriceAwareHours(Hours):
             absolute_top_price: float = None,
             non_hours: list = None,
             caution_hours: list = None,
+            cautionhour_type: float = CAUTIONHOURTYPES[CAUTIONHOURTYPE_INTERMEDIATE]
     ):
         self._absolute_top_price = self._set_absolute_top_price(absolute_top_price)
-        self._core = core_hours(self._absolute_top_price)
+        self._cautionhour_type = cautionhour_type
+        self._core = core_hours(self._absolute_top_price, self._cautionhour_type)
         self._hass = hass
         self._prices = []
         self._nordpool_entity = None
         self._setup_nordpool()
         super().__init__(price_aware, non_hours, caution_hours)
+
+    @property
+    def cautionhour_type_string(self) -> str:
+        return CAUTIONHOURMAP_REV[self._cautionhour_type]
 
     @Hours.non_hours.getter
     def non_hours(self) -> list:

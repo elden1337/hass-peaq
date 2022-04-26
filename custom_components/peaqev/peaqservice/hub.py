@@ -49,7 +49,8 @@ class Hub:
                 price_aware=config_inputs["priceaware"],
                 absolute_top_price=config_inputs["absolute_top_price"],
                 non_hours=config_inputs["nonhours"],
-                caution_hours=config_inputs["cautionhours"]
+                caution_hours=config_inputs["cautionhours"],
+                cautionhour_type=constants.CAUTIONHOURMAP_REV[config_inputs["cautionhour_type"]]
             )
         else:
             self.hours = RegularHours(

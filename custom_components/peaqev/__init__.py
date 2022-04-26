@@ -30,7 +30,8 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
         "nonhours": config.options["nonhours"] if "nonhours" in config.options.keys() else config.data["options"]["nonhours"] if "nonhours" in config.data["options"].keys() else [],
         "monthlystartpeak": config.options["startpeaks"] if "startpeaks" in config.options.keys() else config.data["options"]["startpeaks"] if "startpeaks" in config.data["options"].keys() else _standard_startpeaks,
         "priceaware": config.options["priceaware"] if "priceaware" in config.options.keys() else False,
-        "absolute_top_price": config.options["absolute_top_price"] if "absolute_top_price" in config.options.keys() else None
+        "absolute_top_price": config.options["absolute_top_price"] if "absolute_top_price" in config.options.keys() else None,
+        "cautionhour_type": config.options["absolute_top_price"] if "absolute_top_price" in config.options.keys() else 0
     }
 
     hub = Hub(hass, configinputs, DOMAIN)
