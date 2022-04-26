@@ -3,7 +3,7 @@ import logging
 import homeassistant.helpers.template as template
 
 from custom_components.peaqev.peaqservice.chargertypes.servicecalls import ServiceCalls
-from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
+from peaqevcore.Models import CHARGERSTATES
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,9 +18,9 @@ class ChargerBase:
         self.ampmeter_is_attribute = None
         self._servicecalls = None
         self._chargerstates = {
-            CHARGECONTROLLER.Idle: [],
-            CHARGECONTROLLER.Connected: [],
-            CHARGECONTROLLER.Charging: []
+            CHARGERSTATES.Idle: [],
+            CHARGERSTATES.Connected: [],
+            CHARGERSTATES.Charging: []
         }
         self._entityschema = ""
 

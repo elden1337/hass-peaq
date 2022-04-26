@@ -3,7 +3,7 @@ import logging
 from homeassistant.core import HomeAssistant
 
 from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
-from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
+from peaqevcore.Models import CHARGERSTATES
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -22,9 +22,9 @@ class ChargeAmps(ChargerBase):
         super().__init__(hass)
         self._chargerid = chargerid
         self.getentities(DOMAINNAME, ENTITYENDINGS)
-        self._chargerstates[CHARGECONTROLLER.Idle] = ["available"]
-        self._chargerstates[CHARGECONTROLLER.Connected] = ["connected"]
-        self._chargerstates[CHARGECONTROLLER.Charging] = ["charging"]
+        self._chargerstates[CHARGERSTATES.Idle] = ["available"]
+        self._chargerstates[CHARGERSTATES.Connected] = ["connected"]
+        self._chargerstates[CHARGERSTATES.Charging] = ["charging"]
         self.chargerentity = f"sensor.{self._entityschema}_1"
         self.powermeter = f"sensor.{self._entityschema}_1_power"
         self.powerswitch = f"switch.{self._entityschema}_1"

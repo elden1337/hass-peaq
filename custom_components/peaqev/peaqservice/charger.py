@@ -2,7 +2,7 @@ import logging
 import time
 from datetime import datetime
 
-from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
+from peaqevcore.Models import CHARGERSTATES
 from custom_components.peaqev.peaqservice.util.constants import (
     DOMAIN,
     ON,
@@ -31,13 +31,13 @@ class Charger:
     async def charge(self):
         """Main function to turn charging on or off"""
         if self._hub.charger_enabled.value is True:
-            if self._hub.chargecontroller.status is CHARGECONTROLLER.Start:
+            if self._hub.chargecontroller.status is CHARGERSTATES.Start:
                 if self._hub.chargerobject_switch.value is False and self._charger_running is False:
                     await self._start_charger()
-            elif self._hub.chargecontroller.status is CHARGECONTROLLER.Stop or self._hub.chargecontroller.status is CHARGECONTROLLER.Idle:
+            elif self._hub.chargecontroller.status is CHARGERSTATES.Stop or self._hub.chargecontroller.status is CHARGERSTATES.Idle:
                 if self._hub.chargerobject_switch.value is True and self._charger_stopped is False:
                     await self._pause_charger()
-            elif self._hub.chargecontroller.status is CHARGECONTROLLER.Done and self._hub.charger_done.value is False:
+            elif self._hub.chargecontroller.status is CHARGERSTATES.Done and self._hub.charger_done.value is False:
                 await self._terminate_charger()
         else:
             if self._hub.chargerobject_switch.value is True and self._charger_stopped is False:
@@ -62,7 +62,7 @@ class Charger:
 
     async def _pause_charger(self):
         self._is_running(False)
-        if self._hub.charger_done.value is True or self._hub.chargecontroller.status is CHARGECONTROLLER.Idle:
+        if self._hub.charger_done.value is True or self._hub.chargecontroller.status is CHARGERSTATES.Idle:
             await self._terminate_charger()
         else:
             await self._call_charger(PAUSE)
