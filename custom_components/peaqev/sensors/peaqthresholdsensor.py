@@ -20,7 +20,7 @@ class PeaqThresholdSensor(SensorBase):
 
     @property
     def icon(self) -> str:
-        return "mdi:stairs"
+        return "mdi:chart-bell-curve"
 
     def update(self) -> None:
         self._start_threshold = self._hub.threshold.start

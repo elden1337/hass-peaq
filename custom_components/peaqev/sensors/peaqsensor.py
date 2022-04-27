@@ -21,7 +21,12 @@ class PeaqSensor(SensorBase):
 
     @property
     def icon(self) -> str:
-        return "mdi:gate-xor"
+        ret = "mdi:electric-switch-closed"
+        if self.state == "Idle":
+            ret = "mdi:electric-switch"
+        elif self.state == "Done":
+            ret = "mdi:check"
+        return ret
 
     def update(self) -> None:
         self._state = self._hub.chargecontroller.status.name

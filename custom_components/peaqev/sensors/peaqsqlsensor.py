@@ -21,5 +21,9 @@ class PeaqSQLSensor(SQLSensor):
             )
 
     @property
+    def icon(self) -> str:
+        return "mdi:chart-arc"
+
+    @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
