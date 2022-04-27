@@ -119,18 +119,28 @@ class PriceAwareHours(Hours):
         self._nordpool_entity = val
 
     @property
-    def prices(self):
+    def prices(self) -> list:
         return self._core.prices
 
     @prices.setter
     def prices(self, val):
         self._core.prices = val
 
+    @property
+    def prices_tomorrow(self) -> list:
+        return self._core.prices_tomorrow
+
+    @prices_tomorrow.setter
+    def prices_tomorrow(self, val):
+        self._core.prices_tomorrow = val
+
     def update_nordpool(self):
         ret = self._hass.states.get(self.nordpool_entity)
         if ret is not None:
             ret_attr = list(ret.attributes.get("today"))
+            ret_attr_tomorrow = list(ret.attributes.get("tomorrow"))
             self.prices = ret_attr
+            self.prices_tomorrow = ret_attr_tomorrow
         else:
             _LOGGER.warn("could not get nordpool-prices")
 
@@ -148,10 +158,10 @@ class PriceAwareHours(Hours):
             _LOGGER.warn("Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness.")
 
     @staticmethod
-    def _set_absolute_top_price(input) -> float:
-        if input is None or input <= 0:
+    def _set_absolute_top_price(_input) -> float:
+        if _input is None or _input <= 0:
             return float("inf")
-        return input
+        return _input
 
 
 
