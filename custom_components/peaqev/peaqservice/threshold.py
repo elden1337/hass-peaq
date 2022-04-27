@@ -1,6 +1,6 @@
 from datetime import datetime
 import custom_components.peaqev.peaqservice.util.constants as constants
-from peaqevcore.Threshold import ThresholdBase as core_threshold
+from peaqevcore.Threshold import ThresholdBase as _core
 
 
 class Threshold():
@@ -9,21 +9,21 @@ class Threshold():
 
     @property
     def stop(self) -> float:
-        return core_threshold.stop(
+        return _core.stop(
             datetime.now().minute,
             str(datetime.now().hour) in self._hub.hours.caution_hours
         )
 
     @property
     def start(self) -> float:
-        return core_threshold.start(
+        return _core.start(
             datetime.now().minute,
             str(datetime.now().hour) in self._hub.hours.caution_hours
         )
 
     @property
     def allowedcurrent(self) -> int:
-        return core_threshold.allowedcurrent(
+        return _core.allowedcurrent(
             datetime.now().minute,
             self._hub.powersensormovingaverage.value if self._hub.powersensormovingaverage.value is not None else 0,
             self._hub.charger_enabled.value,
