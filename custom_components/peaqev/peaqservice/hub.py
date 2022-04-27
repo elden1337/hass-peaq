@@ -147,12 +147,12 @@ class Hub:
     def init_hub_values(self):
         """Initialize values from Home Assistant on the set objects"""
 
-        self.chargerobject.value = self.hass.states.get(self.chargerobject.entity).state
-        self.chargerobject_switch.value = self.hass.states.get(self.chargerobject_switch.entity).state
+        self.chargerobject.value = self.hass.states.get(self.chargerobject.entity).state if self.hass.states.get(self.chargerobject.entity) is not None else 0
+        self.chargerobject_switch.value = self.hass.states.get(self.chargerobject_switch.entity).state if self.hass.states.get(self.chargerobject_switch.entity) is not None else ""
         self.chargerobject_switch.updatecurrent()
-        self.carpowersensor.value = self.hass.states.get(self.carpowersensor.entity).state
-        self.totalhourlyenergy.value = self.hass.states.get(self.totalhourlyenergy.entity)
-        self.currentpeak.value = self.hass.states.get(self.currentpeak.entity)
+        self.carpowersensor.value = self.hass.states.get(self.carpowersensor.entity).state if self.hass.states.get(self.carpowersensor.entity) is not None else 0
+        self.totalhourlyenergy.value = self.hass.states.get(self.totalhourlyenergy.entity) if self.hass.states.get(self.totalhourlyenergy.entity) is not None else 0
+        self.currentpeak.value = self.hass.states.get(self.currentpeak.entity) if self.hass.states.get(self.currentpeak.entity) is not None else 0
 
     async def is_initialized(self) -> bool:
         return True
