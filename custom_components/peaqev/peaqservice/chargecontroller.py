@@ -30,7 +30,7 @@ class ChargeController:
         return self._core.below_start_threshold(
             predicted_energy=self._hub.prediction.predictedenergy,
             current_peak=self._hub.currentpeak.value,
-            threshold_start=self._hub.threshold.start
+            threshold_start=self._hub.threshold.start/100
         )
 
     @property
@@ -38,7 +38,7 @@ class ChargeController:
         return self._core.above_stop_threshold(
             predicted_energy=self._hub.prediction.predictedenergy,
             current_peak=self._hub.currentpeak.value,
-            threshold_stop=self._hub.threshold.stop
+            threshold_stop=self._hub.threshold.stop/100
         )
 
     @property
