@@ -74,12 +74,14 @@ class Charger:
             calls[command]
         )
 
+
     async def _updatemaxcurrent(self):
         """If enabled, let the charger periodically update it's current during charging."""
         self._hub.chargerobject_switch.updatecurrent()
         calls = self._service_calls.get_call(UPDATECURRENT)
 
         if await self._hass.async_add_executor_job(self._wait_turn_on):
+            #call here to set amp-list
             while self._hub.chargerobject_switch.value is True and self._charger_running is True:
                 if await self._hass.async_add_executor_job(self._wait_update_current):
                     serviceparams = await self._setchargerparams(calls)
