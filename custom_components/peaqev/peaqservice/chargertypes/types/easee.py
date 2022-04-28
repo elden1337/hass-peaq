@@ -43,7 +43,7 @@ class Easee(ChargerBase):
             pause_call="pause",
             resume_call="resume",
             allowupdatecurrent=True,
-            update_current_call="set_charger_max_limit",
+            update_current_call="set_charger_dynamic_limit",
             update_current_params=servicecall_params
         )
 
