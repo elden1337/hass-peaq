@@ -62,6 +62,8 @@ class ChargeController:
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Idle]:
             update_timer = True
             ret = CHARGERSTATES.Idle
+            if self._hub.charger_done.value is True:
+                self._hub.charger_done.value = False
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Connected] and self._hub.charger_enabled.value is False:
             update_timer = True
             ret = CHARGERSTATES.Connected
