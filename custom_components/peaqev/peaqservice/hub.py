@@ -58,7 +58,7 @@ class Hub:
                 caution_hours=config_inputs["cautionhours"]
             )
 
-        self.powersensor = HubMember(int, config_inputs["powersensor"], 0)
+
 
         self.charger_enabled = HubMember(
             type=bool,
@@ -80,6 +80,12 @@ class Hub:
             listenerentity=f"binary_sensor.{self.domain}_{ex.nametoid(constants.CHARGERDONE)}",
             initval=False
         )
+
+        self.house_powersensor = HubMember(
+            type=int,
+            listenerentity=config_inputs["powersensor"],
+            initval=0)
+
         self.totalpowersensor = HubMember(
             type=int,
             name=constants.TOTALPOWER
@@ -89,6 +95,7 @@ class Hub:
             listenerentity=self.chargertype.charger.powermeter,
             initval=0
         )
+
         self.currentpeak = CurrentPeak(
             type=float,
             listenerentity=self.locale.current_peak_entity,
@@ -123,7 +130,7 @@ class Hub:
         trackerEntities = [
             self.carpowersensor.entity,
             self.chargerobject_switch.entity,
-            self.powersensor.entity,
+            self.house_powersensor.entity,
             self.totalhourlyenergy.entity,
             self.currentpeak.entity
         ]
@@ -167,19 +174,19 @@ class Hub:
             pass
 
     async def _updatesensor(self, entity, value):
-        if entity == self.powersensor.entity:
+        if entity == self.house_powersensor.entity:
             if self._powersensor_includes_car is False:
-                self.powersensor.value = value
-                self.totalpowersensor.value = (self.powersensor.value + self.carpowersensor.value)
+                self.house_powersensor.value = value
+                self.totalpowersensor.value = (self.house_powersensor.value + self.carpowersensor.value)
             else:
                 self.totalpowersensor.value = value
-                self.powersensor.value = (self.totalpowersensor.value - self.carpowersensor.value)
+                self.house_powersensor.value = (self.totalpowersensor.value - self.carpowersensor.value)
         elif entity == self.carpowersensor.entity:
             self.carpowersensor.value = value
             if self._powersensor_includes_car is False:
-                self.totalpowersensor.value = (self.carpowersensor.value + self.powersensor.value)
+                self.totalpowersensor.value = (self.carpowersensor.value + self.house_powersensor.value)
             else:
-                self.powersensor.value = (self.totalpowersensor.value - self.carpowersensor.value)
+                self.house_powersensor.value = (self.totalpowersensor.value - self.carpowersensor.value)
         elif entity == self.chargerobject.entity:
             self.chargerobject.value = value
         elif entity == self.chargerobject_switch.entity:
