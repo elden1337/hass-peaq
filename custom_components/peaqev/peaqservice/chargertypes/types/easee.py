@@ -24,7 +24,7 @@ error
 """
 
 class Easee(ChargerBase):
-    def __init__(self, hass: HomeAssistant, chargerid):
+    def __init__(self, hass: HomeAssistant, chargerid, auth_required: bool = False):
         super().__init__(hass)
         self._chargerid = chargerid
         self.getentities(DOMAINNAME, ENTITYENDINGS)
@@ -36,16 +36,25 @@ class Easee(ChargerBase):
         self.powerswitch = f"switch.{self._entityschema}_is_enabled"
         self.ampmeter = f"sensor.{self._entityschema}_max_charger_limit"
         self.ampmeter_is_attribute = False
+        self._auth_required = auth_required
 
-        servicecall_params = {}
-        servicecall_params[CHARGER] = "charger_id"
-        servicecall_params[CHARGERID] = self._chargerid
-        servicecall_params[CURRENT] = "current"
+        servicecall_params = {
+            CHARGER: "charger_id",
+            CHARGERID: self._chargerid,
+            CURRENT: "current"
+        }
+
+        if self._auth_required is True:
+            _on = "start"
+            _off = "stop"
+        else:
+            _on = "resume"
+            _off = "pause"
 
         self._set_servicecalls(
             domain=DOMAINNAME,
-            on_call="start",
-            off_call="stop",
+            on_call=_on,
+            off_call=_off,
             pause_call="pause",
             resume_call="resume",
             allowupdatecurrent=True,
