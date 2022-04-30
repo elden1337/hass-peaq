@@ -54,7 +54,12 @@ class ChargeController:
         charger_state = self._hub.chargerobject.value.lower()
         free_charge = self._hub.locale.data.free_charge
 
-        if charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Idle]:
+        #hax for easee. fix dict-type completed in CHARGERSTATES generic dict
+        if charger_state == "completed":
+            self._hub.charger_done.value = True
+            ret = CHARGERSTATES.Done
+        # hax for easee. fix dict-type completed in CHARGERSTATES generic dict
+        elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Idle]:
             update_timer = True
             ret = CHARGERSTATES.Idle
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Connected] and self._hub.charger_enabled.value is False:
