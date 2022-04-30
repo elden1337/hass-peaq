@@ -16,6 +16,12 @@ ENTITYENDINGS = ["_power", "_status", "_dimmer", "_downlight", "_lifetime_energy
 DOMAINNAME = "easee"
 UPDATECURRENT = True
 
+"""
+UNUSED STATES FROM EASEE
+
+completed
+error
+"""
 
 class Easee(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid):
