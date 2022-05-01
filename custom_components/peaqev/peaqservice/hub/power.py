@@ -39,12 +39,15 @@ class Power:
                 initval=0,
                 name=TOTALPOWER
             )
+            #create a sensor for "housepower" so that we can use it as average etc.
+
         else:
             self.house = HubMember(
                 type=int,
                 listenerentity=self.config_sensor,
                 initval=0
             )
+            #do nothing.
 
     def update(self, carpowersensor_value=0, val=None):
         if self._powersensor_includes_car is True:
