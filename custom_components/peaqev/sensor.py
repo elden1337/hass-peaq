@@ -1,19 +1,19 @@
 """Platform for sensor integration."""
 import logging
-from custom_components.peaqev.sensors.peaqutilitysensor import (
+from custom_components.peaqev.sensors.utility_sensor import (
     PeaqUtilitySensor,
     METER_OFFSET,
     PERIODS
 )
 
-from custom_components.peaqev.sensors.peaqintegrationsensor import PeaqIntegrationSensor
-from custom_components.peaqev.sensors.peaqaveragesensor import PeaqAverageSensor
-from custom_components.peaqev.sensors.peaqsqlsensor import PeaqSQLSensor
+from custom_components.peaqev.sensors.integration_sensor import PeaqIntegrationSensor
+from custom_components.peaqev.sensors.average_sensor import PeaqAverageSensor
+from custom_components.peaqev.sensors.sql_sensor import PeaqSQLSensor
 from custom_components.peaqev.peaqservice.util.sqlsensorhelper import SQLSensorHelper
-from custom_components.peaqev.sensors.peaqpowersensor import (PeaqPowerSensor, PeaqAmpSensor)
-from custom_components.peaqev.sensors.peaqpredictionsensor import PeaqPredictionSensor
-from custom_components.peaqev.sensors.peaqthresholdsensor import PeaqThresholdSensor
-from custom_components.peaqev.sensors.peaqsensor import PeaqSensor
+from custom_components.peaqev.sensors.power_sensor import (PeaqPowerSensor, PeaqAmpSensor)
+from custom_components.peaqev.sensors.prediction_sensor import PeaqPredictionSensor
+from custom_components.peaqev.sensors.threshold_sensor import PeaqThresholdSensor
+from custom_components.peaqev.sensors.peaq_sensor import PeaqSensor
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_TOTAL_NAME,
