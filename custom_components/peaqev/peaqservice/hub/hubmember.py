@@ -14,8 +14,12 @@ class HubMember:
         self.id = ex.nametoid(self.name) if self.name is not None else None
 
     @property
-    def entity(self):
+    def entity(self) -> str:
         return self._listenerentity
+
+    @entity.setter
+    def entity(self, val: str):
+        self._listenerentity = val
 
     @property
     def value(self):

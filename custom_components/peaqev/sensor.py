@@ -10,7 +10,7 @@ from custom_components.peaqev.sensors.integration_sensor import PeaqIntegrationS
 from custom_components.peaqev.sensors.average_sensor import PeaqAverageSensor
 from custom_components.peaqev.sensors.sql_sensor import PeaqSQLSensor
 from custom_components.peaqev.peaqservice.util.sqlsensorhelper import SQLSensorHelper
-from custom_components.peaqev.sensors.power_sensor import (PeaqPowerSensor, PeaqAmpSensor)
+from custom_components.peaqev.sensors.power_sensor import (PeaqPowerSensor, PeaqAmpSensor, PeaqHousePowerSensor)
 from custom_components.peaqev.sensors.prediction_sensor import PeaqPredictionSensor
 from custom_components.peaqev.sensors.threshold_sensor import PeaqThresholdSensor
 from custom_components.peaqev.sensors.peaq_sensor import PeaqSensor
@@ -45,9 +45,37 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
     async_add_entities(peaqsensors, update_before_add = True)
 
     peaqintegrationsensors = []
-    peaqintegrationsensors.append(PeaqIntegrationSensor(hub, hub.power.house.entity, f"{ex.nametoid(CONSUMPTION_INTEGRAL_NAME)}"))
-    peaqintegrationsensors.append(PeaqIntegrationSensor(hub, f"sensor.{DOMAIN}_{hub.power.total.id}", f"{ex.nametoid(CONSUMPTION_TOTAL_NAME)}"))
-    async_add_entities(peaqintegrationsensors, update_before_add = True)
+    if hub._powersensor_includes_car is True:
+        peaqintegrationsensors.append(
+            PeaqIntegrationSensor(
+                hub,
+                f"sensor.{DOMAIN}_{hub.power.house.id}",
+                f"{ex.nametoid(CONSUMPTION_INTEGRAL_NAME)}"
+            )
+        )
+        peaqintegrationsensors.append(
+            PeaqIntegrationSensor(
+                hub,
+                hub.power.total.entity,
+                f"{ex.nametoid(CONSUMPTION_TOTAL_NAME)}"
+            )
+        )
+    else:
+        peaqintegrationsensors.append(
+            PeaqIntegrationSensor(
+                hub,
+                hub.power.house.entity,
+                f"{ex.nametoid(CONSUMPTION_INTEGRAL_NAME)}"
+            )
+        )
+        peaqintegrationsensors.append(
+            PeaqIntegrationSensor(
+                hub,
+                f"sensor.{DOMAIN}_{hub.power.total.id}",
+                f"{ex.nametoid(CONSUMPTION_TOTAL_NAME)}"
+            )
+        )
+    async_add_entities(peaqintegrationsensors, update_before_add=True)
 
     integrationsensors = [ex.nametoid(CONSUMPTION_TOTAL_NAME), ex.nametoid(CONSUMPTION_INTEGRAL_NAME)]
     peaqutilitysensors = []
@@ -78,7 +106,10 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
 
 async def gather_Sensors(hass: HomeAssistant, hub) -> list:
     peaqsensors = []
-    peaqsensors.append(PeaqPowerSensor(hub, hass))
+    if hub._powersensor_includes_car is True:
+        peaqsensors.append(PeaqHousePowerSensor(hub, hass))
+    else:
+        peaqsensors.append(PeaqPowerSensor(hub, hass))
     peaqsensors.append(PeaqAmpSensor(hub, hass))
     peaqsensors.append(PeaqAverageSensor(hub))
     peaqsensors.append(PeaqPredictionSensor(hub))

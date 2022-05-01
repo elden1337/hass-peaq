@@ -82,18 +82,6 @@ class Hub:
             initval=False
         )
 
-        #rename all refs to these and remove
-        # self.house_powersensor = HubMember(
-        #     type=int,
-        #     listenerentity=config_inputs["powersensor"],
-        #     initval=0)
-
-        # self.totalpowersensor = HubMember(
-        #     type=int,
-        #     name=constants.TOTALPOWER
-        # )
-        # rename all refs to these and remove
-
         self.power = Power(
             configsensor=config_inputs["powersensor"],
             powersensor_includes_car=self._powersensor_includes_car
@@ -185,21 +173,10 @@ class Hub:
 
     async def _updatesensor(self, entity, value):
         if entity == self.configpower_entity:
-            self.power.update(carpowersensor_value=0, val=value)
-            # if self._powersensor_includes_car is False:
-            #     self.house_powersensor.value = value
-            #     self.totalpowersensor.value = (self.house_powersensor.value + self.carpowersensor.value)
-            # else:
-            #     self.totalpowersensor.value = value
-            #     self.house_powersensor.value = (self.totalpowersensor.value - self.carpowersensor.value)
+            self.power.update(carpowersensor_value=self.carpowersensor.value, val=value)
         elif entity == self.carpowersensor.entity:
             self.carpowersensor.value = value
             self.power.update(carpowersensor_value=value, val=None)
-            # if self._powersensor_includes_car is False:
-            #     self.totalpowersensor.value = (self.carpowersensor.value + self.house_powersensor.value)
-            # else:
-            #     self.house_powersensor.value = (self.totalpowersensor.value - self.carpowersensor.value)
-
         elif entity == self.chargerobject.entity:
             self.chargerobject.value = value
         elif entity == self.chargerobject_switch.entity:

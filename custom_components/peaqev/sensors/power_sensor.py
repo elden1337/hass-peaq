@@ -51,3 +51,21 @@ class PeaqPowerSensor(SensorBase):
 
     def update(self) -> None:
         self._state = self._hub.power.total.value
+
+class PeaqHousePowerSensor(SensorBase):
+    device_class = DEVICE_CLASS_POWER
+    unit_of_measurement = POWER_WATT
+
+    def __init__(self, hub, hass):
+        name = f"{hub.hubname} {hub.power.house.name}"
+        super().__init__(hub, name)
+        self._hub = hub
+        self._state = self._hub.power.house.value
+        self._attr_icon = "mdi:home-lightning-bolt"
+
+    @property
+    def state(self) -> int:
+        return self._state
+
+    def update(self) -> None:
+        self._state = self._hub.power.house.value
