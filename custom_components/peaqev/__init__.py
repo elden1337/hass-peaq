@@ -1,7 +1,7 @@
 """The peaqev integration."""
 from __future__ import annotations
 import logging
-from custom_components.peaqev.peaqservice.hub import Hub
+from custom_components.peaqev.peaqservice.hub.hub import Hub
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 

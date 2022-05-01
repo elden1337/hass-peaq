@@ -13,10 +13,11 @@ from custom_components.peaqev.peaqservice.chargecontroller import ChargeControll
 from custom_components.peaqev.peaqservice.charger import Charger
 from custom_components.peaqev.peaqservice.hourselection import (PriceAwareHours, RegularHours)
 from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
+from custom_components.peaqev.peaqservice.hub.power import Power
 from custom_components.peaqev.peaqservice.localetypes.locale import LocaleData
 from custom_components.peaqev.peaqservice.prediction import Prediction
 from custom_components.peaqev.peaqservice.threshold import Threshold
-from custom_components.peaqev.peaqservice.util.hubmember import (
+from custom_components.peaqev.peaqservice.hub.hubmember import (
     HubMember,
     CurrentPeak,
     ChargerSwitch
@@ -81,15 +82,25 @@ class Hub:
             initval=False
         )
 
-        self.house_powersensor = HubMember(
-            type=int,
-            listenerentity=config_inputs["powersensor"],
-            initval=0)
+        #rename all refs to these and remove
+        # self.house_powersensor = HubMember(
+        #     type=int,
+        #     listenerentity=config_inputs["powersensor"],
+        #     initval=0)
 
-        self.totalpowersensor = HubMember(
-            type=int,
-            name=constants.TOTALPOWER
+        # self.totalpowersensor = HubMember(
+        #     type=int,
+        #     name=constants.TOTALPOWER
+        # )
+        # rename all refs to these and remove
+
+        self.power = Power(
+            configsensor=config_inputs["powersensor"],
+            powersensor_includes_car=self._powersensor_includes_car
         )
+
+        self.configpower_entity = config_inputs["powersensor"]
+
         self.carpowersensor = HubMember(
             type=int,
             listenerentity=self.chargertype.charger.powermeter,
@@ -130,7 +141,7 @@ class Hub:
         trackerEntities = [
             self.carpowersensor.entity,
             self.chargerobject_switch.entity,
-            self.house_powersensor.entity,
+            self.configpower_entity,
             self.totalhourlyenergy.entity,
             self.currentpeak.entity
         ]
@@ -153,7 +164,6 @@ class Hub:
  
     def init_hub_values(self):
         """Initialize values from Home Assistant on the set objects"""
-
         self.chargerobject.value = self.hass.states.get(self.chargerobject.entity).state if self.hass.states.get(self.chargerobject.entity) is not None else 0
         self.chargerobject_switch.value = self.hass.states.get(self.chargerobject_switch.entity).state if self.hass.states.get(self.chargerobject_switch.entity) is not None else ""
         self.chargerobject_switch.updatecurrent()
@@ -174,19 +184,22 @@ class Hub:
             pass
 
     async def _updatesensor(self, entity, value):
-        if entity == self.house_powersensor.entity:
-            if self._powersensor_includes_car is False:
-                self.house_powersensor.value = value
-                self.totalpowersensor.value = (self.house_powersensor.value + self.carpowersensor.value)
-            else:
-                self.totalpowersensor.value = value
-                self.house_powersensor.value = (self.totalpowersensor.value - self.carpowersensor.value)
+        if entity == self.configpower_entity:
+            self.power.update(carpowersensor_value=0, val=value)
+            # if self._powersensor_includes_car is False:
+            #     self.house_powersensor.value = value
+            #     self.totalpowersensor.value = (self.house_powersensor.value + self.carpowersensor.value)
+            # else:
+            #     self.totalpowersensor.value = value
+            #     self.house_powersensor.value = (self.totalpowersensor.value - self.carpowersensor.value)
         elif entity == self.carpowersensor.entity:
             self.carpowersensor.value = value
-            if self._powersensor_includes_car is False:
-                self.totalpowersensor.value = (self.carpowersensor.value + self.house_powersensor.value)
-            else:
-                self.house_powersensor.value = (self.totalpowersensor.value - self.carpowersensor.value)
+            self.power.update(carpowersensor_value=value, val=None)
+            # if self._powersensor_includes_car is False:
+            #     self.totalpowersensor.value = (self.carpowersensor.value + self.house_powersensor.value)
+            # else:
+            #     self.house_powersensor.value = (self.totalpowersensor.value - self.carpowersensor.value)
+
         elif entity == self.chargerobject.entity:
             self.chargerobject.value = value
         elif entity == self.chargerobject_switch.entity:

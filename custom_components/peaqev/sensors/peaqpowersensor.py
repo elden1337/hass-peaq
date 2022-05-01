@@ -39,10 +39,10 @@ class PeaqPowerSensor(SensorBase):
     unit_of_measurement = POWER_WATT
     
     def __init__(self, hub, hass):
-        name = f"{hub.hubname} {hub.totalpowersensor.name}"
+        name = f"{hub.hubname} {hub.power.total.name}"
         super().__init__(hub, name)
         self._hub = hub
-        self._state = self._hub.totalpowersensor.value
+        self._state = self._hub.power.total.value
         self._attr_icon = "mdi:flash"
 
     @property
@@ -50,4 +50,4 @@ class PeaqPowerSensor(SensorBase):
         return self._state
 
     def update(self) -> None:
-        self._state = self._hub.totalpowersensor.value
+        self._state = self._hub.power.total.value
