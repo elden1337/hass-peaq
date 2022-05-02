@@ -70,6 +70,7 @@ class ChargerBase:
             off_call: str,
             pause_call: str = None,
             resume_call: str = None,
+            on_off_params: dict = None,
             allowupdatecurrent: bool = False,
             update_current_call: str = None,
             update_current_params: dict = None
@@ -80,6 +81,7 @@ class ChargerBase:
             off_call,
             pause_call,
             resume_call,
+            on_off_params,
             allowupdatecurrent,
             update_current_call,
             update_current_params

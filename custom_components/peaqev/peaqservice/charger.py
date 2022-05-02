@@ -71,11 +71,12 @@ class Charger:
         msg = f"Calling charger {command}"
         _LOGGER.info(msg)
         calls = self._service_calls.get_call(command)
+
         await self._hub.hass.services.async_call(
             calls[DOMAIN],
-            calls[command]
+            calls[command],
+            calls["params"]
         )
-
 
     async def _updatemaxcurrent(self):
         """If enabled, let the charger periodically update it's current during charging."""

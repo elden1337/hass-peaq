@@ -44,6 +44,10 @@ class Easee(ChargerBase):
             CURRENT: "current"
         }
 
+        on_off_params = {
+            "charger_id": self._chargerid
+        }
+
         if self._auth_required is True:
             _on = "start"
             _off = "stop"
@@ -57,6 +61,7 @@ class Easee(ChargerBase):
             off_call=_off,
             pause_call="pause",
             resume_call="resume",
+            on_off_params=on_off_params,
             allowupdatecurrent=True,
             update_current_call="set_charger_dynamic_limit",
             update_current_params=servicecall_params
