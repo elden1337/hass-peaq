@@ -9,6 +9,8 @@ from custom_components.peaqev.peaqservice.util.constants import (
     QUERYTYPE_AVERAGEOFTHREEHOURS,
     QUERYTYPE_AVERAGEOFTHREEHOURS_MIN,
     QUERYTYPE_HIGHLOAD,
+    QUERYTYPE_AVERAGEOFFIVEDAYS,
+    QUERYTYPE_AVERAGEOFFIVEDAYS_MIN,
     QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19,
     QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19_MIN,
     QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22,
@@ -19,24 +21,27 @@ from custom_components.peaqev.peaqservice.util.constants import (
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 
 class SQLSensorHelper():
-    def __init__(self, sensor :str):
+    def __init__(self, sensor: str):
         self._sensor = ex.nametoid(sensor)
 
         PREFIX_MAX = f'SELECT IFNULL(MAX(state),0) AS state FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id = "{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date())'
         SUFFIX_MAX = f' GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 1'
         PREFIX_AVG_MIN = f'SELECT IFNULL(min(daymax),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date())'
-        SUFFIX_AVG_MIN_HOUR = f' GROUP BY strftime(\'%H\', start) ORDER BY MAX(state) DESC LIMIT 3)'
-        SUFFIX_AVG_MIN_DAY = f' GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 3)'
         PREFIX_AVG = f'SELECT IFNULL(ROUND(AVG(daymax),2),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date())'
         SUFFIX_AVG_HOUR = f' GROUP BY strftime(\'%H\', start) ORDER BY MAX(state) DESC LIMIT 3)'
         SUFFIX_AVG_DAY = f' GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 3)'
+        PREFIX_AVG_5 = f'SELECT IFNULL(ROUND(AVG(daymax),2),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date())'
+        PREFIX_AVG_5_MIN = f'SELECT IFNULL(min(daymax),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date())'
+        SUFFIX_AVG_5_DAY = f' GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 5)'
 
         self.basequeries = {
             "max": [PREFIX_MAX, SUFFIX_MAX],
-            "min_hour": [PREFIX_AVG_MIN, SUFFIX_AVG_MIN_HOUR],
-            "min_day": [PREFIX_AVG_MIN, SUFFIX_AVG_MIN_DAY],
+            "min_hour": [PREFIX_AVG_MIN, SUFFIX_AVG_HOUR],
+            "min_day": [PREFIX_AVG_MIN, SUFFIX_AVG_DAY],
             "avg_hour": [PREFIX_AVG, SUFFIX_AVG_HOUR],
-            "avg_day": [PREFIX_AVG, SUFFIX_AVG_DAY]
+            "avg_day": [PREFIX_AVG, SUFFIX_AVG_DAY],
+            "min_day_5": [PREFIX_AVG_5_MIN, SUFFIX_AVG_5_DAY],
+            "avg_day_5": [PREFIX_AVG_5, SUFFIX_AVG_5_DAY]
         }
 
     def getquerytype(self, type):
@@ -154,7 +159,31 @@ class SQLSensorHelper():
                 ),
                 'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_HIGHLOAD}',
                 'comment': '(karlstad). Only used Nov - Mar, weekdays between 08-18'
-            }
+            },
+            QUERYTYPE_AVERAGEOFFIVEDAYS: {
+                'query': sql.query(
+                    self.basequeries["avg_day_5"][0],
+                    self.basequeries["avg_day_5"][1],
+                    sql.AND,
+                    sql.datepart("gteq", "hour", 7),
+                    sql.AND,
+                    sql.datepart("lteq", "hour", 18)
+                ),
+                'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE_MIN}',
+                'comment': 'Malung-Sälen, SE'
+            },
+            QUERYTYPE_AVERAGEOFFIVEDAYS_MIN: {
+                'query': sql.query(
+                    self.basequeries["min_day_5"][0],
+                    self.basequeries["min_day_5"][1],
+                    sql.AND,
+                    sql.datepart("gteq", "hour", 7),
+                    sql.AND,
+                    sql.datepart("lteq", "hour", 18)
+                ),
+                'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE_MIN}',
+                'comment': 'Malung-Sälen, SE'
+            },
         }
 
         return QUERYTYPES[type]
