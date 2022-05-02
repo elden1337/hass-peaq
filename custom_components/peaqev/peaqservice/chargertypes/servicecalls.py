@@ -35,7 +35,7 @@ class ServiceCalls:
             off_call: str,
             pause_call: str = None,
             resume_call: str = None,
-            on_off_params: dict = None,
+            on_off_params: dict = {},
             allowupdatecurrent: bool = False,
             update_current_call: str = None,
             update_current_params: dict = None,
