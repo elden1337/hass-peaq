@@ -77,8 +77,6 @@ class ChargeController:
                 ret = CHARGERSTATES.Done
             else:
                 if (self.below_startthreshold and self._hub.totalhourlyenergy.value > 0) or free_charge is True:
-                    msg = f"Connected charger has decided to start."
-                    _LOGGER.info(msg)
                     ret = CHARGERSTATES.Start
                 else:
                     update_timer = True
@@ -86,8 +84,6 @@ class ChargeController:
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Charging]:
             update_timer = True
             if self.above_stopthreshold and self._hub.totalhourlyenergy.value > 0 and free_charge is False:
-                msg = f"Running charger has decided to stop."
-                _LOGGER.info(msg)
                 ret = CHARGERSTATES.Stop
             else:
                 ret = CHARGERSTATES.Start

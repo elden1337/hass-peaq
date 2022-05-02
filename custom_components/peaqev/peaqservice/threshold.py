@@ -26,8 +26,6 @@ class Threshold():
     @property
     def allowedcurrent(self) -> int:
         amps = self._setcurrentdict()
-        msg = f"Checking allowed curret against the possible steps: {amps}"
-        _LOGGER.info(msg)
         return _core.allowedcurrent(
             datetime.now().minute,
             self._hub.powersensormovingaverage.value if self._hub.powersensormovingaverage.value is not None else 0,
