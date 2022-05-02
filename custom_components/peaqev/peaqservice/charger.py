@@ -68,6 +68,8 @@ class Charger:
             await self._call_charger(PAUSE)
 
     async def _call_charger(self, command: str):
+        msg = f"Calling charger {command}"
+        _LOGGER.info(msg)
         calls = self._service_calls.get_call(command)
         await self._hub.hass.services.async_call(
             calls[DOMAIN],
