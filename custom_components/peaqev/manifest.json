@@ -5,7 +5,6 @@
     "documentation": "https://github.com/elden1337/hass-peaq",
     "issue_tracker": "https://github.com/elden1337/hass-peaq/issues",
     "requirements": [
-      "homeassistant>=2022.4.5",
       "peaqevcore>=0.0.21"
     ],
     "codeowners": [
