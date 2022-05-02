@@ -10,6 +10,7 @@ This integration does not communicate with any properitary API's, everything is 
 *While this integration will try to not break your monthly energy peak hour, there is off course no guarantee. Various factors beyond control of this logic do occur, so for those aiming at staying below their threshold, I do suggest you think about the non-hours, caution-hours etc in the setup. These hours should be set when you commonly utilize a lot of extra energy in your home, such as cooking, doing laundry etc.* 
 
 ## Installation
+*Required to install is Home Assistant version 2022.4.5 or higher.*
 
 If you have HACS installed, you can add peaqev as a custom integration.
 
@@ -27,7 +28,7 @@ Search for peaqev in your integrations setup. Fill in the following parameters:
 - `City, or Grid owner company` - Chose your city from the list. The characteristics differ in how peak hours are stored and measured. If you don't live in a supported location but just want to test the integration, or lower your peaks for other reasons, you may check *"Other, just want to test"*
 - `Charger type` - Pick the installed ev-charger you have. Currently Chargeamps and Easee are supported. Check links for required custom components per charger-type: [Chargeamps](https://github.com/kirei/hass-chargeamps), [Easee](https://github.com/fondberg/easee_hass/)
 
-###Config options:
+### Config options:
 - `Non hours` - Click to select the hours (if any) where you do not wish to charge.  
 - `Caution hours` - Click to select the hours (if any) where you want the charger to be extra cautious to not break the peak.
 - `Price aware charging` - Check this to calculate the cheapest hours from Nordpool (requires [Nordpool](https://github.com/custom-components/nordpool)). Above Non- and Caution-hours will be ignored.
