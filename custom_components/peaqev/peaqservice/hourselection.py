@@ -91,6 +91,7 @@ class PriceAwareHours(Hours):
         self._hass = hass
         self._prices = []
         self._nordpool_entity = None
+        self._nordpool_currency = None
         self._setup_nordpool()
         super().__init__(price_aware, non_hours, caution_hours)
 
@@ -134,11 +135,21 @@ class PriceAwareHours(Hours):
     def prices_tomorrow(self, val):
         self._core.prices_tomorrow = val
 
+    @property
+    def currency(self):
+        return self._nordpool_currency
+
+    @currency.setter
+    def currency(self, val):
+        self._nordpool_currency = val
+
     def update_nordpool(self):
         ret = self._hass.states.get(self.nordpool_entity)
         if ret is not None:
             ret_attr = list(ret.attributes.get("today"))
             ret_attr_tomorrow = list(ret.attributes.get("tomorrow"))
+            ret_attr_currency = str(ret.attributes.get("currency"))
+            self.currency = ret_attr_currency
             self.prices = ret_attr
             self.prices_tomorrow = ret_attr_tomorrow
         else:
