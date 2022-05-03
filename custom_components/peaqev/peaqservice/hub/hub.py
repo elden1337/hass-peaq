@@ -42,7 +42,7 @@ class Hub:
         self.locale = LocaleData(config_inputs["locale"], self.domain)
         self.chargertype = ChargerTypeData(hass, config_inputs["chargertype"], config_inputs["chargerid"])
         self._powersensor_includes_car = bool(config_inputs["powersensorincludescar"])
-        self._monthlystartpeak = config_inputs["monthlystartpeak"]
+        #self._monthlystartpeak = config_inputs["startpeaks"]
 
         if config_inputs["priceaware"] is True:
             self.hours = PriceAwareHours(
@@ -99,7 +99,7 @@ class Hub:
             type=float,
             listenerentity=self.locale.current_peak_entity,
             initval=0,
-            startpeak=self._monthlystartpeak[str(datetime.now().month)]
+            startpeaks=config_inputs["startpeaks"]
         )
         self.chargerobject = HubMember(
             type=str,

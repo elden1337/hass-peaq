@@ -1,5 +1,5 @@
 import logging
-
+from datetime import datetime
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 
 _LOGGER = logging.getLogger(__name__)
@@ -55,10 +55,19 @@ class HubMember:
 
 
 class CurrentPeak(HubMember):
-    def __init__(self, type: type, listenerentity, initval, startpeak):
-        self._startpeak = startpeak
+    def __init__(self, type: type, listenerentity, initval, startpeaks:dict):
+
+        self._startpeak = self._set_start_peak(startpeaks)
         self._value = initval
         super().__init__(type, listenerentity, initval)
+
+    def _set_start_peak(self, peaks:dict) -> float:
+        peak = peaks.get(datetime.now().month)
+        if peak is None:
+            peak = peaks.get(str(datetime.now().month))
+            if peak is None:
+                raise ValueError
+        return peak
 
     @HubMember.value.getter
     def value(self):
