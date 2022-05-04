@@ -40,12 +40,12 @@ class Power:
         else:
             self.house.entity = self._config_sensor
 
-    def update(self, carpowersensor_value=0, val=None):
+    def update(self, carpowersensor_value=0, total_value=None):
         if self._powersensor_includes_car is True:
-            if val is not None:
-                self.total.value = val
+            if total_value is not None:
+                self.total.value = total_value
             self.house.value = (self.total.value - carpowersensor_value)
         else:
-            if val is not None:
-                self.house.value = val
+            if total_value is not None:
+                self.house.value = total_value
             self.total.value = (self.house.value + carpowersensor_value)
