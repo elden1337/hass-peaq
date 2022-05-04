@@ -73,6 +73,16 @@ class CurrentPeak(HubMember):
     def value(self):
         return max(self._value, float(self._startpeak)) if self._value is not None else float(self._startpeak)
 
+class CarPowerSensor(HubMember):
+    def __init__(self, type: type, listenerentity=None, initval=None, powermeter_factor=1):
+        self._powermeter_factor = powermeter_factor
+        super().__init__(type, listenerentity, initval)
+
+    @HubMember.value.setter
+    def value(self, val):
+        if val is None or val == 0:
+            self._value = 0
+        self._value = float(val * self._powermeter_factor)
 
 class ChargerSwitch(HubMember):
     def __init__(self, hass, type: type, listenerentity, initval, currentname: str, ampmeter_is_attribute: bool):

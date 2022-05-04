@@ -10,7 +10,7 @@
     "codeowners": [
       "@elden1337"
     ],
-    "version": "0.5.4",
+    "version": "0.5.5",
     "iot_class": "calculated",
     "dependencies": [
       "recorder",

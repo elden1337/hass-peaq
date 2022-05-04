@@ -20,7 +20,8 @@ from custom_components.peaqev.peaqservice.threshold import Threshold
 from custom_components.peaqev.peaqservice.hub.hubmember import (
     HubMember,
     CurrentPeak,
-    ChargerSwitch
+    ChargerSwitch,
+    CarPowerSensor
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -87,10 +88,11 @@ class Hub:
 
         self.configpower_entity = config_inputs["powersensor"]
 
-        self.carpowersensor = HubMember(
+        self.carpowersensor = CarPowerSensor(
             type=int,
             listenerentity=self.chargertype.charger.powermeter,
-            initval=0
+            initval=0,
+            powermeter_factor=self.chargertype.charger.powermeter_factor
         )
 
         self.currentpeak = CurrentPeak(
@@ -125,7 +127,6 @@ class Hub:
         self.init_hub_values()
         
         trackerEntities = [
-            self.carpowersensor.entity,
             self.chargerobject_switch.entity,
             self.configpower_entity,
             self.totalhourlyenergy.entity,
@@ -133,6 +134,7 @@ class Hub:
         ]
 
         self.chargingtracker_entities = [
+            self.carpowersensor.entity,
             self.powersensormovingaverage.entity, 
             self.charger_enabled.entity, 
             self.charger_done.entity, 
@@ -171,10 +173,10 @@ class Hub:
 
     async def _updatesensor(self, entity, value):
         if entity == self.configpower_entity:
-            self.power.update(carpowersensor_value=self.carpowersensor.value, val=value)
+            self.power.update(carpowersensor_value=self.carpowersensor.value, total_value=value)
         elif entity == self.carpowersensor.entity:
             self.carpowersensor.value = value
-            self.power.update(carpowersensor_value=value, val=None)
+            self.power.update(carpowersensor_value=self.carpowersensor.value, total_value=None)
         elif entity == self.chargerobject.entity:
             self.chargerobject.value = value
         elif entity == self.chargerobject_switch.entity:

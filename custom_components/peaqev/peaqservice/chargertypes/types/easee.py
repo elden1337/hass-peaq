@@ -33,6 +33,7 @@ class Easee(ChargerBase):
         self._chargerstates[CHARGERSTATES.Charging] = ["charging"]
         self.chargerentity = f"sensor.{self._entityschema}_status"
         self.powermeter = f"sensor.{self._entityschema}_power"
+        self.powermeter_factor = 1000
         self.powerswitch = f"switch.{self._entityschema}_is_enabled"
         self.ampmeter = f"sensor.{self._entityschema}_max_charger_limit"
         self.ampmeter_is_attribute = False

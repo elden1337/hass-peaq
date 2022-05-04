@@ -13,6 +13,7 @@ class ChargerBase:
         self._hass = hass
         self._chargerEntity = None
         self._powermeter = None
+        self.powermeter_factor = 1
         self._powerswitch = None
         self.ampmeter = None
         self.ampmeter_is_attribute = None
