@@ -59,8 +59,6 @@ class Hub:
                 caution_hours=config_inputs["cautionhours"]
             )
 
-
-
         self.charger_enabled = HubMember(
             type=bool,
             listenerentity=f"binary_sensor.{self.domain}_{ex.nametoid(constants.CHARGERENABLED)}",
