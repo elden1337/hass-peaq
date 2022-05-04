@@ -2,8 +2,9 @@ from custom_components.peaqev.peaqservice.hub.hubmember import HubMember
 from custom_components.peaqev.peaqservice.util.constants import (TOTALPOWER, HOUSEPOWER)
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
+import logging
 
-
+_LOGGER = logging.getLogger(__name__)
 
 class Power:
     def __init__(self, configsensor: str, powersensor_includes_car: bool = False):
@@ -44,8 +45,8 @@ class Power:
         if self._powersensor_includes_car is True:
             if total_value is not None:
                 self.total.value = total_value
-            self.house.value = (self.total.value - carpowersensor_value)
+            self.house.value = (float(self.total.value) - float(carpowersensor_value))
         else:
             if total_value is not None:
                 self.house.value = total_value
-            self.total.value = (self.house.value + carpowersensor_value)
+            self.total.value = (float(self.house.value) + float(carpowersensor_value))
