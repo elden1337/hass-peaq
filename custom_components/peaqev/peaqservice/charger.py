@@ -35,7 +35,7 @@ class Charger:
                 if self._hub.chargerobject_switch.value is False and self._charger_running is False:
                     await self._start_charger()
             elif self._hub.chargecontroller.status is CHARGERSTATES.Stop or self._hub.chargecontroller.status is CHARGERSTATES.Idle:
-                if self._hub.chargerobject_switch.value is True and self._charger_stopped is False:
+                if (self._hub.chargerobject_switch.value is True or self._hub.carpowersensor.value > 0) and self._charger_stopped is False:
                     await self._pause_charger()
             elif self._hub.chargecontroller.status is CHARGERSTATES.Done and self._hub.charger_done.value is False:
                 await self._terminate_charger()

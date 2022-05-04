@@ -125,7 +125,6 @@ class Hub:
         self.init_hub_values()
         
         trackerEntities = [
-            self.carpowersensor.entity,
             self.chargerobject_switch.entity,
             self.configpower_entity,
             self.totalhourlyenergy.entity,
@@ -133,6 +132,7 @@ class Hub:
         ]
 
         self.chargingtracker_entities = [
+            self.carpowersensor.entity,
             self.powersensormovingaverage.entity, 
             self.charger_enabled.entity, 
             self.charger_done.entity, 
