@@ -46,6 +46,7 @@ LOCALES = [
 """Naming constants"""
 PEAQCONTROLLER = "Peaq controller"
 CHARGERCONTROLLER = "Charger controller"
+MONEY = "Money"
 PREDICTION = "Prediction"
 TOTALPOWER = "Total power"
 HOUSEPOWER = "House power"
