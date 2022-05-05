@@ -2,7 +2,9 @@ import logging
 import time
 from datetime import datetime
 
-from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
+from peaqevcore.Models import CHARGERSTATES
+from peaqevcore.session import SessionPrice as _core_session_price
+
 from custom_components.peaqev.peaqservice.util.constants import (
     DOMAIN,
     ON,
@@ -19,6 +21,47 @@ from custom_components.peaqev.peaqservice.util.constants import (
 _LOGGER = logging.getLogger(__name__)
 
 
+class Session:
+    def __init__(self, charger):
+        self._charger = charger
+        self._session_data = self._init_session_data()
+        self.session_price = 0
+        self.session_energy = 0
+
+    def _init_session_data(self):
+        s = _core_session_price()
+        s._set_delta()
+        return s
+
+    @property
+    def session_data(self):
+        return self._session_data
+
+    @property
+    def session_energy(self):
+        return self._session_energy
+
+    @session_energy.setter
+    def session_energy(self, val):
+        self._session_price = val
+
+    @property
+    def session_price(self):
+        return self._session_price
+
+    @session_price.setter
+    def session_price(self, val):
+        self._session_price = val
+
+    def update_session_pricing(self):
+        if self._charger._session_is_active is False:
+            self._session_price.terminate()
+        else:
+            status = self._session_price.get_status()
+            self.session_price = float(status["price"])
+            self.session_energy = float(status["energy"]["value"])
+
+
 class Charger:
     def __init__(self, hub, hass, servicecalls):
         self._hass = hass
@@ -27,17 +70,18 @@ class Charger:
         self._charger_stopped = False
         self._service_calls = servicecalls
         self._session_is_active = False
+        self._session = Session(self)
 
     async def charge(self):
         """Main function to turn charging on or off"""
         if self._hub.charger_enabled.value is True:
-            if self._hub.chargecontroller.status is CHARGECONTROLLER.Start:
+            if self._hub.chargecontroller.status is CHARGERSTATES.Start:
                 if self._hub.chargerobject_switch.value is False and self._charger_running is False:
                     await self._start_charger()
-            elif self._hub.chargecontroller.status is CHARGECONTROLLER.Stop or self._hub.chargecontroller.status is CHARGECONTROLLER.Idle:
-                if self._hub.chargerobject_switch.value is True and self._charger_stopped is False:
+            elif self._hub.chargecontroller.status is CHARGERSTATES.Stop or self._hub.chargecontroller.status is CHARGERSTATES.Idle:
+                if (self._hub.chargerobject_switch.value is True or self._hub.carpowersensor.value > 0) and self._charger_stopped is False:
                     await self._pause_charger()
-            elif self._hub.chargecontroller.status is CHARGECONTROLLER.Done and self._hub.charger_done.value is False:
+            elif self._hub.chargecontroller.status is CHARGERSTATES.Done and self._hub.charger_done.value is False:
                 await self._terminate_charger()
         else:
             if self._hub.chargerobject_switch.value is True and self._charger_stopped is False:
@@ -62,16 +106,22 @@ class Charger:
 
     async def _pause_charger(self):
         self._is_running(False)
-        if self._hub.charger_done.value is True or self._hub.chargecontroller.status is CHARGECONTROLLER.Idle:
+        if self._hub.charger_done.value is True or self._hub.chargecontroller.status is CHARGERSTATES.Idle:
             await self._terminate_charger()
         else:
             await self._call_charger(PAUSE)
 
+
+
     async def _call_charger(self, command: str):
+        msg = f"Calling charger {command}"
+        _LOGGER.info(msg)
         calls = self._service_calls.get_call(command)
+
         await self._hub.hass.services.async_call(
             calls[DOMAIN],
-            calls[command]
+            calls[command],
+            calls["params"]
         )
 
     async def _updatemaxcurrent(self):
@@ -80,6 +130,7 @@ class Charger:
         calls = self._service_calls.get_call(UPDATECURRENT)
 
         if await self._hass.async_add_executor_job(self._wait_turn_on):
+            #call here to set amp-list
             while self._hub.chargerobject_switch.value is True and self._charger_running is True:
                 if await self._hass.async_add_executor_job(self._wait_update_current):
                     serviceparams = await self._setchargerparams(calls)

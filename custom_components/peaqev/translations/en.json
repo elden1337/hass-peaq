@@ -23,15 +23,20 @@
         "description": "",
         "title": "Peaq installation"
       },
-      "opt": {
+      "hours": {
         "data": {
           "nonhours": "Hours when the charger is always disabled",
-          "cautionhours": "Hours when the charger takes extra precaution to not burst peak energy"
+          "cautionhours": "Hours when the charger takes extra precaution to not burst peak energy",
+          "priceaware": "Price aware charging (requires Nordpool)",
+          "absolute_top_price": "Max price to allow charging (same currency as your Nordpool sensor)",
+          "cautionhour_type": "Caution-hour type"
         },
-        "description": "Select the hours you wish to completely stop the charger, and hours you wish to let the charger charge, but with extra caution.",
-        "title": "Non- and Caution-hours"
+        "description": "",
+        "title": "Hoursselection and price-awareness"
       },
-      "startmonth": {
+      "months": {
+        "title": "Monthly allowed peak",
+        "description": "",
         "data": {
           "jan": "January",
           "feb": "February",
@@ -45,10 +50,13 @@
           "oct": "October",
           "nov": "November",
           "dec": "December"
-        },
-        "description": "Set the allowed peak (tolerance) per month. This is to allow the charger to charge up to a certain level before a peak energy is reached.",
-        "title": "Monthly allowed peak"
+        }
       }
+    }
+  },
+  "options": {
+    "step": {
+
     }
   }
 }

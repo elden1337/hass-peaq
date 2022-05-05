@@ -2,16 +2,15 @@
     "domain": "peaqev",
     "name": "peaqev ev-charging",
     "config_flow": true,
-    "documentation": "https://github.com/elden1337/hass_peaq",
-    "issue_tracker": "https://github.com/elden1337/hass_peaq/issues",
+    "documentation": "https://github.com/elden1337/hass-peaq",
+    "issue_tracker": "https://github.com/elden1337/hass-peaq/issues",
     "requirements": [
-      "homeassistant>=2022.4.5",
-      "peaqevcore>=0.0.4"
+      "peaqevcore>=0.0.21"
     ],
     "codeowners": [
       "@elden1337"
     ],
-    "version": "0.4.2",
+    "version": "0.5.6",
     "iot_class": "calculated",
     "dependencies": [
       "recorder",

@@ -4,6 +4,7 @@ from homeassistant.components.utility_meter.sensor import (
     HOURLY
 )
 from custom_components.peaqev.const import DOMAIN
+import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 
 class Object(object):
     pass
@@ -17,10 +18,10 @@ PERIODS = [HOURLY]
 
 
 class PeaqUtilitySensor(UtilityMeterSensor):
-    def __init__(self, hub, sensor, meter_type, meter_offset):
+    def __init__(self, hub, sensor, meter_type, meter_offset, entry_id):
+        self._entry_id = entry_id
         self._hub = hub
         self._attr_name = f"{self._hub.hubname} {sensor} {meter_type.lower()}"
-        self._attr_unique_id = f"{DOMAIN}_{self._hub.hub_id}_{self._attr_name}"
         entity = f"sensor.{DOMAIN.lower()}_{sensor}"
         
         super().__init__(
@@ -34,8 +35,13 @@ class PeaqUtilitySensor(UtilityMeterSensor):
             source_entity=entity,
             tariff_entity=None,
             tariff=None,
-            unique_id = self._attr_unique_id
+            unique_id = self.unique_id
         )
+
+    @property
+    def unique_id(self):
+        """Return a unique ID to use for this sensor."""
+        return f"{DOMAIN}_{self._entry_id}_{ex.nametoid(self._attr_name)}"
 
     @property
     def device_info(self):

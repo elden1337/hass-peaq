@@ -3,7 +3,7 @@ import logging
 import homeassistant.helpers.template as template
 
 from custom_components.peaqev.peaqservice.chargertypes.servicecalls import ServiceCalls
-from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
+from peaqevcore.Models import CHARGERSTATES
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -13,14 +13,15 @@ class ChargerBase:
         self._hass = hass
         self._chargerEntity = None
         self._powermeter = None
+        self.powermeter_factor = 1
         self._powerswitch = None
         self.ampmeter = None
         self.ampmeter_is_attribute = None
         self._servicecalls = None
         self._chargerstates = {
-            CHARGECONTROLLER.Idle: [],
-            CHARGECONTROLLER.Connected: [],
-            CHARGECONTROLLER.Charging: []
+            CHARGERSTATES.Idle: [],
+            CHARGERSTATES.Connected: [],
+            CHARGERSTATES.Charging: []
         }
         self._entityschema = ""
 
@@ -70,6 +71,7 @@ class ChargerBase:
             off_call: str,
             pause_call: str = None,
             resume_call: str = None,
+            on_off_params: dict = None,
             allowupdatecurrent: bool = False,
             update_current_call: str = None,
             update_current_params: dict = None
@@ -80,6 +82,7 @@ class ChargerBase:
             off_call,
             pause_call,
             resume_call,
+            on_off_params,
             allowupdatecurrent,
             update_current_call,
             update_current_params

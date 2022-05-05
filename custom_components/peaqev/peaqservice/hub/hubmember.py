@@ -1,5 +1,5 @@
 import logging
-
+from datetime import datetime
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 
 _LOGGER = logging.getLogger(__name__)
@@ -14,8 +14,12 @@ class HubMember:
         self.id = ex.nametoid(self.name) if self.name is not None else None
 
     @property
-    def entity(self):
+    def entity(self) -> str:
         return self._listenerentity
+
+    @entity.setter
+    def entity(self, val: str):
+        self._listenerentity = val
 
     @property
     def value(self):
@@ -51,15 +55,34 @@ class HubMember:
 
 
 class CurrentPeak(HubMember):
-    def __init__(self, type: type, listenerentity, initval, startpeak):
-        self._startpeak = startpeak
+    def __init__(self, type: type, listenerentity, initval, startpeaks:dict):
+
+        self._startpeak = self._set_start_peak(startpeaks)
         self._value = initval
         super().__init__(type, listenerentity, initval)
+
+    def _set_start_peak(self, peaks:dict) -> float:
+        peak = peaks.get(datetime.now().month)
+        if peak is None:
+            peak = peaks.get(str(datetime.now().month))
+            if peak is None:
+                raise ValueError
+        return peak
 
     @HubMember.value.getter
     def value(self):
         return max(self._value, float(self._startpeak)) if self._value is not None else float(self._startpeak)
 
+class CarPowerSensor(HubMember):
+    def __init__(self, type: type, listenerentity=None, initval=None, powermeter_factor=1):
+        self._powermeter_factor = powermeter_factor
+        super().__init__(type, listenerentity, initval)
+
+    @HubMember.value.setter
+    def value(self, val):
+        if val is None or val == 0:
+            self._value = 0
+        self._value = float(val * self._powermeter_factor)
 
 class ChargerSwitch(HubMember):
     def __init__(self, hass, type: type, listenerentity, initval, currentname: str, ampmeter_is_attribute: bool):
@@ -95,6 +118,6 @@ class ChargerSwitch(HubMember):
         else:
             ret = self._hass.states.get(self._current_attr_name)
             if ret is not None:
-                self.current = ret
+                self.current = ret.state
             else:
                 _LOGGER.error("chargerobject state was none")

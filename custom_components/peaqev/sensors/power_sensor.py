@@ -12,9 +12,9 @@ class PeaqAmpSensor(SensorBase):
     device_class = DEVICE_CLASS_CURRENT
     unit_of_measurement = ELECTRIC_CURRENT_AMPERE
     
-    def __init__(self, hub, hass):
+    def __init__(self, hub, entry_id):
         name = f"{hub.hubname} {ALLOWEDCURRENT}"
-        super().__init__(hub, name)
+        super().__init__(hub, name, entry_id)
         self._hub = hub
         self._state = self._hub.threshold.allowedcurrent
         self._attr_icon = "mdi:current-ac"
@@ -38,11 +38,11 @@ class PeaqPowerSensor(SensorBase):
     device_class = DEVICE_CLASS_POWER
     unit_of_measurement = POWER_WATT
     
-    def __init__(self, hub, hass):
-        name = f"{hub.hubname} {hub.totalpowersensor.name}"
-        super().__init__(hub, name)
+    def __init__(self, hub, entry_id):
+        name = f"{hub.hubname} {hub.power.total.name}"
+        super().__init__(hub, name, entry_id)
         self._hub = hub
-        self._state = self._hub.totalpowersensor.value
+        self._state = self._hub.power.total.value
         self._attr_icon = "mdi:flash"
 
     @property
@@ -50,4 +50,22 @@ class PeaqPowerSensor(SensorBase):
         return self._state
 
     def update(self) -> None:
-        self._state = self._hub.totalpowersensor.value
+        self._state = self._hub.power.total.value
+
+class PeaqHousePowerSensor(SensorBase):
+    device_class = DEVICE_CLASS_POWER
+    unit_of_measurement = POWER_WATT
+
+    def __init__(self, hub, hass):
+        name = f"{hub.hubname} {hub.power.house.name}"
+        super().__init__(hub, name)
+        self._hub = hub
+        self._state = self._hub.power.house.value
+        self._attr_icon = "mdi:home-lightning-bolt"
+
+    @property
+    def state(self) -> int:
+        return self._state
+
+    def update(self) -> None:
+        self._state = self._hub.power.house.value

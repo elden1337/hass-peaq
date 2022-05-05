@@ -1,7 +1,7 @@
 """The peaqev integration."""
 from __future__ import annotations
 import logging
-from custom_components.peaqev.peaqservice.hub import Hub
+from custom_components.peaqev.peaqservice.hub.hub import Hub
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
@@ -17,16 +17,21 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][config.entry_id] = config.data
-    
+
+    _standard_startpeaks = {1: 1.5, 2: 1.5, 3: 1.5, 4: 1.5, 5: 1.5, 6: 1.5, 7: 1.5, 8: 1.5, 9: 1.5, 10: 1.5, 11: 1.5, 12: 1.5}
+
     configinputs = {
         "powersensor": config.data["name"],
         "powersensorincludescar": config.data["powersensorincludescar"],
         "locale": config.data["locale"],
         "chargertype": config.data["chargertype"],
-        "cautionhours": config.data["options"]["cautionhours"],
         "chargerid": config.data["chargerid"],
-        "nonhours": config.data["options"]["nonhours"],
-        "monthlystartpeak": config.data["options"]["startpeaks"]
+        "cautionhours": config.data["cautionhours"] ,
+        "nonhours": config.data["nonhours"],
+        "startpeaks": config.data["startpeaks"],
+        "priceaware": config.data["priceaware"],
+        "absolute_top_price": config.data["absolute_top_price"],
+        "cautionhour_type": config.data["cautionhour_type"]
     }
 
     hub = Hub(hass, configinputs, DOMAIN)
