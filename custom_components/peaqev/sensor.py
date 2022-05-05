@@ -23,7 +23,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
 from homeassistant.core import (
     HomeAssistant,
 )
-from homeassistant.helpers.typing import ConfigType
+from homeassistant.config_entries import ConfigEntry
 from datetime import timedelta
 import sqlalchemy
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -36,12 +36,12 @@ _LOGGER = logging.getLogger(__name__)
 
 SCAN_INTERVAL = timedelta(seconds=5)
 
-async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_entities):
+async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add_entities):
     """Add sensors for passed config_entry in HA."""
     
     hub = hass.data[DOMAIN]["hub"]
 
-    peaqsensors = await gather_Sensors(hass, hub)
+    peaqsensors = await gather_Sensors(hub, config.entry_id)
     async_add_entities(peaqsensors, update_before_add = True)
 
     peaqintegrationsensors = []
@@ -50,14 +50,16 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
             PeaqIntegrationSensor(
                 hub,
                 f"sensor.{DOMAIN}_{hub.power.house.id}",
-                f"{ex.nametoid(CONSUMPTION_INTEGRAL_NAME)}"
+                f"{ex.nametoid(CONSUMPTION_INTEGRAL_NAME)}",
+                config.entry_id
             )
         )
         peaqintegrationsensors.append(
             PeaqIntegrationSensor(
                 hub,
                 hub.power.total.entity,
-                f"{ex.nametoid(CONSUMPTION_TOTAL_NAME)}"
+                f"{ex.nametoid(CONSUMPTION_TOTAL_NAME)}",
+                config.entry_id
             )
         )
     else:
@@ -65,14 +67,16 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
             PeaqIntegrationSensor(
                 hub,
                 hub.power.house.entity,
-                f"{ex.nametoid(CONSUMPTION_INTEGRAL_NAME)}"
+                f"{ex.nametoid(CONSUMPTION_INTEGRAL_NAME)}",
+                config.entry_id
             )
         )
         peaqintegrationsensors.append(
             PeaqIntegrationSensor(
                 hub,
                 f"sensor.{DOMAIN}_{hub.power.total.id}",
-                f"{ex.nametoid(CONSUMPTION_TOTAL_NAME)}"
+                f"{ex.nametoid(CONSUMPTION_TOTAL_NAME)}",
+                config.entry_id
             )
         )
     async_add_entities(peaqintegrationsensors, update_before_add=True)
@@ -82,37 +86,38 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
 
     for i in integrationsensors:
         for p in PERIODS:
-            peaqutilitysensors.append(PeaqUtilitySensor(hub, i, p, METER_OFFSET))
+            peaqutilitysensors.append(PeaqUtilitySensor(hub, i, p, METER_OFFSET, config.entry_id))
     
     async_add_entities(peaqutilitysensors, update_before_add = True)
 
     #sql sensors
     peaqsqlsensors = []
-    peaks = hub.locale
+    peaks = hub.locale.data
 
     db_url = DEFAULT_URL.format(hass_config_path=hass.config.path(DEFAULT_DB_FILE))
     engine = sqlalchemy.create_engine(db_url)
     sessmaker = scoped_session(sessionmaker(bind=engine))
     sqlsensor = hub.totalhourlyenergy.entity
-    sql = SQLSensorHelper(sqlsensor).getquerytype(peaks.data.charged_peak)
-    peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql))
+    sql = SQLSensorHelper(sqlsensor).getquerytype(peaks.charged_peak)
+    peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql, config.entry_id))
 
-    if peaks.data.charged_peak != peaks.data.observed_peak:
-        sql2 = SQLSensorHelper(sqlsensor).getquerytype(peaks.data.observed_peak)
-        peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql2))
+    if peaks.charged_peak != peaks.observed_peak:
+        _LOGGER.warn("i want to create a second sensor")
+        sql2 = SQLSensorHelper(sqlsensor).getquerytype(peaks.observed_peak)
+        peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql2, config.entry_id))
     #sql sensors
     
     async_add_entities(peaqsqlsensors, update_before_add = True)
 
-async def gather_Sensors(hass: HomeAssistant, hub) -> list:
+async def gather_Sensors(hub, entry_id) -> list:
     peaqsensors = []
     if hub._powersensor_includes_car is True:
-        peaqsensors.append(PeaqHousePowerSensor(hub, hass))
+        peaqsensors.append(PeaqHousePowerSensor(hub, entry_id))
     else:
-        peaqsensors.append(PeaqPowerSensor(hub, hass))
-    peaqsensors.append(PeaqAmpSensor(hub, hass))
-    peaqsensors.append(PeaqAverageSensor(hub))
-    peaqsensors.append(PeaqPredictionSensor(hub))
-    peaqsensors.append(PeaqThresholdSensor(hub))
-    peaqsensors.append(PeaqSensor(hub))
+        peaqsensors.append(PeaqPowerSensor(hub, entry_id))
+    peaqsensors.append(PeaqAmpSensor(hub, entry_id))
+    peaqsensors.append(PeaqAverageSensor(hub, entry_id))
+    peaqsensors.append(PeaqPredictionSensor(hub, entry_id))
+    peaqsensors.append(PeaqThresholdSensor(hub, entry_id))
+    peaqsensors.append(PeaqSensor(hub, entry_id))
     return peaqsensors

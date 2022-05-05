@@ -10,9 +10,9 @@ class PeaqPredictionSensor(SensorBase):
     device_class = DEVICE_CLASS_ENERGY
     unit_of_measurement = ENERGY_KILO_WATT_HOUR
 
-    def __init__(self, hub):
+    def __init__(self, hub, entry_id):
         name = f"{hub.hubname} {PREDICTION}"
-        super().__init__(hub, name)
+        super().__init__(hub, name, entry_id)
 
         self._attr_name = name
         self._state = self._hub.prediction.predictedenergy
