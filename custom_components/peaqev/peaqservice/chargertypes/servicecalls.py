@@ -106,12 +106,13 @@ class ServiceCalls:
         return _callsdict.get(call)
 
     def _validate_servicecalls(self):
-        assertions = [self.domain, self.on, self.off, self.pause, self.resume]
-        try:
-            for a in assertions:
-                assert len(a) > 0
-        except Exception as e:
-            _LOGGER.error("Peaqev could not initialize servicecalls", e)
+        pass
+        #assertions = [self.domain.call, self.on.call, self.off.call, self.pause.call, self.resume.call]
+        #try:
+        #    for a in assertions:
+        #        assert len(a) > 0
+        #except Exception as e:
+        #    _LOGGER.error("Peaqev could not initialize servicecalls", e)
 
 
 
