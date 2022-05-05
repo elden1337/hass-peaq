@@ -1,10 +1,11 @@
 from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
-from custom_components.peaqev.peaqservice.util.chargerstates import CHARGECONTROLLER
+from peaqevcore.Models import CHARGERSTATES
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
     CURRENT,
 )
+from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
 import logging
 from homeassistant.core import HomeAssistant
 
@@ -43,28 +44,42 @@ states:
 """
 
 class GaroWallbox(ChargerBase):
-    def __init__(self, hass: HomeAssistant, chargerid):
+    def __init__(self, hass: HomeAssistant, chargerid, auth_required: bool = False):
         super().__init__(hass)
         self._chargerid = chargerid
         self.getentities(DOMAINNAME, ENTITYENDINGS)
-        self._chargerstates[CHARGECONTROLLER.Idle] = ['NOT_CONNECTED']
-        self._chargerstates[CHARGECONTROLLER.Connected] = [
+        self._chargerstates[CHARGERSTATES.Idle] = ['NOT_CONNECTED']
+        self._chargerstates[CHARGERSTATES.Connected] = [
             'CONNECTED',
             'CHARGING_PAUSED',
             'CHARGING_FINISHED',
             'CHARGING_CANCELLED'
         ]
-        self._chargerstates[CHARGECONTROLLER.Charging] = ['CHARGING']
-        #self.chargerentity = f"sensor.{self._entityschema}_1"
-        #self.powermeter = f"sensor.{self._entityschema}_1_power"
-        #self.powerswitch = f"switch.{self._entityschema}_1"
-        #self.ampmeter = "Max current"
-        #self.ampmeter_is_attribute = True
+        self._chargerstates[CHARGERSTATES.Charging] = ['CHARGING']
+        # self.chargerentity = f"sensor.{self._entityschema}_status"
+        # self.powermeter = f"sensor.{self._entityschema}_power"
+        # self.powermeter_factor = 1000
+        # self.powerswitch = f"switch.{self._entityschema}_is_enabled"
+        # self.ampmeter = f"sensor.{self._entityschema}_max_charger_limit"
+        # self.ampmeter_is_attribute = False
+        self._auth_required = auth_required
 
-        servicecall_params = {}
-        servicecall_params[CHARGER] = "entity_id"
-        servicecall_params[CHARGERID] = self._chargerid #sensor for garo, not id
-        servicecall_params[CURRENT] = "limit"
+        servicecall_params = {
+            CHARGER: "entity_id",
+            CHARGERID: self._chargerid, #sensor for garo, not id
+            CURRENT: "limit"
+        }
 
-        self._set_servicecalls(DOMAINNAME, "set_mode|on", "set_mode|off", None, None, "set_current_limit", servicecall_params)
-        #remember to fix a split on modes in servicalls.py on |. example here. same call for both on and off, but with different params.
+        _on_call = CallType("set_mode", {"mode": "on", "entity_id": self.chargerentity})
+        _off_call = CallType("set_mode", {"mode": "off", "entity_id": self.chargerentity})
+
+        self._set_servicecalls(
+            domain=DOMAINNAME,
+            on_call=_on_call,
+            off_call=_off_call,
+            pause_call=None,
+            resume_call=None,
+            allowupdatecurrent=True,
+            update_current_call="set_current_limit",
+            update_current_params=servicecall_params
+        )

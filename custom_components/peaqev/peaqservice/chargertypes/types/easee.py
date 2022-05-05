@@ -4,6 +4,7 @@ from homeassistant.core import HomeAssistant
 
 from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
 from peaqevcore.Models import CHARGERSTATES
+from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -16,15 +17,6 @@ ENTITYENDINGS = ["_power", "_status", "_dimmer", "_downlight", "_lifetime_energy
 DOMAINNAME = "easee"
 UPDATECURRENT = True
 #docs: https://github.com/fondberg/easee_hass
-
-"""
-This is the class that implements a specific chargertype into peaqev.
-Note that you need to change:
-
--manifest.json: add the domain of the charger to after_dependencies
--constants.py: alter the CHARGERTYPES with a new type-constant for your charger. If not, it will not be selectable in config_flow
--chargertypes.py|init: update the clause with your type to return this class as the charger.
-"""
 
 """
 UNUSED STATES FROM EASEE
@@ -55,24 +47,21 @@ class Easee(ChargerBase):
             CURRENT: "current"
         }
 
-        on_off_params = {
-            "charger_id": self._chargerid
-        }
+        _on_off_params = {"charger_id": self._chargerid}
 
         if self._auth_required is True:
-            _on = "start"
-            _off = "stop"
+            _on = CallType("start", _on_off_params)
+            _off = CallType("stop", _on_off_params)
         else:
-            _on = "resume"
-            _off = "pause"
+            _on = CallType("resume", _on_off_params)
+            _off = CallType("pause", _on_off_params)
 
         self._set_servicecalls(
             domain=DOMAINNAME,
             on_call=_on,
             off_call=_off,
-            pause_call="pause",
-            resume_call="resume",
-            on_off_params=on_off_params,
+            pause_call=CallType("pause", _on_off_params),
+            resume_call=CallType("resume", _on_off_params),
             allowupdatecurrent=True,
             update_current_call="set_charger_dynamic_limit",
             update_current_params=servicecall_params

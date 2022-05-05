@@ -1,7 +1,7 @@
 import logging
 
 from homeassistant.core import HomeAssistant
-
+from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
 from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
 from peaqevcore.Models import CHARGERSTATES
 from custom_components.peaqev.peaqservice.util.constants import (
@@ -31,7 +31,7 @@ class ChargeAmps(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid):
         super().__init__(hass)
         self._chargerid = chargerid
-        self._chargeamps_conntector = 1
+        self._chargeamps_connector = 1
         self.getentities(DOMAINNAME, ENTITYENDINGS)
         self._chargerstates[CHARGERSTATES.Idle] = ["available"]
         self._chargerstates[CHARGERSTATES.Connected] = ["connected"]
@@ -47,16 +47,18 @@ class ChargeAmps(ChargerBase):
         servicecall_params[CHARGERID] = self._chargerid
         servicecall_params[CURRENT] = "max_current"
 
-        on_off_params = {
+        _on_off_params = {
             "chargepoint": self._chargerid,
-            "connector": self._chargeamps_conntector
+            "connector": self._chargeamps_connector
         }
+
+        _on = CallType("enable", _on_off_params)
+        _off = CallType("disable", _on_off_params)
 
         self._set_servicecalls(
             domain=DOMAINNAME,
-            on_call="enable",
-            off_call="disable",
-            on_off_params=on_off_params,
+            on_call=_on,
+            off_call=_off,
             allowupdatecurrent= True,
             update_current_call="set_max_current",
             update_current_params=servicecall_params
