@@ -3,11 +3,10 @@ from custom_components.peaqev.sensors.sensorbase import SensorBase
 from custom_components.peaqev.peaqservice.util.constants import THRESHOLD
 
 class PeaqThresholdSensor(SensorBase):
-    _attr_unit_of_measurement = PERCENTAGE
 
-    def __init__(self, hub):
+    def __init__(self, hub, entry_id):
         name = f"{hub.hubname} {THRESHOLD}"
-        super().__init__(hub, name)
+        super().__init__(hub, name, entry_id)
 
         self._attr_name = name
         self._state = self._hub.prediction.predictedpercentageofpeak
@@ -17,6 +16,10 @@ class PeaqThresholdSensor(SensorBase):
     @property
     def state(self):
         return self._state
+
+    @property
+    def native_unit_of_measurement(self):
+        return PERCENTAGE
 
     @property
     def icon(self) -> str:

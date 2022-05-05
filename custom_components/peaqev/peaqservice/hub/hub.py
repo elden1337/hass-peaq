@@ -45,7 +45,9 @@ class Hub:
         self._powersensor_includes_car = bool(config_inputs["powersensorincludescar"])
         #self._monthlystartpeak = config_inputs["startpeaks"]
 
-        if config_inputs["priceaware"] is True:
+        self.price_aware = config_inputs["priceaware"]
+
+        if self.price_aware is True:
             self.hours = PriceAwareHours(
                 hass=self.hass,
                 price_aware=config_inputs["priceaware"],
