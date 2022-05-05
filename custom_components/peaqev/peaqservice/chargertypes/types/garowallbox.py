@@ -11,19 +11,23 @@ from homeassistant.core import HomeAssistant
 
 _LOGGER = logging.getLogger(__name__)
 
-ENTITYENDINGS = [] #fix
+ENTITYENDINGS = [
+    '_current_temperature',
+    '_latest_reading_k',
+    '_latest_reading',
+    '_acc_session_energy',
+    '_pilot_level',
+    '_current_limit',
+    '_nr_of_phases',
+    '_current_charging_power',
+    '_current_charging_current',
+    '_status'
+ ]
+
 DOMAINNAME = "garo_wallbox"
 UPDATECURRENT = True
 #docs: https://github.com/sockless-coding/garo_wallbox/
 
-"""
-This is the class that implements a specific chargertype into peaqev.
-Note that you need to change:
-
--manifest.json: add the domain of the charger to after_dependencies
--constants.py: alter the CHARGERTYPES with a new type-constant for your charger. If not, it will not be selectable in config_flow
--chargertypes.py|init: update the clause with your type to return this class as the charger.
-"""
 
 """
 states:
@@ -56,12 +60,12 @@ class GaroWallbox(ChargerBase):
             'CHARGING_CANCELLED'
         ]
         self._chargerstates[CHARGERSTATES.Charging] = ['CHARGING']
-        # self.chargerentity = f"sensor.{self._entityschema}_status"
-        # self.powermeter = f"sensor.{self._entityschema}_power"
-        # self.powermeter_factor = 1000
+        self.chargerentity = f"sensor.{self._entityschema}_status"
+        self.powermeter = f"sensor.{self._entityschema}_current_charging_power"
+        self.powermeter_factor = 1
         # self.powerswitch = f"switch.{self._entityschema}_is_enabled"
-        # self.ampmeter = f"sensor.{self._entityschema}_max_charger_limit"
-        # self.ampmeter_is_attribute = False
+        self.ampmeter = f"sensor.{self._entityschema}_current_charging_current"
+        self.ampmeter_is_attribute = False
         self._auth_required = auth_required
 
         servicecall_params = {
@@ -79,7 +83,7 @@ class GaroWallbox(ChargerBase):
             off_call=_off_call,
             pause_call=None,
             resume_call=None,
-            allowupdatecurrent=True,
+            allowupdatecurrent=UPDATECURRENT,
             update_current_call="set_current_limit",
             update_current_params=servicecall_params
         )

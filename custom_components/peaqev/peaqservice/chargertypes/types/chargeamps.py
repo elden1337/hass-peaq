@@ -59,7 +59,7 @@ class ChargeAmps(ChargerBase):
             domain=DOMAINNAME,
             on_call=_on,
             off_call=_off,
-            allowupdatecurrent= True,
+            allowupdatecurrent= UPDATECURRENT,
             update_current_call="set_max_current",
             update_current_params=servicecall_params
         )

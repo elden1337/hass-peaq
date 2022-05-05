@@ -13,7 +13,20 @@ from custom_components.peaqev.peaqservice.util.constants import (
 
 _LOGGER = logging.getLogger(__name__)
 
-ENTITYENDINGS = ["_power", "_status", "_dimmer", "_downlight", "_lifetime_energy", "_online", "_current", "_voltage", "_output_limit", "_cost_per_kwh", "_enable_idle_current"]
+ENTITYENDINGS = [
+    "_power",
+    "_status",
+    "_dimmer",
+    "_downlight",
+    "_lifetime_energy",
+    "_online",
+    "_current",
+    "_voltage",
+    "_output_limit",
+    "_cost_per_kwh",
+    "_enable_idle_current"
+]
+
 DOMAINNAME = "easee"
 UPDATECURRENT = True
 #docs: https://github.com/fondberg/easee_hass
@@ -62,7 +75,7 @@ class Easee(ChargerBase):
             off_call=_off,
             pause_call=CallType("pause", _on_off_params),
             resume_call=CallType("resume", _on_off_params),
-            allowupdatecurrent=True,
+            allowupdatecurrent=UPDATECURRENT,
             update_current_call="set_charger_dynamic_limit",
             update_current_params=servicecall_params
         )
