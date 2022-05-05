@@ -23,7 +23,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
 from homeassistant.core import (
     HomeAssistant,
 )
-from homeassistant.helpers.typing import ConfigType
+from homeassistant.config_entries import ConfigEntry
 from datetime import timedelta
 import sqlalchemy
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -36,7 +36,7 @@ _LOGGER = logging.getLogger(__name__)
 
 SCAN_INTERVAL = timedelta(seconds=5)
 
-async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_entities):
+async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add_entities):
     """Add sensors for passed config_entry in HA."""
     
     hub = hass.data[DOMAIN]["hub"]
@@ -95,11 +95,11 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigType, async_add_
     sessmaker = scoped_session(sessionmaker(bind=engine))
     sqlsensor = hub.totalhourlyenergy.entity
     sql = SQLSensorHelper(sqlsensor).getquerytype(peaks.data.charged_peak)
-    peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql))
+    peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql, config.entry_id))
 
     if peaks.data.charged_peak != peaks.data.observed_peak:
         sql2 = SQLSensorHelper(sqlsensor).getquerytype(peaks.data.observed_peak)
-        peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql2))
+        peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql2, config.entry_id))
     #sql sensors
     
     async_add_entities(peaqsqlsensors, update_before_add = True)

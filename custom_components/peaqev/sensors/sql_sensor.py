@@ -6,7 +6,7 @@ import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 
 
 class PeaqSQLSensor(SQLSensor):
-    def __init__(self, hub, sessmaker, query):
+    def __init__(self, hub, sessmaker, query, entry_id):
         self._hub = hub
         self._attr_name = f"{hub.hubname} {query['name']}"
         self._attr_unique_id = f"{DOMAIN}_{self._hub.hub_id}_{ex.nametoid(self._attr_name)}"
@@ -17,7 +17,8 @@ class PeaqSQLSensor(SQLSensor):
             query["query"],
             "state",
             "kW",
-            None
+            None,
+            entry_id
             )
 
     @property

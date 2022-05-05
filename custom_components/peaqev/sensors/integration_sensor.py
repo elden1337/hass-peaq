@@ -23,8 +23,8 @@ class PeaqIntegrationSensor(IntegrationSensor):
             source_entity=sensor,
             unique_id=self._attr_unique_id,
             unit_prefix="k",
-            unit_time=TIME_HOURS,
-            unit_of_measurement=self._unit_of_measurement
+            unit_time=TIME_HOURS
+            #unit_of_measurement=self._unit_of_measurement
         )
 
     @property
