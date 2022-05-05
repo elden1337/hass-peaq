@@ -29,6 +29,10 @@ class PeaqIntegrationSensor(IntegrationSensor):
         )
 
     @property
+    def entity_registry_visible_default(self):
+        return False
+
+    @property
     def unique_id(self):
         """Return a unique ID to use for this sensor."""
         return f"{DOMAIN}_{self._entry_id}_{ex.nametoid(self._attr_name)}"
