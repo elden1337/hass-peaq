@@ -29,7 +29,7 @@ class ChargeController:
     def below_startthreshold(self) -> bool:
         return self._core.below_start_threshold(
             predicted_energy=self._hub.prediction.predictedenergy,
-            current_peak=self._hub.currentpeak.value,
+            current_peak=self._hub.current_peak_dynamic,
             threshold_start=self._hub.threshold.start/100
         )
 
@@ -37,7 +37,7 @@ class ChargeController:
     def above_stopthreshold(self) -> bool:
         return self._core.above_stop_threshold(
             predicted_energy=self._hub.prediction.predictedenergy,
-            current_peak=self._hub.currentpeak.value,
+            current_peak=self._hub.current_peak_dynamic,
             threshold_stop=self._hub.threshold.stop/100
         )
 

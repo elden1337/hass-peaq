@@ -13,14 +13,14 @@ class Threshold():
     def stop(self) -> float:
         return _core.stop(
             datetime.now().minute,
-            str(datetime.now().hour) in self._hub.hours.caution_hours
+            str(datetime.now().hour) in self._hub.hours.caution_hours if self._hub.price_aware is False else False
         )
 
     @property
     def start(self) -> float:
         return _core.start(
             datetime.now().minute,
-            str(datetime.now().hour) in self._hub.hours.caution_hours
+            str(datetime.now().hour) in self._hub.hours.caution_hours if self._hub.price_aware is False else False
         )
 
     @property
@@ -33,7 +33,7 @@ class Threshold():
             self._hub.charger_done.value,
             amps,
             self._hub.totalhourlyenergy.value,
-            self._hub.currentpeak.value
+            self._hub.current_peak_dynamic
         )
 
     # this one must be done better. Currently cannot accommodate 1-32A single phase for instance.

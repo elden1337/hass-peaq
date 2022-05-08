@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 
 from homeassistant.core import (
     HomeAssistant,
@@ -7,10 +6,11 @@ from homeassistant.core import (
 )
 from homeassistant.helpers.event import async_track_state_change
 
+from datetime import datetime
 import custom_components.peaqev.peaqservice.util.constants as constants
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.chargecontroller import ChargeController
-from custom_components.peaqev.peaqservice.charger import Charger
+from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.hourselection import (PriceAwareHours, RegularHours)
 from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
 from custom_components.peaqev.peaqservice.hub.power import Power
@@ -38,19 +38,21 @@ class Hub:
         self.hass = hass
         self.hubname = domain.capitalize()
         self.domain = domain
-
-        """from the config inputs"""
         self.locale = LocaleData(config_inputs["locale"], self.domain)
         self.chargertype = ChargerTypeData(hass, config_inputs["chargertype"], config_inputs["chargerid"])
         self._powersensor_includes_car = bool(config_inputs["powersensorincludescar"])
-        #self._monthlystartpeak = config_inputs["startpeaks"]
-
         self.price_aware = config_inputs["priceaware"]
+
+        self.currentpeak = CurrentPeak(
+            type=float,
+            listenerentity=self.locale.current_peak_entity,
+            initval=0,
+            startpeaks=config_inputs["startpeaks"]
+        )
 
         if self.price_aware is True:
             self.hours = PriceAwareHours(
                 hass=self.hass,
-                price_aware=config_inputs["priceaware"],
                 absolute_top_price=config_inputs["absolute_top_price"],
                 non_hours=config_inputs["nonhours"],
                 caution_hours=config_inputs["cautionhours"],
@@ -97,12 +99,7 @@ class Hub:
             powermeter_factor=self.chargertype.charger.powermeter_factor
         )
 
-        self.currentpeak = CurrentPeak(
-            type=float,
-            listenerentity=self.locale.current_peak_entity,
-            initval=0,
-            startpeaks=config_inputs["startpeaks"]
-        )
+
         self.chargerobject = HubMember(
             type=str,
             listenerentity=self.chargertype.charger.chargerentity
@@ -151,7 +148,14 @@ class Hub:
         trackerEntities += self.chargingtracker_entities
         
         async_track_state_change(hass, trackerEntities, self.state_changed)
- 
+
+    @property
+    def current_peak_dynamic(self):
+        if self.price_aware is True and len(self.hours.dynamic_caution_hours):
+            if datetime.now().hour in self.hours.dynamic_caution_hours.keys():
+                return self.currentpeak.value * self.hours.dynamic_caution_hours[datetime.now().hour]
+        return self.currentpeak.value
+
     def init_hub_values(self):
         """Initialize values from Home Assistant on the set objects"""
         self.chargerobject.value = self.hass.states.get(self.chargerobject.entity).state if self.hass.states.get(self.chargerobject.entity) is not None else 0
