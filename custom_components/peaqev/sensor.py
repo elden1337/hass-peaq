@@ -34,7 +34,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-SCAN_INTERVAL = timedelta(seconds=5)
+SCAN_INTERVAL = timedelta(seconds=4)
 
 async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add_entities):
     """Add sensors for passed config_entry in HA."""
@@ -90,7 +90,11 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add
     
     async_add_entities(peaqutilitysensors, update_before_add = True)
 
-    #sql sensors
+    peaqsqlsensors = await gather_sql_sensors(hass, hub, config.entry_id)
+
+    async_add_entities(peaqsqlsensors, update_before_add = True)
+
+async def gather_sql_sensors(hass, hub, entry_id):
     peaqsqlsensors = []
     peaks = hub.locale.data
 
@@ -99,15 +103,12 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add
     sessmaker = scoped_session(sessionmaker(bind=engine))
     sqlsensor = hub.totalhourlyenergy.entity
     sql = SQLSensorHelper(sqlsensor).getquerytype(peaks.charged_peak)
-    peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql, config.entry_id))
+    peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql, entry_id))
 
     if peaks.charged_peak != peaks.observed_peak:
         _LOGGER.warn("i want to create a second sensor")
         sql2 = SQLSensorHelper(sqlsensor).getquerytype(peaks.observed_peak)
-        peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql2, config.entry_id))
-    #sql sensors
-    
-    async_add_entities(peaqsqlsensors, update_before_add = True)
+        peaqsqlsensors.append(PeaqSQLSensor(hub, sessmaker, sql2, entry_id))
 
 async def gather_Sensors(hub, entry_id) -> list:
     peaqsensors = []
