@@ -26,8 +26,8 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
         "locale": config.data["locale"],
         "chargertype": config.data["chargertype"],
         "chargerid": config.data["chargerid"],
-        "cautionhours": config.data["cautionhours"] ,
-        "nonhours": config.data["nonhours"],
+        "cautionhours": config.data["cautionhours"] if "cautionhors" in config.data.keys() else [] ,
+        "nonhours": config.data["nonhours"] if "nonhours" in config.data.keys() else [],
         "startpeaks": config.data["startpeaks"],
         "priceaware": config.data["priceaware"],
         "absolute_top_price": config.data["absolute_top_price"],
@@ -53,7 +53,7 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
 
     return True
 
-def unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
 
     unload_ok = hass.config_entries.async_unload_platforms(entry, PLATFORMS)

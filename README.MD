@@ -2,7 +2,7 @@
 [![Buy me a coffee](https://img.shields.io/static/v1.svg?label=Buy%20me%20a%20coffee&message=🥨&color=black&logo=buy%20me%20a%20coffee&logoColor=white&labelColor=6f4e37)](https://www.buymeacoffee.com/elden)
 # Peaqev ev-charging
 
-![Peaq logo](https://raw.githubusercontent.com/elden1337/hass-peaq/main/icon.png)
+![Peaq logo](https://raw.githubusercontent.com/elden1337/hass-peaq/main/assets/icon.png)
 
 Peaqev ev-charging is an attempt of charging an ev without breaching a preset monthly max-peak energy level. 
 In order for this integration to function, you will need to have a sensor/device that reads your current power-draw with good resolution *examples below*. You will also have to disable any other smart-charging capability you may have, such as scheduled charging or energy-price-aware charging, the latter will come as parameter here in a future update.
