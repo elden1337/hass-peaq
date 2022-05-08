@@ -1,5 +1,6 @@
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
+from datetime import datetime
 
 class PeaqSensor(SensorBase):
     def __init__(self, hub, entry_id):
@@ -51,5 +52,13 @@ class PeaqSensor(SensorBase):
         if self._price_aware is True:
             dict["absolute top price"] = f"{self._absolute_top_price} {self.currency}"
             dict["cautionhour_type"] = self._cautionhour_type_string
+            dict["cautionhour_charge_permittance"] = self.set_dynamic_caution_hours_display()
 
         return dict
+
+    def set_dynamic_caution_hours_display(self) -> str:
+        if len(self._hub.hours.dynamic_caution_hours) > 0:
+            if datetime.now().hour in self._hub.hours.dynamic_caution_hours.keys():
+                ret = int(self._hub.hours.dynamic_caution_hours[datetime.now().hour] * 100)
+                return f"{str(ret)}%"
+        return "100%"
