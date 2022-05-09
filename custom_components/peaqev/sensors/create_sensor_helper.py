@@ -89,3 +89,4 @@ async def gather_integration_sensors(hub, entry_id):
                 entry_id
             )
         )
+    return peaqintegrationsensors

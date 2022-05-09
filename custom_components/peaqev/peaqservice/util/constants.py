@@ -47,6 +47,7 @@ LOCALES = [
 PEAQCONTROLLER = "Peaq controller"
 CHARGERCONTROLLER = "Charger controller"
 MONEY = "Money"
+HOURCONTROLLER = "Hour controller"
 PREDICTION = "Prediction"
 TOTALPOWER = "Total power"
 HOUSEPOWER = "House power"

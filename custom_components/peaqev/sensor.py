@@ -38,6 +38,7 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add
     peaqintegrationsensors = await _helper.gather_integration_sensors(hub, config.entry_id)
 
     async_add_entities(peaqintegrationsensors, update_before_add=True)
+    _LOGGER.info(peaqintegrationsensors)
 
     integrationsensors = [ex.nametoid(CONSUMPTION_TOTAL_NAME), ex.nametoid(CONSUMPTION_INTEGRAL_NAME)]
     peaqutilitysensors = []
@@ -45,7 +46,7 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add
     for i in integrationsensors:
         for p in PERIODS:
             peaqutilitysensors.append(PeaqUtilitySensor(hub, i, p, METER_OFFSET, config.entry_id))
-    
+
     async_add_entities(peaqutilitysensors, update_before_add = True)
 
     peaqsqlsensors = await _helper.gather_sql_sensors(hass, hub, config.entry_id)

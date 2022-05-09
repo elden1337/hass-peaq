@@ -1,12 +1,12 @@
 from custom_components.peaqev.sensors.sensorbase import SensorBase
-from custom_components.peaqev.peaqservice.util.constants import MONEY
+from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
 from datetime import datetime
 
 
 class PeaqMoneySensor(SensorBase):
     """Special sensor which is only created if priceaware is true"""
     def __init__(self, hub, entry_id):
-        name = f"{hub.hubname} {MONEY}"
+        name = f"{hub.hubname} {HOURCONTROLLER}"
         super().__init__(hub, name, entry_id)
 
         self._attr_name = name
@@ -38,7 +38,7 @@ class PeaqMoneySensor(SensorBase):
     @property
     def extra_state_attributes(self) -> dict:
         dict = {
-            "Non hours": self._nonhours,
+            "Non hours": self.set_non_hours_display_model(self._nonhours),
             "Caution hours": self.set_dynamic_caution_hours_display(),
             "Current hour state": self._current_hour,
             "Absolute top price": f"{self._absolute_top_price} {self._currency}",
@@ -72,11 +72,23 @@ class PeaqMoneySensor(SensorBase):
             return first - (second - 24) != 1
         return first - second != 1
 
+    def set_non_hours_display_model(self, input) -> list:
+        ret = []
+        for i in input:
+            if i < datetime.now().hour:
+                ret.append(f"{str(i)}⁺¹")
+            else:
+                ret.append(str(i))
+        return ret
+
     def set_dynamic_caution_hours_display(self) -> dict:
         ret = {}
         if len(self._dynamic_caution_hours) > 0:
             for h in self._dynamic_caution_hours:
-                hh = int(h)
+                if h < datetime.now().hour:
+                    hh = f"{h}⁺¹"
+                else:
+                    hh = h
                 ret[hh] = f"{str((int(self._dynamic_caution_hours[h] * 100)))}%"
         return ret
 
