@@ -26,6 +26,7 @@ class ChargeAmps(ChargerBase):
         self._chargerstates[CHARGERSTATES.Idle] = ["available"]
         self._chargerstates[CHARGERSTATES.Connected] = ["connected"]
         self._chargerstates[CHARGERSTATES.Charging] = ["charging"]
+        self._chargerstates[CHARGERSTATES.Done] = ["not_available"]
         self.chargerentity = f"sensor.{self._entityschema}_1"
         self.powermeter = f"sensor.{self._entityschema}_1_power"
         self.powerswitch = f"switch.{self._entityschema}_1"

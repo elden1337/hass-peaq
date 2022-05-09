@@ -43,4 +43,6 @@ class MoneySensor(SensorEntity):
             "identifiers": {(DOMAIN, self._hub.hub_id, "money")},
             "name": f"{self._attr_name} money",
             "sw_version": 1,
+            "model": f"{self._hub.locale.type} ({self._hub.chargertype.type})",
+            "manufacturer": "Peaq systems",
         }

@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 
 from peaqevcore.Models import CHARGERSTATES
-from session import Session
+from custom_components.peaqev.peaqservice.charger.session import Session
 from custom_components.peaqev.peaqservice.util.constants import (
     DOMAIN,
     ON,
