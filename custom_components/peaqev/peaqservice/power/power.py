@@ -1,4 +1,4 @@
-from custom_components.peaqev.peaqservice.hub.hubmember import HubMember
+from custom_components.peaqev.peaqservice.hub.hubdata.hubmember import HubMember
 from custom_components.peaqev.peaqservice.util.constants import (TOTALPOWER, HOUSEPOWER)
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
