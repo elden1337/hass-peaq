@@ -83,12 +83,13 @@ class CarPowerSensor(HubMember):
     def value(self, val):
         if val is None or val == 0:
             self._value = 0
-        elif ex.try_parse(val, float) is True:
-            self._value = float(val * self._powermeter_factor)
-        elif ex.try_parse(val, int) is True:
-            self._value = float(val * self._powermeter_factor)
-        else:
+        vval = ex.try_parse(val, float)
+        if not vval:
+            vval = ex.try_parse(val, int)
+        if not vval:
             self._value = 0
+        else:
+            self._value = float(vval * self._powermeter_factor)
 
 
 class ChargerSwitch(HubMember):
