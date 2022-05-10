@@ -21,7 +21,8 @@ class ChargerBase:
         self._chargerstates = {
             CHARGERSTATES.Idle: [],
             CHARGERSTATES.Connected: [],
-            CHARGERSTATES.Charging: []
+            CHARGERSTATES.Charging: [],
+            CHARGERSTATES.Done: []
         }
         self._entityschema = ""
 

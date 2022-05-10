@@ -29,7 +29,7 @@ class ChargeController:
     def below_startthreshold(self) -> bool:
         return self._core.below_start_threshold(
             predicted_energy=self._hub.prediction.predictedenergy,
-            current_peak=self._hub.currentpeak.value,
+            current_peak=self._hub.current_peak_dynamic,
             threshold_start=self._hub.threshold.start/100
         )
 
@@ -37,7 +37,7 @@ class ChargeController:
     def above_stopthreshold(self) -> bool:
         return self._core.above_stop_threshold(
             predicted_energy=self._hub.prediction.predictedenergy,
-            current_peak=self._hub.currentpeak.value,
+            current_peak=self._hub.current_peak_dynamic,
             threshold_stop=self._hub.threshold.stop/100
         )
 
@@ -54,11 +54,9 @@ class ChargeController:
         charger_state = self._hub.chargerobject.value.lower()
         free_charge = self._hub.locale.data.free_charge
 
-        #hax for easee. fix dict-type completed in CHARGERSTATES generic dict
-        if charger_state == "completed":
+        if charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]:
             self._hub.charger_done.value = True
             ret = CHARGERSTATES.Done
-        # hax for easee. fix dict-type completed in CHARGERSTATES generic dict
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Idle]:
             update_timer = True
             ret = CHARGERSTATES.Idle

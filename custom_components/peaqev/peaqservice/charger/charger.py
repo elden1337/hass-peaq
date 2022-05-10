@@ -3,8 +3,7 @@ import time
 from datetime import datetime
 
 from peaqevcore.Models import CHARGERSTATES
-from peaqevcore.session import SessionPrice as _core_session_price
-
+from custom_components.peaqev.peaqservice.charger.session import Session
 from custom_components.peaqev.peaqservice.util.constants import (
     DOMAIN,
     ON,
@@ -19,47 +18,6 @@ from custom_components.peaqev.peaqservice.util.constants import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class Session:
-    def __init__(self, charger):
-        self._charger = charger
-        self._session_data = self._init_session_data()
-        self.session_price = 0
-        self.session_energy = 0
-
-    def _init_session_data(self):
-        s = _core_session_price()
-        s._set_delta()
-        return s
-
-    @property
-    def session_data(self):
-        return self._session_data
-
-    @property
-    def session_energy(self):
-        return self._session_energy
-
-    @session_energy.setter
-    def session_energy(self, val):
-        self._session_price = val
-
-    @property
-    def session_price(self):
-        return self._session_price
-
-    @session_price.setter
-    def session_price(self, val):
-        self._session_price = val
-
-    def update_session_pricing(self):
-        if self._charger._session_is_active is False:
-            self._session_price.terminate()
-        else:
-            status = self._session_price.get_status()
-            self.session_price = float(status["price"])
-            self.session_energy = float(status["energy"]["value"])
 
 
 class Charger:
@@ -110,8 +68,6 @@ class Charger:
             await self._terminate_charger()
         else:
             await self._call_charger(PAUSE)
-
-
 
     async def _call_charger(self, command: str):
         msg = f"Calling charger {command}"

@@ -46,6 +46,7 @@ class Easee(ChargerBase):
         self._chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
         self._chargerstates[CHARGERSTATES.Connected] = ["awaiting_start", "ready_to_charge"]
         self._chargerstates[CHARGERSTATES.Charging] = ["charging"]
+        self._chargerstates[CHARGERSTATES.Done] = ["completed"]
         self.chargerentity = f"sensor.{self._entityschema}_status"
         self.powermeter = f"sensor.{self._entityschema}_power"
         self.powermeter_factor = 1000
