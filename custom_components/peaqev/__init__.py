@@ -5,6 +5,8 @@ from custom_components.peaqev.peaqservice.hub.hub import Hub
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
+from .peaqservice.hub.hub_lite import HubLite
+
 _LOGGER = logging.getLogger(__name__)
 
 from .const import (
@@ -32,16 +34,20 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
         "cautionhour_type": config.data["cautionhour_type"]
     }
 
-    hub = Hub(hass, configinputs, DOMAIN)
+    if config.data["peaqlite"] is True:
+        hub = HubLite(hass, configinputs, DOMAIN)
+    else:
+        hub = Hub(hass, configinputs, DOMAIN)
+
     await hub.is_initialized()
     hass.data[DOMAIN]["hub"] = hub
     
     """Create Service calls"""
     async def servicehandler_enable(call):
         await hub.call_enable_peaq()
+
     async def servicehandler_disable(call):
         await hub.call_disable_peaq()
-
 
     hass.services.async_register(DOMAIN, "enable", servicehandler_enable)
     hass.services.async_register(DOMAIN, "disable", servicehandler_disable)
