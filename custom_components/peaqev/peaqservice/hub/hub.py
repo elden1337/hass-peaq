@@ -70,10 +70,10 @@ class Hub(HubBase, HubData):
 
     async def _updatesensor(self, entity, value):
         if entity == self.configpower_entity:
-            self.power.update(carpowersensor_value=self.carpowersensor.value, total_value=value)
+            self.power.update(carpowersensor_value=self.carpowersensor.value, config_sensor_value=value)
         elif entity == self.carpowersensor.entity:
             self.carpowersensor.value = value
-            self.power.update(carpowersensor_value=self.carpowersensor.value, total_value=None)
+            self.power.update(carpowersensor_value=self.carpowersensor.value, config_sensor_value=None)
         elif entity == self.chargerobject.entity:
             self.chargerobject.value = value
         elif entity == self.chargerobject_switch.entity:

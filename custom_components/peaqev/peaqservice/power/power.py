@@ -41,12 +41,12 @@ class Power:
         else:
             self.house.entity = self._config_sensor
 
-    def update(self, carpowersensor_value=0, total_value=None):
+    def update(self, carpowersensor_value=0, config_sensor_value=None):
         if self._powersensor_includes_car is True:
-            if total_value is not None:
-                self.total.value = total_value
+            if config_sensor_value is not None:
+                self.total.value = config_sensor_value
             self.house.value = (float(self.total.value) - float(carpowersensor_value))
         else:
-            if total_value is not None:
-                self.house.value = total_value
+            if config_sensor_value is not None:
+                self.house.value = config_sensor_value
             self.total.value = (float(self.house.value) + float(carpowersensor_value))
