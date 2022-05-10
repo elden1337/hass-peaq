@@ -20,7 +20,7 @@ class PeaqMoneySensor(SensorBase):
 
     @property
     def state(self):
-        return self.get_written_state()
+        return self._get_written_state()
 
     @property
     def icon(self) -> str:
@@ -47,19 +47,18 @@ class PeaqMoneySensor(SensorBase):
         }
         return dict
 
-    def get_written_state(self) -> str:
+    def _get_written_state(self) -> str:
         hour = datetime.now().hour
         ret = ""
         if hour in self._nonhours:
             for idx, h in enumerate(self._nonhours):
                 if idx + 1 < len(self._nonhours):
-                    if self.getuneven(self._nonhours[idx + 1], self._nonhours[idx]):
-                        val = h + 1 if h + 1 < 24 else h + 1 - 24
-                        if len(str(val)) == 1:
-                            ret = f"Charging stopped until 0{val}:00"
-                        else:
-                            ret = f"Charging stopped until {val}:00"
+                    if self._getuneven(self._nonhours[idx + 1], self._nonhours[idx]):
+                        ret = self._get_stopped_string(h)
                         break
+                elif idx + 1 == len(self._nonhours):
+                    ret = self._get_stopped_string(h)
+                    break
         elif hour in self._dynamic_caution_hours.keys():
             val = self._dynamic_caution_hours[hour]
             ret = f"Charging allowed at {int(val * 100)}% of peak"
@@ -67,7 +66,14 @@ class PeaqMoneySensor(SensorBase):
             ret = "Charging allowed"
         return ret
 
-    def getuneven(self, first, second) -> bool:
+    def _get_stopped_string(self, h) -> str:
+        val = h + 1 if h + 1 < 24 else h + 1 - 24
+        if len(str(val)) == 1:
+            return f"Charging stopped until 0{val}:00"
+        else:
+            return f"Charging stopped until {val}:00"
+
+    def _getuneven(self, first, second) -> bool:
         if second > first:
             return first - (second - 24) != 1
         return first - second != 1
