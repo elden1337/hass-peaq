@@ -18,6 +18,23 @@ from .const import DOMAIN   # pylint:disable=unused-import
 
 _LOGGER = logging.getLogger(__name__)
 
+TYPEREGULAR = "Regular (requires powersensor)"
+TYPELITE = "Lite"
+
+INSTALLATIONTYPES = [
+    TYPEREGULAR,
+    TYPELITE
+]
+
+LITE_SCHEMA = vol.Schema(
+    {
+        vol.Required(
+            "peaqevtype",
+            default="",
+        ): vol.In(INSTALLATIONTYPES)
+    }
+)
+
 INIT_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_NAME): cv.string,  
