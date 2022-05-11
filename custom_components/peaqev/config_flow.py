@@ -15,35 +15,40 @@ from .const import DOMAIN  # pylint:disable=unused-import
 
 _LOGGER = logging.getLogger(__name__)
 
-PEAQTYPE_SCHEMA = vol.Schema(
-    {
-        vol.Optional(
-            "peaqevtype",
-            default="",
-        ): vol.In(pk.INSTALLATIONTYPES)
-    }
-)
 
-SENSOR_SCHEMA = vol.Schema(
-    {
-        vol.Optional(CONF_NAME): cv.string,
-        vol.Optional("powersensorincludescar", default=False): cv.boolean
-    }
-)
+async def _set_startpeak_dict(user_input) -> dict:
+    return {1: user_input["jan"], 2: user_input["feb"], 3: user_input["mar"], 4: user_input["apr"],
+           5: user_input["may"], 6: user_input["jun"], 7: user_input["jul"], 8: user_input["aug"],
+           9: user_input["sep"], 10: user_input["oct"], 11: user_input["nov"], 12: user_input["dec"]}
 
-CHARGER_SCHEMA = vol.Schema(
-    {
-        vol.Optional(
-            "chargertype",
-            default="",
-            ): vol.In(pk.CHARGERTYPES),
-        vol.Optional("chargerid"): cv.string,
-        vol.Optional(
-            "locale",
-            default="",
-            ): vol.In(pk.LOCALES)
-    }
-)
+async def _check_power_sensor(hass: HomeAssistant, powersensor: str) -> bool:
+    ret = hass.states.get(powersensor).state
+    try:
+        float(ret)
+        return True
+    except Exception as e:
+        msg = f"{powersensor} did not produce a valid state for {DOMAIN}. State was {ret}. Ex: {e}"
+        _LOGGER.error(msg)
+        return False
+
+async def _validate_input_first(data: dict) -> dict[str, Any]:
+    """ Validate the data can be used to set up a connection."""
+
+    if len(data["name"]) < 3:
+        raise ValueError
+    if not data["name"].startswith("sensor."):
+        data["name"] = f"sensor.{data['name']}"
+    #if await _check_power_sensor(hass, data["name"]) is False:
+    #    raise ValueError
+
+    return {"title": data["name"]}
+
+async def _validate_input_first_chargerid(data: dict) -> dict[str, Any]:
+    """ Validate the chargerId"""
+    #if len(data["chargerid"]) < 1:
+    #    raise ValueError
+
+    return {"title": data["name"]}
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -53,55 +58,89 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     data: Optional[dict[str, Any]]
     info: Optional[dict[str, Any]]
 
-    async def async_step_init(self, user_input=None):
+    async def async_step_user(self, user_input=None):
         """Invoked when a user initiates a flow via the user interface."""
         errors = {}
-        _LOGGER.info("entered peaqev config flow!")
         if user_input is not None:
             self.data = user_input
-            if self.data["peaqtype"] == pk.TYPELITE:
+            _LOGGER.info(self.data)
+            if self.data["peaqevtype"] == pk.TYPELITE:
+                self.info = {"title": pk.TYPELITE}
                 return await self.async_step_charger()
             return await self.async_step_sensor()
 
         return self.async_show_form(
-            step_id="init", data_schema=PEAQTYPE_SCHEMA, errors=errors, last_step=False
+            step_id="user",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        "peaqevtype",
+                        default="",
+                    ): vol.In(pk.INSTALLATIONTYPES)
+                }
+            ),
+            errors=errors,
+            last_step=False
         )
 
     async def async_step_sensor(self, user_input=None):
-        errors = {}
-        if user_input is not None:
-            self.data.update(user_input)
-            return await self.async_step_charger()
-
-        return self.async_show_form(
-            step_id="sensor", data_schema=SENSOR_SCHEMA, errors=errors, last_step=False
-        )
-
-    async def async_step_charger(self, user_input=None):
         errors = {}
         if user_input is not None:
             try:
                 self.info = await _validate_input_first(user_input)
             except ValueError:
                 errors["base"] = "invalid_powersensor"
-            try:
-                self.info = await _validate_input_first_chargerid(user_input)
-            except ValueError:
-                errors["base"] = "invalid_chargerid"
             if not errors:
-                self.data = user_input
-                return await self.async_step_priceaware()
-
+                self.data.update(user_input)
+            return await self.async_step_charger()
 
         return self.async_show_form(
-            step_id="charger", data_schema=CHARGER_SCHEMA, errors=errors, last_step=False
+            step_id="sensor",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(CONF_NAME): cv.string,
+                    vol.Optional("powersensorincludescar", default=False): cv.boolean
+                }
+            ),
+            errors=errors,
+            last_step=False
+        )
+
+    async def async_step_charger(self, user_input=None):
+        errors = {}
+        if user_input is not None:
+            #try:
+            #    self.info = await _validate_input_first_chargerid(user_input)
+            #except ValueError:
+            #    errors["base"] = "invalid_chargerid"
+            #if not errors:
+            self.data.update(user_input)
+            return await self.async_step_priceaware()
+
+        return self.async_show_form(
+            step_id="charger",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        "chargertype",
+                        default="",
+                        ): vol.In(pk.CHARGERTYPES),
+                    vol.Optional("chargerid"): cv.string,
+                    vol.Optional(
+                        "locale",
+                        default="",
+                        ): vol.In(pk.LOCALES)
+                }
+            ),
+            errors=errors,
+            last_step=False
         )
 
     async def async_step_priceaware(self, user_input=None):
         errors = {}
         if user_input is not None:
             self.data.update(user_input)
-            if str(self.data["priceaware"]) == "false":
+            if self.data["priceaware"] is False or None:
                 return await self.async_step_hours()
             return await self.async_step_months()
 
@@ -129,7 +168,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.data.update(user_input)
             return await self.async_step_months()
 
-        mockhours = list(range(0,24))
+        mockhours = [h for h in range(0, 24)]
 
         _transfer_cautionhours = mockhours
         _transfer_nonhours = mockhours
@@ -154,7 +193,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.data["startpeaks"] = months_dict
             return self.async_create_entry(title=self.info["title"], data=self.data)
 
-        months = list(range(1,13))
+        months = [m for m in range(1, 13)]
 
         mock_startpeaks = {}
         for m in months:
@@ -183,40 +222,3 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             last_step=True,
         )
 
-
-async def _set_startpeak_dict(user_input) -> dict:
-    return {1: user_input["jan"], 2: user_input["feb"], 3: user_input["mar"], 4: user_input["apr"],
-           5: user_input["may"], 6: user_input["jun"], 7: user_input["jul"], 8: user_input["aug"],
-           9: user_input["sep"], 10: user_input["oct"], 11: user_input["nov"], 12: user_input["dec"]}
-
-async def _check_power_sensor(hass: HomeAssistant, powersensor: str) -> bool:
-    ret = hass.states.get(powersensor).state
-    try:
-        float(ret)
-        return True
-    except Exception as e:
-        msg = f"{powersensor} did not produce a valid state for {DOMAIN}. State was {ret}. Ex: {e}"
-        _LOGGER.error(msg)
-        return False
-
-async def _validate_input_first(data: dict) -> dict[str, Any]:
-    """ Validate the data can be used to set up a connection."""
-
-    if len(data["chargerid"]) < 3:
-        raise ValueError
-
-    if len(data["name"]) < 3:
-        raise ValueError
-    if not data["name"].startswith("sensor."):
-        data["name"] = f"sensor.{data['name']}"
-    #if await _check_power_sensor(hass, data["name"]) is False:
-    #    raise ValueError
-
-    return {"title": data["name"]}
-
-async def _validate_input_first_chargerid(data: dict) -> dict[str, Any]:
-    """ Validate the chargerId"""
-    if len(data["chargerid"]) < 1:
-        raise ValueError
-
-    return {"title": data["name"]}
