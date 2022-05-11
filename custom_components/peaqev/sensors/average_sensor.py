@@ -1,12 +1,15 @@
 from datetime import timedelta
+
 from homeassistant.components.filter.sensor import (
     OutlierFilter, LowPassFilter,
     TimeSMAFilter, SensorFilter,
     TIME_SMA_LAST
-    )
-from custom_components.peaqev.const import DOMAIN
+)
+
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
+from custom_components.peaqev.const import DOMAIN
 from custom_components.peaqev.peaqservice.util.constants import AVERAGECONSUMPTION
+
 
 class PeaqAverageSensor(SensorFilter):
     def __init__(self, hub, entry_id):
@@ -17,7 +20,7 @@ class PeaqAverageSensor(SensorFilter):
             self._attr_name,
             self.unique_id,
             self._hub.power.house.entity,
-            self._SetFilters(self._hub)
+            self._set_filters(self._hub)
         )
 
     @property
@@ -29,12 +32,11 @@ class PeaqAverageSensor(SensorFilter):
         """Return a unique ID to use for this sensor."""
         return f"{DOMAIN}_{self._entry_id}_{ex.nametoid(self._attr_name)}"
 
+    def _set_filters(self, hub):
+        FILTERS = []
 
-def _set_filters(hub):
-    FILTERS = []
+        FILTERS.append(LowPassFilter(1, 0, hub.power.house.entity, 10))
+        FILTERS.append(TimeSMAFilter(timedelta(minutes=5), 0, hub.power.house.entity, TIME_SMA_LAST))
+        FILTERS.append(OutlierFilter(4, 0, hub.power.house.entity, 2))
 
-    FILTERS.append(LowPassFilter(1, 0, hub.power.house.entity, 10))
-    FILTERS.append(TimeSMAFilter(timedelta(minutes=5), 0, hub.power.house.entity, TIME_SMA_LAST))
-    FILTERS.append(OutlierFilter(4, 0, hub.power.house.entity, 2))
-
-    return FILTERS
+        return FILTERS

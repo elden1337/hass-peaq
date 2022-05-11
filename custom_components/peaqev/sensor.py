@@ -1,27 +1,25 @@
 """Platform for sensor integration."""
 import logging
+from datetime import timedelta
+
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import (
+    HomeAssistant,
+)
+
+import custom_components.peaqev.peaqservice.util.extensionmethods as ex
+import custom_components.peaqev.sensors.create_sensor_helper as _helper
+from custom_components.peaqev.peaqservice.util.constants import (
+    CONSUMPTION_TOTAL_NAME,
+    CONSUMPTION_INTEGRAL_NAME
+)
 from custom_components.peaqev.sensors.utility_sensor import (
     PeaqUtilitySensor,
     METER_OFFSET,
     PERIODS
 )
-
-import custom_components.peaqev.sensors.create_sensor_helper as _helper
-import custom_components.peaqev.peaqservice.util.extensionmethods as ex
-from custom_components.peaqev.peaqservice.util.constants import (
-    CONSUMPTION_TOTAL_NAME,
-    CONSUMPTION_INTEGRAL_NAME
-    )
-
-from homeassistant.core import (
-    HomeAssistant,
-)
-from homeassistant.config_entries import ConfigEntry
-from datetime import timedelta
-
 from .const import (
     DOMAIN)
-from .sensors.money_sensor import PeaqMoneySensor
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,7 +30,7 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add
     
     hub = hass.data[DOMAIN]["hub"]
 
-    peaqsensors = await _helper.gather_Sensors(hub, config.entry_id)
+    peaqsensors = await _helper.gather_Sensors(hub, config)
     async_add_entities(peaqsensors, update_before_add = True)
 
     peaqintegrationsensors = await _helper.gather_integration_sensors(hub, config.entry_id)
@@ -53,8 +51,4 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add
 
     async_add_entities(peaqsqlsensors, update_before_add = True)
 
-    if hub.price_aware is True:
-        moneysensors = []
-        moneysensors.append(PeaqMoneySensor(hub, config.entry_id))
-        async_add_entities(moneysensors, update_before_add=True)
 

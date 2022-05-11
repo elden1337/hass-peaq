@@ -1,9 +1,9 @@
-from .const import (
-    DOMAIN)
-
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.core import HomeAssistant
+
 from custom_components.peaqev.peaqservice.util.constants import CHARGERENABLED, CHARGERDONE
+from .const import (
+    DOMAIN)
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities):

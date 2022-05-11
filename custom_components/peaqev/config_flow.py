@@ -1,15 +1,17 @@
 """Config flow for Peaq integration."""
 from __future__ import annotations
-import logging
-import voluptuous as vol
-from typing import Any, Optional
-from homeassistant import config_entries
-from homeassistant.core import (HomeAssistant)
-from homeassistant.const import CONF_NAME
-import homeassistant.helpers.config_validation as cv
-import custom_components.peaqev.peaqservice.util.constants as pk
 
-from .const import DOMAIN   # pylint:disable=unused-import
+import logging
+
+import homeassistant.helpers.config_validation as cv
+import voluptuous as vol
+from homeassistant import config_entries
+from homeassistant.const import CONF_NAME
+from homeassistant.core import (HomeAssistant)
+from typing import Any, Optional
+
+import custom_components.peaqev.peaqservice.util.constants as pk
+from .const import DOMAIN  # pylint:disable=unused-import
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,10 +26,17 @@ LITE_SCHEMA = vol.Schema(
     }
 )
 
+SENSOR_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_NAME): cv.string,
+        vol.Optional("powersensorincludescar", default=False): cv.boolean
+    }
+)
+
 INIT_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_NAME): cv.string,
-        vol.Optional("powersensorincludescar", default=False): cv.boolean, 
+        vol.Optional("powersensorincludescar", default=False): cv.boolean,
         vol.Optional(
             "chargertype",
             default="",
@@ -40,7 +49,8 @@ INIT_SCHEMA = vol.Schema(
     }
 )
 
-async def _check_power_sensor(hass: HomeAssistant, powersensor:str) -> bool:
+
+async def _check_power_sensor(hass: HomeAssistant, powersensor: str) -> bool:
     ret = hass.states.get(powersensor).state
     try:
         float(ret)
@@ -59,7 +69,7 @@ async def _validate_input_first(hass: HomeAssistant, data: dict) -> dict[str, An
 
     if len(data["name"]) < 3:
         raise ValueError
-    elif not data["name"].startswith("sensor."):
+    if not data["name"].startswith("sensor."):
         data["name"] = f"sensor.{data['name']}"
     #if await _check_power_sensor(hass, data["name"]) is False:
     #    raise ValueError
@@ -90,6 +100,24 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     data: Optional[dict[str, Any]]
     info: Optional[dict[str, Any]]
 
+    async def async_step_peaqtype(self, user_input=None):
+        errors = {}
+        if user_input is not None:
+            pass
+
+        return self.async_show_form(
+            step_id="peaqtype", data_schema=LITE_SCHEMA, errors=errors, last_step=False
+        )
+
+    async def async_step_sensor(self, user_input=None):
+        errors = {}
+        if user_input is not None:
+            pass
+
+        return self.async_show_form(
+            step_id="sensor", data_schema=SENSOR_SCHEMA, errors=errors, last_step=False
+        )
+
     async def async_step_user(self, user_input=None):
         errors = {}
         if user_input is not None:
@@ -108,7 +136,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 #return self.async_create_entry(title=self.info["title"], data=self.data)
 
         return self.async_show_form(
-            step_id="user", data_schema=INIT_SCHEMA, errors=errors,last_step=False
+            step_id="user", data_schema=INIT_SCHEMA, errors=errors, last_step=False
         )
 
     async def async_step_hours(self, user_input=None):
@@ -116,7 +144,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.data.update(user_input)
             return await self.async_step_months()
 
-        mockhours = [h for h in range(0, 24)]
+        mockhours = list(range(0,24))
 
         _transfer_cautionhours = mockhours
         _transfer_nonhours = mockhours
@@ -150,7 +178,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.data["startpeaks"] = months_dict
             return self.async_create_entry(title=self.info["title"], data=self.data)
 
-        months = [m for m in range(1, 13)]
+        months = list(range(1,13))
 
         mock_startpeaks = {}
         for m in months:
