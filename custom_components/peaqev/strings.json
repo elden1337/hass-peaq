@@ -1,31 +1,38 @@
 {
   "config": {
     "step": {
-      "user": {
+      "init": {
+        "data": {
+          "peaqevtype": "[%key:common::config_flow::data::peaqevtype%]"
+        }
+      },
+      "sensor": {
         "data": {
           "name": "[%key:common::config_flow::data::powersensor%]",
-          "powersensorincludescar": "[%key:common::config_flow::data::powersensorincludescar%]",
+          "powersensorincludescar": "[%key:common::config_flow::data::powersensorincludescar%]"
+        }
+      },
+      "charger": {
+        "data": {
           "chargerid": "[%key:common::config_flow::data::chargerid%]",
           "chargertype": "[%key:common::config_flow::data::chargertype%]",
           "locale": "[%key:common::config_flow::data::locale%]"
-        },
-        "description": "",
-        "title": "Peaq installation"
+        }
+      },
+      "priceaware": {
+        "data": {
+          "priceaware": "[%key:common::config_flow::data::priceaware%]",
+          "absolute_top_price": "[%key:common::config_flow::data::absolute_top_price%]",
+          "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]"
+        }
       },
       "hours": {
         "data": {
-          "nonhours": "Hours when the charger is always disabled",
-          "cautionhours": "Hours when the charger takes extra precaution to not burst peak energy",
-          "priceaware": "Price aware charging (requires Nordpool)",
-          "absolute_top_price": "Max price to allow charging (same currency as your Nordpool sensor)",
-          "cautionhour_type": "Caution-hour type"
-        },
-        "description": "",
-        "title": "Hoursselection and price-awareness"
+          "nonhours": "[%key:common::config_flow::data::nonhours%]",
+          "cautionhours": "[%key:common::config_flow::data::cautionhours%]"
+        }
       },
       "months": {
-        "title": "Monthly allowed peak",
-        "description": "",
         "data": {
           "jan": "January",
           "feb": "February",
@@ -52,11 +59,6 @@
     },
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
-    }
-  },
-  "options": {
-    "step": {
-
     }
   }
 }
