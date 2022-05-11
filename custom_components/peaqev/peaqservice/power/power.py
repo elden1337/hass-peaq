@@ -1,16 +1,17 @@
-from custom_components.peaqev.peaqservice.hub.hubdata.hubmember import HubMember
-from custom_components.peaqev.peaqservice.util.constants import (TOTALPOWER, HOUSEPOWER)
+import logging
+
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
-import logging
+from custom_components.peaqev.peaqservice.hub.hubdata.hubmember import HubMember
+from custom_components.peaqev.peaqservice.util.constants import (TOTALPOWER, HOUSEPOWER)
 
 _LOGGER = logging.getLogger(__name__)
 
 class Power:
     def __init__(self, configsensor: str, powersensor_includes_car: bool = False):
         self._config_sensor = configsensor
-        self._total = HubMember(type=int, initval=0, name=TOTALPOWER)
-        self._house = HubMember(type=int, initval=0, name=HOUSEPOWER)
+        self._total = HubMember(data_type=int, initval=0, name=TOTALPOWER)
+        self._house = HubMember(data_type=int, initval=0, name=HOUSEPOWER)
         self._powersensor_includes_car = powersensor_includes_car
         self._setup()
 

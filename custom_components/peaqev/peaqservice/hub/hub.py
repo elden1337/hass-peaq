@@ -1,12 +1,11 @@
 import logging
+from datetime import datetime
 
 from homeassistant.core import (
     HomeAssistant,
-    callback,
 )
 from homeassistant.helpers.event import async_track_state_change
 
-from datetime import datetime
 import custom_components.peaqev.peaqservice.util.constants as constants
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller import ChargeController
@@ -21,8 +20,8 @@ _LOGGER = logging.getLogger(__name__)
 class Hub(HubBase, HubData):
     """This is the hub used under normal circumstances. Ie when there is a power-meter to read from."""
     def __init__(
-        self, 
-        hass: HomeAssistant, 
+        self,
+        hass: HomeAssistant,
         config_inputs: dict,
         domain: str
         ):
@@ -46,9 +45,9 @@ class Hub(HubBase, HubData):
 
         self.chargingtracker_entities = [
             self.carpowersensor.entity,
-            self.powersensormovingaverage.entity, 
-            self.charger_enabled.entity, 
-            self.charger_done.entity, 
+            self.powersensormovingaverage.entity,
+            self.charger_enabled.entity,
+            self.charger_done.entity,
             self.chargerobject.entity,
             f"sensor.{self.domain}_{ex.nametoid(constants.CHARGERCONTROLLER)}",
             ]
@@ -58,7 +57,7 @@ class Hub(HubBase, HubData):
                 self.chargingtracker_entities.append(self.hours.nordpool_entity)
 
         trackerEntities += self.chargingtracker_entities
-        
+
         async_track_state_change(hass, trackerEntities, self.state_changed)
 
     @property
@@ -87,7 +86,5 @@ class Hub(HubBase, HubData):
             self.powersensormovingaverage.value = value
         elif entity == self.hours.nordpool_entity:
             self.hours.update_nordpool()
-        
         if entity in self.chargingtracker_entities:
             await self.charger.charge()
-

@@ -1,3 +1,4 @@
+import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.util.constants import (
     SQLSENSOR_BASENAME,
     SQLSENSOR_AVERAGEOFTHREE,
@@ -17,22 +18,22 @@ from custom_components.peaqev.peaqservice.util.constants import (
     QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR,
     SQLSENSOR_STATISTICS_TABLE,
     SQLSENSOR_STATISTICS_META_TABLE
-    )
-import custom_components.peaqev.peaqservice.util.extensionmethods as ex
+)
+
 
 class SQLSensorHelper():
     def __init__(self, sensor: str):
         self._sensor = ex.nametoid(sensor)
 
         PREFIX_MAX = f'SELECT IFNULL(MAX(state),0) AS state FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id = "{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date())'
-        SUFFIX_MAX = f' GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 1'
+        SUFFIX_MAX = ' GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 1'
         PREFIX_AVG_MIN = f'SELECT IFNULL(min(daymax),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date())'
         PREFIX_AVG = f'SELECT IFNULL(ROUND(AVG(daymax),2),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date())'
-        SUFFIX_AVG_HOUR = f' GROUP BY strftime(\'%H\', start) ORDER BY MAX(state) DESC LIMIT 3)'
-        SUFFIX_AVG_DAY = f' GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 3)'
+        SUFFIX_AVG_HOUR = ' GROUP BY strftime(\'%H\', start) ORDER BY MAX(state) DESC LIMIT 3)'
+        SUFFIX_AVG_DAY = ' GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 3)'
         PREFIX_AVG_5 = f'SELECT IFNULL(ROUND(AVG(daymax),2),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date())'
         PREFIX_AVG_5_MIN = f'SELECT IFNULL(min(daymax),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date())'
-        SUFFIX_AVG_5_DAY = f' GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 5)'
+        SUFFIX_AVG_5_DAY = ' GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 5)'
 
         self.basequeries = {
             "max": [PREFIX_MAX, SUFFIX_MAX],
@@ -44,7 +45,7 @@ class SQLSensorHelper():
             "avg_day_5": [PREFIX_AVG_5, SUFFIX_AVG_5_DAY]
         }
 
-    def getquerytype(self, type):
+    def getquerytype(self, query_type):
         QUERYTYPES = {
             QUERYTYPE_BASICMAX: {
                 'query': sql.query(
@@ -186,7 +187,7 @@ class SQLSensorHelper():
             },
         }
 
-        return QUERYTYPES[type]
+        return QUERYTYPES[query_type]
 
 
 class sql:
@@ -230,7 +231,7 @@ class sql:
         return _base + _divident + _arg
 
     @staticmethod
-    def _strftime_base(type: str) -> str:
-        return f"cast(strftime(\'%{type}\', start) as int) "
+    def _strftime_base(time_type: str) -> str:
+        return f"cast(strftime(\'%{time_type}\', start) as int) "
 
 

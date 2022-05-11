@@ -1,18 +1,17 @@
 import logging
+from datetime import datetime
 
 from homeassistant.core import (
     HomeAssistant,
-    callback,
 )
 from homeassistant.helpers.event import async_track_state_change
 
-from datetime import datetime
 import custom_components.peaqev.peaqservice.util.constants as constants
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
+from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_lite import ChargeControllerLite
 from custom_components.peaqev.peaqservice.hub.hubbase import HubBase
 from custom_components.peaqev.peaqservice.hub.hubdata.hubdata_lite import HubDataLite
 from custom_components.peaqev.peaqservice.threshold.threshold_lite import ThresholdLite
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_lite import ChargeControllerLite
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +26,6 @@ class HubLite(HubBase, HubDataLite):
         super().__init__(hass=hass, config_inputs=config_inputs, domain=domain)
         self.create_hub_data(self.hass, config_inputs, self.domain)
 
-        """Init the subclasses"""
         self.threshold = ThresholdLite(self)
         self.chargecontroller = ChargeControllerLite(self)
 

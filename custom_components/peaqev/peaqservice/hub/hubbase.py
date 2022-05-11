@@ -5,10 +5,12 @@ from homeassistant.core import (
     HomeAssistant,
     callback,
 )
+
 import custom_components.peaqev.peaqservice.util.constants as constants
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.hourselection import (PriceAwareHours, RegularHours)
 from custom_components.peaqev.peaqservice.hub.hubdata.hubmember import HubMember
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -42,12 +44,12 @@ class HubBase:
             )
 
         self.charger_enabled = HubMember(
-            type=bool,
+            data_type=bool,
             listenerentity=f"binary_sensor.{domain}_{ex.nametoid(constants.CHARGERENABLED)}",
             initval=False
         )
         self.charger_done = HubMember(
-            type=bool,
+            data_type=bool,
             listenerentity=f"binary_sensor.{domain}_{ex.nametoid(constants.CHARGERDONE)}",
             initval=False
         )
@@ -63,14 +65,14 @@ class HubBase:
             if old_state is None or old_state.state != new_state.state:
                 await self._updatesensor(entity_id, new_state.state)
         except Exception as e:
-            _LOGGER.warn("Unable to handle data: ", entity_id, e)
+            msg = f"Unable to handle data: {entity_id} {e}"
+            _LOGGER.error(msg)
             pass
 
     @abstractmethod
     async def _updatesensor(self, entity, value):
         pass
 
-    """Methods called from servicecalls"""
     async def call_enable_peaq(self):
         """peaqev.enable"""
         self.charger_enabled.value = True

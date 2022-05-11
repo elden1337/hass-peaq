@@ -6,30 +6,25 @@ from custom_components.peaqev.peaqservice.chargertypes.types.easee import Easee
 
 
 class ChargerTypeData:
-    def __init__(self, hass: HomeAssistant, input, chargerid):
+    def __init__(self, hass: HomeAssistant, input_type, chargerid):
         self._charger = None
-        self._type = input
+        self._type = input_type
         self._hass = hass
 
-        if input == constants.CHARGERTYPE_CHARGEAMPS:
+        if input_type == constants.CHARGERTYPE_CHARGEAMPS:
             self._charger = ChargeAmps(self._hass, chargerid)
-        elif input == constants.CHARGERTYPE_EASEE:
+        elif input_type == constants.CHARGERTYPE_EASEE:
             self._charger = Easee(self._hass, chargerid)
 
         self._charger.validatecharger()
 
-    """type returns the implemented chargertype."""
     @property
     def type(self) -> str:
+        """type returns the implemented chargertype."""
         return self._type
 
-    """charger returns the set charger with all its properties of states, servicecalls etc."""
     @property
     def charger(self):
+        """charger returns the set charger with all its properties of states, servicecalls etc."""
         return self._charger
-
-
-
-
-
 

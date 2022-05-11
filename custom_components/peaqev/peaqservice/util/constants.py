@@ -1,8 +1,7 @@
 from peaqevcore.Models import (
     CAUTIONHOURTYPE_SUAVE,
     CAUTIONHOURTYPE_INTERMEDIATE,
-    CAUTIONHOURTYPE_AGGRESSIVE,
-    CAUTIONHOURTYPE as CAUTIONHOURTYPE_DICT
+    CAUTIONHOURTYPE_AGGRESSIVE
 )
 
 CURRENTS_ONEPHASE_1_16 = {3600: 16, 3150: 14, 2700: 12, 2250: 10, 1800: 8, 1350: 6} #moved to core
@@ -26,7 +25,7 @@ LOCALE_SE_SKOVDE = "Skövde, Sweden"
 
 """Lookup types for config flow"""
 CHARGERTYPES = [
-    CHARGERTYPE_CHARGEAMPS, 
+    CHARGERTYPE_CHARGEAMPS,
     CHARGERTYPE_EASEE
     ]
 
@@ -53,7 +52,7 @@ TOTALPOWER = "Total power"
 HOUSEPOWER = "House power"
 ALLOWEDCURRENT = "Allowed current"
 CONSUMPTION_INTEGRAL_NAME = "Energy excluding car"
-CONSUMPTION_TOTAL_NAME = "Energy including car" 
+CONSUMPTION_TOTAL_NAME = "Energy including car"
 CHARGERENABLED = "Charger enabled"
 CHARGERDONE = "Charger done"
 AVERAGECONSUMPTION = "Average consumption"
@@ -113,5 +112,10 @@ CAUTIONHOURTYPE_NAMES =[
     CAUTIONHOURTYPE_AGGRESSIVE
 ]
 
+TYPEREGULAR = "Regular (requires power sensor)"
+TYPELITE = "Lite"
 
-
+INSTALLATIONTYPES = [
+    TYPEREGULAR,
+    TYPELITE
+]

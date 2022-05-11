@@ -1,12 +1,12 @@
+import custom_components.peaqev.peaqservice.util.constants as constants
+import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.hub.hubdata.hubdatabase import HubDataBase
 from custom_components.peaqev.peaqservice.hub.hubdata.hubmember import HubMember
 from custom_components.peaqev.peaqservice.power.power import Power
-import custom_components.peaqev.peaqservice.util.constants as constants
-import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 
 
 class HubData(HubDataBase):
-    _powersensor_includes_car: bool
+    powersensor_includes_car: bool
     powersensormovingaverage: HubMember
     totalhourlyenergy: HubMember
     power: Power
@@ -17,23 +17,23 @@ class HubData(HubDataBase):
             config_inputs:dict,
             domain: str):
 
-        self._powersensor_includes_car = bool(config_inputs["powersensorincludescar"])
+        self.powersensor_includes_car = bool(config_inputs["powersensorincludescar"])
         self.create_hub_base_data(hass, config_inputs, domain)
 
         self.powersensormovingaverage = HubMember(
-            type=int,
+            data_type=int,
             listenerentity=f"sensor.{domain}_{ex.nametoid(constants.AVERAGECONSUMPTION)}",
             initval=0
         )
         self.totalhourlyenergy = HubMember(
-            type=float,
+            data_type=float,
             listenerentity=f"sensor.{domain}_{ex.nametoid(constants.CONSUMPTION_TOTAL_NAME)}_{constants.HOURLY}",
             initval=0
         )
 
         self.power = Power(
             configsensor=config_inputs["powersensor"],
-            powersensor_includes_car=self._powersensor_includes_car
+            powersensor_includes_car=self.powersensor_includes_car
         )
 
 

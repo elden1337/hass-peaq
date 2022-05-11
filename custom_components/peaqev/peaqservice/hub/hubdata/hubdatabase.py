@@ -1,8 +1,10 @@
+from homeassistant.core import HomeAssistant
+
 from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
-from custom_components.peaqev.peaqservice.hub.hubdata.hubmember import CurrentPeak, HubMember, CarPowerSensor, ChargerSwitch
+from custom_components.peaqev.peaqservice.hub.hubdata.hubmember import CurrentPeak, HubMember, CarPowerSensor, \
+    ChargerSwitch
 from custom_components.peaqev.peaqservice.localetypes.locale import LocaleData
-from homeassistant.core import HomeAssistant
 
 
 class HubDataBase:
@@ -13,6 +15,7 @@ class HubDataBase:
     chargerobject: HubMember
     chargerobject_switch: ChargerSwitch
     hass: HomeAssistant
+    charger: Charger
 
     def create_hub_base_data(
             self,
@@ -32,24 +35,24 @@ class HubDataBase:
             config_inputs["chargerid"]
         )
         self.currentpeak = CurrentPeak(
-            type=float,
+            data_type=float,
             listenerentity=self.locale.current_peak_entity,
             initval=0,
             startpeaks=config_inputs["startpeaks"]
         )
         self.carpowersensor = CarPowerSensor(
-            type=int,
+            data_type=int,
             listenerentity=self.chargertype.charger.powermeter,
             initval=0,
             powermeter_factor=self.chargertype.charger.powermeter_factor
         )
         self.chargerobject = HubMember(
-            type=str,
+            data_type=str,
             listenerentity=self.chargertype.charger.chargerentity
         )
         self.chargerobject_switch = ChargerSwitch(
             hass=hass,
-            type=bool,
+            data_type=bool,
             listenerentity=self.chargertype.charger.powerswitch,
             initval=False,
             currentname=self.chargertype.charger.ampmeter,

@@ -1,7 +1,6 @@
-from datetime import datetime
-from custom_components.peaqev.peaqservice.threshold.thresholdbase import ThresholdBase
-from peaqevcore.Threshold import ThresholdBase as _core
 import logging
+
+from custom_components.peaqev.peaqservice.threshold.thresholdbase import ThresholdBase
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,5 +23,3 @@ class ThresholdLite(ThresholdBase):
         #     self._hub.totalhourlyenergy.value,
         #     self._hub.current_peak_dynamic
         # )
-
-

@@ -1,6 +1,10 @@
+import logging
 from abc import abstractmethod
 from datetime import datetime
-import logging
+
+import homeassistant.helpers.template as template
+from peaqevcore.hoursselection import Hoursselectionbase as core_hours
+
 from custom_components.peaqev.peaqservice.util.constants import (
     NON_HOUR,
     CAUTION_HOUR,
@@ -8,9 +12,6 @@ from custom_components.peaqev.peaqservice.util.constants import (
     CAUTIONHOURTYPE_INTERMEDIATE,
     CAUTIONHOURTYPE_DICT
 )
-
-import homeassistant.helpers.template as template
-from peaqevcore.hoursselection import Hoursselectionbase as core_hours
 
 NORDPOOL = "nordpool"
 _LOGGER = logging.getLogger(__name__)
@@ -78,6 +79,18 @@ class RegularHours(Hours):
     def __init__(self, non_hours=None, caution_hours=None):
         super().__init__(False, non_hours, caution_hours)
 
+    @property
+    def nordpool_entity(self):
+        pass
+
+    def update_nordpool(self):
+        pass
+
+    @property
+    def dynamic_caution_hours(self) -> dict:
+        pass
+
+
 class PriceAwareHours(Hours):
     def __init__(
             self,
@@ -106,11 +119,11 @@ class PriceAwareHours(Hours):
     def cautionhour_type_string(self) -> str:
         return self._cautionhour_type_string
 
-    @Hours.non_hours.getter
+    @property
     def non_hours(self) -> list:
         return self._core.non_hours
 
-    @Hours.caution_hours.getter
+    @property
     def caution_hours(self) -> list:
         return self._core.caution_hours
 
@@ -160,7 +173,7 @@ class PriceAwareHours(Hours):
             self.prices = ret_attr
             self.prices_tomorrow = ret_attr_tomorrow
         else:
-            _LOGGER.warn("could not get nordpool-prices")
+            _LOGGER.error("could not get nordpool-prices")
 
     def _setup_nordpool(self):
         try:
@@ -172,8 +185,9 @@ class PriceAwareHours(Hours):
                 self.update_nordpool()
             else:
                 raise Exception("more than one Nordpool entity found. Cannot continue.")
-        except Exception:
-            _LOGGER.warn("Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness.")
+        except Exception as e:
+            msg = f"Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness: {e}"
+            _LOGGER.error(msg)
 
     @staticmethod
     def _set_absolute_top_price(_input) -> float:

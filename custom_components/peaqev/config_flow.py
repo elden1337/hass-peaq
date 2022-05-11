@@ -1,43 +1,32 @@
 """Config flow for Peaq integration."""
 from __future__ import annotations
 import logging
-import copy
 import voluptuous as vol
 from typing import Any, Optional
-from homeassistant import config_entries, exceptions
-from homeassistant.core import (HomeAssistant, callback)
+from homeassistant import config_entries
+from homeassistant.core import (HomeAssistant)
 from homeassistant.const import CONF_NAME
 import homeassistant.helpers.config_validation as cv
 import custom_components.peaqev.peaqservice.util.constants as pk
-from homeassistant.helpers.entity_registry import (
-    async_entries_for_config_entry,
-    async_get_registry,
-)
 
 from .const import DOMAIN   # pylint:disable=unused-import
 
 _LOGGER = logging.getLogger(__name__)
 
-TYPEREGULAR = "Regular (requires powersensor)"
-TYPELITE = "Lite"
 
-INSTALLATIONTYPES = [
-    TYPEREGULAR,
-    TYPELITE
-]
 
 LITE_SCHEMA = vol.Schema(
     {
         vol.Required(
             "peaqevtype",
             default="",
-        ): vol.In(INSTALLATIONTYPES)
+        ): vol.In(pk.INSTALLATIONTYPES)
     }
 )
 
 INIT_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_NAME): cv.string,  
+        vol.Required(CONF_NAME): cv.string,
         vol.Optional("powersensorincludescar", default=False): cv.boolean, 
         vol.Optional(
             "chargertype",

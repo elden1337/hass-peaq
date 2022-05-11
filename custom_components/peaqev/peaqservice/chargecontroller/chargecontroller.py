@@ -1,8 +1,10 @@
 import logging
 import time
 from datetime import datetime
+
 from peaqevcore.Chargecontroller import ChargeControllerBase as _core
 from peaqevcore.Models import CHARGERSTATES
+
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontrollerbase import ChargeControllerBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -119,5 +121,4 @@ class ChargeController(ChargeControllerBase):
         if update_timer is True:
             self.update_latestchargerstart()
         return ret
-
 

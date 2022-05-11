@@ -1,8 +1,10 @@
+import logging
 from abc import abstractmethod
 from datetime import datetime
-import custom_components.peaqev.peaqservice.util.constants as constants
+
 from peaqevcore.Threshold import ThresholdBase as _core
-import logging
+
+import custom_components.peaqev.peaqservice.util.constants as constants
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,4 +35,4 @@ class ThresholdBase:
     def _setcurrentdict(self):
         if 0 < int(self._hub.carpowersensor.value) < 3700:
             return constants.CURRENTS_ONEPHASE_1_16
-        return constants.CURRENTS_THREEPHASE_1_16
+        return constants.CURRENTS_THREEPHASE_1_32

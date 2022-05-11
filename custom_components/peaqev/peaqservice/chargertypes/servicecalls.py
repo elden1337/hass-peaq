@@ -114,5 +114,3 @@ class ServiceCalls:
         #except Exception as e:
         #    _LOGGER.error("Peaqev could not initialize servicecalls", e)
 
-
-
