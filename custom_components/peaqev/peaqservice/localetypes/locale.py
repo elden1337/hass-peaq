@@ -1,4 +1,3 @@
-import custom_components.peaqev.peaqservice.util.constants as constants
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.localetypes.types.default import Default
 from custom_components.peaqev.peaqservice.localetypes.types.se_gothenburg import SE_Gothenburg
@@ -9,18 +8,33 @@ from custom_components.peaqev.peaqservice.localetypes.types.se_nacka import SE_N
 from custom_components.peaqev.peaqservice.localetypes.types.se_partille import SE_Partille
 from custom_components.peaqev.peaqservice.localetypes.types.se_she_ab import SE_SHE_AB
 from custom_components.peaqev.peaqservice.localetypes.types.se_skovde import SE_Skovde
+from custom_components.peaqev.peaqservice.localetypes.types.se_sollentuna import SE_Sollentuna
+from custom_components.peaqev.peaqservice.util.constants import (
+    LOCALE_DEFAULT,
+    LOCALE_SE_GOTHENBURG,
+    LOCALE_SE_PARTILLE,
+    LOCALE_SE_KARLSTAD,
+    LOCALE_SE_KRISTINEHAMN,
+    LOCALE_SE_NACKA_NORMAL,
+    LOCALE_SE_MALUNG_SALEN,
+    LOCALE_SE_SALA,
+    LOCALE_SE_SKOVDE,
+    LOCALE_SE_SOLLENTUNA,
+    NAME
+)
 from custom_components.peaqev.peaqservice.util.sqlsensorhelper import SQLSensorHelper
 
 LOCALETYPEDICT = {
-    constants.LOCALE_DEFAULT: Default(),
-    constants.LOCALE_SE_GOTHENBURG: SE_Gothenburg(),
-    constants.LOCALE_SE_PARTILLE: SE_Partille(),
-    constants.LOCALE_SE_KARLSTAD: SE_Karlstad(),
-    constants.LOCALE_SE_KRISTINEHAMN: SE_Kristinehamn(),
-    constants.LOCALE_SE_NACKA_NORMAL: SE_Nacka_normal(),
-    constants.LOCALE_SE_MALUNG_SALEN: SE_Malung_Salen(),
-    constants.LOCALE_SE_SALA: SE_SHE_AB(),
-    constants.LOCALE_SE_SKOVDE: SE_Skovde(),
+    LOCALE_DEFAULT: Default(),
+    LOCALE_SE_GOTHENBURG: SE_Gothenburg(),
+    LOCALE_SE_PARTILLE: SE_Partille(),
+    LOCALE_SE_KARLSTAD: SE_Karlstad(),
+    LOCALE_SE_KRISTINEHAMN: SE_Kristinehamn(),
+    LOCALE_SE_NACKA_NORMAL: SE_Nacka_normal(),
+    LOCALE_SE_MALUNG_SALEN: SE_Malung_Salen(),
+    LOCALE_SE_SALA: SE_SHE_AB(),
+    LOCALE_SE_SKOVDE: SE_Skovde(),
+    LOCALE_SE_SOLLENTUNA: SE_Sollentuna()
 }
 
 class LocaleData:
@@ -41,6 +55,6 @@ class LocaleData:
 
     @property
     def current_peak_entity(self) -> str:
-        return f"sensor.{self._domain}_{ex.nametoid(SQLSensorHelper('').getquerytype(self.data.observed_peak)[constants.NAME])}"
+        return f"sensor.{self._domain}_{ex.nametoid(SQLSensorHelper('').getquerytype(self.data.observed_peak)[NAME])}"
 
 

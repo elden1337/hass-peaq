@@ -23,18 +23,18 @@ class LocaleTypeBase:
         #self._peakreader_type = PeakReaderType.Hourly
         self._free_charge_pattern = freechargepattern if freechargepattern is not None else []
 
-    """Observed peak (only added as sensor if separated from charged peak)"""
     @property
     def observed_peak(self) -> str:
+        """Observed peak (only added as sensor if separated from charged peak)"""
         return self._observed_peak
 
     @observed_peak.setter
     def observed_peak(self, val):
         self._observed_peak = val
 
-    """Charged peak (always added)"""
     @property
     def charged_peak(self) -> str:
+        """Charged peak (always added)"""
         return self._charged_peak
 
     @charged_peak.setter
@@ -65,4 +65,3 @@ class LocaleTypeBase:
                         return True
 
         return False
-
