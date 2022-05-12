@@ -35,5 +35,3 @@ som är möjlig från dagtid till kvällstid (19.00-07:00) eller till helger och
 Nov – Mars vardagar kl 7-19 135,00 kr/kW inkl moms
 April – Okt vardagar kl 7-19 56,00 kr/kW inkl moms
 """
-
-

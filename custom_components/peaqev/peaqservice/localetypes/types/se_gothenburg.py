@@ -13,5 +13,3 @@ class SE_Gothenburg(LocaleTypeBase):
             observedpeak=observed_peak,
             chargedpeak=charged_peak
         )
-
-

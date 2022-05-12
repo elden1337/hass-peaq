@@ -38,12 +38,12 @@ LOCALETYPEDICT = {
 }
 
 class LocaleData:
-    def __init__(self, input, domain):
+    def __init__(self, input_type, domain):
         self._data = None
-        self._type = input
+        self._type = input_type
         self._domain = domain
 
-        self._data = LOCALETYPEDICT[input]
+        self._data = LOCALETYPEDICT[input_type]
 
     @property
     def type(self) -> str:
@@ -56,5 +56,3 @@ class LocaleData:
     @property
     def current_peak_entity(self) -> str:
         return f"sensor.{self._domain}_{ex.nametoid(SQLSensorHelper('').getquerytype(self.data.observed_peak)[NAME])}"
-
-

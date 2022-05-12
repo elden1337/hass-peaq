@@ -1,6 +1,7 @@
-from custom_components.peaqev.sensors.sensorbase import SensorBase
-from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
 from datetime import datetime
+
+from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
+from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 
 class PeaqMoneySensor(SensorBase):
@@ -12,8 +13,8 @@ class PeaqMoneySensor(SensorBase):
         self._attr_name = name
         self._nonhours = None
         self._dynamic_caution_hours = None
-        self._current_hour = None,
-        self._price_aware = False,
+        self._current_hour = None
+        self._price_aware = False
         self._absolute_top_price = None
         self._currency = None
         self._cautionhour_type_string = None
@@ -70,17 +71,16 @@ class PeaqMoneySensor(SensorBase):
         val = h + 1 if h + 1 < 24 else h + 1 - 24
         if len(str(val)) == 1:
             return f"Charging stopped until 0{val}:00"
-        else:
-            return f"Charging stopped until {val}:00"
+        return f"Charging stopped until {val}:00"
 
     def _getuneven(self, first, second) -> bool:
         if second > first:
             return first - (second - 24) != 1
         return first - second != 1
 
-    def set_non_hours_display_model(self, input) -> list:
+    def set_non_hours_display_model(self, input_hour) -> list:
         ret = []
-        for i in input:
+        for i in input_hour:
             if i < datetime.now().hour:
                 ret.append(f"{str(i)}⁺¹")
             else:

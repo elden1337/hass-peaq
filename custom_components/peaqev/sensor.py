@@ -27,7 +27,7 @@ SCAN_INTERVAL = timedelta(seconds=4)
 
 async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add_entities):
     """Add sensors for passed config_entry in HA."""
-    
+
     hub = hass.data[DOMAIN]["hub"]
 
     peaqsensors = await _helper.gather_Sensors(hub, config)
@@ -50,5 +50,4 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add
     peaqsqlsensors = await _helper.gather_sql_sensors(hass, hub, config.entry_id)
 
     async_add_entities(peaqsqlsensors, update_before_add = True)
-
 

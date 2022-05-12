@@ -1,7 +1,10 @@
-import custom_components.peaqev.peaqservice.util.constants as constants
+
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.hub.hubdata.hubdatabase import HubDataBase
 from custom_components.peaqev.peaqservice.hub.hubdata.hubmember import HubMember
+from custom_components.peaqev.peaqservice.util.constants import (
+    CONSUMPTION_TOTAL_NAME, HOURLY
+)
 
 
 class HubDataLite(HubDataBase):
@@ -17,7 +20,7 @@ class HubDataLite(HubDataBase):
 
         self.totalhourlyenergy = HubMember(
             data_type=float,
-            listenerentity=f"sensor.{domain}_{ex.nametoid(constants.CONSUMPTION_TOTAL_NAME)}_{constants.HOURLY}",
+            listenerentity=f"sensor.{domain}_{ex.nametoid(CONSUMPTION_TOTAL_NAME)}_{HOURLY}",
             initval=0
         )
 

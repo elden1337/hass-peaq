@@ -36,10 +36,9 @@ class Hours():
     def state(self) -> str:
         if datetime.now().hour in self.non_hours:
             return NON_HOUR
-        elif datetime.now().hour in self.caution_hours:
+        if datetime.now().hour in self.caution_hours:
             return CAUTION_HOUR
-        else:
-            return CHARGING_PERMITTED
+        return CHARGING_PERMITTED
 
     @property
     def price_aware(self) -> bool:
@@ -180,7 +179,7 @@ class PriceAwareHours(Hours):
             entities = template.integration_entities(self._hass, NORDPOOL)
             if len(entities) < 1:
                 raise Exception("no entities found for Nordpool.")
-            elif len(entities) == 1:
+            if len(entities) == 1:
                 self.nordpool_entity = entities[0]
                 self.update_nordpool()
             else:

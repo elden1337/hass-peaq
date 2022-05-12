@@ -12,6 +12,3 @@ class SE_Partille(LocaleTypeBase):
             observedpeak=observed_peak,
             chargedpeak=charged_peak
         )
-
-
-

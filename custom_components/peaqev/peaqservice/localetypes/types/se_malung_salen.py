@@ -23,5 +23,3 @@ class SE_Malung_Salen(LocaleTypeBase):
             chargedpeak=charged_peak,
             freechargepattern=free_charge_pattern
         )
-
-

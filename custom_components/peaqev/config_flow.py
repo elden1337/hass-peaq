@@ -168,7 +168,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.data.update(user_input)
             return await self.async_step_months()
 
-        mockhours = [h for h in range(0, 24)]
+        mockhours = list(range(0,24))
 
         _transfer_cautionhours = mockhours
         _transfer_nonhours = mockhours
@@ -193,7 +193,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.data["startpeaks"] = months_dict
             return self.async_create_entry(title=self.info["title"], data=self.data)
 
-        months = [m for m in range(1, 13)]
+        months = list(range(1,13))
 
         mock_startpeaks = {}
         for m in months:
@@ -221,4 +221,3 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }),
             last_step=True,
         )
-

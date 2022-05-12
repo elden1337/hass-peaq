@@ -1,8 +1,14 @@
-import custom_components.peaqev.peaqservice.util.constants as constants
+
+
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.hub.hubdata.hubdatabase import HubDataBase
 from custom_components.peaqev.peaqservice.hub.hubdata.hubmember import HubMember
 from custom_components.peaqev.peaqservice.power.power import Power
+from custom_components.peaqev.peaqservice.util.constants import (
+    AVERAGECONSUMPTION,
+    CONSUMPTION_TOTAL_NAME,
+    HOURLY
+)
 
 
 class HubData(HubDataBase):
@@ -22,12 +28,12 @@ class HubData(HubDataBase):
 
         self.powersensormovingaverage = HubMember(
             data_type=int,
-            listenerentity=f"sensor.{domain}_{ex.nametoid(constants.AVERAGECONSUMPTION)}",
+            listenerentity=f"sensor.{domain}_{ex.nametoid(AVERAGECONSUMPTION)}",
             initval=0
         )
         self.totalhourlyenergy = HubMember(
             data_type=float,
-            listenerentity=f"sensor.{domain}_{ex.nametoid(constants.CONSUMPTION_TOTAL_NAME)}_{constants.HOURLY}",
+            listenerentity=f"sensor.{domain}_{ex.nametoid(CONSUMPTION_TOTAL_NAME)}_{HOURLY}",
             initval=0
         )
 
@@ -51,4 +57,3 @@ class HubData(HubDataBase):
             self.totalhourlyenergy.entity) is not None else 0
         self.currentpeak.value = self.hass.states.get(self.currentpeak.entity) if self.hass.states.get(
             self.currentpeak.entity) is not None else 0
-

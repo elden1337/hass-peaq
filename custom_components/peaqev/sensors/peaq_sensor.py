@@ -1,5 +1,6 @@
-from custom_components.peaqev.sensors.sensorbase import SensorBase
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
+from custom_components.peaqev.sensors.sensorbase import SensorBase
+
 
 class PeaqSensor(SensorBase):
     def __init__(self, hub, entry_id):
@@ -10,8 +11,8 @@ class PeaqSensor(SensorBase):
         self._state = self._hub.chargecontroller.status.name
         self._nonhours = None
         self._cautionhours = None
-        self._current_hour = None,
-        self._price_aware = False,
+        self._current_hour = None
+        self._price_aware = False
 
     @property
     def state(self):
@@ -43,4 +44,3 @@ class PeaqSensor(SensorBase):
         }
 
         return dict
-

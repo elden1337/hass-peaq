@@ -3,8 +3,10 @@ from homeassistant.components.utility_meter.sensor import (
     UtilityMeterSensor,
     HOURLY
 )
-from custom_components.peaqev.const import DOMAIN
+
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
+from custom_components.peaqev.const import DOMAIN
+
 
 class Object(object):
     pass
@@ -46,4 +48,3 @@ class PeaqUtilitySensor(UtilityMeterSensor):
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
-
