@@ -57,10 +57,10 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
     await hub.is_initialized()
     hass.data[DOMAIN]["hub"] = hub
 
-    async def servicehandler_enable():
+    async def servicehandler_enable(call):
         await hub.call_enable_peaq()
 
-    async def servicehandler_disable():
+    async def servicehandler_disable(call):
         await hub.call_disable_peaq()
 
     hass.services.async_register(DOMAIN, "enable", servicehandler_enable)
