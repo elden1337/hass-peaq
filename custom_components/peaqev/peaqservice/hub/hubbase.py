@@ -6,10 +6,10 @@ from homeassistant.core import (
     callback,
 )
 
-import custom_components.peaqev.peaqservice.util.constants as constants
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.hourselection import (PriceAwareHours, RegularHours)
 from custom_components.peaqev.peaqservice.hub.hubdata.hubmember import HubMember
+from custom_components.peaqev.peaqservice.util.constants import CHARGERENABLED, CHARGERDONE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -45,16 +45,14 @@ class HubBase:
 
         self.charger_enabled = HubMember(
             data_type=bool,
-            listenerentity=f"binary_sensor.{domain}_{ex.nametoid(constants.CHARGERENABLED)}",
+            listenerentity=f"binary_sensor.{domain}_{ex.nametoid(CHARGERENABLED)}",
             initval=False
         )
         self.charger_done = HubMember(
             data_type=bool,
-            listenerentity=f"binary_sensor.{domain}_{ex.nametoid(constants.CHARGERDONE)}",
+            listenerentity=f"binary_sensor.{domain}_{ex.nametoid(CHARGERDONE)}",
             initval=False
         )
-
-
 
     async def is_initialized(self) -> bool:
         return True
@@ -63,14 +61,14 @@ class HubBase:
     async def state_changed(self, entity_id, old_state, new_state):
         try:
             if old_state is None or old_state.state != new_state.state:
-                await self._updatesensor(entity_id, new_state.state)
+                await self._update_sensor(entity_id, new_state.state)
         except Exception as e:
             msg = f"Unable to handle data: {entity_id} {e}"
             _LOGGER.error(msg)
             pass
 
     @abstractmethod
-    async def _updatesensor(self, entity, value):
+    async def _update_sensor(self, entity, value):
         pass
 
     async def call_enable_peaq(self):

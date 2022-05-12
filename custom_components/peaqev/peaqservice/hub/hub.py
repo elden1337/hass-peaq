@@ -6,13 +6,13 @@ from homeassistant.core import (
 )
 from homeassistant.helpers.event import async_track_state_change
 
-import custom_components.peaqev.peaqservice.util.constants as constants
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller import ChargeController
 from custom_components.peaqev.peaqservice.hub.hubbase import HubBase
 from custom_components.peaqev.peaqservice.hub.hubdata.hubdata import HubData
 from custom_components.peaqev.peaqservice.prediction.prediction import Prediction
 from custom_components.peaqev.peaqservice.threshold.threshold import Threshold
+from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,9 +33,7 @@ class Hub(HubBase, HubData):
         self.prediction = Prediction(self)
         self.threshold = Threshold(self)
         self.chargecontroller = ChargeController(self)
-
         self.init_hub_values()
-        
         trackerEntities = [
             self.chargerobject_switch.entity,
             self.configpower_entity,
@@ -49,7 +47,7 @@ class Hub(HubBase, HubData):
             self.charger_enabled.entity,
             self.charger_done.entity,
             self.chargerobject.entity,
-            f"sensor.{self.domain}_{ex.nametoid(constants.CHARGERCONTROLLER)}",
+            f"sensor.{self.domain}_{ex.nametoid(CHARGERCONTROLLER)}",
             ]
 
         if self.hours.price_aware is True:
@@ -67,7 +65,7 @@ class Hub(HubBase, HubData):
                 return self.currentpeak.value * self.hours.dynamic_caution_hours[datetime.now().hour]
         return self.currentpeak.value
 
-    async def _updatesensor(self, entity, value):
+    async def _update_sensor(self, entity, value):
         if entity == self.configpower_entity:
             self.power.update(carpowersensor_value=self.carpowersensor.value, config_sensor_value=value)
         elif entity == self.carpowersensor.entity:

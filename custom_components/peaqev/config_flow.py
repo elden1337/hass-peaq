@@ -140,7 +140,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             self.data.update(user_input)
-            if self.data["priceaware"] is False or None:
+            if self.data["priceaware"] is False:
                 return await self.async_step_hours()
             return await self.async_step_months()
 

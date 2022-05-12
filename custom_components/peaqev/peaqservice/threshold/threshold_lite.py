@@ -12,7 +12,9 @@ class ThresholdLite(ThresholdBase):
 
     @property
     def allowedcurrent(self) -> int:
-        pass
+        return 6
+        #todo: fix proper calc
+
         # amps = self._setcurrentdict()
         # return _core.allowedcurrent(
         #     datetime.now().minute,

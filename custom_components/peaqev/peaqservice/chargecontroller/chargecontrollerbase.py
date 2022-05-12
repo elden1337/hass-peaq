@@ -1,7 +1,10 @@
 import logging
 import time
 from abc import abstractmethod
+from datetime import datetime
+
 from peaqevcore.Models import CHARGERSTATES
+
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
 _LOGGER = logging.getLogger(__name__)
@@ -31,6 +34,48 @@ class ChargeControllerBase:
     def update_latestchargerstart(self):
         self.latest_charger_start = time.time()
 
-    @abstractmethod
     def _get_status(self):
+        ret = CHARGERSTATES.Error
+        update_timer = False
+        charger_state = self._hub.chargerobject.value.lower()
+        free_charge = self._hub.locale.data.free_charge
+
+        if charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]:
+            self._hub.charger_done.value = True
+            ret = CHARGERSTATES.Done
+        elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Idle]:
+            update_timer = True
+            ret = CHARGERSTATES.Idle
+            if self._hub.charger_done.value is True:
+                self._hub.charger_done.value = False
+        elif charger_state in self._hub.chargertype.charger.chargerstates[
+            CHARGERSTATES.Connected] and self._hub.charger_enabled.value is False:
+            update_timer = True
+            ret = CHARGERSTATES.Connected
+        elif charger_state not in self._hub.chargertype.charger.chargerstates[
+            CHARGERSTATES.Idle] and self._hub.charger_done.value is True:
+            ret = CHARGERSTATES.Done
+        elif datetime.now().hour in self._hub.hours.non_hours and free_charge is False:
+            update_timer = True
+            ret = CHARGERSTATES.Stop
+
+        elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Connected]:
+            ret = self._get_status_connected()
+            update_timer = (ret == CHARGERSTATES.Stop)
+
+        elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Charging]:
+            ret = self._get_status_charging()
+            update_timer = True
+
+        if update_timer is True:
+            self.update_latestchargerstart()
+
+        return ret
+
+    @abstractmethod
+    def _get_status_charging(self) -> CHARGERSTATES:
+        pass
+
+    @abstractmethod
+    def _get_status_connected(self) -> CHARGERSTATES:
         pass
