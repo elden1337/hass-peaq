@@ -23,6 +23,7 @@ LOCALE_DEFAULT = "Other, just want to test"
 LOCALE_SE_SALA = "Sala-Heby Energi AB, Sweden"
 LOCALE_SE_MALUNG_SALEN = "Malung-Sälen, Sweden (Malungs elverk)"
 LOCALE_SE_SKOVDE = "Skövde, Sweden"
+LOCALE_SE_SOLLENTUNA = "Sollentuna Energi, Sweden"
 
 """Lookup types for config flow"""
 CHARGERTYPES = [
@@ -40,6 +41,7 @@ LOCALES = [
     LOCALE_SE_PARTILLE,
     LOCALE_SE_SALA,
     LOCALE_SE_SKOVDE,
+    LOCALE_SE_SOLLENTUNA,
     LOCALE_DEFAULT
     ]
 
@@ -79,6 +81,9 @@ QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19_MIN = "sala"
 
 QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22 = "skövde"
 QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR = "kristinehamn"
+
+QUERYTYPE_SOLLENTUNA = "sollentuna"
+QUERYTYPE_SOLLENTUNA_MIN = "sollentuna_min"
 
 """Sql sensor helpers"""
 SQLSENSOR_STATISTICS_TABLE = "statistics"

@@ -1,4 +1,3 @@
-import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.util.constants import (
     SQLSENSOR_BASENAME,
     SQLSENSOR_AVERAGEOFTHREE,
@@ -17,9 +16,9 @@ from custom_components.peaqev.peaqservice.util.constants import (
     QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22,
     QUERYTYPE_BASICMAX_MON_FRI_07_17_DEC_MAR_ELSE_REGULAR,
     SQLSENSOR_STATISTICS_TABLE,
-    SQLSENSOR_STATISTICS_META_TABLE
+    SQLSENSOR_STATISTICS_META_TABLE, QUERYTYPE_SOLLENTUNA, QUERYTYPE_SOLLENTUNA_MIN
 )
-
+import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 
 class SQLSensorHelper():
     def __init__(self, sensor: str):
@@ -184,6 +183,34 @@ class SQLSensorHelper():
                 ),
                 'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE_MIN}',
                 'comment': 'Malung-Sälen, SE'
+            },
+            QUERYTYPE_SOLLENTUNA: {
+                'query': sql.query(
+                    self.basequeries["avg_hour"][0],
+                    self.basequeries["avg_hour"][1],
+                    sql.AND,
+                    sql.datepart("gteq", "hour", 7),
+                    sql.AND,
+                    sql.datepart("lteq", "hour", 18),
+                    sql.AND,
+                    sql.datepart("lteq", "weekday", 4)
+                ),
+                'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE}',
+                'comment': 'Sollentuna, SE'
+            },
+            QUERYTYPE_SOLLENTUNA_MIN: {
+                'query': sql.query(
+                    self.basequeries["min_hour"][0],
+                    self.basequeries["min_hour"][1],
+                    sql.AND,
+                    sql.datepart("gteq", "hour", 7),
+                    sql.AND,
+                    sql.datepart("lteq", "hour", 18),
+                    sql.AND,
+                    sql.datepart("lteq", "weekday", 4)
+                ),
+                'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE_MIN}',
+                'comment': 'Sollentuna, SE'
             },
         }
 
