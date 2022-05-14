@@ -113,9 +113,9 @@ class ChargerSwitch(HubMember):
     def current(self, value):
         try:
             self._current = int(value)
-        except:
-            msg = f"[{value}] could not set value as chargercurrent"
-            _LOGGER.warn(msg)
+        except ValueError as v:
+            msg = f"[{value}] could not set value as chargercurrent. {v}"
+            _LOGGER.error(msg)
 
     def updatecurrent(self):
         if self._ampmeter_is_attribute is True:
