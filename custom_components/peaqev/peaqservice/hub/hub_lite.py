@@ -53,12 +53,11 @@ class HubLite(HubBase, HubDataLite):
 
         async_track_state_change(hass, trackerEntities, self.state_changed)
 
-    async def is_initialized(self) -> bool:
+    def is_initialized(self) -> bool:
         ret = [self.hours.is_initialized,
                self.carpowersensor.is_initialized,
-               self.chargerobject.is_initialized,
                self.chargerobject_switch.is_initialized,
-               self.power.is_initialized
+               self.chargerobject.is_initialized
                ]
         return all(ret)
 

@@ -16,6 +16,10 @@ class Power:
         self._setup()
 
     @property
+    def is_initialized(self) -> bool:
+        return self._total.is_initialized and self._house.is_initialized
+
+    @property
     def config_sensor(self) -> str:
         return self._config_sensor
 

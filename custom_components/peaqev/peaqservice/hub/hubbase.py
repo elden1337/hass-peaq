@@ -56,7 +56,7 @@ class HubBase:
         )
 
     @abstractmethod
-    async def is_initialized(self) -> bool:
+    def is_initialized(self) -> bool:
         pass
 
     @callback

@@ -36,7 +36,6 @@ class HubData(HubDataBase):
             listenerentity=f"sensor.{domain}_{ex.nametoid(CONSUMPTION_TOTAL_NAME)}_{HOURLY}",
             initval=0
         )
-
         self.power = Power(
             configsensor=config_inputs["powersensor"],
             powersensor_includes_car=self.powersensor_includes_car

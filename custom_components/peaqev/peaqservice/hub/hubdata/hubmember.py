@@ -15,6 +15,10 @@ class HubMember:
         self.id = ex.nametoid(self.name) if self.name is not None else None
 
     @property
+    def is_initialized(self) -> bool:
+        return isinstance(self.value, self._type)
+
+    @property
     def entity(self) -> str:
         return self._listenerentity
 
@@ -81,6 +85,10 @@ class CarPowerSensor(HubMember):
         self._powermeter_factor = powermeter_factor
         super().__init__(data_type, listenerentity, initval)
 
+    @property
+    def is_initialized(self) -> bool:
+        return self.value is float
+
     @HubMember.value.setter
     def value(self, val):
         if val is None or val == 0:
@@ -102,6 +110,10 @@ class ChargerSwitch(HubMember):
         self._current_attr_name = currentname
         self._ampmeter_is_attribute = ampmeter_is_attribute
         super().__init__(data_type, listenerentity, initval)
+
+    @property
+    def is_initialized(self) -> bool:
+        return self.current > 0 and isinstance(self.value, self._type)
 
     @property
     def current(self) -> int:

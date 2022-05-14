@@ -89,6 +89,10 @@ class RegularHours(Hours):
     def dynamic_caution_hours(self) -> dict:
         pass
 
+    @property
+    def is_initialized(self) -> bool:
+        return True
+
 
 class PriceAwareHours(Hours):
     def __init__(
@@ -161,6 +165,10 @@ class PriceAwareHours(Hours):
     @currency.setter
     def currency(self, val):
         self._nordpool_currency = val
+
+    @property
+    def is_initialized(self) -> bool:
+        return len(self.prices) > 0
 
     def update_nordpool(self):
         ret = self._hass.states.get(self.nordpool_entity)

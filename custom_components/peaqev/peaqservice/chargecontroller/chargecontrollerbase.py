@@ -2,7 +2,9 @@ import logging
 import time
 from abc import abstractmethod
 from datetime import datetime
+
 from peaqevcore.Models import CHARGERSTATES
+
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
 _LOGGER = logging.getLogger(__name__)
@@ -41,7 +43,8 @@ class ChargeControllerBase:
         update_timer = False
         charger_state = self._hub.chargerobject.value.lower()
         free_charge = self._hub.locale.data.free_charge
-
+        if not self._hub.is_initialized:
+            return "Awaiting Hub Initialization."
         if charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]:
             self._hub.charger_done.value = True
             ret = CHARGERSTATES.Done
