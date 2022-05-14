@@ -55,8 +55,9 @@ class HubBase:
             initval=False
         )
 
+    @abstractmethod
     async def is_initialized(self) -> bool:
-        return True
+        pass
 
     @callback
     async def state_changed(self, entity_id, old_state, new_state):
