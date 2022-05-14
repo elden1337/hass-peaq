@@ -9,8 +9,8 @@ class PeaqSensor(SensorBase):
 
         self._attr_name = name
         self._state = self._hub.chargecontroller.status.name
-        self._nonhours = None
-        self._cautionhours = None
+        self._nonhours = self._hub.hours.non_hours
+        self._cautionhours = self._hub.hours.caution_hours
         self._current_hour = None
         self._price_aware = False
 
@@ -36,11 +36,12 @@ class PeaqSensor(SensorBase):
 
     @property
     def extra_state_attributes(self) -> dict:
-        dict = {
-            "non_hours": self._nonhours,
-            "caution_hours": self._cautionhours,
-            "current_hour state": self._current_hour,
-            "price aware": self._price_aware,
-        }
+        dict = {}
+        dict["price aware"] = self._price_aware
+        if self._hub.hours.price_aware is False:
+            dict["non_hours"] = self._nonhours
+            dict["caution_hours"] = self._cautionhours
+
+        dict["current_hour state"]= self._current_hour
 
         return dict

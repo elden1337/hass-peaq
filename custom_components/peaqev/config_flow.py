@@ -63,7 +63,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             self.data = user_input
-            _LOGGER.info(self.data)
             if self.data["peaqevtype"] == pk.TYPELITE:
                 self.info = {"title": pk.TYPELITE}
                 return await self.async_step_charger()

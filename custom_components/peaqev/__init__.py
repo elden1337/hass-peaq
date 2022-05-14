@@ -29,40 +29,30 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
     else:
         peaqtype_is_lite = False
 
-    if peaqtype_is_lite is True:
-        configinputs = {
-            "locale": config.data["locale"],
-            "chargertype": config.data["chargertype"],
-            "chargerid": config.data["chargerid"],
-            "cautionhours": config.data["cautionhours"] if "cautionhors" in config.data.keys() else [],
-            "nonhours": config.data["nonhours"] if "nonhours" in config.data.keys() else [],
-            "startpeaks": config.data["startpeaks"],
-            "priceaware": config.data["priceaware"],
-            "absolute_top_price": config.data["absolute_top_price"],
-            "cautionhour_type": config.data["cautionhour_type"],
-            "peaqtype_is_lite": peaqtype_is_lite
-        }
+    configinputs = {}
 
+    configinputs["locale"] = config.data["locale"]
+    configinputs["chargertype"] = config.data["chargertype"]
+    configinputs["chargerid"] = config.data["chargerid"]
+    configinputs["startpeaks"] = config.data["startpeaks"]
+    configinputs["priceaware"] = config.data["priceaware"]
+    configinputs["peaqtype_is_lite"] = peaqtype_is_lite
+
+    if config.data["priceaware"] is False:
+        configinputs["cautionhours"] = config.data["cautionhours"]
+        configinputs["nonhours"] = config.data["nonhours"]
+    else:
+        configinputs["absolute_top_price"] = config.data["absolute_top_price"]
+        configinputs["cautionhour_type"] = config.data["cautionhour_type"]
+
+    if peaqtype_is_lite is True:
         hub = HubLite(hass, configinputs, DOMAIN)
     else:
-        configinputs = {
-            "powersensor": config.data["name"],
-            "powersensorincludescar": config.data["powersensorincludescar"],
-            "locale": config.data["locale"],
-            "chargertype": config.data["chargertype"],
-            "chargerid": config.data["chargerid"],
-            "cautionhours": config.data["cautionhours"] if "cautionhors" in config.data.keys() else [],
-            "nonhours": config.data["nonhours"] if "nonhours" in config.data.keys() else [],
-            "startpeaks": config.data["startpeaks"],
-            "priceaware": config.data["priceaware"],
-            "absolute_top_price": config.data["absolute_top_price"],
-            "cautionhour_type": config.data["cautionhour_type"],
-            "peaqtype_is_lite": peaqtype_is_lite
-        }
+        configinputs["powersensor"] = config.data["name"]
+        configinputs["powersensorincludescar"] = config.data["powersensorincludescar"]
 
         hub = Hub(hass, configinputs, DOMAIN)
 
-    await hub.is_initialized()
     hass.data[DOMAIN]["hub"] = hub
 
     async def servicehandler_enable(call):

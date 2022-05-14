@@ -34,11 +34,10 @@ class HubBase:
             self.hours = PriceAwareHours(
                 hass=self.hass,
                 absolute_top_price=config_inputs["absolute_top_price"],
-                non_hours=config_inputs["nonhours"],
-                caution_hours=config_inputs["cautionhours"],
                 cautionhour_type=config_inputs["cautionhour_type"]
             )
         else:
+            _LOGGER.error(config_inputs["cautionhours"])
             self.hours = RegularHours(
                 non_hours=config_inputs["nonhours"],
                 caution_hours=config_inputs["cautionhours"]
