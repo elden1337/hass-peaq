@@ -33,7 +33,7 @@ class ChargeControllerBase:
         if ret == CHARGERSTATES.Error:
             msg = f"Chargecontroller returned faulty state. Charger reported {self._hub.chargerobject.value.lower()} as state."
             _LOGGER.error(msg)
-        return
+        return ret
 
     def update_latestchargerstart(self):
         self.latest_charger_start = time.time()
