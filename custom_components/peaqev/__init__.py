@@ -23,7 +23,13 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][config.entry_id] = config.data
 
-    if config.data["peaqevtype"] == TYPELITE:
+    if "peaqevtype" in config.data.keys():
+        peaqtype_is_lite = bool(config.data["peaqevtype"] == TYPELITE)
+
+    else:
+        peaqtype_is_lite = False
+
+    if peaqtype_is_lite is True:
         configinputs = {
             "locale": config.data["locale"],
             "chargertype": config.data["chargertype"],
@@ -33,7 +39,8 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
             "startpeaks": config.data["startpeaks"],
             "priceaware": config.data["priceaware"],
             "absolute_top_price": config.data["absolute_top_price"],
-            "cautionhour_type": config.data["cautionhour_type"]
+            "cautionhour_type": config.data["cautionhour_type"],
+            "peaqtype_is_lite": peaqtype_is_lite
         }
 
         hub = HubLite(hass, configinputs, DOMAIN)
@@ -49,7 +56,8 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
             "startpeaks": config.data["startpeaks"],
             "priceaware": config.data["priceaware"],
             "absolute_top_price": config.data["absolute_top_price"],
-            "cautionhour_type": config.data["cautionhour_type"]
+            "cautionhour_type": config.data["cautionhour_type"],
+            "peaqtype_is_lite": peaqtype_is_lite
         }
 
         hub = Hub(hass, configinputs, DOMAIN)
