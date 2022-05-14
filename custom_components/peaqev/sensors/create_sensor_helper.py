@@ -51,7 +51,7 @@ async def gather_Sensors(hub, config) -> list:
     else:
         ret.append(PeaqPowerSensor(hub, config.entry_id))
 
-    if config.data["peaqevtype"] == TYPEREGULAR:
+    if hub.peaqtype_is_lite is False:
         ret.append(PeaqAverageSensor(hub, config.entry_id))
         ret.append(PeaqPredictionSensor(hub, config.entry_id))
 

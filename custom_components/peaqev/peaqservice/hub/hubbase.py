@@ -28,6 +28,7 @@ class HubBase:
         self.hubname = domain.capitalize()
         self.domain = domain
         self.price_aware = config_inputs["priceaware"]
+        self.peaqtype_is_lite = config_inputs["peaqtype_is_lite"]
 
         if self.price_aware is True:
             self.hours = PriceAwareHours(

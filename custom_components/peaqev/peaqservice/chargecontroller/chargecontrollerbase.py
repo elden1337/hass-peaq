@@ -2,9 +2,7 @@ import logging
 import time
 from abc import abstractmethod
 from datetime import datetime
-
 from peaqevcore.Models import CHARGERSTATES
-
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
 _LOGGER = logging.getLogger(__name__)
@@ -29,7 +27,11 @@ class ChargeControllerBase:
 
     @property
     def status(self):
-        return self._get_status()
+        ret = self._get_status()
+        if ret == CHARGERSTATES.Error:
+            msg = f"Chargecontroller returned faulty state. Charger reported {self._hub.chargerobject.value.lower()} as state."
+            _LOGGER.error(msg)
+        return
 
     def update_latestchargerstart(self):
         self.latest_charger_start = time.time()
