@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from custom_components.peaqev.peaqservice.threshold.thresholdbase import ThresholdBase
 
@@ -12,16 +13,13 @@ class ThresholdLite(ThresholdBase):
 
     @property
     def allowedcurrent(self) -> int:
-        return 6
-        #todo: fix proper calc
-
-        # amps = self._setcurrentdict()
-        # return _core.allowedcurrent(
-        #     datetime.now().minute,
-        #     self._hub.powersensormovingaverage.value if self._hub.powersensormovingaverage.value is not None else 0,
-        #     self._hub.charger_enabled.value,
-        #     self._hub.charger_done.value,
-        #     amps,
-        #     self._hub.totalhourlyenergy.value,
-        #     self._hub.current_peak_dynamic
-        # )
+        amps = self._setcurrentdict()
+        ret = 6
+        if self._hub.charger_enabled.value is False or self._hub.charger_done.value is True:
+            return ret
+        currents = amps
+        for key, value in currents.items():
+            if (((key / 60) * (60 - datetime.now().minute) + self._hub.totalhourlyenergy.value * 1000) / 1000) < self._hub.current_peak_dynamic:
+                ret = value
+                break
+        return ret
