@@ -17,7 +17,7 @@ This integration does not communicate with any properitary API's, everything is 
 ## Installation
 *Required to install is Home Assistant version 2022.4.5 or higher.*
 
-If you have HACS installed, you can add peaqev as a custom integration.
+Preferred if you have HACS installed is to search for Peaqev there.
 
 Otherwise you may:
 - Copy `custom_components/peaqev` folder to `<config_dir>/custom_components/peaqev/`
@@ -26,20 +26,34 @@ Otherwise you may:
 
 ### Config setup:
 
-Search for peaqev in your integrations setup. Fill in the following parameters:
+Peaqev has two types of installations: Regular and Lite. Regular is much more precise, but requires an installed powersensor.
 
+[![](https://mermaid.ink/img/pako:eNpVkNtqwzAMhl_F-CqD5gVyMRg5NIUMRrO7eRciVhuDYwdFZpSm7z7nUNh0Jen_pB_pLjuvUWbySjD2ojkrJ2K8fbUMxN8iTV9FnpzcxGAtsPFO8G3Elw3LF31uDOMsiiTvga5IApwWje_A_sfOeA0WaBZl0qKbPO1quZoUW1GsRZV8kOkwhR-g55JqXVKBnaLZMal9oGmXjutQ_Zf7pBCxOnn3jvuFU7zJ8iAHpAGMjkffl56S3OOASmYx1XiBYFlJ5R4RDaMGxlIb9iSzy2J-kBDYtzfXyYyjyxMqDMQfDjv1-AUWBWqX)](https://mermaid-js.github.io/mermaid-live-editor/edit#pako:eNpVkNtqwzAMhl_F-CqD5gVyMRg5NIUMRrO7eRciVhuDYwdFZpSm7z7nUNh0Jen_pB_pLjuvUWbySjD2ojkrJ2K8fbUMxN8iTV9FnpzcxGAtsPFO8G3Elw3LF31uDOMsiiTvga5IApwWje_A_sfOeA0WaBZl0qKbPO1quZoUW1GsRZV8kOkwhR-g55JqXVKBnaLZMal9oGmXjutQ_Zf7pBCxOnn3jvuFU7zJ8iAHpAGMjkffl56S3OOASmYx1XiBYFlJ5R4RDaMGxlIb9iSzy2J-kBDYtzfXyYyjyxMqDMQfDjv1-AUWBWqX)
+
+##### Installation type:
+- `Installation type` - Pick regular for the full Peaqev-experience. This will charge according to your home's total energy. Pick Lite if you do not have such a sensor installed. Peaqev will then charge the allowed hourly amount set further down in "Months"
+
+##### Sensor:
 - `Power sensor` - The already existing power sensor in your setup. This is required to get the reading to work. Examples of devices sending such data is Tibber Pulse/Watty, Shelly DIN-mounted devices or similar.
 - `Power sensor includes car` - Check this option if the above sensor includes your car's power draw. The calutions will be altered accordingly
+
+##### Charger and Locale:
 - `City, or Grid owner company` - Chose your city from the list. The characteristics differ in how peak hours are stored and measured. If you don't live in a supported location but just want to test the integration, or lower your peaks for other reasons, you may check *"Other, just want to test"*
 - `Charger type` - Pick the installed ev-charger you have. Currently Chargeamps and Easee are supported. Check links for required custom components per charger-type: [Chargeamps](https://github.com/kirei/hass-chargeamps), [Easee](https://github.com/fondberg/easee_hass/)
+- `Charger id` - Your local identifier to tell Peaqev which charger unit we mean to manipulate. If your chargertype does not provide this, leave blank
 
-### Config options:
-- `Non hours` - Click to select the hours (if any) where you do not wish to charge.  
-- `Caution hours` - Click to select the hours (if any) where you want the charger to be extra cautious to not break the peak.
+##### Price-aware:
 - `Price aware charging` - Check this to calculate the cheapest hours from Nordpool (requires [Nordpool](https://github.com/custom-components/nordpool)). Above Non- and Caution-hours will be ignored.
 - `Absolute top price` - The limit (if any) where your charger should be stopped, regardless of the hour-algorithm.
-- `Monthly allowed peak` - Needs to be set in order to determine a minimum allowed peak. In the beginning of each month this is necessary to be able to charge at all. *Format is in kW. See examples below*
 - `Caution-hour type` - Choose to what extent you would like Peaqev to hold back during caution-hours. *Suave > Aggressive* 
+
+##### Hours:
+- `Non hours` - Click to select the hours (if any) where you do not wish to charge.  
+- `Caution hours` - Click to select the hours (if any) where you want the charger to be extra cautious to not break the peak.
+
+##### Months:
+- `Monthly allowed peak` - Needs to be set in order to determine a minimum allowed peak. In the beginning of each month this is necessary to be able to charge at all. *Format is in kW. See examples below*
+
 
 These are two (quite restrained) examples of monthly start peaks, for 1-phase and 3-phase charging respectively. This option is always up to your house and it's other appliances. The below are made for a modern house with installed heat pump.
 
@@ -106,6 +120,6 @@ Example of basic automations to enable/disable the charging. Your states here ma
   mode: single
 ```
 
-*Tested with Chargeamps Halo 11kw and Easee. Both setups with one single charger per household. Currently will not function where multiple chargers have been installed ,2022-04-23*
+*Tested with Chargeamps Halo 11kw and Easee. Both setups with one single charger per household. Currently will not function where multiple chargers have been installed ,2022-05-16*
 
 
