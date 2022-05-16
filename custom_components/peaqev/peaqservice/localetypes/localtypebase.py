@@ -1,26 +1,11 @@
-#from enum import Enum
+
 from datetime import datetime
-
-"""Determine how the peaks are charger. Monthly, weekly, bi-weekly."""
-#class PeakChargeType(Enum):
-#    Monthly = 1,
-#    Weekly = 2,
-#    BiWeekly = 3
-
-
-"""Determine how the peaks are read. Hourly to reset every hours, etc"""
-#class PeakReaderType(Enum):
-#    Hourly = 60,
-#    Quarterly = 15,
-#    MidHourly = 30
 
 
 class LocaleTypeBase:
-    def __init__(self, observedpeak:str, chargedpeak:str, freechargepattern:list = []):
+    def __init__(self, observedpeak:str, chargedpeak:str, freechargepattern:list = []): # pylint:disable=dangerous-default-value
         self._observed_peak = observedpeak
         self._charged_peak = chargedpeak
-        #self._peakcharge_type = PeakChargeType.Monthly
-        #self._peakreader_type = PeakReaderType.Hourly
         self._free_charge_pattern = freechargepattern if freechargepattern is not None else []
 
     @property
@@ -44,14 +29,6 @@ class LocaleTypeBase:
     @property
     def free_charge(self) -> bool:
         return self._gather_free_charge_pattern()
-
-    # @property
-    # def charge_type(self) -> PeakChargeType:
-    #     return self._peakcharge_type
-    #
-    # @property
-    # def reader_type(self) -> PeakReaderType:
-    #     return self._peakreader_type
 
     def _gather_free_charge_pattern(self) -> bool:
         if len(self._free_charge_pattern) == 0:

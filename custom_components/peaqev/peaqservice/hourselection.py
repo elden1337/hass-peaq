@@ -201,6 +201,3 @@ class PriceAwareHours(Hours):
         if _input is None or _input <= 0:
             return float("inf")
         return _input
-
-
-
