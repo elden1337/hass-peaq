@@ -1,4 +1,3 @@
-import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.util.constants import (
     SQLSENSOR_BASENAME,
     SQLSENSOR_AVERAGEOFTHREE,
@@ -19,7 +18,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
     SQLSENSOR_STATISTICS_TABLE,
     SQLSENSOR_STATISTICS_META_TABLE, QUERYTYPE_SOLLENTUNA, QUERYTYPE_SOLLENTUNA_MIN
 )
-
+import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 
 class SQLSensorHelper():
     def __init__(self, sensor: str):
@@ -259,7 +258,7 @@ class sql:
         return _base + _divident + _arg
 
     @staticmethod
-    def _strftime_base(type: str) -> str:
-        return f"cast(strftime(\'%{type}\', start) as int) "
+    def _strftime_base(time_type: str) -> str:
+        return f"cast(strftime(\'%{time_type}\', start) as int) "
 
 

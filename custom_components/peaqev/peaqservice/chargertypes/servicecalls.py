@@ -98,6 +98,3 @@ class ServiceCalls:
         #        assert len(a) > 0
         #except Exception as e:
         #    _LOGGER.error("Peaqev could not initialize servicecalls", e)
-
-
-

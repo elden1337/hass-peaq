@@ -1,10 +1,10 @@
 
-def nametoid(input) -> str:
-    return input.lower().replace(" ", "_").replace(",", "")
+def nametoid(input_string) -> str:
+    return input_string.lower().replace(" ", "_").replace(",", "")
 
-def try_parse(input:str, parsetype:type):
+def try_parse(input_string:str, parsetype:type):
     try:
-        ret = parsetype(input)
+        ret = parsetype(input_string)
         return ret
-    except:
+    except Exception as e:
         return False

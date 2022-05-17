@@ -1,17 +1,22 @@
 import logging
 from datetime import datetime
+
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class HubMember:
-    def __init__(self, type: type, listenerentity = None, initval = None, name = None):
+    def __init__(self, data_type: type, listenerentity = None, initval = None, name = None):
         self._value = initval
-        self._type = type
+        self._type = data_type
         self._listenerentity = listenerentity
         self.name = name
         self.id = ex.nametoid(self.name) if self.name is not None else None
+
+    @property
+    def is_initialized(self) -> bool:
+        return isinstance(self.value, self._type)
 
     @property
     def entity(self) -> str:
@@ -27,7 +32,7 @@ class HubMember:
 
     @value.setter
     def value(self, value):
-        if type(value) is self._type:
+        if isinstance(value, self._type):
             self._value = value
         elif self._type is float:
             try:
@@ -48,18 +53,19 @@ class HubMember:
                 elif value.lower() == "off":
                     self._value = False
             except:
-                _LOGGER.warn("Could not parse bool, setting to false to be sure", value, self._listenerentity)
+                msg = f"Could not parse bool, setting to false to be sure {value}, {self._listenerentity}"
+                _LOGGER.error(msg)
                 self._value = False
         elif  self._type is str:
             self._value = str(value)
 
 
 class CurrentPeak(HubMember):
-    def __init__(self, type: type, listenerentity, initval, startpeaks:dict):
+    def __init__(self, data_type: type, listenerentity, initval, startpeaks:dict):
 
         self._startpeak = self._set_start_peak(startpeaks)
         self._value = initval
-        super().__init__(type, listenerentity, initval)
+        super().__init__(data_type, listenerentity, initval)
 
     def _set_start_peak(self, peaks:dict) -> float:
         peak = peaks.get(datetime.now().month)
@@ -75,9 +81,13 @@ class CurrentPeak(HubMember):
 
 
 class CarPowerSensor(HubMember):
-    def __init__(self, type: type, listenerentity=None, initval=None, powermeter_factor=1):
+    def __init__(self, data_type: type, listenerentity=None, initval=None, powermeter_factor=1):
         self._powermeter_factor = powermeter_factor
-        super().__init__(type, listenerentity, initval)
+        super().__init__(data_type, listenerentity, initval)
+
+    @property
+    def is_initialized(self) -> bool:
+        return self.value is float
 
     @HubMember.value.setter
     def value(self, val):
@@ -93,13 +103,17 @@ class CarPowerSensor(HubMember):
 
 
 class ChargerSwitch(HubMember):
-    def __init__(self, hass, type: type, listenerentity, initval, currentname: str, ampmeter_is_attribute: bool):
+    def __init__(self, hass, data_type: type, listenerentity, initval, currentname: str, ampmeter_is_attribute: bool):
         self._hass = hass
         self._value = initval
         self._current = 0
         self._current_attr_name = currentname
         self._ampmeter_is_attribute = ampmeter_is_attribute
-        super().__init__(type, listenerentity, initval)
+        super().__init__(data_type, listenerentity, initval)
+
+    @property
+    def is_initialized(self) -> bool:
+        return self.current > 0 and isinstance(self.value, self._type)
 
     @property
     def current(self) -> int:
@@ -111,9 +125,9 @@ class ChargerSwitch(HubMember):
     def current(self, value):
         try:
             self._current = int(value)
-        except:
-            msg = f"[{value}] could not set value as chargercurrent"
-            _LOGGER.warn(msg)
+        except ValueError as v:
+            msg = f"[{value}] could not set value as chargercurrent. {v}"
+            _LOGGER.error(msg)
 
     def updatecurrent(self):
         if self._ampmeter_is_attribute is True:

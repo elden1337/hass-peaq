@@ -1,10 +1,11 @@
-from custom_components.peaqev.sensors.sensorbase import SensorBase
-from custom_components.peaqev.peaqservice.util.constants import PREDICTION
-
 from homeassistant.const import (
     DEVICE_CLASS_ENERGY,
     ENERGY_KILO_WATT_HOUR
 )
+
+from custom_components.peaqev.peaqservice.util.constants import PREDICTION
+from custom_components.peaqev.sensors.sensorbase import SensorBase
+
 
 class PeaqPredictionSensor(SensorBase):
     device_class = DEVICE_CLASS_ENERGY

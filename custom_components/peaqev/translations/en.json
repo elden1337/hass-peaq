@@ -1,42 +1,38 @@
 {
   "config": {
-    "abort": {
-      "already_configured": "This integration has already been configured"
-    },
-    "error": {
-      "cannot_connect": "Cannot create Peaq-instance",
-      "invalid_auth": "Invalid authentication",
-      "unknown": "Unknown error has occured",
-      "invalid_powersensor": "The powersensor provided is not reachable or wrong type  (state must be numeric)",
-      "invalid_chargerid": "You must provide a chargerId",
-      "invalid_nonhours": "You must provide at least one hour per day when charger is available. Nonhours is currently set as every hour."
-    },
     "step": {
       "user": {
         "data": {
+          "peaqevtype": "Installationtype"
+        }
+      },
+      "sensor": {
+        "data": {
           "name": "PowerSensor",
-          "powersensorincludescar": "PowerSensor includes car",
+          "powersensorincludescar": "PowerSensor includes car"
+        }
+      },
+      "charger": {
+        "data": {
           "chargerid": "Chargepoint Id (single chargepoint)",
           "chargertype": "Charger brand",
           "locale": "City, or Grid owner company"
-        },
-        "description": "",
-        "title": "Peaq installation"
+        }
+      },
+      "priceaware": {
+        "data": {
+          "priceaware": "Price aware charging (requires Nordpool)",
+          "absolute_top_price": "Max price to allow charging (same currency as your Nordpool sensor)",
+          "cautionhour_type": "Caution-hour type"
+        }
       },
       "hours": {
         "data": {
           "nonhours": "Hours when the charger is always disabled",
-          "cautionhours": "Hours when the charger takes extra precaution to not burst peak energy",
-          "priceaware": "Price aware charging (requires Nordpool)",
-          "absolute_top_price": "Max price to allow charging (same currency as your Nordpool sensor)",
-          "cautionhour_type": "Caution-hour type"
-        },
-        "description": "",
-        "title": "Hoursselection and price-awareness"
+          "cautionhours": "Hours when the charger takes extra precaution to not burst peak energy"
+        }
       },
       "months": {
-        "title": "Monthly allowed peak",
-        "description": "",
         "data": {
           "jan": "January",
           "feb": "February",
@@ -52,11 +48,17 @@
           "dec": "December"
         }
       }
-    }
-  },
-  "options": {
-    "step": {
-
+    },
+    "error": {
+      "cannot_connect": "Cannot create Peaq-instance",
+      "invalid_auth": "Invalid authentication",
+      "unknown": "Unknown error has occured",
+      "invalid_powersensor": "The powersensor provided is not reachable or wrong type  (state must be numeric)",
+      "invalid_chargerid": "You must provide a chargerId",
+      "invalid_nonhours": "You must provide at least one hour per day when charger is available. Nonhours is currently set as every hour."
+    },
+    "abort": {
+      "already_configured": "This integration has already been configured"
     }
   }
 }

@@ -1,13 +1,15 @@
 
-from homeassistant.const import (
-    TIME_HOURS
-)
 from homeassistant.components.integration.const import METHOD_TRAPEZOIDAL
-import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from homeassistant.components.integration.sensor import (
     IntegrationSensor
 )
+from homeassistant.const import (
+    TIME_HOURS
+)
+
+import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
+
 
 class PeaqIntegrationSensor(IntegrationSensor):
     def __init__(self, hub, sensor, name, entry_id):

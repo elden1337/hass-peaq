@@ -1,11 +1,12 @@
 from datetime import datetime
+
 from peaqevcore.Prediction import PredictionBase as _core
 
 
 class Prediction():
     def __init__(self, hub=None):
         self._hub = hub
-    
+
     @property
     def predictedenergy(self) -> float:
         return _core.predictedenergy(

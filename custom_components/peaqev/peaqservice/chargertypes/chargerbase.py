@@ -5,6 +5,8 @@ from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
 from custom_components.peaqev.peaqservice.chargertypes.servicecalls import ServiceCalls
 from peaqevcore.Models import CHARGERSTATES
 
+from custom_components.peaqev.peaqservice.chargertypes.servicecalls import ServiceCalls
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -30,37 +32,33 @@ class ChargerBase:
     def chargerstates(self) -> dict:
         return self._chargerstates
 
-    """Power meter"""
     @property
     def powermeter(self):
         return self._powermeter
 
     @powermeter.setter
     def powermeter(self, val):
-        assert type(val) is str
+        assert isinstance(val, str)
         self._powermeter = val
 
-    """Power Switch"""
     @property
     def powerswitch(self):
         return self._powerswitch
 
     @powerswitch.setter
     def powerswitch(self, val):
-        assert type(val) is str
+        assert isinstance(val, str)
         self._powerswitch = val
 
-    """Charger entity"""
     @property
     def chargerentity(self):
         return self._chargerentity
 
     @chargerentity.setter
     def chargerentity(self, val):
-        assert type(val) is str
+        assert isinstance(val, str)
         self._chargerentity = val
 
-    """Service calls"""
     @property
     def servicecalls(self):
         return self._servicecalls
@@ -100,7 +98,8 @@ class ChargerBase:
             if self.servicecalls.allowupdatecurrent is True:
                 assert self.servicecalls.update_current.call is not None
         except Exception as e:
-            _LOGGER.error("Peaqev could not initialize charger", e)
+            msg = f"Peaqev could not initialize charger: {e}"
+            _LOGGER.error(msg)
 
     def getentities(self, domain: str, endings: list):
         entities = template.integration_entities(self._hass, domain)

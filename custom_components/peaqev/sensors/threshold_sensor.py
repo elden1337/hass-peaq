@@ -1,6 +1,8 @@
 from homeassistant.const import PERCENTAGE
-from custom_components.peaqev.sensors.sensorbase import SensorBase
+
 from custom_components.peaqev.peaqservice.util.constants import THRESHOLD
+from custom_components.peaqev.sensors.sensorbase import SensorBase
+
 
 class PeaqThresholdSensor(SensorBase):
 
@@ -12,7 +14,7 @@ class PeaqThresholdSensor(SensorBase):
         self._state = self._hub.prediction.predictedpercentageofpeak
         self._start_threshold = None
         self._stop_threshold = None
-        
+
     @property
     def state(self):
         return self._state

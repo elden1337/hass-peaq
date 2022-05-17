@@ -1,18 +1,23 @@
-from custom_components.peaqev.peaqservice.hub.hubmember import HubMember
-from custom_components.peaqev.peaqservice.util.constants import (TOTALPOWER, HOUSEPOWER)
+import logging
+
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
-import logging
+from custom_components.peaqev.peaqservice.hub.hubdata.hubmember import HubMember
+from custom_components.peaqev.peaqservice.util.constants import (TOTALPOWER, HOUSEPOWER)
 
 _LOGGER = logging.getLogger(__name__)
 
 class Power:
     def __init__(self, configsensor: str, powersensor_includes_car: bool = False):
         self._config_sensor = configsensor
-        self._total = HubMember(type=int, initval=0, name=TOTALPOWER)
-        self._house = HubMember(type=int, initval=0, name=HOUSEPOWER)
+        self._total = HubMember(data_type=int, initval=0, name=TOTALPOWER)
+        self._house = HubMember(data_type=int, initval=0, name=HOUSEPOWER)
         self._powersensor_includes_car = powersensor_includes_car
         self._setup()
+
+    @property
+    def is_initialized(self) -> bool:
+        return self._total.is_initialized and self._house.is_initialized
 
     @property
     def config_sensor(self) -> str:
@@ -41,12 +46,12 @@ class Power:
         else:
             self.house.entity = self._config_sensor
 
-    def update(self, carpowersensor_value=0, total_value=None):
+    def update(self, carpowersensor_value=0, config_sensor_value=None):
         if self._powersensor_includes_car is True:
-            if total_value is not None:
-                self.total.value = total_value
+            if config_sensor_value is not None:
+                self.total.value = config_sensor_value
             self.house.value = (float(self.total.value) - float(carpowersensor_value))
         else:
-            if total_value is not None:
-                self.house.value = total_value
+            if config_sensor_value is not None:
+                self.house.value = config_sensor_value
             self.total.value = (float(self.house.value) + float(carpowersensor_value))
