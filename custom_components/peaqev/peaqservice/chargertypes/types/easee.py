@@ -64,19 +64,18 @@ class Easee(ChargerBase):
         _on_off_params = {"charger_id": self._chargerid}
         _on_params = {}
         _off_params = {}
-        if self._auth_required is True:
-            _on = CallType("start", _on_off_params)
-            _off = CallType("stop", _on_off_params)
-        else:
-            _on = CallType("set_charger_dynamic_limit", _on_off_params)
-            _off = CallType("set_charger_dynamic_limit", _on_off_params)
+
+        _on = CallType("start", _on_off_params)
+        _off = CallType("stop", _on_off_params)
+        _resume = CallType("set_charger_dynamic_limit", {"mode": "6", "charger_id": self._chargerid})
+        _pause = CallType("set_charger_dynamic_limit", {"mode": "0", "charger_id": self._chargerid})
 
         self._set_servicecalls(
             domain=DOMAINNAME,
-            on_call=_on,
-            off_call=_off,
-            pause_call=CallType("set_charger_dynamic_limit", _on_off_params),
-            resume_call=CallType("set_charger_dynamic_limit", _on_off_params),
+            on_call=_on if self._auth_required is True else _resume,
+            off_call=_off if self._auth_required is True else _pause,
+            pause_call=_pause,
+            resume_call=_resume,
             allowupdatecurrent=UPDATECURRENT,
             update_current_call="set_charger_dynamic_limit",
             update_current_params=servicecall_params
