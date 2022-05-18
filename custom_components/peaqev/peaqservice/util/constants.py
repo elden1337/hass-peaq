@@ -12,6 +12,7 @@ CURRENTS_THREEPHASE_1_32 = {22000: 32, 20625: 30, 19250: 28, 17875: 26, 16500: 2
 
 CHARGERTYPE_CHARGEAMPS = "Chargeamps"
 CHARGERTYPE_EASEE = "Easee"
+CHARGERTYPE_GAROWALLBOX = "Garo Wallbox"
 
 LOCALE_SE_GOTHENBURG = "Gothenburg, Sweden"
 LOCALE_SE_KARLSTAD = "Karlstad, Sweden"
@@ -27,8 +28,9 @@ LOCALE_SE_SOLLENTUNA = "Sollentuna Energi, Sweden"
 
 """Lookup types for config flow"""
 CHARGERTYPES = [
-    CHARGERTYPE_CHARGEAMPS,
-    CHARGERTYPE_EASEE
+    CHARGERTYPE_CHARGEAMPS, 
+    CHARGERTYPE_EASEE,
+    #CHARGERTYPE_GAROWALLBOX
     ]
 
 """Lookup locales for config flow"""

@@ -1,5 +1,5 @@
 import logging
-
+from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
 from custom_components.peaqev.peaqservice.util.constants import (
     DOMAIN,
     ON,
@@ -13,39 +13,24 @@ from custom_components.peaqev.peaqservice.util.constants import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class CallType:
-    def __init__(self, call: str, params: dict = {}):
-        self._call = call
-        self._params = params
-
-    @property
-    def call(self) -> str:
-        return self._call
-
-    @property
-    def params(self) -> dict:
-        return self._params
-
-
 class ServiceCalls:
     def __init__(
             self,
             domain: str,
-            on_call: str,
-            off_call: str,
-            pause_call: str = None,
-            resume_call: str = None,
-            on_off_params: dict = {},
+            on_call: CallType,
+            off_call: CallType,
+            pause_call: CallType = None,
+            resume_call: CallType = None,
             allowupdatecurrent: bool = False,
             update_current_call: str = None,
             update_current_params: dict = None,
     ):
         self._domain = domain
         self._allowupdatecurrent = allowupdatecurrent
-        self._on = CallType(on_call, on_off_params)
-        self._off = CallType(off_call, on_off_params)
-        self._pause = CallType(pause_call if pause_call is not None else off_call, on_off_params)
-        self._resume = CallType(resume_call if resume_call is not None else on_call, on_off_params)
+        self._on = on_call
+        self._off = off_call
+        self._pause = pause_call if pause_call is not None else off_call
+        self._resume = resume_call if resume_call is not None else on_call
         self._update_current = CallType(update_current_call, update_current_params)
         self._validate_servicecalls()
 

@@ -2,8 +2,9 @@ from homeassistant.core import HomeAssistant
 
 from custom_components.peaqev.peaqservice.chargertypes.types.chargeamps import ChargeAmps
 from custom_components.peaqev.peaqservice.chargertypes.types.easee import Easee
+from custom_components.peaqev.peaqservice.chargertypes.types.garowallbox import GaroWallbox
 from custom_components.peaqev.peaqservice.util.constants import (
-    CHARGERTYPE_EASEE, CHARGERTYPE_CHARGEAMPS
+    CHARGERTYPE_EASEE, CHARGERTYPE_CHARGEAMPS, CHARGERTYPE_GAROWALLBOX
 )
 
 
@@ -17,6 +18,8 @@ class ChargerTypeData:
             self._charger = ChargeAmps(self._hass, chargerid)
         elif input_type == CHARGERTYPE_EASEE:
             self._charger = Easee(self._hass, chargerid)
+        elif input == CHARGERTYPE_GAROWALLBOX:
+            self._charger = GaroWallbox(self._hass, chargerid)
 
         self._charger.validatecharger()
 

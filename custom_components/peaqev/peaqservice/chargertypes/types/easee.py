@@ -4,6 +4,7 @@ from homeassistant.core import HomeAssistant
 
 from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
 from peaqevcore.Models import CHARGERSTATES
+from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -12,9 +13,23 @@ from custom_components.peaqev.peaqservice.util.constants import (
 
 _LOGGER = logging.getLogger(__name__)
 
-ENTITYENDINGS = ["_power", "_status", "_dimmer", "_downlight", "_lifetime_energy", "_online", "_current", "_voltage", "_output_limit", "_cost_per_kwh", "_enable_idle_current"]
+ENTITYENDINGS = [
+    "_power",
+    "_status",
+    "_dimmer",
+    "_downlight",
+    "_lifetime_energy",
+    "_online",
+    "_current",
+    "_voltage",
+    "_output_limit",
+    "_cost_per_kwh",
+    "_enable_idle_current"
+]
+
 DOMAINNAME = "easee"
 UPDATECURRENT = True
+#docs: https://github.com/fondberg/easee_hass
 
 """
 UNUSED STATES FROM EASEE
@@ -46,25 +61,22 @@ class Easee(ChargerBase):
             CURRENT: "current"
         }
 
-        on_off_params = {
-            "charger_id": self._chargerid
-        }
+        _on_off_params = {"charger_id": self._chargerid}
+        _on_params = {}
+        _off_params = {}
 
-        if self._auth_required is True:
-            _on = "start"
-            _off = "stop"
-        else:
-            _on = "resume"
-            _off = "pause"
+        _on = CallType("start", _on_off_params)
+        _off = CallType("stop", _on_off_params)
+        _resume = CallType("set_charger_dynamic_limit", {"mode": "6", "charger_id": self._chargerid})
+        _pause = CallType("set_charger_dynamic_limit", {"mode": "0", "charger_id": self._chargerid})
 
         self._set_servicecalls(
             domain=DOMAINNAME,
-            on_call=_on,
-            off_call=_off,
-            pause_call="pause",
-            resume_call="resume",
-            on_off_params=on_off_params,
-            allowupdatecurrent=True,
+            on_call=_on if self._auth_required is True else _resume,
+            off_call=_off if self._auth_required is True else _pause,
+            pause_call=_pause,
+            resume_call=_resume,
+            allowupdatecurrent=UPDATECURRENT,
             update_current_call="set_charger_dynamic_limit",
             update_current_params=servicecall_params
         )

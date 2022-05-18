@@ -1,6 +1,8 @@
 import logging
 
 import homeassistant.helpers.template as template
+from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
+from custom_components.peaqev.peaqservice.chargertypes.servicecalls import ServiceCalls
 from peaqevcore.Models import CHARGERSTATES
 
 from custom_components.peaqev.peaqservice.chargertypes.servicecalls import ServiceCalls
@@ -64,11 +66,10 @@ class ChargerBase:
     def _set_servicecalls(
             self,
             domain: str,
-            on_call: str,
-            off_call: str,
-            pause_call: str = None,
-            resume_call: str = None,
-            on_off_params: dict = None,
+            on_call: CallType,
+            off_call: CallType,
+            pause_call: CallType = None,
+            resume_call: CallType = None,
             allowupdatecurrent: bool = False,
             update_current_call: str = None,
             update_current_params: dict = None
@@ -79,7 +80,6 @@ class ChargerBase:
             off_call,
             pause_call,
             resume_call,
-            on_off_params,
             allowupdatecurrent,
             update_current_call,
             update_current_params

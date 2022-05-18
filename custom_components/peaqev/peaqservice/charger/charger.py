@@ -141,6 +141,7 @@ class Charger:
         timer = 180
         start_time = time.time()
         self._hub.chargerobject_switch.updatecurrent()
+
         while time.time() - start_time < timer:
             time.sleep(3)
 
