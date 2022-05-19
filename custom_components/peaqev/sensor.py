@@ -15,8 +15,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
 )
 from custom_components.peaqev.sensors.utility_sensor import (
     PeaqUtilitySensor,
-    METER_OFFSET,
-    PERIODS
+    METER_OFFSET
 )
 from .const import (
     DOMAIN)
@@ -41,8 +40,7 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add
     peaqutilitysensors = []
 
     for i in integrationsensors:
-        for p in PERIODS:
-            peaqutilitysensors.append(PeaqUtilitySensor(hub, i, p, METER_OFFSET, config.entry_id))
+        peaqutilitysensors.append(PeaqUtilitySensor(hub, i, hub.locale.data.peak_cycle, METER_OFFSET, config.entry_id))
 
     async_add_entities(peaqutilitysensors, update_before_add = True)
 

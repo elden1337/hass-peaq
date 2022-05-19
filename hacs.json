@@ -5,7 +5,7 @@
     "sensor"
   ],
   "homeassistant": "2022.4.5",
-  "country": "SE",
+  "country": ["SE", "BE"],
   "zip_release": true,
   "filename": "peaqev.zip",
   "render_readme": true

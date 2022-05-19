@@ -9,6 +9,7 @@ from custom_components.peaqev.peaqservice.localetypes.types.se_partille import S
 from custom_components.peaqev.peaqservice.localetypes.types.se_she_ab import SE_SHE_AB
 from custom_components.peaqev.peaqservice.localetypes.types.se_skovde import SE_Skovde
 from custom_components.peaqev.peaqservice.localetypes.types.se_sollentuna import SE_Sollentuna
+from custom_components.peaqev.peaqservice.localetypes.types.vreg_belgium import VregBelgium
 from custom_components.peaqev.peaqservice.util.constants import (
     LOCALE_DEFAULT,
     LOCALE_SE_GOTHENBURG,
@@ -20,6 +21,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
     LOCALE_SE_SALA,
     LOCALE_SE_SKOVDE,
     LOCALE_SE_SOLLENTUNA,
+    LOCALE_BE_VREG,
     NAME
 )
 from custom_components.peaqev.peaqservice.util.sqlsensorhelper import SQLSensorHelper
@@ -34,7 +36,8 @@ LOCALETYPEDICT = {
     LOCALE_SE_MALUNG_SALEN: SE_Malung_Salen(),
     LOCALE_SE_SALA: SE_SHE_AB(),
     LOCALE_SE_SKOVDE: SE_Skovde(),
-    LOCALE_SE_SOLLENTUNA: SE_Sollentuna()
+    LOCALE_SE_SOLLENTUNA: SE_Sollentuna(),
+    LOCALE_BE_VREG: VregBelgium()
 }
 
 class LocaleData:

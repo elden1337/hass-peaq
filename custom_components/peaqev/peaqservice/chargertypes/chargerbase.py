@@ -1,10 +1,9 @@
 import logging
 
 import homeassistant.helpers.template as template
-from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
-from custom_components.peaqev.peaqservice.chargertypes.servicecalls import ServiceCalls
 from peaqevcore.Models import CHARGERSTATES
 
+from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
 from custom_components.peaqev.peaqservice.chargertypes.servicecalls import ServiceCalls
 
 _LOGGER = logging.getLogger(__name__)

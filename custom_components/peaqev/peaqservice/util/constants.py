@@ -25,16 +25,18 @@ LOCALE_SE_SALA = "Sala-Heby Energi AB, Sweden"
 LOCALE_SE_MALUNG_SALEN = "Malung-Sälen, Sweden (Malungs elverk)"
 LOCALE_SE_SKOVDE = "Skövde, Sweden"
 LOCALE_SE_SOLLENTUNA = "Sollentuna Energi, Sweden"
+LOCALE_BE_VREG = "Belgium (VREG)"
 
 """Lookup types for config flow"""
 CHARGERTYPES = [
-    CHARGERTYPE_CHARGEAMPS, 
+    CHARGERTYPE_CHARGEAMPS,
     CHARGERTYPE_EASEE,
     #CHARGERTYPE_GAROWALLBOX
     ]
 
 """Lookup locales for config flow"""
 LOCALES = [
+    LOCALE_BE_VREG,
     LOCALE_SE_GOTHENBURG,
     LOCALE_SE_KARLSTAD,
     LOCALE_SE_KRISTINEHAMN,

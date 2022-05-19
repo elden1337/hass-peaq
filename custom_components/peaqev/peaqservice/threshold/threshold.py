@@ -22,5 +22,6 @@ class Threshold(ThresholdBase):
             self._hub.charger_done.value,
             amps,
             self._hub.totalhourlyenergy.value,
-            self._hub.current_peak_dynamic
+            self._hub.current_peak_dynamic,
+            self._hub.locale.data.is_quarterly
         )
