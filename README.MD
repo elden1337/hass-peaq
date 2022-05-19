@@ -56,6 +56,7 @@ Peaqev has two types of installations: Regular and Lite. Regular is much more pr
 
 
 These are two (quite restrained) examples of monthly start peaks, for 1-phase and 3-phase charging respectively. This option is always up to your house and it's other appliances. The below are made for a modern house with installed heat pump.
+These suggestions are also made for hourly calculation. Should your Locale apply other, like quarter-hourly, do consider altering the numbers accordingly.
 
 Month | 1-phase charge | 3-phase charge
 --- | --- | ---
@@ -72,10 +73,19 @@ Oct| 1.5 | 3.0
 Nov| 1.8 | 3.6
 Dec| 2.0 | 4.0
 
+### Locale
+
+#### Belgium
 
 Locale | Characteristics
 --- | ---
 Belgium (VREG) | single monthly max peak is used in calculation, but the energy is cycled quarter-hourly instead of hourly. 
+
+
+#### Sweden
+
+Locale | Characteristics
+--- | --- 
 Gothenburg, Sweden | The average of three max peak hours from different days is what your are charged for. The algorithm tries to stay below the minimum value of these three peaks.
 Karlstad, Sweden | single max peak
 Kristinehamn, Sweden | for Nov-Mar, max peak during Mon-Fri 07-17. Other months, single max peak
