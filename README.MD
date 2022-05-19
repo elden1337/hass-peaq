@@ -75,6 +75,7 @@ Dec| 2.0 | 4.0
 
 Locale | Characteristics
 --- | ---
+Belgium (VREG) | single monthly max peak is used in calculation, but the energy is cycled quarter-hourly instead of hourly. 
 Gothenburg, Sweden | The average of three max peak hours from different days is what your are charged for. The algorithm tries to stay below the minimum value of these three peaks.
 Karlstad, Sweden | single max peak
 Kristinehamn, Sweden | for Nov-Mar, max peak during Mon-Fri 07-17. Other months, single max peak
