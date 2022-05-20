@@ -109,11 +109,6 @@ NON_HOUR = "Charging stopped"
 CAUTION_HOUR = "Charging-permittance degraded"
 CHARGING_PERMITTED = "Charging permitted"
 
-"""Cautionhour types"""
-#CAUTIONHOURNAME_SUAVE = "Suave"
-#CAUTIONHOURNAME_INTERMEDIATE = "Intermediate"
-#CAUTIONHOURNAME_AGGRESSIVE = "Aggressive"
-
 CAUTIONHOURTYPE_NAMES =[
     CAUTIONHOURTYPE_SUAVE,
     CAUTIONHOURTYPE_INTERMEDIATE,

@@ -9,7 +9,7 @@ from custom_components.peaqev.const import (
     DOMAIN)
 from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_TOTAL_NAME,
-    CONSUMPTION_INTEGRAL_NAME, TYPEREGULAR
+    CONSUMPTION_INTEGRAL_NAME
 )
 from custom_components.peaqev.peaqservice.util.sqlsensorhelper import SQLSensorHelper
 from custom_components.peaqev.sensors.average_sensor import PeaqAverageSensor

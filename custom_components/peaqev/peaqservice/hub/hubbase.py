@@ -66,7 +66,6 @@ class HubBase:
         except Exception as e:
             msg = f"Unable to handle data: {entity_id} {e}"
             _LOGGER.error(msg)
-            pass
 
     @abstractmethod
     async def _update_sensor(self, entity, value):

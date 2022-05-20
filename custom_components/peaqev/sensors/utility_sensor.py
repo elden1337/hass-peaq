@@ -8,13 +8,13 @@ import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
 
 
-class Object(object):
+class Object():
     pass
 
 METER_OFFSET = Object()
-METER_OFFSET.seconds = 0
-METER_OFFSET.minutes = 0
-METER_OFFSET.days = 0
+METER_OFFSET.seconds = 0 # pylint:disable=attribute-defined-outside-init
+METER_OFFSET.minutes = 0 # pylint:disable=attribute-defined-outside-init
+METER_OFFSET.days = 0 # pylint:disable=attribute-defined-outside-init
 
 PERIODS = [HOURLY]
 
@@ -25,7 +25,7 @@ class PeaqUtilitySensor(UtilityMeterSensor):
         self._hub = hub
         self._attr_name = f"{self._hub.hubname} {sensor} {meter_type.lower()}"
         entity = f"sensor.{DOMAIN.lower()}_{sensor}"
-        
+
         super().__init__(
             cron_pattern="{minute} * * * *",
             delta_values=0,

@@ -37,12 +37,12 @@ class HubMember:
         elif self._type is float:
             try:
                 self._value = float(value)
-            except:
+            except ValueError:
                 self._value = 0
         elif self._type is int:
             try:
                 self._value = int(float(value))
-            except:
+            except ValueError:
                 self._value = 0
         elif self._type is bool:
             try:
@@ -52,8 +52,8 @@ class HubMember:
                     self._value = True
                 elif value.lower() == "off":
                     self._value = False
-            except:
-                msg = f"Could not parse bool, setting to false to be sure {value}, {self._listenerentity}"
+            except ValueError as e:
+                msg = f"Could not parse bool, setting to false to be sure {value}, {self._listenerentity}, {e}"
                 _LOGGER.error(msg)
                 self._value = False
         elif  self._type is str:
@@ -76,7 +76,7 @@ class CurrentPeak(HubMember):
         return peak
 
     @HubMember.value.getter
-    def value(self):
+    def value(self): # pylint:disable=invalid-overridden-method
         return max(self._value, float(self._startpeak)) if self._value is not None else float(self._startpeak)
 
 
