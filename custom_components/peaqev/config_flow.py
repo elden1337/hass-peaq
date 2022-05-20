@@ -2,14 +2,24 @@
 from __future__ import annotations
 
 import logging
-
+from config_flow.config_flow_schemas import (
+    SENSOR_SCHEMA,
+    PRICEAWARE_SCHEMA,
+    HOURS_SCHEMA,
+    MONTHS_SCHEMA,
+    CHARGER_SCHEMA,
+    TYPE_SCHEMA
+)
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_NAME
-from homeassistant.core import (HomeAssistant)
-from typing import Any, Optional
 
+from typing import Any, Optional
+from homeassistant.helpers.entity_registry import (
+    async_entries_for_config_entry,
+    async_get_registry,
+)
 import custom_components.peaqev.peaqservice.util.constants as pk
 from .const import DOMAIN  # pylint:disable=unused-import
 
@@ -20,35 +30,6 @@ async def _set_startpeak_dict(user_input) -> dict:
     return {1: user_input["jan"], 2: user_input["feb"], 3: user_input["mar"], 4: user_input["apr"],
            5: user_input["may"], 6: user_input["jun"], 7: user_input["jul"], 8: user_input["aug"],
            9: user_input["sep"], 10: user_input["oct"], 11: user_input["nov"], 12: user_input["dec"]}
-
-async def _check_power_sensor(hass: HomeAssistant, powersensor: str) -> bool:
-    ret = hass.states.get(powersensor).state
-    try:
-        float(ret)
-        return True
-    except Exception as e:
-        msg = f"{powersensor} did not produce a valid state for {DOMAIN}. State was {ret}. Ex: {e}"
-        _LOGGER.error(msg)
-        return False
-
-async def _validate_input_first(data: dict) -> dict[str, Any]:
-    """ Validate the data can be used to set up a connection."""
-
-    if len(data["name"]) < 3:
-        raise ValueError
-    if not data["name"].startswith("sensor."):
-        data["name"] = f"sensor.{data['name']}"
-    #if await _check_power_sensor(hass, data["name"]) is False:
-    #    raise ValueError
-
-    return {"title": data["name"]}
-
-async def _validate_input_first_chargerid(data: dict) -> dict[str, Any]:
-    """ Validate the chargerId"""
-    #if len(data["chargerid"]) < 1:
-    #    raise ValueError
-
-    return {"title": data["name"]}
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -70,14 +51,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user",
-            data_schema=vol.Schema(
-                {
-                    vol.Optional(
-                        "peaqevtype",
-                        default="",
-                    ): vol.In(pk.INSTALLATIONTYPES)
-                }
-            ),
+            data_schema=TYPE_SCHEMA,
             errors=errors,
             last_step=False
         )
@@ -95,12 +69,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="sensor",
-            data_schema=vol.Schema(
-                {
-                    vol.Optional(CONF_NAME): cv.string,
-                    vol.Optional("powersensorincludescar", default=False): cv.boolean
-                }
-            ),
+            data_schema=SENSOR_SCHEMA,
             errors=errors,
             last_step=False
         )
@@ -118,19 +87,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="charger",
-            data_schema=vol.Schema(
-                {
-                    vol.Optional(
-                        "chargertype",
-                        default="",
-                        ): vol.In(pk.CHARGERTYPES),
-                    vol.Optional("chargerid"): cv.string,
-                    vol.Optional(
-                        "locale",
-                        default="",
-                        ): vol.In(pk.LOCALES)
-                }
-            ),
+            data_schema=CHARGER_SCHEMA,
             errors=errors,
             last_step=False
         )
@@ -145,19 +102,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         _priceaware = False
         _absolute_top_price = 0
-        #_cautionhour_type = pk.CAUTIONHOURTYPE_INTERMEDIATE
 
         return self.async_show_form(
             step_id="priceaware",
-            data_schema=vol.Schema(
-                {
-                    vol.Optional("priceaware", default=_priceaware): cv.boolean,
-                    vol.Optional("absolute_top_price", default=_absolute_top_price): cv.positive_float,
-                    vol.Optional(
-                        "cautionhour_type",
-                        default=pk.CAUTIONHOURTYPE_INTERMEDIATE,
-                    ): vol.In(pk.CAUTIONHOURTYPE_NAMES),
-                }),
+            data_schema=PRICEAWARE_SCHEMA,
             errors=errors,
             last_step=False,
         )
@@ -174,15 +122,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="hours",
-            data_schema=vol.Schema(
-            {
-                vol.Optional("nonhours", default=list(_transfer_nonhours)): cv.multi_select(
-                    mockhours
-                ),
-                vol.Optional("cautionhours", default=list(_transfer_cautionhours)): cv.multi_select(
-                    mockhours
-                )
-            }),
+            data_schema=HOURS_SCHEMA,
             last_step=False,
         )
 
@@ -203,20 +143,92 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="months",
-            data_schema=vol.Schema(
-                {
-                vol.Optional("jan", default=_transfer_startpeaks["1"]): cv.positive_float,
-                vol.Optional("feb", default=_transfer_startpeaks["2"]): cv.positive_float,
-                vol.Optional("mar", default=_transfer_startpeaks["3"]): cv.positive_float,
-                vol.Optional("apr", default=_transfer_startpeaks["4"]): cv.positive_float,
-                vol.Optional("may", default=_transfer_startpeaks["5"]): cv.positive_float,
-                vol.Optional("jun", default=_transfer_startpeaks["6"]): cv.positive_float,
-                vol.Optional("jul", default=_transfer_startpeaks["7"]): cv.positive_float,
-                vol.Optional("aug", default=_transfer_startpeaks["8"]): cv.positive_float,
-                vol.Optional("sep", default=_transfer_startpeaks["9"]): cv.positive_float,
-                vol.Optional("oct", default=_transfer_startpeaks["10"]): cv.positive_float,
-                vol.Optional("nov", default=_transfer_startpeaks["11"]): cv.positive_float,
-                vol.Optional("dec", default=_transfer_startpeaks["12"]): cv.positive_float
-                }),
+            data_schema=MONTHS_SCHEMA,
             last_step=True,
+        )
+
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        """Get the options flow for this handler."""
+        return OptionsFlowHandler(config_entry)
+
+
+class OptionsFlowHandler(config_entries.OptionsFlow):
+    """Handles options flow for the component."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        self.config_entry = config_entry
+
+    async def async_step_init(
+            self, user_input: Dict[str, Any] = None
+    ) -> Dict[str, Any]:
+        """Manage the options for the custom component."""
+        errors: Dict[str, str] = {}
+        # Grab all configured repos from the entity registry so we can populate the
+        # multi-select dropdown that will allow a user to remove a repo.
+        entity_registry = await async_get_registry(self.hass)
+        entries = async_entries_for_config_entry(
+            entity_registry, self.config_entry.entry_id
+        )
+        # Default value for our multi-select.
+        all_repos = {e.entity_id: e.original_name for e in entries}
+        repo_map = {e.entity_id: e for e in entries}
+
+        if user_input is not None:
+            updated_repos = deepcopy(self.config_entry.data[CONF_REPOS])
+
+            # Remove any unchecked repos.
+            removed_entities = [
+                entity_id
+                for entity_id in repo_map.keys()
+                if entity_id not in user_input["repos"]
+            ]
+            for entity_id in removed_entities:
+                # Unregister from HA
+                entity_registry.async_remove(entity_id)
+                # Remove from our configured repos.
+                entry = repo_map[entity_id]
+                entry_path = entry.unique_id
+                updated_repos = [e for e in updated_repos if e["path"] != entry_path]
+
+            if user_input.get(CONF_PATH):
+                # Validate the path.
+                access_token = self.hass.data[DOMAIN][self.config_entry.entry_id][
+                    CONF_ACCESS_TOKEN
+                ]
+                try:
+                    await validate_path(user_input[CONF_PATH], access_token, self.hass)
+                except ValueError:
+                    errors["base"] = "invalid_path"
+
+                if not errors:
+                    # Add the new repo.
+                    updated_repos.append(
+                        {
+                            "path": user_input[CONF_PATH],
+                            "name": user_input.get(CONF_NAME, user_input[CONF_PATH]),
+                        }
+                    )
+
+            if not errors:
+                # Value of data will be set on the options property of our config_entry
+                # instance.
+                return self.async_create_entry(
+                    title="",
+                    data={CONF_REPOS: updated_repos},
+                )
+
+        options_schema = vol.Schema(
+            {
+                vol.Optional("repos", default=list(all_repos.keys())): cv.multi_select(
+                    all_repos
+                ),
+                vol.Optional(CONF_PATH): cv.string,
+                vol.Optional(CONF_NAME): cv.string,
+            }
+        )
+        return self.async_show_form(
+            step_id="init", data_schema=options_schema, errors=errors
         )
