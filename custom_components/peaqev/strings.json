@@ -1,4 +1,40 @@
 {
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "priceaware": "[%key:common::config_flow::data::priceaware%]",
+          "absolute_top_price": "[%key:common::config_flow::data::absolute_top_price%]",
+          "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]"
+        },
+        "description": "Select price-aware if you wish to adhere to Nordpool-prices (requires integration)"
+      },
+      "hours": {
+        "data": {
+          "nonhours": "[%key:common::config_flow::data::nonhours%]",
+          "cautionhours": "[%key:common::config_flow::data::cautionhours%]"
+        },
+        "description": "Change the non-hours and caution-hours"
+      },
+      "months": {
+        "data": {
+          "jan": "January",
+          "feb": "February",
+          "mar": "March",
+          "apr": "April",
+          "may": "May",
+          "jun": "June",
+          "jul": "July",
+          "aug": "August",
+          "sep": "September",
+          "oct": "October",
+          "nov": "November",
+          "dec": "December"
+        },
+        "description": "Select your allowed monthly start-peak."
+      }
+    }
+  },
   "config": {
     "step": {
       "user": {
