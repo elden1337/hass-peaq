@@ -1,6 +1,7 @@
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.const import CONF_NAME
+
 import custom_components.peaqev.peaqservice.util.constants as pk
 
 TYPE_SCHEMA = vol.Schema(

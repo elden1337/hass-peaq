@@ -1,10 +1,10 @@
 import logging
 
 from homeassistant.core import HomeAssistant
-
-from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
 from peaqevcore.Models import CHARGERSTATES
+
 from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
+from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,

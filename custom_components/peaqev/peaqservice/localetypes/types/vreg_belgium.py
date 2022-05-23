@@ -8,6 +8,8 @@ from custom_components.peaqev.peaqservice.util.constants import (
 )
 
 
+#https://www.vreg.be/nl/nieuwe-nettarieven
+
 class VregBelgium(LocaleTypeBase):
     def __init__(self):
         observed_peak = QUERYTYPE_BASICMAX
@@ -19,6 +21,3 @@ class VregBelgium(LocaleTypeBase):
             chargedpeak=charged_peak,
             peakcycle=peakcycle
         )
-
-
-#https://www.vreg.be/nl/nieuwe-nettarieven

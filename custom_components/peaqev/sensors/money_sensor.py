@@ -38,7 +38,7 @@ class PeaqMoneySensor(SensorBase):
 
     @property
     def extra_state_attributes(self) -> dict:
-        dict = {
+        attr_dict = {
             "Non hours": self.set_non_hours_display_model(self._nonhours),
             "Caution hours": self.set_dynamic_caution_hours_display(),
             "Current hour state": self._current_hour,
@@ -46,7 +46,7 @@ class PeaqMoneySensor(SensorBase):
             "Caution hour type": self._cautionhour_type_string,
             "Current hour charge permittance": self.set_dynamic_caution_hour_display()
         }
-        return dict
+        return attr_dict
 
     def _get_written_state(self) -> str:
         hour = datetime.now().hour

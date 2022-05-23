@@ -18,7 +18,7 @@ class ChargerTypeData:
             self._charger = ChargeAmps(self._hass, chargerid)
         elif input_type == CHARGERTYPE_EASEE:
             self._charger = Easee(self._hass, chargerid)
-        elif input == CHARGERTYPE_GAROWALLBOX:
+        elif input_type == CHARGERTYPE_GAROWALLBOX:
             self._charger = GaroWallbox(self._hass, chargerid)
 
         self._charger.validatecharger()

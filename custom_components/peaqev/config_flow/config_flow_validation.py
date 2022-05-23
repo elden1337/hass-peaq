@@ -1,7 +1,11 @@
 import logging
-from homeassistant.core import HomeAssistant
-from ..const import DOMAIN  # pylint:disable=unused-import
 
+from homeassistant.core import HomeAssistant
+from typing import Any
+
+from custom_components.peaqev.peaqservice.util.constants import DOMAIN
+
+_LOGGER = logging.getLogger(__name__)
 
 async def _check_power_sensor(hass: HomeAssistant, powersensor: str) -> bool:
     ret = hass.states.get(powersensor).state
