@@ -5,7 +5,7 @@ from datetime import datetime
 from peaqevcore.Threshold import ThresholdBase as _core
 
 from custom_components.peaqev.peaqservice.util.constants import (
-    CURRENTS_ONEPHASE_1_16, CURRENTS_THREEPHASE_1_32
+    CURRENTS_ONEPHASE_1_16, CURRENTS_THREEPHASE_1_16
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -39,4 +39,4 @@ class ThresholdBase:
     def _setcurrentdict(self):
         if 0 < int(self._hub.carpowersensor.value) < 3700:
             return CURRENTS_ONEPHASE_1_16
-        return CURRENTS_THREEPHASE_1_32
+        return CURRENTS_THREEPHASE_1_16
