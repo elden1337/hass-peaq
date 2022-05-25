@@ -8,7 +8,8 @@
 ![Peaq logo](https://raw.githubusercontent.com/elden1337/hass-peaq/main/assets/icon.png)
 
 Peaqev ev-charging is an attempt of charging an ev without breaching a preset monthly max-peak energy level. 
-In order for this integration to function, you will need to have a sensor/device that reads your current power-draw with good resolution *examples below*. You will also have to disable any other smart-charging capability you may have, such as scheduled charging or energy-price-aware charging, the latter will come as parameter here in a future update.
+In order for this integration to function in its normal state, you will need to have a sensor/device that reads your current power-draw with good resolution *examples below*. If you do not have this, you may install the Lite-version of Peaqev.
+Shoudl you wish to let Peaqev control your charging depending on hourly energy price, you must first disable any other smart-charging capability you may have, such as scheduled charging or energy-price-aware charging.
 
 This integration does not communicate with any properitary API's, everything is handled locally in your Home Assistant. However, the chargers selected will use the integrations set for them, and may include cloud polling of data.
 
@@ -75,30 +76,25 @@ Dec| 2.0 | 4.0
 
 ### Locale
 
-#### Belgium
+##### Belgium
 
-Locale | Characteristics
---- | ---
-Belgium (VREG) | single monthly max peak is used in calculation, but the energy is cycled quarter-hourly instead of hourly. 
+- `Belgium (VREG)` - single monthly max peak is used in calculation, but the energy is cycled quarter-hourly instead of hourly. 
 
 
-#### Sweden
+##### Sweden
 
-Locale | Characteristics
---- | --- 
-Gothenburg, Sweden | The average of three max peak hours from different days is what your are charged for. The algorithm tries to stay below the minimum value of these three peaks.
-Karlstad, Sweden | single max peak
-Kristinehamn, Sweden | for Nov-Mar, max peak during Mon-Fri 07-17. Other months, single max peak
-Malung-Sälen, Sweden | Average of five peaks on different days. Peaks are calc between 07-19. Other hours are free-charge.
-Nacka, Sweden (Normal tariffe) | The average of three max peak hours is what your are charged for. The algorithm tries to stay below the minimum value of these three peaks.
-Other, just want to test | Single monthly peak hour is what is being avoided by the algorithm
-Partille, Sweden | Single monthly peak hour is what is being avoided by the algorithm
-Sala, Sweden (SHE ab-customer) | The average of three max peak hours, that do occur Mon-Fri, between 07-19. Other hours are non-observed.
-Skövde, Sweden | Single monthly max peak. Observed Nov-Mar, Mon-Fri between 06-22. Other hours are non-observed. 
-Sollentuna, Sweden | Average of three hours, workdays between 7-19.
+- `Gothenburg, Sweden` - The average of three max peak hours from different days is what your are charged for. The algorithm tries to stay below the minimum value of these three peaks.
+- `Karlstad, Sweden` - single max peak
+- `Kristinehamn, Sweden` - for Nov-Mar, max peak during Mon-Fri 07-17. Other months, single max peak
+- `Malung-Sälen, Sweden` - Average of five peaks on different days. Peaks are calc between 07-19. Other hours are free-charge.
+- `Nacka, Sweden (Normal tariffe)` - The average of three max peak hours is what your are charged for. The algorithm tries to stay below the minimum value of these three peaks.
+- `Partille, Sweden` - Single monthly peak hour is what is being avoided by the algorithm
+- `Sala, Sweden (SHE ab-customer)` - The average of three max peak hours, that do occur Mon-Fri, between 07-19. Other hours are non-observed.
+- `Skövde, Sweden` - Single monthly max peak. Observed Nov-Mar, Mon-Fri between 06-22. Other hours are non-observed. 
+- `Sollentuna, Sweden` - Average of three hours, workdays between 7-19.
+- `Other, just want to test` - Single monthly peak hour is what is being avoided by the algorithm
 
-
-*More cities will come in future updates*
+*More locales will come in future updates*
 
 ## Usage
 
