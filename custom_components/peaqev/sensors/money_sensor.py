@@ -20,6 +20,10 @@ class PeaqMoneySensor(SensorBase):
         self._currency = None
         self._cautionhour_type_string = None
 
+        self._prices = []
+        self._prices_tomorrow = []
+        self._current_peak = None
+
     @property
     def state(self):
         return self._get_written_state()
@@ -45,9 +49,45 @@ class PeaqMoneySensor(SensorBase):
             "Absolute top price": f"{self._absolute_top_price} {self._currency}",
             "Min caution price": f"{self._min_price} {self._currency}",
             "Caution hour type": self._cautionhour_type_string,
-            "Current hour charge permittance": self.set_dynamic_caution_hour_display()
+            "Current hour charge permittance": self.set_dynamic_caution_hour_display(),
+            #"Avg nordpool price per kWh": f"{self._get_nordpool_avg_price} {self._currency}",
+            "Projected avg price per kWh": f"{self._get_average_kwh_price} {self._currency}",
+            #"Projected max possible charge-amount": f"{self._get_total_charge} kWh"
         }
         return attr_dict
+
+    # def _get_nordpool_avg_price(self) -> float:
+    #     hour = datetime.now().hour
+    #
+    #     return 0
+
+    def _get_average_kwh_price(self) -> float:
+        hour = datetime.now().hour
+        ret = {}
+
+        for h in self._dynamic_caution_hours:
+            if h < hour:
+                ret[h] = self._dynamic_caution_hours[h] * self._prices_tomorrow[h]
+            elif h >= hour:
+                ret[h] = self._dynamic_caution_hours[h] * self._prices[h]
+
+        for nh in self._nonhours:
+            ret[nh] = 0
+
+        for i in range(0,23):
+            if i not in ret.keys():
+                if i < hour:
+                    ret[i] = self._prices_tomorrow[i]
+                elif i >= hour:
+                    ret[i] = self._prices[i]
+
+        return round(sum(ret.values())/len(ret),2)
+
+
+    # def _get_total_charge(self) -> float:
+    #     hour = datetime.now().hour
+    #
+    #     return 0
 
     def _get_written_state(self) -> str:
         hour = datetime.now().hour
@@ -100,10 +140,11 @@ class PeaqMoneySensor(SensorBase):
         return ret
 
     def set_dynamic_caution_hour_display(self) -> str:
-        if datetime.now().hour in self._nonhours:
+        hour = datetime.now().hour
+        if hour in self._nonhours:
             return "0%"
         if len(self._dynamic_caution_hours) > 0:
-            if datetime.now().hour in  self._dynamic_caution_hours.keys():
-                ret = int(self._dynamic_caution_hours[datetime.now().hour] * 100)
+            if hour in self._dynamic_caution_hours.keys():
+                ret = int(self._dynamic_caution_hours[hour] * 100)
                 return f"{str(ret)}%"
         return "100%"
