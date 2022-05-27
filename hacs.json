@@ -1,9 +1,5 @@
 {
   "name": "Peaqev ev-Charging",
-  "domains": [
-    "binary_sensor",
-    "sensor"
-  ],
   "homeassistant": "2022.4.5",
   "country": ["SE", "BE"],
   "zip_release": true,
