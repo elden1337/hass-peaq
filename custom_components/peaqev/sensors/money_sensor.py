@@ -36,58 +36,66 @@ class PeaqMoneySensor(SensorBase):
         self._nonhours = self._hub.hours.non_hours
         self._dynamic_caution_hours = self._hub.hours.dynamic_caution_hours
         self._price_aware = self._hub.hours.price_aware
-        self._absolute_top_price = self._hub.hours.absolute_top_price if 0 < self._hub.hours.absolute_top_price < float("inf") else "-"
-        self._min_price = self._hub.hours.min_price if self._hub.hours.min_price > 0 else "-"
+        self._absolute_top_price = self._hub.hours.absolute_top_price if 0 < self._hub.hours.absolute_top_price < float("inf") else None
+        self._min_price = self._hub.hours.min_price if self._hub.hours.min_price is not None and self._hub.hours.min_price > 0 else None
         self._currency = self._hub.hours.currency
         self._cautionhour_type_string = self._hub.hours.cautionhour_type_string
+        self._prices = self._hub.hours.prices if self._hub.hours.prices is not None else []
+        self._prices_tomorrow = self._hub.hours.prices_tomorrow if self._hub.hours.prices_tomorrow is not None else []
+        self._current_peak = self._hub.currentpeak.value
 
     @property
     def extra_state_attributes(self) -> dict:
         attr_dict = {
             "Non hours": self.set_non_hours_display_model(self._nonhours),
             "Caution hours": self.set_dynamic_caution_hours_display(),
-            "Absolute top price": f"{self._absolute_top_price} {self._currency}",
-            "Min caution price": f"{self._min_price} {self._currency}",
             "Caution hour type": self._cautionhour_type_string,
             "Current hour charge permittance": self.set_dynamic_caution_hour_display(),
-            #"Avg nordpool price per kWh": f"{self._get_nordpool_avg_price} {self._currency}",
-            "Projected avg price per kWh": f"{self._get_average_kwh_price} {self._currency}",
-            #"Projected max possible charge-amount": f"{self._get_total_charge} kWh"
+            "Projected avg price per kWh": f"{self._get_average_kwh_price()} {self._currency}",
+            "Projected max possible charge-amount": f"{self._get_total_charge()} kWh"
         }
+        if self._absolute_top_price is not None:
+            attr_dict["Absolute top price"] = f"{self._absolute_top_price} {self._currency}"
+        if self._min_price is not None:
+            attr_dict["Min caution price"]= f"{self._min_price} {self._currency}"
+
         return attr_dict
 
-    # def _get_nordpool_avg_price(self) -> float:
-    #     hour = datetime.now().hour
-    #
-    #     return 0
+    def _get_average_kwh_price(self):
+        if len(self._prices) > 0:
+            hour = datetime.now().hour
+            ret = {}
 
-    def _get_average_kwh_price(self) -> float:
-        hour = datetime.now().hour
+            for h in self._dynamic_caution_hours:
+                if h < hour and len(self._prices_tomorrow) > 0:
+                    ret[h] = self._dynamic_caution_hours[h] * self._prices_tomorrow[h]
+                elif h >= hour:
+                    ret[h] = self._dynamic_caution_hours[h] * self._prices[h]
+
+            for nh in self._nonhours:
+                ret[nh] = 0
+
+            for i in range(0,23):
+                if i not in ret.keys():
+                    if i < hour and len(self._prices_tomorrow) > 0:
+                        ret[i] = self._prices_tomorrow[i]
+                    elif i >= hour:
+                        ret[i] = self._prices[i]
+
+            return round(sum(ret.values())/len(ret),2)
+        return "-"
+
+    def _get_total_charge(self) -> float:
         ret = {}
 
         for h in self._dynamic_caution_hours:
-            if h < hour:
-                ret[h] = self._dynamic_caution_hours[h] * self._prices_tomorrow[h]
-            elif h >= hour:
-                ret[h] = self._dynamic_caution_hours[h] * self._prices[h]
-
-        for nh in self._nonhours:
-            ret[nh] = 0
+            ret[h] = self._dynamic_caution_hours[h] * self._current_peak
 
         for i in range(0,23):
             if i not in ret.keys():
-                if i < hour:
-                    ret[i] = self._prices_tomorrow[i]
-                elif i >= hour:
-                    ret[i] = self._prices[i]
+                ret[i] = self._current_peak
 
-        return round(sum(ret.values())/len(ret),2)
-
-
-    # def _get_total_charge(self) -> float:
-    #     hour = datetime.now().hour
-    #
-    #     return 0
+        return round(sum(ret.values()),1)
 
     def _get_written_state(self) -> str:
         hour = datetime.now().hour

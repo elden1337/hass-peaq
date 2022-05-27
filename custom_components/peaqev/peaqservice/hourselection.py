@@ -99,7 +99,7 @@ class PriceAwareHours(Hours):
             self,
             hass,
             absolute_top_price: float = None,
-            min_price: float = None,
+            min_price: float = 0,
             non_hours: list = None,
             caution_hours: list = None,
             cautionhour_type: str = CAUTIONHOURTYPE_INTERMEDIATE
