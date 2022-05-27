@@ -26,6 +26,7 @@ class ChargerBase:
             CHARGERSTATES.Done: []
         }
         self._entityschema = ""
+        self._entities = None
 
     @property
     def chargerstates(self) -> dict:
@@ -115,3 +116,6 @@ class ChargerBase:
                     candidate = namelrg[1].replace(e, '')
 
             self._entityschema = candidate
+            self._entities = entities
+
+
