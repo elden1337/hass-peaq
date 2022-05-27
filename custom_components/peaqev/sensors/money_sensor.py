@@ -16,6 +16,7 @@ class PeaqMoneySensor(SensorBase):
         self._current_hour = None
         self._price_aware = False
         self._absolute_top_price = None
+        self._min_price = None
         self._currency = None
         self._cautionhour_type_string = None
 
@@ -30,9 +31,9 @@ class PeaqMoneySensor(SensorBase):
     def update(self) -> None:
         self._nonhours = self._hub.hours.non_hours
         self._dynamic_caution_hours = self._hub.hours.dynamic_caution_hours
-        self._current_hour = self._hub.hours.state
         self._price_aware = self._hub.hours.price_aware
         self._absolute_top_price = self._hub.hours.absolute_top_price if 0 < self._hub.hours.absolute_top_price < float("inf") else "-"
+        self._min_price = self._hub.hours.min_price if self._hub.hours.min_price > 0 else "-"
         self._currency = self._hub.hours.currency
         self._cautionhour_type_string = self._hub.hours.cautionhour_type_string
 
@@ -41,8 +42,8 @@ class PeaqMoneySensor(SensorBase):
         attr_dict = {
             "Non hours": self.set_non_hours_display_model(self._nonhours),
             "Caution hours": self.set_dynamic_caution_hours_display(),
-            "Current hour state": self._current_hour,
             "Absolute top price": f"{self._absolute_top_price} {self._currency}",
+            "Min caution price": f"{self._min_price} {self._currency}",
             "Caution hour type": self._cautionhour_type_string,
             "Current hour charge permittance": self.set_dynamic_caution_hour_display()
         }
