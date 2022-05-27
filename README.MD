@@ -45,6 +45,7 @@ Peaqev has two types of installations: Regular and Lite. Regular is much more pr
 ##### Price-aware:
 - `Price aware charging` - Check this to calculate the cheapest hours from Nordpool (requires [Nordpool](https://github.com/custom-components/nordpool)). Above Non- and Caution-hours will be ignored.
 - `Absolute top price` - The limit (if any) where your charger should be stopped, regardless of the hour-algorithm.
+- `Min price` - The lower limit (if any) where charging will always be permitted (must be lower than top-price if set).
 - `Caution-hour type` - Choose to what extent you would like Peaqev to hold back during caution-hours. *Suave > Aggressive* 
 
 ##### Hours:

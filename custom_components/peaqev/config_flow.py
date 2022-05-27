@@ -131,11 +131,20 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
 
+
+
 class OptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry):
         """Initialize options flow."""
         self.config_entry = config_entry
         self.options = dict(config_entry.options)
+
+    async def _get_existing_param(self, parameter: str, default_val: any):
+        if parameter in self.config_entry.options.keys():
+            return self.config_entry.options.get(parameter)
+        if parameter in self.config_entry.data.keys():
+            return self.config_entry.data.get(parameter)
+        return default_val
 
     async def async_step_init(self, user_input=None):
         """Priceaware"""
@@ -145,9 +154,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 return await self.async_step_hours()
             return await self.async_step_months()
 
-        _priceaware = self.config_entry.options.get("priceaware") if "priceaware" in self.config_entry.options.keys() else self.config_entry.data.get("priceaware")
-        _topprice = self.config_entry.options.get("absolute_top_price") if "absolute_top_price" in self.config_entry.options.keys() else self.config_entry.data.get("absolute_top_price")
-        _hourtype = self.config_entry.options.get("cautionhour_type") if "cautionhour_type" in self.config_entry.options.keys() else self.config_entry.data.get("cautionhour_type")
+        _priceaware = await self._get_existing_param("priceaware", False)
+        _topprice = await self._get_existing_param("absolute_top_price", 0)
+        _minprice = await self._get_existing_param("min_priceaware_threshold_price", 0)
+        _hourtype = await self._get_existing_param("cautionhour_type", pk.CAUTIONHOURTYPE_INTERMEDIATE)
 
         return self.async_show_form(
             step_id="init",
@@ -156,6 +166,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 {
                     vol.Optional("priceaware", default=_priceaware): cv.boolean,
                     vol.Optional("absolute_top_price", default=_topprice): cv.positive_float,
+                    vol.Optional("min_priceaware_threshold_price", default=_minprice): cv.positive_float,
                     vol.Optional(
                         "cautionhour_type",
                         default=_hourtype,

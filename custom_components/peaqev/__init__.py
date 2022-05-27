@@ -17,6 +17,13 @@ from .peaqservice.hub.hub_lite import HubLite
 _LOGGER = logging.getLogger(__name__)
 
 
+async def _get_existing_param(config, parameter: str, default_val: any):
+    if parameter in config.options.keys():
+        return config.options.get(parameter)
+    if parameter in config.data.keys():
+        return config.data.get(parameter)
+    return default_val
+
 async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
     """Set up Peaq"""
 
@@ -35,14 +42,15 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
     configinputs["chargertype"] = config.data["chargertype"]
     configinputs["chargerid"] = config.data["chargerid"]
     configinputs["startpeaks"] = config.options["startpeaks"] if "startpeaks" in config.options.keys() else config.data["startpeaks"]
-    configinputs["priceaware"] = config.options["priceaware"] if "priceaware" in config.options.keys() else config.data["priceaware"]
+    configinputs["priceaware"] = await _get_existing_param(config, "priceaware", False)
     configinputs["peaqtype_is_lite"] = peaqtype_is_lite
 
     if configinputs["priceaware"] is False:
         configinputs["cautionhours"] = config.options["cautionhours"] if "cautionhours" in config.options.keys() else config.data["cautionhours"]
         configinputs["nonhours"] = config.options["nonhours"] if "nonhours" in config.options.keys() else config.data["nonhours"]
     else:
-        configinputs["absolute_top_price"] = config.options["absolute_top_price"] if "absolute_top_price" in config.options.keys() else config.data["absolute_top_price"]
+        configinputs["absolute_top_price"] = await _get_existing_param(config, "absolute_top_price", 0)
+        configinputs["min_price"] = await _get_existing_param(config, "min_priceaware_threshold_price", 0)
         configinputs["cautionhour_type"] = config.options["cautionhour_type"] if "cautionhour_type" in config.options.keys() else config.data["cautionhour_type"]
 
     if peaqtype_is_lite is True:
