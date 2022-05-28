@@ -40,8 +40,12 @@ class Charger:
             elif self._hub.chargecontroller.status is CHARGERSTATES.Stop or self._hub.chargecontroller.status is CHARGERSTATES.Idle:
                 if (self._hub.chargerobject_switch.value is True or self._hub.carpowersensor.value > 0) and self._charger_stopped is False:
                     await self._pause_charger()
-            elif self._hub.chargecontroller.status is CHARGERSTATES.Done and self._hub.charger_done.value is False:
+            elif self._hub.chargecontroller.status is CHARGERSTATES.Done and self._hub.charger_done is False:
                 await self._terminate_charger()
+            elif self._hub.chargecontroller.status is CHARGERSTATES.Idle:
+                self._hub.charger_done = False
+                if self._hub.chargerobject_switch.value is True:
+                    await self._terminate_charger()
         else:
             if self._hub.chargerobject_switch.value is True and self._charger_stopped is False:
                 await self._terminate_charger()
@@ -71,15 +75,15 @@ class Charger:
             await self._call_charger(PAUSE)
 
     async def _call_charger(self, command: str):
-        msg = f"Calling charger {command}"
-        _LOGGER.info(msg)
         calls = self._service_calls.get_call(command)
 
-        await self._hub.hass.services.async_call(
+        result = await self._hub.hass.services.async_call(
             calls[DOMAIN],
             calls[command],
             calls["params"]
         )
+        msg = f"Calling charger {command}, result {result}"
+        _LOGGER.info(msg)
 
     async def _updatemaxcurrent(self):
         """If enabled, let the charger periodically update it's current during charging."""
