@@ -10,7 +10,6 @@ from custom_components.peaqev.peaqservice.util.constants import (
     HOURLY
 )
 
-
 class HubData(HubDataBase):
     powersensor_includes_car: bool
     powersensormovingaverage: HubMember
