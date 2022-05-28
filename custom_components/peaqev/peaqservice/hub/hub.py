@@ -67,7 +67,6 @@ class Hub(HubBase, HubData):
                ]
         return all(ret)
 
-
     @property
     def current_peak_dynamic(self):
         if self.price_aware is True and len(self.hours.dynamic_caution_hours):

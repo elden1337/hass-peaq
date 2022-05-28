@@ -16,7 +16,10 @@ class HubMember:
 
     @property
     def is_initialized(self) -> bool:
-        return isinstance(self.value, self._type)
+        if isinstance(self.value, self._type):
+            return True
+        _LOGGER.error(f"{self.name} was not {self._type}. {self.value}")
+        return False
 
     @property
     def entity(self) -> str:
@@ -87,7 +90,10 @@ class CarPowerSensor(HubMember):
 
     @property
     def is_initialized(self) -> bool:
-        return self.value is float
+        if isinstance(self.value, float):
+            return True
+        _LOGGER.error(f"Carpowersensorvalue was not float. {self.value}")
+        return False
 
     @HubMember.value.setter
     def value(self, val):
@@ -110,10 +116,6 @@ class ChargerSwitch(HubMember):
         self._current_attr_name = currentname
         self._ampmeter_is_attribute = ampmeter_is_attribute
         super().__init__(data_type, listenerentity, initval)
-
-    @property
-    def is_initialized(self) -> bool:
-        return self.current > 0 and isinstance(self.value, self._type)
 
     @property
     def current(self) -> int:

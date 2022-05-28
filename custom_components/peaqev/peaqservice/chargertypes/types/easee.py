@@ -68,7 +68,7 @@ class Easee(ChargerBase):
         _on = CallType("start", _on_off_params)
         _off = CallType("stop", _on_off_params)
         _resume = CallType("set_charger_dynamic_limit", {"mode": "6", "charger_id": self._chargerid})
-        _pause = CallType("set_charger_dynamic_limit", {"mode": "0", "charger_id": self._chargerid})
+        _pause = CallType("set_charger_dynamic_limit", {"mode": "4", "charger_id": self._chargerid})
 
         self._set_servicecalls(
             domain=DOMAINNAME,
@@ -80,3 +80,5 @@ class Easee(ChargerBase):
             update_current_call="set_charger_dynamic_limit",
             update_current_params=servicecall_params
         )
+
+

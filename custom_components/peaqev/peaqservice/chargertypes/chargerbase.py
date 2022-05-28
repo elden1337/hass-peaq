@@ -100,6 +100,20 @@ class ChargerBase:
         except Exception as e:
             msg = f"Peaqev could not initialize charger: {e}"
             _LOGGER.error(msg)
+        debugprint = {
+            "chargerentity": self.chargerentity,
+            "powermeter": self.powermeter,
+            "powermeter_factor": self.powermeter_factor,
+            "powerswitch": self.powerswitch,
+            "ampmeter": self.ampmeter,
+            "ampmeter_is_attribute": self.ampmeter_is_attribute,
+            "servicecalls_on": self.servicecalls.on,
+            "servicecalls_off": self.servicecalls.off,
+            "servicecalls_resume": self.servicecalls.resume,
+            "servicecalls_pause": self.servicecalls.pause,
+            "updatecurrent": self.servicecalls.update_current.call
+        }
+        _LOGGER.info(debugprint)
 
     def getentities(self, domain: str, endings: list):
         entities = template.integration_entities(self._hass, domain)

@@ -1,3 +1,6 @@
+import logging
+from abc import abstractmethod
+
 from homeassistant.core import HomeAssistant
 
 from custom_components.peaqev.peaqservice.charger.charger import Charger
@@ -5,6 +8,8 @@ from custom_components.peaqev.peaqservice.chargertypes.chargertypes import Charg
 from custom_components.peaqev.peaqservice.hub.hubdata.hubmember import CurrentPeak, HubMember, CarPowerSensor, \
     ChargerSwitch
 from custom_components.peaqev.peaqservice.localetypes.locale import LocaleData
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class HubDataBase:
@@ -24,6 +29,8 @@ class HubDataBase:
             domain: str
     ):
         self.hass = hass
+
+        resultdict = {}
 
         self.locale = LocaleData(
             config_inputs["locale"],
@@ -50,6 +57,8 @@ class HubDataBase:
             data_type=str,
             listenerentity=self.chargertype.charger.chargerentity
         )
+        resultdict[self.chargerobject.entity] = self.chargerobject.is_initialized
+
         self.chargerobject_switch = ChargerSwitch(
             hass=hass,
             data_type=bool,
@@ -63,3 +72,9 @@ class HubDataBase:
             hass,
             self.chargertype.charger.servicecalls
         )
+
+        _LOGGER.info(self.chargertype.charger.chargerentity)
+
+    @abstractmethod
+    def init_hub_values(self):
+        pass
