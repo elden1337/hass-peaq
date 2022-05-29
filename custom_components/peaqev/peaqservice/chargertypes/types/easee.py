@@ -26,6 +26,7 @@ ENTITYENDINGS = [
     "_cost_per_kwh",
     "_enable_idle_current"
 ]
+NATIVE_CHARGERSTATES = ["disconnected","awaiting_start","charging","ready_to_charge","completed","error"]
 
 DOMAINNAME = "easee"
 UPDATECURRENT = True
@@ -37,7 +38,7 @@ class Easee(ChargerBase):
         super().__init__(hass)
         self._chargerid = chargerid
         self.getentities(DOMAINNAME, ENTITYENDINGS)
-        self._native_chargerstates = ["disconnected","awaiting_start","charging","ready_to_charge","completed","error"]
+        self._native_chargerstates = NATIVE_CHARGERSTATES
         self._chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
         self._chargerstates[CHARGERSTATES.Connected] = ["awaiting_start", "ready_to_charge"]
         self._chargerstates[CHARGERSTATES.Charging] = ["charging"]

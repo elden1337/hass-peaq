@@ -30,6 +30,12 @@ class ChargeControllerBase:
 
     @property
     def status(self):
+        if self._hub.is_initialized is False:
+            return "Awaiting Hub Initialization."
+        if self._hub.is_initialized is True:
+            if self._chargecontroller_initalized is False:
+                self._chargecontroller_initalized = True
+                _LOGGER.info("Chargecontroller is initialized and ready to work!")
         ret = self._get_status()
         if ret == CHARGERSTATES.Error:
             msg = f"Chargecontroller returned faulty state. Charger reported {self._hub.chargerobject.value.lower()} as state."
@@ -44,13 +50,6 @@ class ChargeControllerBase:
         update_timer = False
         charger_state = self._hub.chargerobject.value.lower()
         free_charge = self._hub.locale.data.free_charge
-
-        if self._hub.is_initialized is False:
-            return "Awaiting Hub Initialization."
-        if self._hub.is_initialized is True:
-            if self._chargecontroller_initalized is False:
-                self._chargecontroller_initalized = True
-                _LOGGER.info("Chargecontroller is initialized and ready to work!")
 
         if charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]:
             self._hub.charger_done.value = True

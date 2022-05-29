@@ -58,6 +58,7 @@ class Hub(HubBase, HubData):
 
         async_track_state_change(hass, trackerEntities, self.state_changed)
 
+    @property
     def is_initialized(self) -> bool:
         ret = [self.hours.is_initialized,
                self.carpowersensor.is_initialized,
@@ -93,5 +94,5 @@ class Hub(HubBase, HubData):
             self.powersensormovingaverage.value = value
         elif entity == self.hours.nordpool_entity:
             self.hours.update_nordpool()
-        if entity in self.chargingtracker_entities:
+        if entity in self.chargingtracker_entities and self.is_initialized is True:
             await self.charger.charge()
