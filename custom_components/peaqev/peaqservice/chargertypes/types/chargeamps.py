@@ -39,6 +39,7 @@ class ChargeAmps(ChargerBase):
         self._chargerid = chargerid
         self._chargeamps_connector = 1
         self.getentities(DOMAINNAME, ENTITYENDINGS)
+        self._native_chargerstates = ["available", "connected", "charging"]
         self._chargerstates[CHARGERSTATES.Idle] = ["available"]
         self._chargerstates[CHARGERSTATES.Connected] = ["connected"]
         self._chargerstates[CHARGERSTATES.Charging] = ["charging"]

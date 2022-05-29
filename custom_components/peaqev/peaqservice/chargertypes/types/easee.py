@@ -31,18 +31,13 @@ DOMAINNAME = "easee"
 UPDATECURRENT = True
 #docs: https://github.com/fondberg/easee_hass
 
-"""
-UNUSED STATES FROM EASEE
-
-completed
-error
-"""
 
 class Easee(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid, auth_required: bool = False):
         super().__init__(hass)
         self._chargerid = chargerid
         self.getentities(DOMAINNAME, ENTITYENDINGS)
+        self._native_chargerstates = ["disconnected","awaiting_start","charging","ready_to_charge","completed","error"]
         self._chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
         self._chargerstates[CHARGERSTATES.Connected] = ["awaiting_start", "ready_to_charge"]
         self._chargerstates[CHARGERSTATES.Charging] = ["charging"]

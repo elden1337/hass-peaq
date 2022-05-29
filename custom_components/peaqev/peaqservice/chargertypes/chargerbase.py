@@ -63,6 +63,10 @@ class ChargerBase:
     def servicecalls(self):
         return self._servicecalls
 
+    @property
+    def native_chargerstates(self) -> list:
+        return self._native_chargerstates
+
     def _set_servicecalls(
             self,
             domain: str,

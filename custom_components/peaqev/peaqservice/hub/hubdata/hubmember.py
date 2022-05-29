@@ -7,7 +7,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class HubMember:
-    def __init__(self, data_type: type, listenerentity = None, initval = None, name = None):
+    def __init__(self, data_type, listenerentity = None, initval = None, name = None):
         self._value = initval
         self._type = data_type
         self._listenerentity = listenerentity
@@ -108,8 +108,33 @@ class CarPowerSensor(HubMember):
             self._value = float(vval * self._powermeter_factor)
 
 
+class ChargerObject(HubMember):
+    def __init__(self, data_type:list, listenerentity):
+        self._type = data_type
+        self._listenerentity = listenerentity
+        super().__init__(data_type, listenerentity)
+
+    @property
+    def is_initialized(self) -> bool:
+        if self.value in self._type:
+            return True
+        _LOGGER.warning(f"Chargerobject-state not found in given state-list. Value was: {self.value}")
+        return False
+
+    @HubMember.value.setter
+    def value(self, value):
+        self._value = value
+
 class ChargerSwitch(HubMember):
-    def __init__(self, hass, data_type: type, listenerentity, initval, currentname: str, ampmeter_is_attribute: bool):
+    def __init__(
+            self,
+            hass,
+            data_type: type,
+            listenerentity,
+            initval,
+            currentname: str,
+            ampmeter_is_attribute: bool
+    ):
         self._hass = hass
         self._value = initval
         self._current = 0

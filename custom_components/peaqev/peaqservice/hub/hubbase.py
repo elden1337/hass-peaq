@@ -37,7 +37,6 @@ class HubBase:
                 cautionhour_type=config_inputs["cautionhour_type"]
             )
         else:
-            _LOGGER.error(config_inputs["cautionhours"])
             self.hours = RegularHours(
                 non_hours=config_inputs["nonhours"],
                 caution_hours=config_inputs["cautionhours"]
