@@ -51,8 +51,8 @@ class PeaqMoneySensor(SensorBase):
             "Caution hours": self.set_dynamic_caution_hours_display(),
             "Caution hour type": self._cautionhour_type_string,
             "Current hour charge permittance": self.set_dynamic_caution_hour_display(),
-            "Projected avg price per kWh": f"{self._get_average_kwh_price()} {self._currency}",
-            "Projected max possible charge-amount": f"{self._get_total_charge()} kWh"
+            "Avg price per kWh next 24h": f"{self._get_average_kwh_price()} {self._currency}",
+            "Max charge next 24h": f"{self._get_total_charge()} kWh"
         }
         if self._absolute_top_price is not None:
             attr_dict["Absolute top price"] = f"{self._absolute_top_price} {self._currency}"
@@ -90,7 +90,8 @@ class PeaqMoneySensor(SensorBase):
 
         for h in self._dynamic_caution_hours:
             ret[h] = self._dynamic_caution_hours[h] * self._current_peak
-
+        for h in self._nonhours:
+            ret[h] = 0
         for i in range(0,23):
             if i not in ret.keys():
                 ret[i] = self._current_peak
