@@ -1,7 +1,7 @@
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.hub.hubdata.hubdatabase import HubDataBase
-from custom_components.peaqev.peaqservice.hub.hubdata.hubmember import HubMember
+from custom_components.peaqev.peaqservice.hub.hubmember.hubmember import HubMember
 from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_TOTAL_NAME, HOURLY
 )

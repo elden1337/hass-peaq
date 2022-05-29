@@ -113,6 +113,7 @@ class PriceAwareHours(Hours):
         self._prices = []
         self._nordpool_entity = None
         self._nordpool_currency = None
+        self._is_initialized = False
         self._setup_nordpool()
         super().__init__(True, non_hours, caution_hours)
 
@@ -174,7 +175,13 @@ class PriceAwareHours(Hours):
 
     @property
     def is_initialized(self) -> bool:
-        return len(self.prices) > 0
+        if self.prices is not None:
+            if len(self.prices) > 0:
+                if self._is_initialized is False:
+                    self._is_initialized = True
+                    _LOGGER.info("Hourselection has initialized")
+                return True
+        return False
 
     def update_nordpool(self):
         ret = self._hass.states.get(self.nordpool_entity)

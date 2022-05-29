@@ -60,13 +60,21 @@ class Hub(HubBase, HubData):
 
     @property
     def is_initialized(self) -> bool:
-        ret = [self.hours.is_initialized,
-               self.carpowersensor.is_initialized,
-               self.chargerobject_switch.is_initialized,
-               self.power.is_initialized,
-               self.chargerobject.is_initialized
-               ]
-        return all(ret)
+        ret = {"hours": self.hours.is_initialized,
+               "carpowersensor": self.carpowersensor.is_initialized,
+               "chargerobject_switch": self.chargerobject_switch.is_initialized,
+               "power": self.power.is_initialized,
+               "chargerobject": self.chargerobject.is_initialized
+               }
+        if all(ret.values()):
+            return True
+        else:
+            notready = []
+            for r in ret:
+                if ret[r] is False:
+                    notready.append(r)
+            _LOGGER.warning(f"{notready} has not initialized yet.")
+            return False
 
     @property
     def current_peak_dynamic(self):

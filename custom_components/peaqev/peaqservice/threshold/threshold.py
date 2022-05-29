@@ -1,8 +1,8 @@
 import logging
 from datetime import datetime
 
-from peaqevcore.Threshold import ThresholdBase as _core
 from peaqevcore.Models import CHARGERSTATES
+from peaqevcore.Threshold import ThresholdBase as _core
 
 from custom_components.peaqev.peaqservice.threshold.thresholdbase import ThresholdBase
 
@@ -16,7 +16,7 @@ class Threshold(ThresholdBase):
     @property
     def allowedcurrent(self) -> int:
         amps = self._setcurrentdict()
-        if self._hub.chargecontroller.status is not CHARGERSTATES.Start:
+        if self._hub.chargecontroller.status is not CHARGERSTATES.Start.name:
             return min(amps.values())
         return _core.allowedcurrent(
             datetime.now().minute,

@@ -14,6 +14,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
 _LOGGER = logging.getLogger(__name__)
 
 ENTITYENDINGS = ["_power", "_1", "_2", "_status", "_dimmer", "_downlight", "_current", "_voltage"]
+NATIVE_CHARGERSTATES = ["available", "connected", "charging"]
 DOMAINNAME = "chargeamps"
 UPDATECURRENT = True
 #docs: https://github.com/kirei/hass-chargeamps
@@ -39,7 +40,7 @@ class ChargeAmps(ChargerBase):
         self._chargerid = chargerid
         self._chargeamps_connector = 1
         self.getentities(DOMAINNAME, ENTITYENDINGS)
-        self._native_chargerstates = ["available", "connected", "charging"]
+        self._native_chargerstates = NATIVE_CHARGERSTATES
         self._chargerstates[CHARGERSTATES.Idle] = ["available"]
         self._chargerstates[CHARGERSTATES.Connected] = ["connected"]
         self._chargerstates[CHARGERSTATES.Charging] = ["charging"]

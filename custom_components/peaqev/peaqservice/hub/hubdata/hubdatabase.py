@@ -5,8 +5,9 @@ from homeassistant.core import HomeAssistant
 
 from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
-from custom_components.peaqev.peaqservice.hub.hubdata.hubmember import CurrentPeak, HubMember, CarPowerSensor, \
-    ChargerSwitch, ChargerObject
+from custom_components.peaqev.peaqservice.hub.hubmember.chargerswitch import ChargerSwitch
+from custom_components.peaqev.peaqservice.hub.hubmember.hubmember import CurrentPeak, HubMember, CarPowerSensor, \
+    ChargerObject
 from custom_components.peaqev.peaqservice.localetypes.locale import LocaleData
 
 _LOGGER = logging.getLogger(__name__)
@@ -50,7 +51,7 @@ class HubDataBase:
         self.carpowersensor = CarPowerSensor(
             data_type=int,
             listenerentity=self.chargertype.charger.powermeter,
-            initval=0,
+            #initval=0,
             powermeter_factor=self.chargertype.charger.powermeter_factor
         )
         self.chargerobject = ChargerObject(

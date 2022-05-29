@@ -31,7 +31,7 @@ class ChargeControllerBase:
     @property
     def status(self):
         if self._hub.is_initialized is False:
-            return "Awaiting Hub Initialization."
+            return "Hub not ready. Check logs!"
         if self._hub.is_initialized is True:
             if self._chargecontroller_initalized is False:
                 self._chargecontroller_initalized = True
@@ -40,7 +40,7 @@ class ChargeControllerBase:
         if ret == CHARGERSTATES.Error:
             msg = f"Chargecontroller returned faulty state. Charger reported {self._hub.chargerobject.value.lower()} as state."
             _LOGGER.error(msg)
-        return ret
+        return ret.name
 
     def update_latestchargerstart(self):
         self.latest_charger_start = time.time()

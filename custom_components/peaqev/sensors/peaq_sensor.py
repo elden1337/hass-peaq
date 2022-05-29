@@ -8,7 +8,7 @@ class PeaqSensor(SensorBase):
         super().__init__(hub, name, entry_id)
 
         self._attr_name = name
-        self._state = self._hub.chargecontroller.status.name
+        self._state = self._hub.chargecontroller.status
         self._nonhours = self._hub.hours.non_hours
         self._cautionhours = self._hub.hours.caution_hours
         self._current_hour = None
@@ -16,7 +16,7 @@ class PeaqSensor(SensorBase):
 
     @property
     def state(self):
-        return self._hub.chargecontroller.status.name
+        return self._hub.chargecontroller.status
 
     @property
     def icon(self) -> str:
@@ -28,7 +28,7 @@ class PeaqSensor(SensorBase):
         return ret
 
     def update(self) -> None:
-        self._state = self._hub.chargecontroller.status.name
+        self._state = self._hub.chargecontroller.status
         self._nonhours = self._hub.hours.non_hours
         self._cautionhours = self._hub.hours.caution_hours
         self._current_hour = self._hub.hours.state

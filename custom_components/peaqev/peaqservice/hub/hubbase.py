@@ -8,7 +8,7 @@ from homeassistant.core import (
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.hourselection import (PriceAwareHours, RegularHours)
-from custom_components.peaqev.peaqservice.hub.hubdata.hubmember import HubMember
+from custom_components.peaqev.peaqservice.hub.hubmember.hubmember import HubMember
 from custom_components.peaqev.peaqservice.util.constants import CHARGERENABLED, CHARGERDONE
 
 _LOGGER = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ class HubBase:
             if old_state is None or old_state.state != new_state.state:
                 await self._update_sensor(entity_id, new_state.state)
         except Exception as e:
-            msg = f"Unable to handle data: {entity_id} {e}"
+            msg = f"Unable to handle data: {entity_id} ({e})"
             _LOGGER.error(msg)
 
     @abstractmethod

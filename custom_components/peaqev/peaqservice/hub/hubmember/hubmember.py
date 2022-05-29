@@ -13,12 +13,20 @@ class HubMember:
         self._listenerentity = listenerentity
         self.name = name
         self.id = ex.nametoid(self.name) if self.name is not None else None
+        self.warned_not_initialized = False
+        self._is_initialized = False
 
     @property
     def is_initialized(self) -> bool:
-        if isinstance(self.value, self._type):
+        if self._is_initialized:
             return True
-        _LOGGER.error(f"{self.name} was not {self._type}. {self.value}")
+        if isinstance(self.value, self._type):
+            _LOGGER.info(f"{self._listenerentity} has initialized")
+            self._is_initialized = True
+            return True
+        if not self.warned_not_initialized:
+            _LOGGER.error(f"{self._listenerentity} was not {self._type}. {self.value}")
+            self.warned_not_initialized = True
         return False
 
     @property
@@ -86,13 +94,21 @@ class CurrentPeak(HubMember):
 class CarPowerSensor(HubMember):
     def __init__(self, data_type: type, listenerentity=None, initval=None, powermeter_factor=1):
         self._powermeter_factor = powermeter_factor
+        self._warned_not_initialized = False
+        self._is_initialized = False
         super().__init__(data_type, listenerentity, initval)
 
     @property
     def is_initialized(self) -> bool:
-        if isinstance(self.value, float):
+        if self._is_initialized is True:
             return True
-        _LOGGER.error(f"Carpowersensorvalue was not float. {self.value}")
+        if isinstance(self.value, float) or isinstance(self.value, int):
+            _LOGGER.info("Carpowersensor has initialized")
+            self._is_initialized = True
+            return True
+        if not self._warned_not_initialized:
+            _LOGGER.error(f"Carpowersensorvalue was not float. {self.value}")
+            self._warned_not_initialized = True
         return False
 
     @HubMember.value.setter
@@ -112,61 +128,25 @@ class ChargerObject(HubMember):
     def __init__(self, data_type:list, listenerentity):
         self._type = data_type
         self._listenerentity = listenerentity
+        self._warned_not_initialized = False
+        self._is_initialized = False
         super().__init__(data_type, listenerentity)
 
     @property
     def is_initialized(self) -> bool:
-        if self.value in self._type:
+        if self._is_initialized is True:
             return True
-        _LOGGER.warning(f"Chargerobject-state not found in given state-list. Value was: {self.value}")
+        if self.value is not None:
+            if self.value.lower() in self._type:
+               _LOGGER.info("Chargerobject has initialized")
+               self._is_initialized = True
+               return True
+        if not self._warned_not_initialized:
+            _LOGGER.warning(f"Chargerobject-state not found in given state-list. Value was: {self.value}")
+            self._warned_not_initialized = True
         return False
 
     @HubMember.value.setter
     def value(self, value):
         self._value = value
 
-class ChargerSwitch(HubMember):
-    def __init__(
-            self,
-            hass,
-            data_type: type,
-            listenerentity,
-            initval,
-            currentname: str,
-            ampmeter_is_attribute: bool
-    ):
-        self._hass = hass
-        self._value = initval
-        self._current = 0
-        self._current_attr_name = currentname
-        self._ampmeter_is_attribute = ampmeter_is_attribute
-        super().__init__(data_type, listenerentity, initval)
-
-    @property
-    def current(self) -> int:
-        if self._current == 0:
-            return 6
-        return self._current
-
-    @current.setter
-    def current(self, value):
-        try:
-            self._current = int(value)
-        except ValueError as v:
-            msg = f"[{value}] could not set value as chargercurrent. {v}"
-            _LOGGER.error(msg)
-
-    def updatecurrent(self):
-        if self._ampmeter_is_attribute is True:
-            ret = self._hass.states.get(self.entity)
-            if ret is not None:
-                ret_attr = str(ret.attributes.get(self._current_attr_name))
-                self.current = ret_attr
-            else:
-                _LOGGER.error("chargerobject state was none")
-        else:
-            ret = self._hass.states.get(self._current_attr_name)
-            if ret is not None:
-                self.current = ret.state
-            else:
-                _LOGGER.error("chargerobject state was none")
