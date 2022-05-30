@@ -137,7 +137,7 @@ class ChargerObject(HubMember):
         if self._is_initialized is True:
             return True
         if self.value is not None:
-            if self.value.lower() in self._type:
+            if str(self.value).lower() in self._type:
                _LOGGER.info("Chargerobject has initialized")
                self._is_initialized = True
                return True
