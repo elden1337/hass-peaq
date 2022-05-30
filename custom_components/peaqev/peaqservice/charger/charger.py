@@ -15,7 +15,9 @@ from custom_components.peaqev.peaqservice.util.constants import (
     PARAMS,
     UPDATECURRENT,
     CURRENT,
-    CHARGERID
+    CHARGERID,
+    CALL,
+    SWITCH
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -77,13 +79,18 @@ class Charger:
     async def _call_charger(self, command: str):
         calls = self._service_calls.get_call(command)
         _LOGGER.info(calls[DOMAIN], calls[command], calls["params"])
-        result = await self._hub.hass.services.async_call(
-            calls[DOMAIN],
-            calls[command],
-            calls["params"]
-        )
-        msg = f"Calling charger {command}, result {result}"
-        _LOGGER.info(msg)
+
+        if calls["on_off_call_type"] == CALL:
+            await self._hub.hass.services.async_call(
+                calls[DOMAIN],
+                calls[command],
+                calls["params"]
+            )
+        elif calls["on_off_call_type"] == SWITCH:
+            await self._hub.hass.states.async_set(
+                calls[command],
+                calls["params"]["command"]
+            )
 
     async def _updatemaxcurrent(self):
         """If enabled, let the charger periodically update it's current during charging."""

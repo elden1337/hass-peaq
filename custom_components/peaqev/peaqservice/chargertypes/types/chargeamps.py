@@ -8,7 +8,7 @@ from custom_components.peaqev.peaqservice.chargertypes.chargerbase import Charge
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
-    CURRENT,
+    CURRENT, CALL,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -63,13 +63,14 @@ class ChargeAmps(ChargerBase):
             "connector": self._chargeamps_connector
         }
 
-        _on = CallType("enable", _on_off_params)
-        _off = CallType("disable", _on_off_params)
+        _on = CallType("enable", _on_off_params, CALL)
+        _off = CallType("disable", _on_off_params, CALL)
 
         self._set_servicecalls(
             domain=DOMAINNAME,
             on_call=_on,
             off_call=_off,
+            on_off_call_type=CALL,
             allowupdatecurrent= UPDATECURRENT,
             update_current_call="set_max_current",
             update_current_params=servicecall_params

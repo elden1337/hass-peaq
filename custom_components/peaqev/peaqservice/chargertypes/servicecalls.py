@@ -66,10 +66,20 @@ class ServiceCalls:
         ret = {}
         ret[DOMAIN] = self.domain
         ret[call] = self._get_call_type(call)
+        ret["on_off_call_type"] = self._get_call_type_type(call)
         ret["params"] = self._get_call_type_params(call)
         if call is UPDATECURRENT:
             ret[PARAMS] = self.update_current.params
         return ret
+
+    def _get_call_type_type(self, call) -> str:
+        _callsdict = {
+            ON: self.on.call_type,
+            OFF: self.off.call_type,
+            PAUSE: self.pause.call_type,
+            RESUME: self.resume.call_type
+        }
+        return _callsdict.get(call)
 
     def _get_call_type_params(self, call) -> dict:
         _callsdict = {

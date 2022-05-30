@@ -57,6 +57,7 @@ CURRENTS_THREEPHASE_1_32 = {
 CHARGERTYPE_CHARGEAMPS = "Chargeamps"
 CHARGERTYPE_EASEE = "Easee"
 CHARGERTYPE_GAROWALLBOX = "Garo Wallbox"
+CHARGERTYPE_OCPP = "Ocpp"
 
 LOCALE_SE_GOTHENBURG = "Gothenburg, Sweden"
 LOCALE_SE_KARLSTAD = "Karlstad, Sweden"
@@ -75,8 +76,12 @@ LOCALE_BE_VREG = "Belgium (VREG)"
 CHARGERTYPES = [
     CHARGERTYPE_CHARGEAMPS,
     CHARGERTYPE_EASEE,
+    CHARGERTYPE_OCPP,
     #CHARGERTYPE_GAROWALLBOX
     ]
+
+SWITCH = "switch"
+CALL = "call"
 
 """Lookup locales for config flow"""
 LOCALES = [

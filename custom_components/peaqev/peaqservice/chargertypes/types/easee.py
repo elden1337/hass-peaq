@@ -9,6 +9,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
     CURRENT,
+    CALL,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -61,15 +62,16 @@ class Easee(ChargerBase):
         _on_params = {}
         _off_params = {}
 
-        _on = CallType("start", _on_off_params)
-        _off = CallType("stop", _on_off_params)
-        _resume = CallType("set_charger_dynamic_limit", {"mode": "6", "charger_id": self._chargerid})
-        _pause = CallType("set_charger_dynamic_limit", {"mode": "4", "charger_id": self._chargerid})
+        _on = CallType("start", _on_off_params, CALL)
+        _off = CallType("stop", _on_off_params, CALL)
+        _resume = CallType("set_charger_dynamic_limit", {"mode": "6", "charger_id": self._chargerid}, CALL)
+        _pause = CallType("set_charger_dynamic_limit", {"mode": "4", "charger_id": self._chargerid}, CALL)
 
         self._set_servicecalls(
             domain=DOMAINNAME,
             on_call=_on if self._auth_required is True else _resume,
             off_call=_off if self._auth_required is True else _pause,
+            on_off_call_type=CALL,
             pause_call=_pause,
             resume_call=_resume,
             allowupdatecurrent=UPDATECURRENT,
