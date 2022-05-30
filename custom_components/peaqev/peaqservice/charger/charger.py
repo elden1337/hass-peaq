@@ -34,15 +34,15 @@ class Charger:
     async def charge(self):
         """Main function to turn charging on or off"""
         if self._hub.charger_enabled.value is True:
-            if self._hub.chargecontroller.status is CHARGERSTATES.Start:
+            if self._hub.chargecontroller.status is CHARGERSTATES.Start.name:
                 if self._hub.chargerobject_switch.value is False and self._charger_running is False:
                     await self._start_charger()
-            elif self._hub.chargecontroller.status is CHARGERSTATES.Stop or self._hub.chargecontroller.status is CHARGERSTATES.Idle:
+            elif self._hub.chargecontroller.status is CHARGERSTATES.Stop.name or self._hub.chargecontroller.status is CHARGERSTATES.Idle.name:
                 if (self._hub.chargerobject_switch.value is True or self._hub.carpowersensor.value > 0) and self._charger_stopped is False:
                     await self._pause_charger()
-            elif self._hub.chargecontroller.status is CHARGERSTATES.Done and self._hub.charger_done.value is False:
+            elif self._hub.chargecontroller.status is CHARGERSTATES.Done.name and self._hub.charger_done.value is False:
                 await self._terminate_charger()
-            elif self._hub.chargecontroller.status is CHARGERSTATES.Idle:
+            elif self._hub.chargecontroller.status is CHARGERSTATES.Idle.name:
                 self._hub.charger_done.value = False
                 if self._hub.chargerobject_switch.value is True:
                     await self._terminate_charger()
@@ -76,7 +76,7 @@ class Charger:
 
     async def _call_charger(self, command: str):
         calls = self._service_calls.get_call(command)
-
+        _LOGGER.info(calls[DOMAIN], calls[command], calls["params"])
         result = await self._hub.hass.services.async_call(
             calls[DOMAIN],
             calls[command],
