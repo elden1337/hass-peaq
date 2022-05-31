@@ -98,12 +98,12 @@ class PriceAwareHours(Hours):
     def __init__(
             self,
             hass,
+            hub,
             absolute_top_price: float = None,
             min_price: float = 0,
-            non_hours: list = None,
-            caution_hours: list = None,
             cautionhour_type: str = CAUTIONHOURTYPE_INTERMEDIATE
     ):
+        self._hub = hub
         self._absolute_top_price = self._set_absolute_top_price(absolute_top_price)
         self._min_price = min_price
         self._cautionhour_type = CAUTIONHOURTYPE_DICT[cautionhour_type]
@@ -115,7 +115,7 @@ class PriceAwareHours(Hours):
         self._nordpool_currency = None
         self._is_initialized = False
         self._setup_nordpool()
-        super().__init__(True, non_hours, caution_hours)
+        super().__init__(True)
 
     @property
     def dynamic_caution_hours(self) -> dict:
@@ -182,6 +182,12 @@ class PriceAwareHours(Hours):
                     _LOGGER.info("Hourselection has initialized")
                 return True
         return False
+
+    def get_average_kwh_price(self):
+        return self._core.get_average_kwh_price()
+
+    def get_total_charge(self):
+        return self._core.get_total_charge(self._hub.currentpeak.value)
 
     def update_nordpool(self):
         ret = self._hass.states.get(self.nordpool_entity)
