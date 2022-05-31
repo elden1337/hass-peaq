@@ -135,5 +135,3 @@ class ChargerBase:
 
             self._entityschema = candidate
             self._entities = entities
-
-

@@ -17,49 +17,49 @@ from .peaqservice.hub.hub_lite import HubLite
 _LOGGER = logging.getLogger(__name__)
 
 
-async def _get_existing_param(config, parameter: str, default_val: any):
-    if parameter in config.options.keys():
-        return config.options.get(parameter)
-    if parameter in config.data.keys():
-        return config.data.get(parameter)
+async def _get_existing_param(conf, parameter: str, default_val: any):
+    if parameter in conf.options.keys():
+        return conf.options.get(parameter)
+    if parameter in conf.data.keys():
+        return conf.data.get(parameter)
     return default_val
 
-async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     """Set up Peaq"""
 
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][config.entry_id] = config.data
+    hass.data[DOMAIN][conf.entry_id] = conf.data
 
-    if "peaqevtype" in config.data.keys():
-        peaqtype_is_lite = bool(config.data["peaqevtype"] == TYPELITE)
+    if "peaqevtype" in conf.data.keys():
+        peaqtype_is_lite = bool(conf.data["peaqevtype"] == TYPELITE)
 
     else:
         peaqtype_is_lite = False
 
-    configinputs = {}
+    ci = {}
 
-    configinputs["locale"] = config.data["locale"]
-    configinputs["chargertype"] = config.data["chargertype"]
-    configinputs["chargerid"] = config.data["chargerid"]
-    configinputs["startpeaks"] = config.options["startpeaks"] if "startpeaks" in config.options.keys() else config.data["startpeaks"]
-    configinputs["priceaware"] = await _get_existing_param(config, "priceaware", False)
-    configinputs["peaqtype_is_lite"] = peaqtype_is_lite
+    ci["locale"] = conf.data["locale"]
+    ci["chargertype"] = conf.data["chargertype"]
+    ci["chargerid"] = conf.data["chargerid"]
+    ci["startpeaks"] = conf.options["startpeaks"] if "startpeaks" in conf.options.keys() else conf.data["startpeaks"]
+    ci["priceaware"] = await _get_existing_param(conf, "priceaware", False)
+    ci["peaqtype_is_lite"] = peaqtype_is_lite
 
-    if configinputs["priceaware"] is False:
-        configinputs["cautionhours"] = config.options["cautionhours"] if "cautionhours" in config.options.keys() else config.data["cautionhours"]
-        configinputs["nonhours"] = config.options["nonhours"] if "nonhours" in config.options.keys() else config.data["nonhours"]
+    if ci["priceaware"] is False:
+        ci["cautionhours"] = conf.options["cautionhours"] if "cautionhours" in conf.options.keys() else conf.data["cautionhours"]
+        ci["nonhours"] = conf.options["nonhours"] if "nonhours" in conf.options.keys() else conf.data["nonhours"]
     else:
-        configinputs["absolute_top_price"] = await _get_existing_param(config, "absolute_top_price", 0)
-        configinputs["min_price"] = await _get_existing_param(config, "min_priceaware_threshold_price", 0)
-        configinputs["cautionhour_type"] = config.options["cautionhour_type"] if "cautionhour_type" in config.options.keys() else config.data["cautionhour_type"]
+        ci["absolute_top_price"] = await _get_existing_param(conf, "absolute_top_price", 0)
+        ci["min_price"] = await _get_existing_param(conf, "min_priceaware_threshold_price", 0)
+        ci["cautionhour_type"] = conf.options["cautionhour_type"] if "cautionhour_type" in conf.options.keys() else conf.data["cautionhour_type"]
 
     if peaqtype_is_lite is True:
-        hub = HubLite(hass, configinputs, DOMAIN)
+        hub = HubLite(hass, ci, DOMAIN)
     else:
-        configinputs["powersensor"] = config.data["name"]
-        configinputs["powersensorincludescar"] = config.data["powersensorincludescar"]
+        ci["powersensor"] = conf.data["name"]
+        ci["powersensorincludescar"] = conf.data["powersensorincludescar"]
 
-        hub = Hub(hass, configinputs, DOMAIN)
+        hub = Hub(hass, ci, DOMAIN)
 
     hass.data[DOMAIN]["hub"] = hub
 
@@ -72,22 +72,22 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry) -> bool:
     hass.services.async_register(DOMAIN, "enable", servicehandler_enable)
     hass.services.async_register(DOMAIN, "disable", servicehandler_disable)
 
-    hass.config_entries.async_setup_platforms(config, PLATFORMS)
+    hass.config_entries.async_setup_platforms(conf, PLATFORMS)
 
-    undo_listener = config.add_update_listener(config_entry_update_listener)
+    undo_listener = conf.add_update_listener(config_entry_update_listener)
 
-    hass.data[DOMAIN][config.entry_id] = {
+    hass.data[DOMAIN][conf.entry_id] = {
         LISTENER_FN_CLOSE: undo_listener,
     }
     return True
 
-async def config_entry_update_listener(hass: HomeAssistant, entry: ConfigEntry):
-    await hass.config_entries.async_reload(entry.entry_id)
+async def config_entry_update_listener(hass: HomeAssistant, conf: ConfigEntry):
+    await hass.config_entries.async_reload(conf.entry_id)
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     """Unload a config entry."""
-    unload_ok = hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    unload_ok = hass.config_entries.async_unload_platforms(conf, PLATFORMS)
     if unload_ok:
-        hass.data[DOMAIN].pop(entry.entry_id)
+        hass.data[DOMAIN].pop(conf.entry_id)
 
     return unload_ok

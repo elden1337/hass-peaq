@@ -1,6 +1,6 @@
 
 class CallType:
-    def __init__(self, call: str, params: dict = {}):
+    def __init__(self, call: str, params: dict = {}): # pylint:disable=dangerous-default-value
         self._call = call
         self._params = params
 
