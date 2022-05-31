@@ -51,8 +51,8 @@ class PeaqMoneySensor(SensorBase):
             "Caution hours": self.set_dynamic_caution_hours_display(),
             "Caution hour type": self._cautionhour_type_string,
             "Current hour charge permittance": self.set_dynamic_caution_hour_display(),
-            "Avg price per kWh next 24h": f"{self._get_average_kwh_price()} {self._currency}",
-            "Max charge next 24h": f"{self._get_total_charge()} kWh"
+            "Avg price per kWh next 24h": f"{self._hub.hours.get_average_kwh_price()} {self._currency}",
+            "Max charge next 24h": f"{self._hub.hours.get_total_charge()} kWh"
         }
         if self._absolute_top_price is not None:
             attr_dict["Absolute top price"] = f"{self._absolute_top_price} {self._currency}"
@@ -60,43 +60,6 @@ class PeaqMoneySensor(SensorBase):
             attr_dict["Min caution price"]= f"{self._min_price} {self._currency}"
 
         return attr_dict
-
-    def _get_average_kwh_price(self):
-        if len(self._prices) > 0:
-            hour = datetime.now().hour
-            ret = {}
-
-            for h in self._dynamic_caution_hours:
-                if h < hour and len(self._prices_tomorrow) > 0:
-                    ret[h] = self._dynamic_caution_hours[h] * self._prices_tomorrow[h]
-                elif h >= hour:
-                    ret[h] = self._dynamic_caution_hours[h] * self._prices[h]
-
-            for nh in self._nonhours:
-                ret[nh] = 0
-
-            for i in range(0,23):
-                if i not in ret.keys():
-                    if i < hour and len(self._prices_tomorrow) > 0:
-                        ret[i] = self._prices_tomorrow[i]
-                    elif i >= hour:
-                        ret[i] = self._prices[i]
-
-            return round(sum(ret.values())/len(ret),2)
-        return "-"
-
-    def _get_total_charge(self) -> float:
-        ret = {}
-
-        for h in self._dynamic_caution_hours:
-            ret[h] = self._dynamic_caution_hours[h] * self._current_peak
-        for h in self._nonhours:
-            ret[h] = 0
-        for i in range(0,23):
-            if i not in ret.keys():
-                ret[i] = self._current_peak
-
-        return round(sum(ret.values()),1)
 
     def _get_written_state(self) -> str:
         hour = datetime.now().hour

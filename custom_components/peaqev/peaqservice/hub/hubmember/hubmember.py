@@ -73,7 +73,6 @@ class HubMember:
 
 class CurrentPeak(HubMember):
     def __init__(self, data_type: type, listenerentity, initval, startpeaks:dict):
-
         self._startpeak = self._set_start_peak(startpeaks)
         self._value = initval
         super().__init__(data_type, listenerentity, initval)
@@ -102,7 +101,7 @@ class CarPowerSensor(HubMember):
     def is_initialized(self) -> bool:
         if self._is_initialized is True:
             return True
-        if isinstance(self.value, float) or isinstance(self.value, int):
+        if isinstance(self.value, (float,int)):
             _LOGGER.info("Carpowersensor has initialized")
             self._is_initialized = True
             return True
@@ -149,4 +148,3 @@ class ChargerObject(HubMember):
     @HubMember.value.setter
     def value(self, value):
         self._value = value
-

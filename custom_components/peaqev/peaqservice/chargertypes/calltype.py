@@ -2,7 +2,7 @@ from custom_components.peaqev.peaqservice.util.constants import CALL, SWITCH
 
 
 class CallType:
-    def __init__(self, call: str, params: dict = {}, call_type: str = CALL):
+    def __init__(self, call: str, params: dict = {}, call_type: str = CALL): # pylint:disable=dangerous-default-value
         self._call = call
         self._params = params
         self._call_type = call_type
