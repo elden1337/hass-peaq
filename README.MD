@@ -89,7 +89,8 @@ Dec| 2.0 | 4.0
 - `Kristinehamn, Sweden` - for Nov-Mar, max peak during Mon-Fri 07-17. Other months, single max peak
 - `Malung-Sälen, Sweden` - Average of five peaks on different days. Peaks are calc between 07-19. Other hours are free-charge.
 - `Nacka, Sweden (Normal tariffe)` - The average of three max peak hours is what your are charged for. The algorithm tries to stay below the minimum value of these three peaks.
-- `Partille, Sweden` - Single monthly peak hour is what is being avoided by the algorithm
+- `Bjärke Energi, Sweden` -  Single monthly max peak, except between 22-06
+- `Partille, Sweden` - Single monthly peak hour
 - `Sala, Sweden (SHE ab-customer)` - The average of three max peak hours, that do occur Mon-Fri, between 07-19. Other hours are non-observed.
 - `Skövde, Sweden` - Single monthly max peak. Observed Nov-Mar, Mon-Fri between 06-22. Other hours are non-observed. 
 - `Sollentuna, Sweden` - Average of three hours, workdays between 7-19.
