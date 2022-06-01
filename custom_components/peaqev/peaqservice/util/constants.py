@@ -70,6 +70,7 @@ LOCALE_SE_MALUNG_SALEN = "Malung-Sälen, Sweden (Malungs elverk)"
 LOCALE_SE_SKOVDE = "Skövde, Sweden"
 LOCALE_SE_SOLLENTUNA = "Sollentuna Energi, Sweden"
 LOCALE_BE_VREG = "Belgium (VREG)"
+LOCALE_SE_BJERKE_ENERGI = "Bjärke Energi, Sweden"
 
 """Lookup types for config flow"""
 CHARGERTYPES = [
@@ -90,6 +91,7 @@ LOCALES = [
     LOCALE_SE_SALA,
     LOCALE_SE_SKOVDE,
     LOCALE_SE_SOLLENTUNA,
+    LOCALE_SE_BJERKE_ENERGI,
     LOCALE_DEFAULT
     ]
 
