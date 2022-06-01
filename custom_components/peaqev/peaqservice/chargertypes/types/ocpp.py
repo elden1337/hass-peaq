@@ -15,11 +15,48 @@ from custom_components.peaqev.peaqservice.util.constants import (
 
 _LOGGER = logging.getLogger(__name__)
 
-ENTITYENDINGS = [] #todo: list all (or many of) the entity_endings that this integration has set in HA, this is to gather the correct entities.
-NATIVE_CHARGERSTATES = [] #todo: list all the available chargerstates here
-DOMAINNAME = "" #todo: set the domainname as it is written in HA. ocpp?
-UPDATECURRENT = True #todo: True if integration allows update of current during charging. False otherwise
-#docs: #todo: put links to the native repo here.
+ENTITYENDINGS = [
+    "_reset",
+    "_unlock",
+    "_maximum_current",
+    "_connectors",
+    "_current_import",
+    "_current_offered",
+    "_energy_active_import_register",
+    "_energy_meter_start",
+    "_energy_session",
+    "_error_code",
+    "_error_code_connector",
+    "_features",
+    "_frequency",
+    "_heartbeat",
+    "_id",
+    "_id_tag",
+    "_latency_ping",
+    "_latency_pong",
+    "_model",
+    "_power_active_import",
+    "_power_offered",
+    "_reconnects",
+    "_serial",
+    "_soc",
+    "_status",
+    "_status_connector",
+    "_status_firmware",
+    "_stop_reason",
+    "_time_session",
+    "_timestamp_config_response",
+    "_timestamp_data_response",
+    "_timestamp_data_transfer",
+    "_transaction_id",
+    "_vendor",
+    "_version_firmware",
+    "_availability",
+    "_charge_control"
+] #todo: LISTED ALL POSSIBLE. TO BE SORTED WHICH IS NEEDED OR NOT --> list all (or many of) the entity_endings that this integration has set in HA, this is to gather the correct entities.
+NATIVE_CHARGERSTATES = ["Available"] #todo: list all the available chargerstates here
+DOMAINNAME = "ocpp"
+UPDATECURRENT = True 
 
 """
 The corresponding constant in peaqservice/util/constants.py is what the user picks.
@@ -39,16 +76,17 @@ class OCPP(ChargerBase):
         self._native_chargerstates = NATIVE_CHARGERSTATES
 
         """this is the states-mapping towards the native peaqev-states."""
-        self._chargerstates[CHARGERSTATES.Idle] = [] #todo: list the state(s) that would adhere to peaqev "idle" (ie disconnected)
+        self._chargerstates[CHARGERSTATES.Idle] = ["Available"] #todo: list the state(s) that would adhere to peaqev "idle" (ie disconnected)
         self._chargerstates[CHARGERSTATES.Connected] = [] #todo: list the state(s) that adhere to peaqev "connected"
         self._chargerstates[CHARGERSTATES.Charging] = [] #todo: list the state(s) that adhere to "currently charging"
         self._chargerstates[CHARGERSTATES.Done] = [] #todo: list the state(s) that adhere to "done/completed"
 
-        self.chargerentity = f"sensor.{self._entityschema}_1" #todo: alter this to match the chargerentity
-        self.powermeter = f"sensor.{self._entityschema}_1_power" #todo: alter this to match the powermeter-entity
+        self.chargerentity = f"sensor.{self._entityschema}_id"
+        self.powermeter = f"sensor.{self._entityschema}_power_active_import"
         self.powerswitch = self._determine_switch_entity()
-        self.ampmeter = "max_current" #todo: if updatecurrent is true, type the sensor or attribute that reports the currently set amps from the charger
-        self.ampmeter_is_attribute = True #todo: true if above ampmeter is attribute, false if it's own entity
+        self.ampmeter = f"sensor.{self._entityschema}_current_import"
+
+        self.ampmeter_is_attribute = False
         """
         this will probably have to be rewritten to accommodate the possibility of ampmeter being an attribute, 
         but not bound to the chargeamps-specific entity
@@ -57,8 +95,8 @@ class OCPP(ChargerBase):
         servicecall_params = {}
         """There could be more, or fewer attributes for the servicecall. If needed, add more constants."""
         #servicecall_params[CHARGER] = "chargepoint" #todo
-        #servicecall_params[CHARGERID] = self._chargerid #todo
-        #servicecall_params[CURRENT] = "max_current" #todo
+        servicecall_params[CHARGERID] = self._id #not sure about this one
+        servicecall_params[CURRENT] = "maximum_current" #not sure about this one
 
         _on = CallType(self.powerswitch, {"command": "on"}, SWITCH)
         _off = CallType(self.powerswitch, {"command": "off"}, SWITCH)
