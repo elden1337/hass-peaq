@@ -54,6 +54,7 @@ ENTITYENDINGS = [
     "_availability",
     "_charge_control"
 ] #todo: LISTED ALL POSSIBLE. TO BE SORTED WHICH IS NEEDED OR NOT --> list all (or many of) the entity_endings that this integration has set in HA, this is to gather the correct entities.
+
 NATIVE_CHARGERSTATES = ["Available", "Preparing", "Charging", "SuspendedEVSE", "SuspendedEV", "Finishing", "Reserved", "Unavailable", "Faulted"]
 DOMAINNAME = "ocpp"
 UPDATECURRENT = True 
@@ -76,6 +77,7 @@ class OCPP(ChargerBase):
         self._native_chargerstates = NATIVE_CHARGERSTATES
 
         """this is the states-mapping towards the native peaqev-states."""
+
         self._chargerstates[CHARGERSTATES.Idle] = ["Available"]
         self._chargerstates[CHARGERSTATES.Connected] = ["Preparing"]
         self._chargerstates[CHARGERSTATES.Charging] = ["Charging"]
