@@ -1,4 +1,5 @@
 import logging
+from datetime import timedelta
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.core import HomeAssistant
@@ -6,6 +7,7 @@ from homeassistant.core import HomeAssistant
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
+SCAN_INTERVAL = timedelta(seconds=4)
 
 async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities): # pylint:disable=unused-argument
     hub = hass.data[DOMAIN]["hub"]
