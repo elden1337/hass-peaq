@@ -135,6 +135,17 @@ Example of basic automations to enable/disable the charging. Your states here ma
   mode: single
 ```
 
+### Price awareness
+
+Peaqev can read your local Nordpool-integration should you require charging based on low energy-prices (hourly prices). 
+The logic behind this is found in the parent-repo [Peaqev-core](https://github.com/elden1337/peaqev-core). 
+Like most smart-price chargers Peaqev can stop and start based on "high" prices, but apart from that, it can also let you charge *a little* on semi-expensive hours.
+This means, that without breaking the set peak-energy level, you can also get charge at the lowest possible hours. The combination between these two factors, and the fact that Peaqev has the dynamic hours is unseen elsewhere among smart-chargers.
+
+Below is an example of how the algorithm will determine two different days of prices. The green hours are normal hours (100% of peak accepted), the empty ones are non-hours (turned off) and the yellow-red hours are more and more cautionary because of prices increasing above the tolerance.
+
+![Price aware](assets/price_aware.jfif)
+
 *Tested with Chargeamps Halo 11kw and Easee. Both setups with one single charger per household. Currently will not function where multiple chargers have been installed ,2022-06-02*
 
 
