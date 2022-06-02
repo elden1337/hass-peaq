@@ -79,13 +79,19 @@ Dec| 2.0 | 4.0
 
 ##### Belgium
 
-- `Belgium (VREG)` - single monthly max peak is used in calculation, but the energy is cycled quarter-hourly instead of hourly. 
+- `Belgium (VREG)` - Single monthly max peak is used in calculation, but the energy is cycled quarter-hourly instead of hourly. 
+
+
+##### Norway
+
+- `Agder Energi` - Average of three peaks from different days (hourly).
+- `Glitre Energi` - Single max peak.
 
 
 ##### Sweden
 
-- `Gothenburg, Sweden` - The average of three max peak hours from different days is what your are charged for. The algorithm tries to stay below the minimum value of these three peaks.
-- `Karlstad, Sweden` - single max peak
+- `Gothenburg, Sweden` - Average of three peaks from different days (hourly).
+- `Karlstad, Sweden` - Single max peak
 - `Kristinehamn, Sweden` - for Nov-Mar, max peak during Mon-Fri 07-17. Other months, single max peak
 - `Malung-Sälen, Sweden` - Average of five peaks on different days. Peaks are calc between 07-19. Other hours are free-charge.
 - `Nacka, Sweden (Normal tariffe)` - The average of three max peak hours is what your are charged for. The algorithm tries to stay below the minimum value of these three peaks.
