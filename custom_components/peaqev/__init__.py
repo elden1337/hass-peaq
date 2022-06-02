@@ -46,8 +46,8 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     ci["peaqtype_is_lite"] = peaqtype_is_lite
 
     if ci["priceaware"] is False:
-        ci["cautionhours"] = conf.options["cautionhours"] if "cautionhours" in conf.options.keys() else conf.data["cautionhours"]
-        ci["nonhours"] = conf.options["nonhours"] if "nonhours" in conf.options.keys() else conf.data["nonhours"]
+        ci["cautionhours"] = conf.options["cautionhours"] if "cautionhours" in conf.options.keys() else conf.data["cautionhours"] if "cautionhours" in conf.data.keys() else []
+        ci["nonhours"] = conf.options["nonhours"] if "nonhours" in conf.options.keys() else conf.data["nonhours"] if "nonhours" in conf.data.keys() else []
     else:
         ci["absolute_top_price"] = await _get_existing_param(conf, "absolute_top_price", 0)
         ci["min_price"] = await _get_existing_param(conf, "min_priceaware_threshold_price", 0)
