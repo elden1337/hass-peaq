@@ -1,5 +1,6 @@
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.localetypes.types.default import Default
+from custom_components.peaqev.peaqservice.localetypes.types.no_agder_energi import NO_AgderEnergi
 from custom_components.peaqev.peaqservice.localetypes.types.no_glitre_energi import NO_GlitreEnergi
 from custom_components.peaqev.peaqservice.localetypes.types.se_bjerke_energi import SE_Bjerke_Energi
 from custom_components.peaqev.peaqservice.localetypes.types.se_gothenburg import SE_Gothenburg
@@ -26,7 +27,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
     LOCALE_BE_VREG,
     LOCALE_SE_BJERKE_ENERGI,
     LOCALE_NO_GLITRE_ENERGI,
-    NAME
+    NAME, LOCALE_NO_AGDER_ENERGI
 )
 from custom_components.peaqev.peaqservice.util.sqlsensorhelper import SQLSensorHelper
 
@@ -43,7 +44,8 @@ LOCALETYPEDICT = {
     LOCALE_SE_SOLLENTUNA: SE_Sollentuna(),
     LOCALE_BE_VREG: VregBelgium(),
     LOCALE_SE_BJERKE_ENERGI: SE_Bjerke_Energi(),
-    LOCALE_NO_GLITRE_ENERGI: NO_GlitreEnergi()
+    LOCALE_NO_GLITRE_ENERGI: NO_GlitreEnergi(),
+    LOCALE_NO_AGDER_ENERGI: NO_AgderEnergi()
 }
 
 class LocaleData:

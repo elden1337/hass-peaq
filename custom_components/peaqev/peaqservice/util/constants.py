@@ -72,6 +72,7 @@ LOCALE_SE_SOLLENTUNA = "Sollentuna Energi, Sweden"
 LOCALE_BE_VREG = "Belgium (VREG)"
 LOCALE_SE_BJERKE_ENERGI = "Bjärke Energi, Sweden"
 LOCALE_NO_GLITRE_ENERGI = "Glitre Energi, Norway"
+LOCALE_NO_AGDER_ENERGI = "Agder Energi, Norway"
 
 """Lookup types for config flow"""
 CHARGERTYPES = [
@@ -83,6 +84,7 @@ CHARGERTYPES = [
 """Lookup locales for config flow"""
 LOCALES = [
     LOCALE_BE_VREG,
+    LOCALE_NO_AGDER_ENERGI,
     LOCALE_NO_GLITRE_ENERGI,
     LOCALE_SE_GOTHENBURG,
     LOCALE_SE_KARLSTAD,
