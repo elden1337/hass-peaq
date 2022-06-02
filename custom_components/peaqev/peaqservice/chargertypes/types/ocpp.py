@@ -54,7 +54,7 @@ ENTITYENDINGS = [
     "_availability",
     "_charge_control"
 ] #todo: LISTED ALL POSSIBLE. TO BE SORTED WHICH IS NEEDED OR NOT --> list all (or many of) the entity_endings that this integration has set in HA, this is to gather the correct entities.
-NATIVE_CHARGERSTATES = ["Available"] #todo: list all the available chargerstates here
+NATIVE_CHARGERSTATES = ["Available", "Preparing", "Charging", "SuspendedEVSE", "SuspendedEV", "Finishing", "Reserved", "Unavailable", "Faulted"]
 DOMAINNAME = "ocpp"
 UPDATECURRENT = True 
 
@@ -76,10 +76,10 @@ class OCPP(ChargerBase):
         self._native_chargerstates = NATIVE_CHARGERSTATES
 
         """this is the states-mapping towards the native peaqev-states."""
-        self._chargerstates[CHARGERSTATES.Idle] = ["Available"] #todo: list the state(s) that would adhere to peaqev "idle" (ie disconnected)
-        self._chargerstates[CHARGERSTATES.Connected] = [] #todo: list the state(s) that adhere to peaqev "connected"
-        self._chargerstates[CHARGERSTATES.Charging] = [] #todo: list the state(s) that adhere to "currently charging"
-        self._chargerstates[CHARGERSTATES.Done] = [] #todo: list the state(s) that adhere to "done/completed"
+        self._chargerstates[CHARGERSTATES.Idle] = ["Available"]
+        self._chargerstates[CHARGERSTATES.Connected] = ["Preparing"]
+        self._chargerstates[CHARGERSTATES.Charging] = ["Charging"]
+        self._chargerstates[CHARGERSTATES.Done] = ["Finishing"] #todo: need to be tested if there are additional states i.e. what happens after it finished?
 
         self.chargerentity = f"sensor.{self._entityschema}_id"
         self.powermeter = f"sensor.{self._entityschema}_power_active_import"
