@@ -94,7 +94,7 @@ Dec| 2.0 | 4.0
 - `Karlstad, Sweden` - Single max peak
 - `Kristinehamn, Sweden` - for Nov-Mar, max peak during Mon-Fri 07-17. Other months, single max peak
 - `Malung-Sälen, Sweden` - Average of five peaks on different days. Peaks are calc between 07-19. Other hours are free-charge.
-- `Nacka, Sweden (Normal tariffe)` - The average of three max peak hours is what your are charged for. The algorithm tries to stay below the minimum value of these three peaks.
+- `Nacka, Sweden (Normal tariffe)` - Average of three peaks (hourly).
 - `Bjärke Energi, Sweden` -  Single monthly max peak, except between 22-06
 - `Partille, Sweden` - Single monthly peak hour
 - `Sala, Sweden (SHE ab-customer)` - The average of three max peak hours, that do occur Mon-Fri, between 07-19. Other hours are non-observed.
@@ -102,7 +102,7 @@ Dec| 2.0 | 4.0
 - `Sollentuna, Sweden` - Average of three hours, workdays between 7-19.
 - `Other, just want to test` - Single monthly peak hour is what is being avoided by the algorithm
 
-*More locales will come in future updates*
+*If you miss your city/company/country, please add a feature-request*
 
 ## Usage
 
@@ -135,6 +135,6 @@ Example of basic automations to enable/disable the charging. Your states here ma
   mode: single
 ```
 
-*Tested with Chargeamps Halo 11kw and Easee. Both setups with one single charger per household. Currently will not function where multiple chargers have been installed ,2022-05-16*
+*Tested with Chargeamps Halo 11kw and Easee. Both setups with one single charger per household. Currently will not function where multiple chargers have been installed ,2022-06-02*
 
 
