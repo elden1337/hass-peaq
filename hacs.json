@@ -1,7 +1,7 @@
 {
   "name": "Peaqev ev-Charging",
   "homeassistant": "2022.4.5",
-  "country": ["SE", "BE"],
+  "country": ["SE", "BE", "NO"],
   "zip_release": true,
   "filename": "peaqev.zip",
   "render_readme": true
