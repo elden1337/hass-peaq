@@ -14,12 +14,7 @@ class PeaqMoneySensor(SensorBase):
         self._nonhours = None
         self._dynamic_caution_hours = None
         self._current_hour = None
-        self._price_aware = False
-        self._absolute_top_price = None
-        self._min_price = None
         self._currency = None
-        self._cautionhour_type_string = None
-
         self._prices = []
         self._prices_tomorrow = []
         self._current_peak = None
@@ -35,11 +30,7 @@ class PeaqMoneySensor(SensorBase):
     def update(self) -> None:
         self._nonhours = self._hub.hours.non_hours
         self._dynamic_caution_hours = self._hub.hours.dynamic_caution_hours
-        self._price_aware = self._hub.hours.price_aware
-        self._absolute_top_price = self._hub.hours.absolute_top_price if 0 < self._hub.hours.absolute_top_price < float("inf") else None
-        self._min_price = self._hub.hours.min_price if self._hub.hours.min_price is not None and self._hub.hours.min_price > 0 else None
         self._currency = self._hub.hours.currency
-        self._cautionhour_type_string = self._hub.hours.cautionhour_type_string
         self._prices = self._hub.hours.prices if self._hub.hours.prices is not None else []
         self._prices_tomorrow = self._hub.hours.prices_tomorrow if self._hub.hours.prices_tomorrow is not None else []
         self._current_peak = self._hub.currentpeak.value
@@ -49,15 +40,10 @@ class PeaqMoneySensor(SensorBase):
         attr_dict = {
             "Non hours": self.set_non_hours_display_model(self._nonhours),
             "Caution hours": self.set_dynamic_caution_hours_display(),
-            "Caution hour type": self._cautionhour_type_string,
             "Current hour charge permittance": self.set_dynamic_caution_hour_display(),
             "Avg price per kWh next 24h": f"{self._hub.hours.get_average_kwh_price()} {self._currency}",
             "Max charge next 24h": f"{self._hub.hours.get_total_charge()} kWh"
         }
-        if self._absolute_top_price is not None:
-            attr_dict["Absolute top price"] = f"{self._absolute_top_price} {self._currency}"
-        if self._min_price is not None:
-            attr_dict["Min caution price"]= f"{self._min_price} {self._currency}"
 
         return attr_dict
 

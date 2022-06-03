@@ -71,6 +71,9 @@ LOCALE_SE_MALUNG_SALEN = "Malung-Sälen, Sweden (Malungs elverk)"
 LOCALE_SE_SKOVDE = "Skövde, Sweden"
 LOCALE_SE_SOLLENTUNA = "Sollentuna Energi, Sweden"
 LOCALE_BE_VREG = "Belgium (VREG)"
+LOCALE_SE_BJERKE_ENERGI = "Bjärke Energi, Sweden"
+LOCALE_NO_GLITRE_ENERGI = "Glitre Energi, Norway"
+LOCALE_NO_AGDER_ENERGI = "Agder Energi, Norway"
 
 """Lookup types for config flow"""
 CHARGERTYPES = [
@@ -86,6 +89,8 @@ CALL = "call"
 """Lookup locales for config flow"""
 LOCALES = [
     LOCALE_BE_VREG,
+    LOCALE_NO_AGDER_ENERGI,
+    LOCALE_NO_GLITRE_ENERGI,
     LOCALE_SE_GOTHENBURG,
     LOCALE_SE_KARLSTAD,
     LOCALE_SE_KRISTINEHAMN,
@@ -95,6 +100,7 @@ LOCALES = [
     LOCALE_SE_SALA,
     LOCALE_SE_SKOVDE,
     LOCALE_SE_SOLLENTUNA,
+    LOCALE_SE_BJERKE_ENERGI,
     LOCALE_DEFAULT
     ]
 

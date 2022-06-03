@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.core import HomeAssistant
 
@@ -15,6 +17,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entitie
     peaqsensors.append(PeaqBinarySensorEnabled(hub))
     async_add_entities(peaqsensors)
 
+SCAN_INTERVAL = timedelta(seconds=4)
 
 class PeaqBinarySensorEnabled(BinarySensorEntity):
     """The binary sensor for peaq being enabled or disabled"""

@@ -6,11 +6,9 @@ from peaqevcore.Models import CHARGERSTATES
 from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
 from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
 from custom_components.peaqev.peaqservice.util.constants import (
-    CHARGER,
     CHARGERID,
     CURRENT,
-    SWITCH,
-    CALL
+    SWITCH
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -57,7 +55,7 @@ ENTITYENDINGS = [
 
 NATIVE_CHARGERSTATES = ["Available", "Preparing", "Charging", "SuspendedEVSE", "SuspendedEV", "Finishing", "Reserved", "Unavailable", "Faulted"]
 DOMAINNAME = "ocpp"
-UPDATECURRENT = True 
+UPDATECURRENT = False #todo: set true later, but for initial testing ignore it.
 
 """
 The corresponding constant in peaqservice/util/constants.py is what the user picks.
@@ -77,7 +75,6 @@ class OCPP(ChargerBase):
         self._native_chargerstates = NATIVE_CHARGERSTATES
 
         """this is the states-mapping towards the native peaqev-states."""
-
         self._chargerstates[CHARGERSTATES.Idle] = ["Available"]
         self._chargerstates[CHARGERSTATES.Connected] = ["Preparing"]
         self._chargerstates[CHARGERSTATES.Charging] = ["Charging"]
@@ -88,17 +85,12 @@ class OCPP(ChargerBase):
         #self.powerswitch = self._determine_switch_entity()
         self.powerswitch = f"switch.{self._entityschema}_availability"
         self.ampmeter = f"sensor.{self._entityschema}_current_import"
-
         self.ampmeter_is_attribute = False
-        """
-        this will probably have to be rewritten to accommodate the possibility of ampmeter being an attribute, 
-        but not bound to the chargeamps-specific entity
-        """
 
         servicecall_params = {}
         """There could be more, or fewer attributes for the servicecall. If needed, add more constants."""
         #servicecall_params[CHARGER] = "chargepoint" #todo
-        servicecall_params[CHARGERID] = self._id #not sure about this one
+        servicecall_params[CHARGERID] = self._chargerid
         servicecall_params[CURRENT] = "maximum_current" #not sure about this one
 
         _on = CallType(self.powerswitch, {"command": "on"}, SWITCH)
@@ -109,7 +101,7 @@ class OCPP(ChargerBase):
             on_call=_on,
             off_call=_off,
             allowupdatecurrent= UPDATECURRENT,
-            update_current_call="set_max_current",
+            update_current_call="set_charge_rate",
             update_current_params=servicecall_params
         )
 

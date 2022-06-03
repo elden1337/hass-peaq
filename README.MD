@@ -79,23 +79,30 @@ Dec| 2.0 | 4.0
 
 ##### Belgium
 
-- `Belgium (VREG)` - single monthly max peak is used in calculation, but the energy is cycled quarter-hourly instead of hourly. 
+- `Belgium (VREG)` - Single monthly max peak is used in calculation, but the energy is cycled quarter-hourly instead of hourly. 
+
+
+##### Norway
+
+- `Agder Energi` - Average of three peaks from different days (hourly).
+- `Glitre Energi` - Single max peak.
 
 
 ##### Sweden
 
-- `Gothenburg, Sweden` - The average of three max peak hours from different days is what your are charged for. The algorithm tries to stay below the minimum value of these three peaks.
-- `Karlstad, Sweden` - single max peak
+- `Gothenburg, Sweden` - Average of three peaks from different days (hourly).
+- `Karlstad, Sweden` - Single max peak
 - `Kristinehamn, Sweden` - for Nov-Mar, max peak during Mon-Fri 07-17. Other months, single max peak
 - `Malung-Sälen, Sweden` - Average of five peaks on different days. Peaks are calc between 07-19. Other hours are free-charge.
-- `Nacka, Sweden (Normal tariffe)` - The average of three max peak hours is what your are charged for. The algorithm tries to stay below the minimum value of these three peaks.
-- `Partille, Sweden` - Single monthly peak hour is what is being avoided by the algorithm
+- `Nacka, Sweden (Normal tariffe)` - Average of three peaks (hourly).
+- `Bjärke Energi, Sweden` -  Single monthly max peak, except between 22-06
+- `Partille, Sweden` - Single monthly peak hour
 - `Sala, Sweden (SHE ab-customer)` - The average of three max peak hours, that do occur Mon-Fri, between 07-19. Other hours are non-observed.
 - `Skövde, Sweden` - Single monthly max peak. Observed Nov-Mar, Mon-Fri between 06-22. Other hours are non-observed. 
 - `Sollentuna, Sweden` - Average of three hours, workdays between 7-19.
 - `Other, just want to test` - Single monthly peak hour is what is being avoided by the algorithm
 
-*More locales will come in future updates*
+*If you miss your city/company/country, please add a feature-request*
 
 ## Usage
 
@@ -128,6 +135,17 @@ Example of basic automations to enable/disable the charging. Your states here ma
   mode: single
 ```
 
-*Tested with Chargeamps Halo 11kw and Easee. Both setups with one single charger per household. Currently will not function where multiple chargers have been installed ,2022-05-16*
+### Price awareness
+
+Peaqev can read your local Nordpool-integration should you require charging based on low energy-prices (hourly prices). 
+The logic behind this is found in the parent-repo [Peaqev-core](https://github.com/elden1337/peaqev-core). 
+Like most smart-price chargers Peaqev can stop and start based on "high" prices, but apart from that, it can also let you charge *a little* on semi-expensive hours.
+This means, that without breaking the set peak-energy level, you can also get charge at the lowest possible hours. The combination between these two factors, and the fact that Peaqev has the dynamic hours is unseen elsewhere among smart-chargers.
+
+Below is an example of how the algorithm will determine two different days of prices. The green hours are normal hours (100% of peak accepted), the empty ones are non-hours (turned off) and the yellow-red hours are more and more cautionary because of prices increasing above the tolerance.
+
+![Price aware](assets/price_aware.jfif)
+
+*Tested with Chargeamps Halo 11kw and Easee. Both setups with one single charger per household. Currently will not function where multiple chargers have been installed ,2022-06-02*
 
 
