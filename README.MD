@@ -7,13 +7,10 @@
 
 ![Peaq logo](https://raw.githubusercontent.com/elden1337/hass-peaq/main/assets/icon.png)
 
-Peaqev ev-charging is an attempt of charging an ev without breaching a preset monthly max-peak energy level. 
 In order for this integration to function in its normal state, you will need to have a sensor/device that reads your current power-draw with good resolution *examples below*. If you do not have this, you may install the Lite-version of Peaqev.
-Shoudl you wish to let Peaqev control your charging depending on hourly energy price, you must first disable any other smart-charging capability you may have, such as scheduled charging or energy-price-aware charging.
+Should you wish to let Peaqev control your charging depending on hourly energy price, you must first disable any other smart-charging capability you may have, such as scheduled charging or energy-price-aware charging.
 
-This integration does not communicate with any properitary API's, everything is handled locally in your Home Assistant. However, the chargers selected will use the integrations set for them, and may include cloud polling of data.
-
-*While this integration will try to not break your monthly energy peak hour, there is off course no guarantee. Various factors beyond control of this logic do occur, so for those aiming at staying below their threshold, I do suggest you think about the non-hours, caution-hours etc in the setup. These hours should be set when you commonly utilize a lot of extra energy in your home, such as cooking, doing laundry etc.* 
+This integration does not communicate with any properitary API's. However, the chargers selected will use the integrations set for them, and may include cloud polling of data.
 
 ## Installation
 *Required to install is Home Assistant version 2022.4.5 or higher.*
@@ -79,7 +76,7 @@ Dec| 2.0 | 4.0
 
 ##### Belgium
 
-- `Belgium (VREG)` - Single monthly max peak is used in calculation, but the energy is cycled quarter-hourly instead of hourly. 
+- `VREG` - Single monthly max peak is used in calculation, but the energy is cycled quarter-hourly instead of hourly. 
 
 
 ##### Norway
@@ -89,20 +86,20 @@ Dec| 2.0 | 4.0
 - `LNett` - Average of three peaks (hourly).
 - `Tensio` - Average of three peaks from different days (hourly).
 
-
-
 ##### Sweden
 
-- `Gothenburg, Sweden` - Average of three peaks from different days (hourly).
-- `Karlstad, Sweden` - Single max peak
-- `Kristinehamn, Sweden` - for Nov-Mar, max peak during Mon-Fri 07-17. Other months, single max peak
-- `Malung-Sälen, Sweden` - Average of five peaks on different days. Peaks are calc between 07-19. Other hours are free-charge.
-- `Nacka, Sweden (Normal tariffe)` - Average of three peaks (hourly).
-- `Bjärke Energi, Sweden` -  Single monthly max peak, except between 22-06
-- `Partille, Sweden` - Single monthly peak hour
-- `Sala, Sweden (SHE ab-customer)` - The average of three max peak hours, that do occur Mon-Fri, between 07-19. Other hours are non-observed.
-- `Skövde, Sweden` - Single monthly max peak. Observed Nov-Mar, Mon-Fri between 06-22. Other hours are non-observed. 
-- `Sollentuna, Sweden` - Average of three hours, workdays between 7-19.
+- `Gothenburg` - Average of three peaks from different days (hourly).
+- `Karlstad` - Single max peak
+- `Kristinehamn` - for Nov-Mar, max peak during Mon-Fri 07-17. Other months, single max peak
+- `Malung-Sälen` - Average of five peaks from different days. Peaks are calc between 07-19. Other hours are free-charge.
+- `Nacka (Normal tariffe)` - Average of three peaks (hourly).
+- `Bjärke Energi` -  Single max peak, except between 22-06
+- `Partille` - Single max peak
+- `Sala (SHE ab-customer)` - Average of three peaks, that do occur Mon-Fri, between 07-19. Other hours are non-observed.
+- `Skövde` - Single max peak. Observed Nov-Mar, Mon-Fri between 06-22. Other hours are non-observed. 
+- `Sollentuna` - Average of three hours, workdays between 7-19.
+
+
 - `Other, just want to test` - Single monthly peak hour is what is being avoided by the algorithm
 
 *If you miss your city/company/country, please add a feature-request*
@@ -151,4 +148,4 @@ Below is an example of how the algorithm will determine two different days of pr
 
 *Tested with Chargeamps Halo 11kw and Easee. Both setups with one single charger per household. Currently will not function where multiple chargers have been installed ,2022-06-02*
 
-
+*While this integration will try to not break your monthly energy peak hour, there is off course no guarantee. Various factors beyond control of this logic do occur, so for those aiming at staying below their threshold, I do suggest you think about the non-hours, caution-hours etc in the setup. These hours should be set when you commonly utilize a lot of extra energy in your home, such as cooking, doing laundry etc.*
