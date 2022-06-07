@@ -33,19 +33,19 @@ from custom_components.peaqev.peaqservice.util.sqlsensorhelper import SQLSensorH
 
 LOCALETYPEDICT = {
     LOCALE_DEFAULT: Default(),
-    LOCALE_SE_GOTHENBURG: SE_Gothenburg(),
-    LOCALE_SE_PARTILLE: SE_Partille(),
-    LOCALE_SE_KARLSTAD: SE_Karlstad(),
-    LOCALE_SE_KRISTINEHAMN: SE_Kristinehamn(),
-    LOCALE_SE_NACKA_NORMAL: SE_Nacka_normal(),
-    LOCALE_SE_MALUNG_SALEN: SE_Malung_Salen(),
-    LOCALE_SE_SALA: SE_SHE_AB(),
-    LOCALE_SE_SKOVDE: SE_Skovde(),
-    LOCALE_SE_SOLLENTUNA: SE_Sollentuna(),
-    LOCALE_BE_VREG: VregBelgium(),
-    LOCALE_SE_BJERKE_ENERGI: SE_Bjerke_Energi(),
-    LOCALE_NO_GLITRE_ENERGI: NO_GlitreEnergi(),
-    LOCALE_NO_AGDER_ENERGI: NO_AgderEnergi()
+    LOCALE_SE_GOTHENBURG: SE_Gothenburg,
+    LOCALE_SE_PARTILLE: SE_Partille,
+    LOCALE_SE_KARLSTAD: SE_Karlstad,
+    LOCALE_SE_KRISTINEHAMN: SE_Kristinehamn,
+    LOCALE_SE_NACKA_NORMAL: SE_Nacka_normal,
+    LOCALE_SE_MALUNG_SALEN: SE_Malung_Salen,
+    LOCALE_SE_SALA: SE_SHE_AB,
+    LOCALE_SE_SKOVDE: SE_Skovde,
+    LOCALE_SE_SOLLENTUNA: SE_Sollentuna,
+    LOCALE_BE_VREG: VregBelgium,
+    LOCALE_SE_BJERKE_ENERGI: SE_Bjerke_Energi,
+    LOCALE_NO_GLITRE_ENERGI: NO_GlitreEnergi,
+    LOCALE_NO_AGDER_ENERGI: NO_AgderEnergi
 }
 
 class LocaleData:
@@ -54,7 +54,7 @@ class LocaleData:
         self._type = input_type
         self._domain = domain
 
-        self._data = LOCALETYPEDICT[input_type]
+        self._data = LOCALETYPEDICT[input_type]()
 
     @property
     def type(self) -> str:
