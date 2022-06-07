@@ -84,6 +84,7 @@ LOCALE_SE_BJERKE_ENERGI = "Bjärke Energi, Sweden"
 LOCALE_NO_GLITRE_ENERGI = "Glitre Energi, Norway"
 LOCALE_NO_AGDER_ENERGI = "Agder Energi, Norway"
 LOCALE_NO_LNETT = "LNett, Norway"
+LOCALE_NO_TENSIO = "Tensio, Norway"
 
 """Lookup locales for config flow"""
 LOCALES = [
@@ -91,6 +92,7 @@ LOCALES = [
     LOCALE_NO_AGDER_ENERGI,
     LOCALE_NO_GLITRE_ENERGI,
     LOCALE_NO_LNETT,
+    LOCALE_NO_TENSIO,
     LOCALE_SE_GOTHENBURG,
     LOCALE_SE_KARLSTAD,
     LOCALE_SE_KRISTINEHAMN,

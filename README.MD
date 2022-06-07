@@ -87,6 +87,7 @@ Dec| 2.0 | 4.0
 - `Agder Energi` - Average of three peaks from different days (hourly).
 - `Glitre Energi` - Single max peak.
 - `LNett` - Average of three peaks (hourly).
+- `Tensio` - Average of three peaks from different days (hourly).
 
 
 
