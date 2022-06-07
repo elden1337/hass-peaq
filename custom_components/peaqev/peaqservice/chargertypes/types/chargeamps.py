@@ -83,12 +83,14 @@ class ChargeAmps(ChargerBase):
                 ret.append(e)
         return ret
 
-    def _set_chargeamps_type(self, mainsensor_entity):
-        chargeampstype = self._hass.states.get(mainsensor_entity).attributes.get("chargepoint_type")
-        if chargeampstype == "HALO":
-            self._chargeramps_type = HALO
-        elif chargeampstype == "AURA":
-            self._chargeramps_type = AURA
+    def _set_chargeamps_type(self, main_sensor_entity):
+        if self._hass.states.get(main_sensor_entity) is not None:
+            chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get("chargepoint_type")
+            if chargeampstype == "HALO":
+                self._chargeramps_type = HALO
+            elif chargeampstype == "AURA":
+                self._chargeramps_type = AURA
+
 
     def _determine_switch_entity(self):
         ent = self._determine_entities()
