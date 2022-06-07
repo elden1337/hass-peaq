@@ -184,10 +184,14 @@ class PriceAwareHours(Hours):
         return False
 
     def get_average_kwh_price(self):
-        return self._core.get_average_kwh_price()
+        if self._is_initialized:
+            return self._core.get_average_kwh_price()
+        return 0
 
     def get_total_charge(self):
-        return self._core.get_total_charge(self._hub.currentpeak.value)
+        if self._is_initialized:
+            return self._core.get_total_charge(self._hub.currentpeak.value)
+        return 0
 
     def update_nordpool(self):
         ret = self._hass.states.get(self.nordpool_entity)
