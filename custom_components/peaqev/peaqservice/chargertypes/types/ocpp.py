@@ -83,7 +83,7 @@ class OCPP(ChargerBase):
         self.chargerentity = f"sensor.{self._entityschema}_id"
         self.powermeter = f"sensor.{self._entityschema}_power_active_import"
         #self.powerswitch = self._determine_switch_entity()
-        self.powerswitch = f"switch.{self._entityschema}_availability"
+        self.powerswitch = f"switch.{self._entityschema}_charge_control"
         self.ampmeter = f"sensor.{self._entityschema}_current_import"
         self.ampmeter_is_attribute = False
 
