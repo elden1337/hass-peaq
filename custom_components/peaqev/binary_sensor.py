@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
@@ -7,6 +8,7 @@ from custom_components.peaqev.peaqservice.util.constants import CHARGERENABLED, 
 from .const import (
     DOMAIN)
 
+_LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities): # pylint:disable=unused-argument
     hub = hass.data[DOMAIN]["hub"]
@@ -38,7 +40,11 @@ class PeaqBinarySensorEnabled(BinarySensorEntity):
 
     @property
     def is_on(self) -> bool:
-        return self._hub.charger_enabled.value
+        try:
+            return self._hub.charger_enabled.value
+        except:
+            _LOGGER.debug("Binarysensor_enabled could not get state from hub.")
+            return False
 
 
 class PeaqBinarySensorDone(BinarySensorEntity):
@@ -58,4 +64,8 @@ class PeaqBinarySensorDone(BinarySensorEntity):
 
     @property
     def is_on(self) -> bool:
-        return self._hub.charger_done.value
+        try:
+            return self._hub.charger_done.value
+        except:
+            _LOGGER.debug("Binarysensor_charger_done could not get state from hub.")
+            return False

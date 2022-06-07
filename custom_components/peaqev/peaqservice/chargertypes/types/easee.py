@@ -45,19 +45,16 @@ class Easee(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid, auth_required: bool = False):
         super().__init__(hass)
         self._chargerid = chargerid
-        self.getentities(DOMAINNAME, ENTITYENDINGS)
+        self._auth_required = auth_required
+        self._domainname = DOMAINNAME
+        self._entityendings = ENTITYENDINGS
         self._native_chargerstates = NATIVE_CHARGERSTATES
         self._chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
         self._chargerstates[CHARGERSTATES.Connected] = ["awaiting_start", "ready_to_charge"]
         self._chargerstates[CHARGERSTATES.Charging] = ["charging"]
         self._chargerstates[CHARGERSTATES.Done] = ["completed"]
-        self.chargerentity = f"sensor.{self._entityschema}_status"
-        self.powermeter = f"sensor.{self._entityschema}_power"
-        self.powermeter_factor = 1000
-        self.powerswitch = f"switch.{self._entityschema}_is_enabled"
-        self.ampmeter = f"sensor.{self._entityschema}_max_charger_limit"
-        self.ampmeter_is_attribute = False
-        self._auth_required = auth_required
+        self.getentities()
+        self.set_sensors()
 
         servicecall_params = {
             CHARGER: "charger_id",
@@ -82,3 +79,11 @@ class Easee(ChargerBase):
             update_current_call="set_charger_dynamic_limit",
             update_current_params=servicecall_params
         )
+
+    def set_sensors(self):
+        self.chargerentity = f"sensor.{self._entityschema}_status"
+        self.powermeter = f"sensor.{self._entityschema}_power"
+        self.powermeter_factor = 1000
+        self.powerswitch = f"switch.{self._entityschema}_is_enabled"
+        self.ampmeter = f"sensor.{self._entityschema}_max_charger_limit"
+        self.ampmeter_is_attribute = False

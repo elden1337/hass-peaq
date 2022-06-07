@@ -1,6 +1,7 @@
 import logging
 # import homeassistant.helpers.template as template
 import time
+from abc import abstractmethod
 
 from peaqevcore.Models import CHARGERSTATES
 
@@ -13,6 +14,8 @@ _LOGGER = logging.getLogger(__name__)
 class ChargerBase:
     def __init__(self, hass):
         self._hass = hass
+        self._domainname = ""
+        self._entityendings = None
         self._chargerEntity = None
         self._powermeter = None
         self.powermeter_factor = 1
@@ -127,11 +130,17 @@ class ChargerBase:
             entity_id
             for entity_id, info in entity_sources(self._hass).items()
             if info["domain"] == domain_name
+               or info["domain"] == domain_name.capitalize()
+               or info["domain"] == domain_name.upper()
+               or info["domain"] == domain_name.lower()
         ]
         return ret
 
-    def getentities(self, domain: str, endings: list):
+    def getentities(self, domain: str = None, endings: list = None):
         #entities = template.integration_entities(self._hass, domain)
+        domain = self._domainname if domain is None else domain
+        endings = self._entityendings if endings is None else endings
+
         entities = self._get_entities_fallback(domain)
 
         if len(entities) < 1:
@@ -150,3 +159,8 @@ class ChargerBase:
             msg = f"entityschema is: {self._entityschema} at {time.time()}"
             _LOGGER.info(msg)
             self._entities = entities
+            self.set_sensors()
+
+    @abstractmethod
+    def set_sensors(self):
+        pass

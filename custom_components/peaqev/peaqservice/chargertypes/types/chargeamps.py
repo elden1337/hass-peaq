@@ -39,19 +39,17 @@ class ChargeAmps(ChargerBase):
         self._chargeramps_type = ""
         self._chargerid = chargerid
         self._chargeamps_connector = 1
-        self.getentities(DOMAINNAME, ENTITYENDINGS)
+        self._domainname = DOMAINNAME
+        self._entityendings = ENTITYENDINGS
+
         self._native_chargerstates = NATIVE_CHARGERSTATES
         self._chargerstates[CHARGERSTATES.Idle] = ["available"]
         self._chargerstates[CHARGERSTATES.Connected] = ["connected"]
         self._chargerstates[CHARGERSTATES.Charging] = ["charging"]
         self._chargerstates[CHARGERSTATES.Done] = ["not_available"]
 
-        self.chargerentity = f"sensor.{self._entityschema}_1"
-        self._set_chargeamps_type(self.chargerentity)
-        self.powermeter = f"sensor.{self._entityschema}_1_power"
-        self.powerswitch = self._determine_switch_entity()
-        self.ampmeter = "max_current"
-        self.ampmeter_is_attribute = True
+        self.getentities()
+        self.set_sensors()
 
         servicecall_params = {}
         servicecall_params[CHARGER] = "chargepoint"
@@ -74,6 +72,14 @@ class ChargeAmps(ChargerBase):
             update_current_call="set_max_current",
             update_current_params=servicecall_params
         )
+
+    def set_sensors(self):
+        self.chargerentity = f"sensor.{self._entityschema}_1"
+        self._set_chargeamps_type(self.chargerentity)
+        self.powermeter = f"sensor.{self._entityschema}_1_power"
+        self.powerswitch = self._determine_switch_entity()
+        self.ampmeter = "max_current"
+        self.ampmeter_is_attribute = True
 
     def _determine_entities(self):
         ret = []

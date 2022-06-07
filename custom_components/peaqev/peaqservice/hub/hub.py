@@ -74,13 +74,15 @@ class Hub(HubBase, HubData):
         if all(ret.values()):
             return True
         not_ready = []
-        for r in ret.items():
+        for r in ret:
             if ret[r] is False:
                 not_ready.append(r)
         if len(not_ready) != self.not_ready_list_old_state or self.initialized_log_last_logged - time.time() > 30:
             _LOGGER.warning(f"{not_ready} has not initialized yet.")
             self.not_ready_list_old_state = len(not_ready)
             self.initialized_log_last_logged = time.time()
+        if "chargerobject" in not_ready:
+            self.chargertype.charger.getentities()
         return False
 
     @property
