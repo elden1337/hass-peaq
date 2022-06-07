@@ -180,12 +180,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self.options.update(user_input)
             return await self.async_step_months()
 
-        _nonhours = self.config_entry.options.get(
-            "nonhours") if "nonhours" in self.config_entry.options.keys() else self.config_entry.data.get(
-            "nonhours")
-        _cautionhours = self.config_entry.options.get(
-            "cautionhours") if "cautionhours" in self.config_entry.options.keys() else self.config_entry.data.get(
-            "cautionhours")
+        _nonhours = await self._get_existing_param("nonhours", list(range(0, 24)))
+        _cautionhours = await self._get_existing_param("cautionhours", list(range(0, 24)))
 
         return self.async_show_form(
             step_id="hours",
