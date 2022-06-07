@@ -3,6 +3,7 @@ from homeassistant.components.integration.const import METHOD_TRAPEZOIDAL
 from homeassistant.components.integration.sensor import (
     IntegrationSensor
 )
+from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.const import (
     TIME_HOURS
 )
@@ -12,6 +13,7 @@ from custom_components.peaqev.const import DOMAIN
 
 
 class PeaqIntegrationSensor(IntegrationSensor):
+    device_class = SensorDeviceClass.ENERGY
     def __init__(self, hub, sensor, name, entry_id):
         self._entry_id = entry_id
         self._hub = hub
@@ -27,7 +29,6 @@ class PeaqIntegrationSensor(IntegrationSensor):
             unique_id=self.unique_id,
             unit_prefix="k",
             unit_time=TIME_HOURS
-            #unit_of_measurement=self._unit_of_measurement
         )
 
     @property

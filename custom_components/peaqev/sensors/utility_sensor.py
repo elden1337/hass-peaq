@@ -24,6 +24,7 @@ class PeaqUtilitySensor(UtilityMeterSensor):
         self._entry_id = entry_id
         self._hub = hub
         self._attr_name = f"{self._hub.hubname} {sensor} {meter_type.lower()}"
+        self._unit_of_measurement = "kWh"
         entity = f"sensor.{DOMAIN.lower()}_{sensor}"
 
         super().__init__(

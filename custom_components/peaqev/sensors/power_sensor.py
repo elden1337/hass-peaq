@@ -1,7 +1,6 @@
+from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.const import (
-    DEVICE_CLASS_POWER,
     POWER_WATT,
-    DEVICE_CLASS_CURRENT,
     ELECTRIC_CURRENT_AMPERE
 )
 
@@ -10,7 +9,7 @@ from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 
 class PeaqAmpSensor(SensorBase):
-    device_class = DEVICE_CLASS_CURRENT
+    device_class = SensorDeviceClass.CURRENT
     unit_of_measurement = ELECTRIC_CURRENT_AMPERE
     def __init__(self, hub, entry_id):
         name = f"{hub.hubname} {ALLOWEDCURRENT}"
@@ -35,7 +34,7 @@ class PeaqAmpSensor(SensorBase):
         }
 
 class PeaqPowerSensor(SensorBase):
-    device_class = DEVICE_CLASS_POWER
+    device_class = SensorDeviceClass.POWER
     unit_of_measurement = POWER_WATT
 
     def __init__(self, hub, entry_id):
@@ -53,7 +52,7 @@ class PeaqPowerSensor(SensorBase):
         self._state = self._hub.power.total.value
 
 class PeaqHousePowerSensor(SensorBase):
-    device_class = DEVICE_CLASS_POWER
+    device_class = SensorDeviceClass.POWER
     unit_of_measurement = POWER_WATT
 
     def __init__(self, hub, entry_id):
