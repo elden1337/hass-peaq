@@ -1,6 +1,7 @@
 import logging
+# import homeassistant.helpers.template as template
+import time
 
-import homeassistant.helpers.template as template
 from peaqevcore.Models import CHARGERSTATES
 
 from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
@@ -119,11 +120,23 @@ class ChargerBase:
         }
         _LOGGER.info(debugprint)
 
+    def _get_entities_fallback(self, domain_name):
+        from homeassistant.helpers.entity import entity_sources
+
+        ret = [
+            entity_id
+            for entity_id, info in entity_sources(self._hass).items()
+            if info["domain"] == domain_name
+        ]
+        return ret
+
     def getentities(self, domain: str, endings: list):
-        entities = template.integration_entities(self._hass, domain)
+        #entities = template.integration_entities(self._hass, domain)
+        entities = self._get_entities_fallback(domain)
 
         if len(entities) < 1:
-            _LOGGER.error("no entities!")
+            msg = f"no entities found for {domain} at {time.time()}"
+            _LOGGER.error(msg)
         else:
             _endings = endings
             namelrg = entities[0].split(".")
@@ -134,4 +147,6 @@ class ChargerBase:
                     candidate = namelrg[1].replace(e, '')
 
             self._entityschema = candidate
+            msg = f"entityschema is: {self._entityschema} at {time.time()}"
+            _LOGGER.info(msg)
             self._entities = entities
