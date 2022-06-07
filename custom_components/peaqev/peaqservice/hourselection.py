@@ -112,7 +112,7 @@ class PriceAwareHours(Hours):
         self._hass = hass
         self._prices = []
         self._nordpool_entity = None
-        self._nordpool_currency = None
+        self._nordpool_currency = ""
         self._is_initialized = False
         self._setup_nordpool()
         super().__init__(True)
@@ -185,12 +185,18 @@ class PriceAwareHours(Hours):
 
     def get_average_kwh_price(self):
         if self._is_initialized:
-            return self._core.get_average_kwh_price()
+            try:
+                return self._core.get_average_kwh_price()
+            except ZeroDivisionError as e:
+                _LOGGER.warning(e)
         return 0
 
     def get_total_charge(self):
         if self._is_initialized:
-            return self._core.get_total_charge(self._hub.currentpeak.value)
+            try:
+                return self._core.get_total_charge(self._hub.currentpeak.value)
+            except ZeroDivisionError as e:
+                _LOGGER.warning(e)
         return 0
 
     def update_nordpool(self):
