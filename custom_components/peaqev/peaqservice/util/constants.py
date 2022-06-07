@@ -54,10 +54,20 @@ CURRENTS_THREEPHASE_1_32 = {
     4100: 6
 } #moved to core
 
+
+"""CHARGERTYPES"""
 CHARGERTYPE_CHARGEAMPS = "Chargeamps"
 CHARGERTYPE_EASEE = "Easee"
 CHARGERTYPE_GAROWALLBOX = "Garo Wallbox"
 
+"""Lookup types for config flow"""
+CHARGERTYPES = [
+    CHARGERTYPE_CHARGEAMPS,
+    CHARGERTYPE_EASEE,
+    #CHARGERTYPE_GAROWALLBOX
+    ]
+
+"""LOCALETYPES"""
 LOCALE_SE_GOTHENBURG = "Gothenburg, Sweden"
 LOCALE_SE_KARLSTAD = "Karlstad, Sweden"
 LOCALE_SE_KRISTINEHAMN = "Kristinehamn, Sweden"
@@ -73,19 +83,14 @@ LOCALE_BE_VREG = "Belgium (VREG)"
 LOCALE_SE_BJERKE_ENERGI = "Bjärke Energi, Sweden"
 LOCALE_NO_GLITRE_ENERGI = "Glitre Energi, Norway"
 LOCALE_NO_AGDER_ENERGI = "Agder Energi, Norway"
-
-"""Lookup types for config flow"""
-CHARGERTYPES = [
-    CHARGERTYPE_CHARGEAMPS,
-    CHARGERTYPE_EASEE,
-    #CHARGERTYPE_GAROWALLBOX
-    ]
+LOCALE_NO_LNETT = "LNett, Norway"
 
 """Lookup locales for config flow"""
 LOCALES = [
     LOCALE_BE_VREG,
     LOCALE_NO_AGDER_ENERGI,
     LOCALE_NO_GLITRE_ENERGI,
+    LOCALE_NO_LNETT,
     LOCALE_SE_GOTHENBURG,
     LOCALE_SE_KARLSTAD,
     LOCALE_SE_KRISTINEHAMN,
@@ -99,7 +104,8 @@ LOCALES = [
     LOCALE_DEFAULT
     ]
 
-"""Naming constants"""
+
+"""NAMING CONSTANTS"""
 PEAQCONTROLLER = "Peaq controller"
 CHARGERCONTROLLER = "Charger controller"
 MONEY = "Money"

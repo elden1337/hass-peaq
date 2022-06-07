@@ -1,12 +1,12 @@
 from datetime import datetime
 
 from homeassistant.components.utility_meter.sensor import (
-    QUARTER_HOURLY
+    QUARTER_HOURLY, HOURLY
 )
 
 
 class LocaleTypeBase:
-    def __init__(self, observedpeak:str, chargedpeak:str, peakcycle:str, freechargepattern:list = []): # pylint:disable=dangerous-default-value
+    def __init__(self, observedpeak:str, chargedpeak:str, peakcycle:str = HOURLY, freechargepattern:list = []): # pylint:disable=dangerous-default-value
         self._observed_peak = observedpeak
         self._charged_peak = chargedpeak
         self._peak_cycle = peakcycle
