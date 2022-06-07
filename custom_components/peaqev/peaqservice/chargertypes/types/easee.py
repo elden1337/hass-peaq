@@ -26,7 +26,15 @@ ENTITYENDINGS = [
     "_cost_per_kwh",
     "_enable_idle_current"
 ]
-NATIVE_CHARGERSTATES = ["disconnected","awaiting_start","charging","ready_to_charge","completed","error"]
+
+NATIVE_CHARGERSTATES = [
+    "disconnected",
+    "awaiting_start",
+    "charging",
+    "ready_to_charge",
+    "completed",
+    "error"
+]
 
 DOMAINNAME = "easee"
 UPDATECURRENT = True
@@ -62,7 +70,7 @@ class Easee(ChargerBase):
         _on = CallType("start", _on_off_params)
         _off = CallType("stop", _on_off_params)
         _resume = CallType("set_charger_dynamic_limit", {"mode": "6", "charger_id": self._chargerid})
-        _pause = CallType("set_charger_dynamic_limit", {"mode": "4", "charger_id": self._chargerid})
+        _pause = CallType("set_charger_dynamic_limit", {"mode": "0", "charger_id": self._chargerid})
 
         self._set_servicecalls(
             domain=DOMAINNAME,
