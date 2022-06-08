@@ -35,7 +35,7 @@ class ChargeControllerBase:
         if self._hub.is_initialized is True:
             if self._chargecontroller_initalized is False:
                 self._chargecontroller_initalized = True
-                _LOGGER.debug("Chargecontroller is initialized and ready to work!")
+                _LOGGER.info("Chargecontroller is initialized and ready to work!")
         ret = self._get_status()
         if ret == CHARGERSTATES.Error:
             msg = f"Chargecontroller returned faulty state. Charger reported {self._hub.chargerobject.value.lower()} as state."
