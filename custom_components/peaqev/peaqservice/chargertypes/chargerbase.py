@@ -123,7 +123,7 @@ class ChargerBase:
         }
         _LOGGER.info(debugprint)
 
-    def _get_entities_fallback(self, domain_name):
+    def _get_entities_fallback(self, domain_name) -> list:
         from homeassistant.helpers.entity import entity_sources
 
         ret = [
@@ -137,29 +137,34 @@ class ChargerBase:
         return ret
 
     def getentities(self, domain: str = None, endings: list = None):
-        #entities = template.integration_entities(self._hass, domain)
-        domain = self._domainname if domain is None else domain
-        endings = self._entityendings if endings is None else endings
+        if len(self._entityschema) < 1:
+            #entities = template.integration_entities(self._hass, domain)
+            domain = self._domainname if domain is None else domain
+            endings = self._entityendings if endings is None else endings
 
-        entities = self._get_entities_fallback(domain)
+            entities = self._get_entities_fallback(domain)
 
-        if len(entities) < 1:
-            msg = f"no entities found for {domain} at {time.time()}"
-            _LOGGER.error(msg)
-        else:
-            _endings = endings
-            namelrg = entities[0].split(".")
-            candidate = ""
+            if len(entities) < 1:
+                msg = f"no entities found for {domain} at {time.time()}"
+                _LOGGER.error(msg)
+            else:
+                msg = f"entities discovered for {domain} are: {entities}"
+                _LOGGER.info(msg)
+                _endings = endings
+                namelrg = entities[0].split(".")
+                candidate = ""
 
-            for e in _endings:
-                if namelrg[1].endswith(e):
-                    candidate = namelrg[1].replace(e, '')
+                for e in _endings:
+                    if namelrg[1].endswith(e):
+                        candidate = namelrg[1].replace(e, '')
+                        if len(candidate) > 0:
+                            break
 
-            self._entityschema = candidate
-            msg = f"entityschema is: {self._entityschema} at {time.time()}"
-            _LOGGER.info(msg)
-            self._entities = entities
-            self.set_sensors()
+                self._entityschema = candidate
+                msg = f"entityschema is: {self._entityschema} at {time.time()}"
+                _LOGGER.info(msg)
+                self._entities = entities
+                self.set_sensors()
 
     @abstractmethod
     def set_sensors(self):

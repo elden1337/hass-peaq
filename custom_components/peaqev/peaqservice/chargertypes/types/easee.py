@@ -14,17 +14,24 @@ from custom_components.peaqev.peaqservice.util.constants import (
 _LOGGER = logging.getLogger(__name__)
 
 ENTITYENDINGS = [
-    "_power",
-    "_status",
     "_dimmer",
     "_downlight",
-    "_lifetime_energy",
-    "_online",
     "_current",
     "_voltage",
     "_output_limit",
     "_cost_per_kwh",
-    "_enable_idle_current"
+    "_enable_idle_current",
+    "_is_enabled",
+    "_cable_locked_permanently",
+    "_smart_charging",
+    "_max_charger_limit",
+    "_energy_per_hour",
+    "_lifetime_energy",
+    "_session_energy",
+    "_power",
+    "_status",
+    "_online",
+    "_cable_locked"
 ]
 
 NATIVE_CHARGERSTATES = [
