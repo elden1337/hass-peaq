@@ -138,7 +138,6 @@ class ChargerBase:
 
     def getentities(self, domain: str = None, endings: list = None):
         if len(self._entityschema) < 1:
-            #entities = template.integration_entities(self._hass, domain)
             domain = self._domainname if domain is None else domain
             endings = self._entityendings if endings is None else endings
 
@@ -151,14 +150,16 @@ class ChargerBase:
                 msg = f"entities discovered for {domain} are: {entities}"
                 _LOGGER.info(msg)
                 _endings = endings
-                namelrg = entities[0].split(".")
                 candidate = ""
 
-                for e in _endings:
-                    if namelrg[1].endswith(e):
-                        candidate = namelrg[1].replace(e, '')
-                        if len(candidate) > 0:
+                for e in entities:
+                    splitted = e.split(".")
+                    for ending in _endings:
+                        if splitted[1].endswith(ending):
+                            candidate = splitted[1].replace(ending, '')
                             break
+                    if len(candidate) > 1:
+                        break
 
                 self._entityschema = candidate
                 msg = f"entityschema is: {self._entityschema} at {time.time()}"
