@@ -148,7 +148,7 @@ class ChargerBase:
                 _LOGGER.error(msg)
             else:
                 msg = f"entities discovered for {domain} are: {entities}"
-                _LOGGER.info(msg)
+                _LOGGER.debug(msg)
                 _endings = endings
                 candidate = ""
 
@@ -163,7 +163,7 @@ class ChargerBase:
 
                 self._entityschema = candidate
                 msg = f"entityschema is: {self._entityschema} at {time.time()}"
-                _LOGGER.info(msg)
+                _LOGGER.debug(msg)
                 self._entities = entities
                 self.set_sensors()
 

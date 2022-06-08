@@ -21,7 +21,7 @@ class HubMember:
         if self._is_initialized:
             return True
         if isinstance(self.value, self._type):
-            _LOGGER.info(f"{self._listenerentity} has initialized")
+            _LOGGER.debug(f"{self._listenerentity} has initialized")
             self._is_initialized = True
             return True
         if not self.warned_not_initialized:
@@ -114,7 +114,7 @@ class CarPowerSensor(HubMember):
         if self._is_initialized is True:
             return True
         if isinstance(self.value, (float,int)) and self._hubdata.chargerobject.is_initialized:
-            _LOGGER.info(f"{self.NAME} has initialized")
+            _LOGGER.debug(f"{self.NAME} has initialized")
             self._is_initialized = True
             return True
         return False
@@ -146,7 +146,7 @@ class ChargerObject(HubMember):
             return True
         if self.value is not None:
             if str(self.value).lower() in self._type:
-               _LOGGER.info("Chargerobject has initialized")
+               _LOGGER.debug("Chargerobject has initialized")
                self._is_initialized = True
                return True
         if not self._warned_not_initialized:

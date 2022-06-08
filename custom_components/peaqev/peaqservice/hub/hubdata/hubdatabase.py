@@ -77,7 +77,7 @@ class HubDataBase:
             self.chargertype.charger.servicecalls
         )
 
-        _LOGGER.info(self.chargertype.charger.chargerentity)
+        _LOGGER.debug(self.chargertype.charger.chargerentity)
 
     @abstractmethod
     def init_hub_values(self):

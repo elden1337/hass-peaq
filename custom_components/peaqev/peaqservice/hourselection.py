@@ -179,7 +179,7 @@ class PriceAwareHours(Hours):
             if len(self.prices) > 0:
                 if self._is_initialized is False:
                     self._is_initialized = True
-                    _LOGGER.info("Hourselection has initialized")
+                    _LOGGER.debug("Hourselection has initialized")
                 return True
         return False
 
