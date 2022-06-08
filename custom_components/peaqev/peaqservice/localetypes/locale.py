@@ -8,6 +8,7 @@ from custom_components.peaqev.peaqservice.localetypes.types.se_bjerke_energi imp
 from custom_components.peaqev.peaqservice.localetypes.types.se_gothenburg import SE_Gothenburg
 from custom_components.peaqev.peaqservice.localetypes.types.se_karlstad import SE_Karlstad
 from custom_components.peaqev.peaqservice.localetypes.types.se_kristinehamn import SE_Kristinehamn
+from custom_components.peaqev.peaqservice.localetypes.types.se_linde_energi import SE_Linde_Energi
 from custom_components.peaqev.peaqservice.localetypes.types.se_malung_salen import SE_Malung_Salen
 from custom_components.peaqev.peaqservice.localetypes.types.se_nacka import SE_Nacka_normal
 from custom_components.peaqev.peaqservice.localetypes.types.se_partille import SE_Partille
@@ -29,8 +30,11 @@ from custom_components.peaqev.peaqservice.util.constants import (
     LOCALE_BE_VREG,
     LOCALE_SE_BJERKE_ENERGI,
     LOCALE_NO_GLITRE_ENERGI,
-    NAME, LOCALE_NO_AGDER_ENERGI, LOCALE_NO_LNETT,
-LOCALE_NO_TENSIO
+    NAME,
+    LOCALE_NO_AGDER_ENERGI,
+    LOCALE_NO_LNETT,
+    LOCALE_SE_LINDE_ENERGI,
+    LOCALE_NO_TENSIO
 )
 from custom_components.peaqev.peaqservice.util.sqlsensorhelper import SQLSensorHelper
 
@@ -50,7 +54,8 @@ LOCALETYPEDICT = {
     LOCALE_NO_GLITRE_ENERGI: NO_GlitreEnergi,
     LOCALE_NO_AGDER_ENERGI: NO_AgderEnergi,
     LOCALE_NO_LNETT: NO_LNett,
-    LOCALE_NO_TENSIO: NO_Tensio
+    LOCALE_NO_TENSIO: NO_Tensio,
+    LOCALE_SE_LINDE_ENERGI: SE_Linde_Energi
 }
 
 class LocaleData:

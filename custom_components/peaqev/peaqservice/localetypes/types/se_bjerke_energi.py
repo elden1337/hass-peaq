@@ -1,7 +1,3 @@
-from homeassistant.components.utility_meter.sensor import (
-    HOURLY
-)
-
 from custom_components.peaqev.peaqservice.localetypes.localtypebase import LocaleTypeBase
 from custom_components.peaqev.peaqservice.util.constants import (
     QUERYTYPE_BASICMAX
@@ -15,7 +11,6 @@ class SE_Bjerke_Energi(LocaleTypeBase):
     def __init__(self):
         observed_peak = QUERYTYPE_BASICMAX
         charged_peak = QUERYTYPE_BASICMAX
-        peakcycle = HOURLY
         free_charge_pattern = [
             {
                 "M": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
@@ -26,7 +21,6 @@ class SE_Bjerke_Energi(LocaleTypeBase):
         super().__init__(
             observedpeak=observed_peak,
             chargedpeak=charged_peak,
-            peakcycle=peakcycle,
             freechargepattern=free_charge_pattern
         )
 

@@ -1,6 +1,3 @@
-from homeassistant.components.utility_meter.sensor import (
-    HOURLY
-)
 
 from custom_components.peaqev.peaqservice.localetypes.localtypebase import LocaleTypeBase
 from custom_components.peaqev.peaqservice.util.constants import (
@@ -13,9 +10,7 @@ class NO_AgderEnergi(LocaleTypeBase):
     def __init__(self):
         observed_peak = QUERYTYPE_AVERAGEOFTHREEDAYS_MIN
         charged_peak = QUERYTYPE_AVERAGEOFTHREEDAYS
-        peakcycle = HOURLY
         super().__init__(
             observedpeak=observed_peak,
-            chargedpeak=charged_peak,
-            peakcycle=peakcycle
+            chargedpeak=charged_peak
         )
