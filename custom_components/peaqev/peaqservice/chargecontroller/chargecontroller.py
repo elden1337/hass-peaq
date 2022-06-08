@@ -32,7 +32,7 @@ class ChargeController(ChargeControllerBase):
 
 
     def _get_status_charging(self) -> CHARGERSTATES:
-        if self.above_stopthreshold and self._hub.totalhourlyenergy.value > 0 and self._hub.locale.data.free_charge is False:
+        if self.above_stopthreshold and self._hub.totalhourlyenergy.value > 0 and self._hub.locale.data.free_charge(self._hub.locale.data) is False:
             ret = CHARGERSTATES.Stop
         else:
             ret = CHARGERSTATES.Start
@@ -42,7 +42,7 @@ class ChargeController(ChargeControllerBase):
         if self._hub.carpowersensor.value < 1 and time.time() - self.latest_charger_start > self.DONETIMEOUT:
             ret = CHARGERSTATES.Done
         else:
-            if (self.below_startthreshold and self._hub.totalhourlyenergy.value > 0) or self._hub.locale.data.free_charge is True:
+            if (self.below_startthreshold and self._hub.totalhourlyenergy.value > 0) or self._hub.locale.data.free_charge(self._hub.locale.data) is True:
                 ret = CHARGERSTATES.Start
             else:
                 ret = CHARGERSTATES.Stop

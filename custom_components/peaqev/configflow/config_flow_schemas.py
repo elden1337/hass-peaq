@@ -1,6 +1,7 @@
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.const import CONF_NAME
+from peaqevcore.Locale import LOCALES
 
 import custom_components.peaqev.peaqservice.util.constants as pk
 
@@ -30,7 +31,7 @@ CHARGER_SCHEMA = vol.Schema(
                     vol.Optional(
                         "locale",
                         default="",
-                        ): vol.In(pk.LOCALES)
+                        ): vol.In(LOCALES)
                 }
             )
 

@@ -14,7 +14,7 @@ class Prediction():
             datetime.now().second,
             self._hub.powersensormovingaverage.value if self._hub.powersensormovingaverage.value is not None else 0,
             self._hub.totalhourlyenergy.value,
-            self._hub.locale.data.is_quarterly
+            self._hub.locale.data.is_quarterly(self._hub.locale.data)
         )
 
     @property

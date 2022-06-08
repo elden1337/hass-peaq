@@ -1,8 +1,8 @@
 
 from homeassistant.components.utility_meter.sensor import (
-    UtilityMeterSensor,
-    HOURLY
+    UtilityMeterSensor
 )
+from peaqevcore.querytypes import HOURLY
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
