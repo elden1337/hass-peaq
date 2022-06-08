@@ -72,6 +72,8 @@ class HubMember:
 
 
 class CurrentPeak(HubMember):
+    NAME = "CurrentPeak-sensor"
+
     def __init__(self, data_type: type, listenerentity, initval, startpeaks:dict):
         self._startpeak = self._set_start_peak(startpeaks)
         self._value = initval
@@ -91,7 +93,17 @@ class CurrentPeak(HubMember):
 
 
 class CarPowerSensor(HubMember):
-    def __init__(self, data_type: type, listenerentity=None, initval=None, powermeter_factor=1):
+    NAME = "CarPower-sensor"
+
+    def __init__(
+            self,
+            data_type: type,
+            listenerentity=None,
+            initval=None,
+            powermeter_factor=1,
+            hubdata=None
+    ):
+        self._hubdata = hubdata
         self._powermeter_factor = powermeter_factor
         self._warned_not_initialized = False
         self._is_initialized = False
@@ -101,13 +113,10 @@ class CarPowerSensor(HubMember):
     def is_initialized(self) -> bool:
         if self._is_initialized is True:
             return True
-        if isinstance(self.value, (float,int)):
-            _LOGGER.debug("Carpowersensor has initialized")
+        if isinstance(self.value, (float,int)) and self._hubdata.chargerobject.is_initialized:
+            _LOGGER.debug(f"{self.NAME} has initialized")
             self._is_initialized = True
             return True
-        if not self._warned_not_initialized:
-            _LOGGER.error(f"Carpowersensorvalue was not float. {self.value}")
-            self._warned_not_initialized = True
         return False
 
     @HubMember.value.setter
