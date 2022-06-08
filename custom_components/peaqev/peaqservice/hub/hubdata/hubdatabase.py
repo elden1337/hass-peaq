@@ -50,8 +50,7 @@ class HubDataBase:
         )
         self.chargerobject = ChargerObject(
             data_type=self.chargertype.charger.native_chargerstates,
-            listenerentity=self.chargertype.charger.chargerentity,
-            hubdata=self
+            listenerentity=self.chargertype.charger.chargerentity
         )
         resultdict[self.chargerobject.entity] = self.chargerobject.is_initialized
 
