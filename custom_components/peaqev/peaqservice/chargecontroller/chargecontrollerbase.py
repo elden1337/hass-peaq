@@ -80,7 +80,6 @@ class ChargeControllerBase:
 
         if update_timer is True:
             self.update_latestchargerstart()
-
         return ret
 
     @abstractmethod

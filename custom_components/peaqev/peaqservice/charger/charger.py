@@ -78,7 +78,6 @@ class Charger:
     async def _call_charger(self, command: str):
         if time.time() - self._latest_charger_call > CALL_WAIT_TIMER:
             calls = self._service_calls.get_call(command)
-            _LOGGER.debug(calls[DOMAIN], calls[command], calls["params"])
             await self._hub.hass.services.async_call(
                 calls[DOMAIN],
                 calls[command],
@@ -159,5 +158,8 @@ class Charger:
             self._charger_running = True
             self._charger_stopped = False
         elif not determinator:
-            self._charger_running = False
-            self._charger_stopped = True
+            charger = self._hub.chargerobject.value.lower()
+            chargingstates = self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Charging]
+            if charger not in chargingstates:
+                self._charger_running = False
+                self._charger_stopped = True
