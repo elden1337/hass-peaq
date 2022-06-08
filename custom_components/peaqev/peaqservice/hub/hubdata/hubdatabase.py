@@ -46,19 +46,22 @@ class HubDataBase:
             data_type=float,
             listenerentity=self.locale.current_peak_entity,
             initval=0,
-            startpeaks=config_inputs["startpeaks"]
+            startpeaks=config_inputs["startpeaks"],
         )
+        self.chargerobject = ChargerObject(
+            data_type=self.chargertype.charger.native_chargerstates,
+            listenerentity=self.chargertype.charger.chargerentity,
+            hubdata=self
+        )
+        resultdict[self.chargerobject.entity] = self.chargerobject.is_initialized
+
         self.carpowersensor = CarPowerSensor(
             data_type=int,
             listenerentity=self.chargertype.charger.powermeter,
             #initval=0,
-            powermeter_factor=self.chargertype.charger.powermeter_factor
+            powermeter_factor=self.chargertype.charger.powermeter_factor,
+            hubdata=self
         )
-        self.chargerobject = ChargerObject(
-            data_type=self.chargertype.charger.native_chargerstates,
-            listenerentity=self.chargertype.charger.chargerentity
-        )
-        resultdict[self.chargerobject.entity] = self.chargerobject.is_initialized
 
         self.chargerobject_switch = ChargerSwitch(
             hass=hass,
@@ -66,7 +69,8 @@ class HubDataBase:
             listenerentity=self.chargertype.charger.powerswitch,
             initval=False,
             currentname=self.chargertype.charger.ampmeter,
-            ampmeter_is_attribute=self.chargertype.charger.ampmeter_is_attribute
+            ampmeter_is_attribute=self.chargertype.charger.ampmeter_is_attribute,
+            hubdata=self
         )
         self.charger = Charger(
             self,

@@ -13,14 +13,22 @@ class ChargerSwitch(HubMember):
             listenerentity,
             initval,
             currentname: str,
-            ampmeter_is_attribute: bool
+            ampmeter_is_attribute: bool,
+            hubdata=None
     ):
+        self._hubdata = hubdata
         self._hass = hass
         self._value = initval
         self._current = 0
         self._current_attr_name = currentname
         self._ampmeter_is_attribute = ampmeter_is_attribute
         super().__init__(data_type, listenerentity, initval)
+
+    @property
+    def is_initialized(self) -> bool:
+        if not self._hubdata.chargerobject.is_initialized:
+            return False
+        return super().is_initialized
 
     @property
     def current(self) -> int:
