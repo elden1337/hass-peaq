@@ -19,7 +19,7 @@ class ThresholdBase:
         return _core.stop(
             datetime.now().minute,
             str(datetime.now().hour) in self._hub.hours.caution_hours if self._hub.price_aware is False else False,
-            self._hub.locale.data.is_quarterly
+            self._hub.locale.data.is_quarterly(self._hub.locale.data)
         )
 
     @property
@@ -27,7 +27,7 @@ class ThresholdBase:
         return _core.start(
             datetime.now().minute,
             str(datetime.now().hour) in self._hub.hours.caution_hours if self._hub.price_aware is False else False,
-            self._hub.locale.data.is_quarterly
+            self._hub.locale.data.is_quarterly(self._hub.locale.data)
         )
 
     @property

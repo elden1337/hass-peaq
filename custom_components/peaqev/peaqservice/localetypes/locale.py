@@ -1,62 +1,9 @@
+from peaqevcore.Locale import LOCALETYPEDICT
+
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
-from custom_components.peaqev.peaqservice.localetypes.types.default import Default
-from custom_components.peaqev.peaqservice.localetypes.types.no_agder_energi import NO_AgderEnergi
-from custom_components.peaqev.peaqservice.localetypes.types.no_glitre_energi import NO_GlitreEnergi
-from custom_components.peaqev.peaqservice.localetypes.types.no_lnett import NO_LNett
-from custom_components.peaqev.peaqservice.localetypes.types.no_tensio import NO_Tensio
-from custom_components.peaqev.peaqservice.localetypes.types.se_bjerke_energi import SE_Bjerke_Energi
-from custom_components.peaqev.peaqservice.localetypes.types.se_gothenburg import SE_Gothenburg
-from custom_components.peaqev.peaqservice.localetypes.types.se_karlstad import SE_Karlstad
-from custom_components.peaqev.peaqservice.localetypes.types.se_kristinehamn import SE_Kristinehamn
-from custom_components.peaqev.peaqservice.localetypes.types.se_linde_energi import SE_Linde_Energi
-from custom_components.peaqev.peaqservice.localetypes.types.se_malung_salen import SE_Malung_Salen
-from custom_components.peaqev.peaqservice.localetypes.types.se_nacka import SE_Nacka_normal
-from custom_components.peaqev.peaqservice.localetypes.types.se_partille import SE_Partille
-from custom_components.peaqev.peaqservice.localetypes.types.se_she_ab import SE_SHE_AB
-from custom_components.peaqev.peaqservice.localetypes.types.se_skovde import SE_Skovde
-from custom_components.peaqev.peaqservice.localetypes.types.se_sollentuna import SE_Sollentuna
-from custom_components.peaqev.peaqservice.localetypes.types.vreg_belgium import VregBelgium
-from custom_components.peaqev.peaqservice.util.constants import (
-    LOCALE_DEFAULT,
-    LOCALE_SE_GOTHENBURG,
-    LOCALE_SE_PARTILLE,
-    LOCALE_SE_KARLSTAD,
-    LOCALE_SE_KRISTINEHAMN,
-    LOCALE_SE_NACKA_NORMAL,
-    LOCALE_SE_MALUNG_SALEN,
-    LOCALE_SE_SALA,
-    LOCALE_SE_SKOVDE,
-    LOCALE_SE_SOLLENTUNA,
-    LOCALE_BE_VREG,
-    LOCALE_SE_BJERKE_ENERGI,
-    LOCALE_NO_GLITRE_ENERGI,
-    NAME,
-    LOCALE_NO_AGDER_ENERGI,
-    LOCALE_NO_LNETT,
-    LOCALE_SE_LINDE_ENERGI,
-    LOCALE_NO_TENSIO
-)
+from custom_components.peaqev.peaqservice.util.constants import NAME
 from custom_components.peaqev.peaqservice.util.sqlsensorhelper import SQLSensorHelper
 
-LOCALETYPEDICT = {
-    LOCALE_DEFAULT: Default,
-    LOCALE_SE_GOTHENBURG: SE_Gothenburg,
-    LOCALE_SE_PARTILLE: SE_Partille,
-    LOCALE_SE_KARLSTAD: SE_Karlstad,
-    LOCALE_SE_KRISTINEHAMN: SE_Kristinehamn,
-    LOCALE_SE_NACKA_NORMAL: SE_Nacka_normal,
-    LOCALE_SE_MALUNG_SALEN: SE_Malung_Salen,
-    LOCALE_SE_SALA: SE_SHE_AB,
-    LOCALE_SE_SKOVDE: SE_Skovde,
-    LOCALE_SE_SOLLENTUNA: SE_Sollentuna,
-    LOCALE_BE_VREG: VregBelgium,
-    LOCALE_SE_BJERKE_ENERGI: SE_Bjerke_Energi,
-    LOCALE_NO_GLITRE_ENERGI: NO_GlitreEnergi,
-    LOCALE_NO_AGDER_ENERGI: NO_AgderEnergi,
-    LOCALE_NO_LNETT: NO_LNett,
-    LOCALE_NO_TENSIO: NO_Tensio,
-    LOCALE_SE_LINDE_ENERGI: SE_Linde_Energi
-}
 
 class LocaleData:
     def __init__(self, input_type, domain):

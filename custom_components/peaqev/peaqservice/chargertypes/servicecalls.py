@@ -1,4 +1,5 @@
 import logging
+
 from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
 from custom_components.peaqev.peaqservice.util.constants import (
     DOMAIN,
@@ -39,7 +40,7 @@ class ServiceCalls:
         return self._allowupdatecurrent
 
     @property
-    def domain(self) -> CallType:
+    def domain(self) -> str:
         return self._domain
 
     @property
