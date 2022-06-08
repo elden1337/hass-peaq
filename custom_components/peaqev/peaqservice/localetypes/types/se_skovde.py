@@ -1,7 +1,3 @@
-from homeassistant.components.utility_meter.sensor import (
-    HOURLY
-)
-
 from custom_components.peaqev.peaqservice.localetypes.localtypebase import LocaleTypeBase
 from custom_components.peaqev.peaqservice.util.constants import (
     QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22
@@ -12,7 +8,6 @@ class SE_Skovde(LocaleTypeBase):
     def __init__(self):
         observed_peak = QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22
         charged_peak = QUERYTYPE_MAX_NOV_MAR_MON_FRI_06_22
-        peakcycle = HOURLY
         free_charge_pattern = [
             {
                 "M": [11, 12, 1, 2, 3],
@@ -28,7 +23,6 @@ class SE_Skovde(LocaleTypeBase):
         super().__init__(
             observedpeak=observed_peak,
             chargedpeak=charged_peak,
-            peakcycle=peakcycle,
             freechargepattern=free_charge_pattern
         )
 
