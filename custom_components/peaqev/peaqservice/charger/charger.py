@@ -19,7 +19,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-
+CALL_WAIT_TIMER = 60
 
 class Charger:
     def __init__(self, hub, hass, servicecalls):
@@ -29,6 +29,7 @@ class Charger:
         self._charger_stopped = False
         self._service_calls = servicecalls
         self._session_is_active = False
+        self._latest_charger_call = 0
         self._session = Session(self)
 
     async def charge(self):
@@ -75,15 +76,16 @@ class Charger:
             await self._call_charger(PAUSE)
 
     async def _call_charger(self, command: str):
-        calls = self._service_calls.get_call(command)
-        _LOGGER.info(calls[DOMAIN], calls[command], calls["params"])
-        result = await self._hub.hass.services.async_call(
-            calls[DOMAIN],
-            calls[command],
-            calls["params"]
-        )
-        msg = f"Calling charger {command}, result {result}"
-        _LOGGER.info(msg)
+        if time.time() - self._latest_charger_call > CALL_WAIT_TIMER:
+            calls = self._service_calls.get_call(command)
+            await self._hub.hass.services.async_call(
+                calls[DOMAIN],
+                calls[command],
+                calls["params"]
+            )
+            msg = f"Calling charger {command}"
+            _LOGGER.info(msg)
+            self._latest_charger_call = time.time()
 
     async def _updatemaxcurrent(self):
         """If enabled, let the charger periodically update it's current during charging."""
@@ -156,5 +158,9 @@ class Charger:
             self._charger_running = True
             self._charger_stopped = False
         elif not determinator:
-            self._charger_running = False
-            self._charger_stopped = True
+            charger = self._hub.chargerobject.value.lower()
+            chargingstates = self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Charging]
+            if charger not in chargingstates:
+                self._charger_running = False
+                self._charger_stopped = True
+                _LOGGER.info("charger-class has been stopped")

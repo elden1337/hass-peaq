@@ -91,6 +91,7 @@ Dec| 2.0 | 4.0
 - `Gothenburg` - Average of three peaks from different days (hourly).
 - `Karlstad` - Single max peak
 - `Kristinehamn` - for Nov-Mar, max peak during Mon-Fri 07-17. Other months, single max peak
+- `Linde Energi` - Single max peak
 - `Malung-Sälen` - Average of five peaks from different days. Peaks are calc between 07-19. Other hours are free-charge.
 - `Nacka (Normal tariffe)` - Average of three peaks (hourly).
 - `Bjärke Energi` -  Single max peak, except between 22-06

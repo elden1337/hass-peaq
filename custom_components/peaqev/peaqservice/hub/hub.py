@@ -36,13 +36,13 @@ class Hub(HubBase, HubData):
         self.chargecontroller = ChargeController(self)
         self.init_hub_values()
         trackerEntities = [
-            self.chargerobject_switch.entity,
             self.configpower_entity,
             self.totalhourlyenergy.entity,
             self.currentpeak.entity
         ]
 
         self.chargingtracker_entities = [
+            self.chargerobject_switch.entity,
             self.carpowersensor.entity,
             self.powersensormovingaverage.entity,
             self.charger_enabled.entity,
@@ -71,6 +71,7 @@ class Hub(HubBase, HubData):
                "power": self.power.is_initialized,
                "chargerobject": self.chargerobject.is_initialized
                }
+
         if all(ret.values()):
             return True
         not_ready = []
