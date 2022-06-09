@@ -8,7 +8,7 @@ from custom_components.peaqev.peaqservice.chargertypes.chargertypes import Charg
 from custom_components.peaqev.peaqservice.hub.hubmember.chargerswitch import ChargerSwitch
 from custom_components.peaqev.peaqservice.hub.hubmember.hubmember import CurrentPeak, HubMember, CarPowerSensor, \
     ChargerObject
-from custom_components.peaqev.peaqservice.localetypes.locale import LocaleData
+from custom_components.peaqev.peaqservice.locale import LocaleData
 
 _LOGGER = logging.getLogger(__name__)
 
