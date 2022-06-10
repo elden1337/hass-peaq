@@ -41,6 +41,9 @@ class Hub(HubBase, HubData):
             self.currentpeak.entity
         ]
 
+        if self.locale.data.converted:
+            trackerEntities.append("sensor.peaqev_energy_including_car_hourly")
+
         self.chargingtracker_entities = [
             self.chargerobject_switch.entity,
             self.carpowersensor.entity,
@@ -104,7 +107,7 @@ class Hub(HubBase, HubData):
         elif entity == self.chargerobject_switch.entity:
             self.chargerobject_switch.value = value
             self.chargerobject_switch.updatecurrent()
-        elif entity == self.currentpeak.entity:
+        elif entity == self.currentpeak.entity and self.locale.data.converted is False:
             self.currentpeak.value = value
         elif entity == self.totalhourlyenergy.entity:
             self.totalhourlyenergy.value = value
@@ -112,5 +115,9 @@ class Hub(HubBase, HubData):
             self.powersensormovingaverage.value = value
         elif entity == self.hours.nordpool_entity:
             self.hours.update_nordpool()
+        elif entity == "sensor.peaqev_energy_including_car_hourly": #todo remove hardcoded naming.
+            _LOGGER.info(f"Trying to update localequerymodel with {value}")
+            self.locale.data.query_model.try_update(value)
+            self.currentpeak.value = self.locale.data.query_model.observed_peak
         if entity in self.chargingtracker_entities and self.is_initialized is True:
             await self.charger.charge()

@@ -29,8 +29,8 @@ class SQLSensorHelper():
     def __init__(self, sensor: str):
         self._sensor = ex.nametoid(sensor)
 
-        PREFIX_MAX = f'SELECT IFNULL(MAX(state),0) AS state FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id = "{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date())'
-        SUFFIX_MAX = ' GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 1'
+        #PREFIX_MAX = f'SELECT IFNULL(MAX(state),0) AS state FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id = "{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date())'
+        #SUFFIX_MAX = ' GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 1'
         PREFIX_AVG_MIN = f'SELECT IFNULL(min(daymax),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date())'
         PREFIX_AVG = f'SELECT IFNULL(ROUND(AVG(daymax),2),0) as state FROM ( SELECT MAX(state) as daymax FROM "{SQLSENSOR_STATISTICS_TABLE}" WHERE metadata_id = (SELECT id FROM "{SQLSENSOR_STATISTICS_META_TABLE}" WHERE statistic_id ="{self._sensor}" LIMIT 1) AND strftime(\'%Y\', start) = strftime(\'%Y\', date()) AND strftime(\'%m\', start) = strftime(\'%m\', date())'
         SUFFIX_AVG_HOUR = ' GROUP BY strftime(\'%H\', start) ORDER BY MAX(state) DESC LIMIT 3)'
@@ -40,7 +40,7 @@ class SQLSensorHelper():
         SUFFIX_AVG_5_DAY = ' GROUP BY strftime(\'%d\', start) ORDER BY MAX(state) DESC LIMIT 5)'
 
         self.basequeries = {
-            "max": [PREFIX_MAX, SUFFIX_MAX],
+            # "max": [PREFIX_MAX, SUFFIX_MAX],
             "min_hour": [PREFIX_AVG_MIN, SUFFIX_AVG_HOUR],
             "min_day": [PREFIX_AVG_MIN, SUFFIX_AVG_DAY],
             "avg_hour": [PREFIX_AVG, SUFFIX_AVG_HOUR],
@@ -51,46 +51,46 @@ class SQLSensorHelper():
 
     def getquerytype(self, query_type):
         QUERYTYPES = {
-            QUERYTYPE_BASICMAX: {
-                'query': sql.query(
-                    self.basequeries["max"][0],
-                    self.basequeries["max"][1]
-                ),
-                'name': f'{SQLSENSOR_BASENAME}',
-                'comment': 'Partille, SE etc'
-            },
-            QUERYTYPE_AVERAGEOFTHREEDAYS: {
-                'query': sql.query(
-                    self.basequeries["avg_day"][0],
-                    self.basequeries["avg_day"][1]
-                ),
-                'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE}',
-                'comment': 'Gothenburg, SE'
-            },
-            QUERYTYPE_AVERAGEOFTHREEHOURS: {
-                'query': sql.query(
-                    self.basequeries["avg_hour"][0],
-                    self.basequeries["avg_hour"][1]
-                ),
-                'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE}',
-                'comment': ''
-            },
-            QUERYTYPE_AVERAGEOFTHREEHOURS_MIN: {
-                'query': sql.query(
-                    self.basequeries["min_hour"][0],
-                    self.basequeries["min_hour"][1]
-                ),
-                'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE_MIN}',
-                'comment': ''
-            },
-            QUERYTYPE_AVERAGEOFTHREEDAYS_MIN: {
-                'query': sql.query(
-                    self.basequeries["min_day"][0],
-                    self.basequeries["min_day"][1]
-                ),
-                'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE_MIN}',
-                'comment': 'Gothenburg, SE'
-            },
+            # QUERYTYPE_BASICMAX: {
+            #     'query': sql.query(
+            #         self.basequeries["max"][0],
+            #         self.basequeries["max"][1]
+            #     ),
+            #     'name': f'{SQLSENSOR_BASENAME}',
+            #     'comment': 'Partille, SE etc'
+            # },
+            # QUERYTYPE_AVERAGEOFTHREEDAYS: {
+            #     'query': sql.query(
+            #         self.basequeries["avg_day"][0],
+            #         self.basequeries["avg_day"][1]
+            #     ),
+            #     'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE}',
+            #     'comment': 'Gothenburg, SE'
+            # },
+            # QUERYTYPE_AVERAGEOFTHREEHOURS: {
+            #     'query': sql.query(
+            #         self.basequeries["avg_hour"][0],
+            #         self.basequeries["avg_hour"][1]
+            #     ),
+            #     'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE}',
+            #     'comment': ''
+            # },
+            # QUERYTYPE_AVERAGEOFTHREEHOURS_MIN: {
+            #     'query': sql.query(
+            #         self.basequeries["min_hour"][0],
+            #         self.basequeries["min_hour"][1]
+            #     ),
+            #     'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE_MIN}',
+            #     'comment': ''
+            # },
+            # QUERYTYPE_AVERAGEOFTHREEDAYS_MIN: {
+            #     'query': sql.query(
+            #         self.basequeries["min_day"][0],
+            #         self.basequeries["min_day"][1]
+            #     ),
+            #     'name': f'{SQLSENSOR_BASENAME}, {SQLSENSOR_AVERAGEOFTHREE_MIN}',
+            #     'comment': 'Gothenburg, SE'
+            # },
             QUERYTYPE_AVERAGEOFTHREEHOURS_MON_FRI_07_19: {
                 'query': sql.query(
                     self.basequeries["avg_hour"][0],

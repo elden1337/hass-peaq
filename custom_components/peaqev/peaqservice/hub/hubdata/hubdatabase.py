@@ -35,7 +35,8 @@ class HubDataBase:
 
         self.locale = LocaleData(
             config_inputs["locale"],
-            domain
+            domain,
+            hass
         )
         self.chargertype = ChargerTypeData(
             hass,
