@@ -9,7 +9,7 @@ from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 
 class PeaqAmpSensor(SensorBase):
-    device_class = SensorDeviceClass.CURRENT
+    device_class = SensorDeviceClass.ENERGY
     unit_of_measurement = ELECTRIC_CURRENT_AMPERE
     def __init__(self, hub, entry_id):
         name = f"{hub.hubname} {ALLOWEDCURRENT}"
