@@ -145,7 +145,7 @@ This means, that without breaking the set peak-energy level, you can also get ch
 
 Below is an example of how the algorithm will determine two different days of prices. The green hours are normal hours (100% of peak accepted), the empty ones are non-hours (turned off) and the yellow-red hours are more and more cautionary because of prices increasing above the tolerance.
 
-![Price aware](assets/price_aware.jfif)
+![Price aware](assets/price_aware.png)
 
 *Tested with Chargeamps Halo 11kw and Easee. Both setups with one single charger per household. Currently will not function where multiple chargers have been installed ,2022-06-02*
 
