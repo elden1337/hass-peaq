@@ -81,7 +81,8 @@ class ChargerBase:
             resume_call: CallType = None,
             allowupdatecurrent: bool = False,
             update_current_call: str = None,
-            update_current_params: dict = None
+            update_current_params: dict = None,
+            update_current_on_termination: bool = False
     ) -> None:
         self._servicecalls = ServiceCalls(
             domain,
@@ -91,7 +92,8 @@ class ChargerBase:
             resume_call,
             allowupdatecurrent,
             update_current_call,
-            update_current_params
+            update_current_params,
+            update_current_on_termination
         )
 
     def validatecharger(self):

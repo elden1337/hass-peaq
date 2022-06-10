@@ -29,8 +29,9 @@ class PeaqAmpSensor(SensorBase):
 
     @property
     def extra_state_attributes(self) -> dict:
+        curr = self._charger_current if self._charger_current > 0 else "unreachable"
         return {
-            "charger_reported_current": self._charger_current,
+            "charger_reported_current": curr
         }
 
 class PeaqPowerSensor(SensorBase):

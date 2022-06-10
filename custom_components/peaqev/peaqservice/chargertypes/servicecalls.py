@@ -25,9 +25,11 @@ class ServiceCalls:
             allowupdatecurrent: bool = False,
             update_current_call: str = None,
             update_current_params: dict = None,
+            update_current_on_termination: bool = False
     ):
         self._domain = domain
         self._allowupdatecurrent = allowupdatecurrent
+        self._update_current_on_termination = update_current_on_termination
         self._on = on_call
         self._off = off_call
         self._pause = pause_call if pause_call is not None else off_call
@@ -38,6 +40,10 @@ class ServiceCalls:
     @property
     def allowupdatecurrent(self) -> bool:
         return self._allowupdatecurrent
+
+    @property
+    def allow_update_current_on_termination(self) -> bool:
+        return self._update_current_on_termination
 
     @property
     def domain(self) -> str:

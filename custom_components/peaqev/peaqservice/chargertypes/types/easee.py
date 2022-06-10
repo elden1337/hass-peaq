@@ -45,6 +45,7 @@ NATIVE_CHARGERSTATES = [
 
 DOMAINNAME = "easee"
 UPDATECURRENT = True
+UPDATECURRENT_ON_TERMINATION = False
 #docs: https://github.com/fondberg/easee_hass
 
 
@@ -84,13 +85,24 @@ class Easee(ChargerBase):
             resume_call=_resume,
             allowupdatecurrent=UPDATECURRENT,
             update_current_call="set_charger_dynamic_limit",
-            update_current_params=servicecall_params
+            update_current_params=servicecall_params,
+            update_current_on_termination = UPDATECURRENT_ON_TERMINATION
         )
 
     def set_sensors(self):
+        amp_sensor = f"sensor.{self._entityschema}_dynamic_charger_limit"
+        if not self._validate_sensor(amp_sensor):
+            amp_sensor = f"sensor.{self._entityschema}_max_charger_limit"
+
         self.chargerentity = f"sensor.{self._entityschema}_status"
         self.powermeter = f"sensor.{self._entityschema}_power"
         self.powermeter_factor = 1000
         self.powerswitch = f"switch.{self._entityschema}_is_enabled"
-        self.ampmeter = f"sensor.{self._entityschema}_max_charger_limit"
+        self.ampmeter = amp_sensor
         self.ampmeter_is_attribute = False
+
+    def _validate_sensor(self, sensor:str) -> bool:
+        ret = self._hass.states.get(sensor)
+        if ret.state is None or ret.state == "Null":
+            return False
+        return True

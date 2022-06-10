@@ -106,12 +106,13 @@ class Charger:
                     )
                     await self._hass.async_add_executor_job(self._wait_loop_cycle)
 
-            final_service_params = await self._setchargerparams(calls, ampoverride=6)
-            await self._hub.hass.services.async_call(
-                calls[DOMAIN],
-                calls[UPDATECURRENT],
-                final_service_params
-            )
+            if self._service_calls.allow_update_current_on_termination:
+                final_service_params = await self._setchargerparams(calls, ampoverride=6)
+                await self._hub.hass.services.async_call(
+                    calls[DOMAIN],
+                    calls[UPDATECURRENT],
+                    final_service_params
+                )
 
     async def _setchargerparams(self, calls, ampoverride:int = 0) -> dict:
         amps = ampoverride if ampoverride >= 6 else self._hub.threshold.allowedcurrent
@@ -133,7 +134,6 @@ class Charger:
 
     def _wait_update_current(self) -> bool:
         self._hub.chargerobject_switch.updatecurrent()
-
         while (self._hub.chargerobject_switch.current == self._hub.threshold.allowedcurrent
                or (datetime.now().minute >= 55
                    and self._hub.threshold.allowedcurrent > self._hub.chargerobject_switch.current)) \
