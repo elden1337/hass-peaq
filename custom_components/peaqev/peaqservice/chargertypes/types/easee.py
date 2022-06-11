@@ -101,8 +101,10 @@ class Easee(ChargerBase):
         self.ampmeter = amp_sensor
         self.ampmeter_is_attribute = False
 
-    def _validate_sensor(self, sensor:str) -> bool:
+    def _validate_sensor(self, sensor: str) -> bool:
         ret = self._hass.states.get(sensor)
-        if ret.state is None or ret.state == "Null":
+        if ret is None:
+            return False
+        elif ret.state == "Null":
             return False
         return True
