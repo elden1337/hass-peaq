@@ -1,3 +1,5 @@
+import logging
+
 from homeassistant.core import HomeAssistant
 from peaqevcore.Locale import LOCALETYPEDICT
 
@@ -5,6 +7,7 @@ import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.util.constants import NAME
 from custom_components.peaqev.peaqservice.util.sqlsensorhelper import SQLSensorHelper
 
+_LOGGER = logging.getLogger(__name__)
 
 class LocaleData:
     def __init__(self, input_type, domain, hass: HomeAssistant):
@@ -14,7 +17,6 @@ class LocaleData:
         self._hass = hass
 
         self._data = LOCALETYPEDICT[input_type]
-        self._try_set_peaksdict()
 
     @property
     def type(self) -> str:
@@ -30,11 +32,3 @@ class LocaleData:
             return ""
         return f"sensor.{self._domain}_{ex.nametoid(SQLSensorHelper('').getquerytype(self.data.observed_peak)[NAME])}"
 
-    #todo: _peaksdict must be a proper property on core.
-    def _try_set_peaksdict(self):
-        sensor_entity = "sensor.peaqev_peak"
-        ret = self._hass.states.get(sensor_entity)
-        if ret is not None:
-            attr = ret.attributes.get("peaks_dictionary")
-            if attr is not None:
-                self.data.query_model._peaks.set_init_dict(ret)

@@ -41,10 +41,6 @@ class Hub(HubBase, HubData):
             self.currentpeak.entity
         ]
 
-        # if self.locale.data.converted is True:
-        #     _LOGGER.info(f"Setting up energysensor as tracker.")
-        #     trackerEntities.append("sensor.peaqev_energy_including_car_hourly")
-
         self.chargingtracker_entities = [
             self.chargerobject_switch.entity,
             self.carpowersensor.entity,
@@ -60,7 +56,6 @@ class Hub(HubBase, HubData):
                 self.chargingtracker_entities.append(self.hours.nordpool_entity)
 
         trackerEntities += self.chargingtracker_entities
-
         async_track_state_change(hass, trackerEntities, self.state_changed)
 
 

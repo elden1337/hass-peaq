@@ -1,12 +1,19 @@
+import logging
+
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.components.sql.sensor import (
     SQLSensor
 )
+from homeassistant.const import (
+    ENERGY_KILO_WATT_HOUR
+)
+from homeassistant.helpers.restore_state import RestoreEntity
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
+_LOGGER = logging.getLogger(__name__)
 
 class PeaqSQLSensor(SQLSensor):
     def __init__(self, hub, sessmaker, query, entry_id):
@@ -37,14 +44,14 @@ class PeaqSQLSensor(SQLSensor):
     def device_info(self):
         return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
 
-class PeaqPeakSensor(SensorBase):
+class PeaqPeakSensor(SensorBase, RestoreEntity):
     device_class = SensorDeviceClass.ENERGY
-
+    unit_of_measurement = ENERGY_KILO_WATT_HOUR
     def __init__(self, hub, entry_id):
         self._name = f"{hub.hubname} peak"
-        self._attr_unit_of_measurement = "kWh"
+        #self._attr_unit_of_measurement = "kWh"
         self._charged_peak = 0
-        self._peaks_dict = {}
+        self._peaks_dict: dict| None
         self._observed_peak = 0
         super().__init__(hub, self._name, entry_id)
 
@@ -54,7 +61,7 @@ class PeaqPeakSensor(SensorBase):
 
     def update(self) -> None:
         self._charged_peak = self._hub.locale.data.query_model.charged_peak
-        self._peaks_dict = self._hub.locale.data.query_model.peaks
+        self._peaks_dict = self._hub.locale.data.query_model.peaks_export
         self._observed_peak = self._hub.locale.data.query_model.observed_peak
 
     @property
@@ -83,3 +90,16 @@ class PeaqPeakSensor(SensorBase):
             ret["m"] = self._peaks_dict["m"]
             ret["p"] = self._peaks_dict["p"]
         return ret
+
+    async def async_added_to_hass(self):
+        state = await super().async_get_last_state()
+        if state:
+            _LOGGER.info("last state of %s = %s", self._name, state)
+            self._charged_peak = state.state
+            self._peaks_dict = state.attributes.get('peaks_dictionary', 50)
+            self._hub.locale.data.query_model.peaks.set_init_dict(self._peaks_dict)
+            self._observed_peak = state.attributes.get('observed_peak', 50)
+        else:
+            self._charged_peak = 0
+            self._peaks_dict = {}
+            self._observed_peak = 0
