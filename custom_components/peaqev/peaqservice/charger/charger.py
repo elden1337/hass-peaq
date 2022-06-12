@@ -84,7 +84,7 @@ class Charger:
                 calls["params"]
             )
             msg = f"Calling charger {command}"
-            _LOGGER.info(msg)
+            _LOGGER.debug(msg)
             self._latest_charger_call = time.time()
 
     async def _updatemaxcurrent(self):
@@ -157,10 +157,11 @@ class Charger:
         if determinator:
             self._charger_running = True
             self._charger_stopped = False
+            _LOGGER.debug("charger-class has been started")
         elif not determinator:
             charger = self._hub.chargerobject.value.lower()
             chargingstates = self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Charging]
             if charger not in chargingstates:
                 self._charger_running = False
                 self._charger_stopped = True
-                _LOGGER.info("charger-class has been stopped")
+                _LOGGER.debug("charger-class has been stopped")
