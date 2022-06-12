@@ -1,7 +1,7 @@
 import logging
 
 from homeassistant.core import HomeAssistant
-from peaqevcore.Locale import LOCALETYPEDICT
+from peaqevcore.locale.Locale import LOCALETYPEDICT
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.util.constants import NAME
