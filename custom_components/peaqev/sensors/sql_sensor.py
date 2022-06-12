@@ -94,7 +94,7 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
         if state:
-            _LOGGER.info("last state of %s = %s", self._name, state)
+            _LOGGER.debug("last state of %s = %s", self._name, state)
             self._charged_peak = state.state
             self._peaks_dict = state.attributes.get('peaks_dictionary', 50)
             self._hub.locale.data.query_model.peaks.set_init_dict(self._peaks_dict)

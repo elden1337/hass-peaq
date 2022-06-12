@@ -109,8 +109,8 @@ class Hub(HubBase, HubData):
             if self.locale.data.converted is True:
                 self.totalhourlyenergy.value = value
             self.currentpeak.value = self.locale.data.query_model.observed_peak
-            _LOGGER.info(f"Trying to update localequerymodel with {value}")
-            await self.locale.data.query_model.try_update(float(value))
+            #_LOGGER.info(f"Trying to update localequerymodel with {value}")
+            self.locale.data.query_model.try_update(float(value))
         elif entity == self.powersensormovingaverage.entity:
             self.powersensormovingaverage.value = value
         elif entity == self.hours.nordpool_entity:
