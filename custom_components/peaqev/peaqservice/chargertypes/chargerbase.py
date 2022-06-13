@@ -21,6 +21,7 @@ class ChargerBase:
         self._native_chargerstates = []
         self.powermeter_factor = 1
         self._powerswitch = None
+        self._powerswitch_controls_charging = True
         self.ampmeter = None
         self.ampmeter_is_attribute = None
         self._servicecalls = None
@@ -32,6 +33,10 @@ class ChargerBase:
         }
         self._entityschema = ""
         self._entities = None
+
+    @property
+    def powerswitch_controls_charging(self) -> bool:
+        return self._powerswitch_controls_charging
 
     @property
     def chargerstates(self) -> dict:
