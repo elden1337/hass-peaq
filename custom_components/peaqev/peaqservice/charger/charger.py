@@ -36,19 +36,19 @@ class Charger:
         """Main function to turn charging on or off"""
         if self._hub.charger_enabled.value is True:
             if self._hub.chargecontroller.status is CHARGERSTATES.Start.name:
-                if self._hub.chargerobject_switch.value is False and self._charger_running is False:
+                if self._chargertype_charger_is_on is False and self._charger_running is False:
                     await self._start_charger()
             elif self._hub.chargecontroller.status is CHARGERSTATES.Stop.name or self._hub.chargecontroller.status is CHARGERSTATES.Idle.name:
-                if (self._hub.chargerobject_switch.value is True or self._hub.carpowersensor.value > 0) and self._charger_stopped is False:
+                if (self._chargertype_charger_is_on  or self._hub.carpowersensor.value > 0) is True and self._charger_stopped is False:
                     await self._pause_charger()
             elif self._hub.chargecontroller.status is CHARGERSTATES.Done.name and self._hub.charger_done.value is False:
                 await self._terminate_charger()
             elif self._hub.chargecontroller.status is CHARGERSTATES.Idle.name:
                 self._hub.charger_done.value = False
-                if self._hub.chargerobject_switch.value is True:
+                if self._chargertype_charger_is_on is True:
                     await self._terminate_charger()
         else:
-            if self._hub.chargerobject_switch.value is True and self._charger_stopped is False:
+            if self._chargertype_charger_is_on is True and self._charger_stopped is False:
                 await self._terminate_charger()
 
     async def _start_charger(self):
@@ -114,6 +114,18 @@ class Charger:
                     final_service_params
                 )
 
+    @property
+    def _chargertype_charger_is_on(self) -> bool:
+        if self._hub.chargertype.charger.powerswitch_controls_charging:
+            return self._hub.chargerobject_switch.value
+
+        return all(
+            [
+                self._hub.chargerobject_switch.value,
+                self._hub.carpowersensor.value > 0
+            ]
+        )
+
     async def _setchargerparams(self, calls, ampoverride:int = 0) -> dict:
         amps = ampoverride if ampoverride >= 6 else self._hub.threshold.allowedcurrent
         serviceparams = {}
@@ -126,7 +138,7 @@ class Charger:
         return len(calls[PARAMS][CHARGER]) > 0 and len(calls[PARAMS][CHARGERID]) > 0
 
     def _wait_turn_on(self) -> bool:
-        while self._hub.chargerobject_switch.value is False and self._charger_stopped is False:
+        while self._chargertype_charger_is_on is False and self._charger_stopped is False:
             time.sleep(3)
         if self._charger_stopped is True:
             return False
@@ -157,10 +169,11 @@ class Charger:
         if determinator:
             self._charger_running = True
             self._charger_stopped = False
+            _LOGGER.debug("charger-class has been started")
         elif not determinator:
             charger = self._hub.chargerobject.value.lower()
             chargingstates = self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Charging]
             if charger not in chargingstates:
                 self._charger_running = False
                 self._charger_stopped = True
-                _LOGGER.info("charger-class has been stopped")
+                _LOGGER.debug("charger-class has been stopped")

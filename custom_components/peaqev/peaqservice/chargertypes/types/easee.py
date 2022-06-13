@@ -54,6 +54,7 @@ class Easee(ChargerBase):
         super().__init__(hass)
         self._chargerid = chargerid
         self._auth_required = auth_required
+        self._powerswitch_controls_charging = False
         self._domainname = DOMAINNAME
         self._entityendings = ENTITYENDINGS
         self._native_chargerstates = NATIVE_CHARGERSTATES
