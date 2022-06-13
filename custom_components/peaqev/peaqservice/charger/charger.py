@@ -118,7 +118,6 @@ class Charger:
     def _chargertype_charger_is_on(self) -> bool:
         if self._hub.chargertype.charger.powerswitch_controls_charging:
             return self._hub.chargerobject_switch.value
-
         return all(
             [
                 self._hub.chargerobject_switch.value,
