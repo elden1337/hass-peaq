@@ -45,9 +45,9 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add
 
     async_add_entities(peaqutilitysensors, update_before_add = True)
 
-    if hub.locale.data.converted is True:
-        peaksensor = [PeaqPeakSensor(hub, config.entry_id)]
-        async_add_entities(peaksensor, update_before_add=True)
+    peaksensor = [PeaqPeakSensor(hub, config.entry_id)]
+    async_add_entities(peaksensor, update_before_add=True)
 
-    peaqsqlsensors = await _helper.gather_sql_sensors(hass, hub, config.entry_id)
-    async_add_entities(peaqsqlsensors, update_before_add = True)
+    #deprecated
+    # peaqsqlsensors = await _helper.gather_sql_sensors(hass, hub, config.entry_id)
+    # async_add_entities(peaqsqlsensors, update_before_add = True)

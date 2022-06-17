@@ -3,9 +3,7 @@ import logging
 from homeassistant.core import HomeAssistant
 from peaqevcore.locale.Locale import LOCALETYPEDICT
 
-import custom_components.peaqev.peaqservice.util.extensionmethods as ex
-from custom_components.peaqev.peaqservice.util.constants import NAME
-from custom_components.peaqev.peaqservice.util.sqlsensorhelper import SQLSensorHelper
+#from custom_components.peaqev.peaqservice.util.sqlsensorhelper import SQLSensorHelper
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,7 +26,8 @@ class LocaleData:
 
     @property
     def current_peak_entity(self) -> str:
-        if self.data.converted:
-            return ""
-        return f"sensor.{self._domain}_{ex.nametoid(SQLSensorHelper('').getquerytype(self.data.observed_peak)[NAME])}"
+        return ""
+        # if self.data.converted:
+        #     return ""
+        #return f"sensor.{self._domain}_{ex.nametoid(SQLSensorHelper('').getquerytype(self.data.observed_peak)[NAME])}"
 
