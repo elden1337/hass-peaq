@@ -97,16 +97,20 @@ class CarPowerSensor(HubMember):
 
     def __init__(
             self,
+            hass,
             data_type: type,
             listenerentity=None,
             initval=None,
             powermeter_factor=1,
-            hubdata=None
+            hubdata=None,
+            powermeter_is_attribute: str = None
     ):
+        self._hass = hass
         self._hubdata = hubdata
         self._powermeter_factor = powermeter_factor
         self._warned_not_initialized = False
         self._is_initialized = False
+        self._powermeter_is_attribute: str = powermeter_is_attribute
         super().__init__(data_type, listenerentity, initval)
 
     @property
@@ -121,8 +125,11 @@ class CarPowerSensor(HubMember):
 
     @HubMember.value.setter
     def value(self, val):
-        if val is None or val == 0:
-            self._value = 0
+        if self._powermeter_is_attribute is not None:
+            val = self.update()
+        else:
+            if val is None or val == 0:
+                self._value = 0
         vval = ex.try_parse(val, float)
         if not vval:
             vval = ex.try_parse(val, int)
@@ -130,6 +137,12 @@ class CarPowerSensor(HubMember):
             self._value = 0
         else:
             self._value = float(vval * self._powermeter_factor)
+
+    def update(self):
+        ret = self._hass.states.get(self.entity)
+        if ret is not None:
+            ret_attr = str(ret.attributes.get(self._powermeter_is_attribute))
+            return ret_attr
 
 
 class ChargerObject(HubMember):

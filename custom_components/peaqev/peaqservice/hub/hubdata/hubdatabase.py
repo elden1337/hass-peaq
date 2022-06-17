@@ -56,8 +56,8 @@ class HubDataBase:
 
         self.carpowersensor = CarPowerSensor(
             data_type=int,
-            listenerentity=self.chargertype.charger.powermeter,
-            #initval=0,
+            listenerentity=self.chargertype.charger.chargerentity,
+            powermeter_is_attribute = self.chargertype.charger.powermeter,
             powermeter_factor=self.chargertype.charger.powermeter_factor,
             hubdata=self
         )

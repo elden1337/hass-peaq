@@ -24,6 +24,7 @@ class ChargerBase:
         self._powerswitch_controls_charging = True
         self.ampmeter = None
         self.ampmeter_is_attribute = None
+        self.powermeter_is_attribute = None
         self._servicecalls = None
         self._chargerstates = {
             CHARGERSTATES.Idle: [],
