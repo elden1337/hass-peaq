@@ -10,7 +10,7 @@
     "codeowners": [
       "@elden1337"
     ],
-    "version": "0.12.3",
+    "version": "0.14.0-alpha",
     "iot_class": "calculated",
     "dependencies": [
       "recorder",
@@ -20,6 +20,7 @@
       "chargeamps",
       "easee",
       "garo_wallbox",
+      "zaptec",
       "nordpool",
       "filter",
       "integration",
