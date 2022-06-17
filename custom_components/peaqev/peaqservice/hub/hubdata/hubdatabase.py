@@ -45,7 +45,6 @@ class HubDataBase:
         )
         self.currentpeak = CurrentPeak(
             data_type=float,
-            listenerentity=self.locale.current_peak_entity,
             initval=0,
             startpeaks=config_inputs["startpeaks"],
         )
@@ -58,7 +57,6 @@ class HubDataBase:
         self.carpowersensor = CarPowerSensor(
             data_type=int,
             listenerentity=self.chargertype.charger.powermeter,
-            #initval=0,
             powermeter_factor=self.chargertype.charger.powermeter_factor,
             hubdata=self
         )

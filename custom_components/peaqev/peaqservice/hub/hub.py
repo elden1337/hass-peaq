@@ -38,7 +38,7 @@ class Hub(HubBase, HubData):
         trackerEntities = [
             self.configpower_entity,
             self.totalhourlyenergy.entity,
-            self.currentpeak.entity
+            # self.currentpeak.entity
         ]
 
         self.chargingtracker_entities = [
@@ -103,13 +103,10 @@ class Hub(HubBase, HubData):
         elif entity == self.chargerobject_switch.entity:
             self.chargerobject_switch.value = value
             self.chargerobject_switch.updatecurrent()
-        elif entity == self.currentpeak.entity and self.locale.data.converted is False:
-            self.currentpeak.value = value
         elif entity == self.totalhourlyenergy.entity:
             if self.locale.data.converted is True:
                 self.totalhourlyenergy.value = value
             self.currentpeak.value = self.locale.data.query_model.observed_peak
-            #_LOGGER.info(f"Trying to update localequerymodel with {value}")
             self.locale.data.query_model.try_update(float(value))
         elif entity == self.powersensormovingaverage.entity:
             self.powersensormovingaverage.value = value

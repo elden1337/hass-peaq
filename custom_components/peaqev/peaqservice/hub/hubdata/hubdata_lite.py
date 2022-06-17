@@ -36,5 +36,3 @@ class HubDataLite(HubDataBase):
             self.carpowersensor.entity) is not None else 0
         self.totalhourlyenergy.value = self.hass.states.get(self.totalhourlyenergy.entity) if self.hass.states.get(
             self.totalhourlyenergy.entity) is not None else 0
-        self.currentpeak.value = self.hass.states.get(self.currentpeak.entity) if self.hass.states.get(
-            self.currentpeak.entity) is not None else 0

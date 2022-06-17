@@ -33,8 +33,7 @@ class HubLite(HubBase, HubDataLite):
 
         trackerEntities = [
             self.chargerobject_switch.entity,
-            self.totalhourlyenergy.entity,
-            self.currentpeak.entity
+            self.totalhourlyenergy.entity
         ]
 
         self.chargingtracker_entities = [
