@@ -52,46 +52,47 @@ class Charger:
                 await self._terminate_charger()
 
     async def _start_charger(self):
-        self._is_running(True)
-        if self._session_is_active is False:
-            await self._call_charger(ON)
-            self._session_is_active = True
-        else:
-            await self._call_charger(RESUME)
-        self._hub.chargecontroller.update_latestchargerstart()
-        if self._hub.chargertype.charger.servicecalls.allowupdatecurrent is True and self._hub.locale.data.free_charge(self._hub.locale.data) is False:
-            self._hass.async_create_task(self._updatemaxcurrent())
+        if time.time() - self._latest_charger_call > CALL_WAIT_TIMER:
+            self._is_running(True)
+            if self._session_is_active is False:
+                await self._call_charger(ON)
+                self._session_is_active = True
+            else:
+                await self._call_charger(RESUME)
+            self._hub.chargecontroller.update_latestchargerstart()
+            if self._hub.chargertype.charger.servicecalls.allowupdatecurrent is True and self._hub.locale.data.free_charge(self._hub.locale.data) is False:
+                self._hass.async_create_task(self._updatemaxcurrent())
 
     async def _terminate_charger(self):
-        self._is_running(False)
-        self._session_is_active = False
-        await self._call_charger(OFF)
-        self._hub.charger_done.value = True
+        if time.time() - self._latest_charger_call > CALL_WAIT_TIMER:
+            self._is_running(False)
+            self._session_is_active = False
+            await self._call_charger(OFF)
+            self._hub.charger_done.value = True
 
     async def _pause_charger(self):
-        self._is_running(False)
-        if self._hub.charger_done.value is True or self._hub.chargecontroller.status is CHARGERSTATES.Idle:
-            await self._terminate_charger()
-        else:
-            await self._call_charger(PAUSE)
+        if time.time() - self._latest_charger_call > CALL_WAIT_TIMER:
+            self._is_running(False)
+            if self._hub.charger_done.value is True or self._hub.chargecontroller.status is CHARGERSTATES.Idle:
+                await self._terminate_charger()
+            else:
+                await self._call_charger(PAUSE)
 
     async def _call_charger(self, command: str):
-        if time.time() - self._latest_charger_call > CALL_WAIT_TIMER:
-            calls = self._service_calls.get_call(command)
-            await self._hub.hass.services.async_call(
-                calls[DOMAIN],
-                calls[command],
-                calls["params"]
-            )
-            msg = f"Calling charger {command}"
-            _LOGGER.debug(msg)
-            self._latest_charger_call = time.time()
+        calls = self._service_calls.get_call(command)
+        await self._hub.hass.services.async_call(
+            calls[DOMAIN],
+            calls[command],
+            calls["params"]
+        )
+        msg = f"Calling charger {command}"
+        _LOGGER.debug(msg)
+        self._latest_charger_call = time.time()
 
     async def _updatemaxcurrent(self):
         """If enabled, let the charger periodically update it's current during charging."""
         self._hub.chargerobject_switch.updatecurrent()
         calls = self._service_calls.get_call(UPDATECURRENT)
-
         if await self._hass.async_add_executor_job(self._wait_turn_on):
             #call here to set amp-list
             while self._hub.chargerobject_switch.value is True and self._charger_running is True:
