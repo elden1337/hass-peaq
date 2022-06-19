@@ -104,8 +104,7 @@ class Hub(HubBase, HubData):
             self.chargerobject_switch.value = value
             self.chargerobject_switch.updatecurrent()
         elif entity == self.totalhourlyenergy.entity:
-            if self.locale.data.converted is True:
-                self.totalhourlyenergy.value = value
+            self.totalhourlyenergy.value = value
             self.currentpeak.value = self.locale.data.query_model.observed_peak
             self.locale.data.query_model.try_update(float(value))
         elif entity == self.powersensormovingaverage.entity:

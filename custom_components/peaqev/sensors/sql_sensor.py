@@ -12,42 +12,11 @@ from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 _LOGGER = logging.getLogger(__name__)
 
-#deprecated
-# class PeaqSQLSensor(SQLSensor):
-#     def __init__(self, hub, sessmaker, query, entry_id):
-#         self._hub = hub
-#         self._attr_name = f"{hub.hubname} {query['name']}"
-#         self._entry_id = entry_id
-#         sm = sessmaker
-#         super().__init__(
-#             self._attr_name,
-#             sm,
-#             query["query"],
-#             "state",
-#             "kWh",
-#             None,
-#             entry_id
-#             )
-#
-#     @property
-#     def icon(self) -> str:
-#         return "mdi:chart-arc"
-#
-#     @property
-#     def unique_id(self):
-#         """Return a unique ID to use for this sensor."""
-#         return f"{DOMAIN}_{self._entry_id}_{ex.nametoid(self._attr_name)}"
-#
-#     @property
-#     def device_info(self):
-#         return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
-
 class PeaqPeakSensor(SensorBase, RestoreEntity):
     device_class = SensorDeviceClass.ENERGY
     unit_of_measurement = ENERGY_KILO_WATT_HOUR
     def __init__(self, hub, entry_id):
         self._name = f"{hub.hubname} peak"
-        #self._attr_unit_of_measurement = "kWh"
         self._charged_peak = 0
         self._peaks_dict: dict| None
         self._observed_peak = 0

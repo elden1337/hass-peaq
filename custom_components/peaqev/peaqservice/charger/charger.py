@@ -98,7 +98,7 @@ class Charger:
                 if await self._hass.async_add_executor_job(self._wait_update_current):
                     serviceparams = await self._setchargerparams(calls)
                     info = f"peaqev updating current with: {calls[DOMAIN]}, {calls[UPDATECURRENT]} and params: {serviceparams}"
-                    _LOGGER.info(info)
+                    _LOGGER.debug(info)
                     await self._hub.hass.services.async_call(
                         calls[DOMAIN],
                         calls[UPDATECURRENT],
