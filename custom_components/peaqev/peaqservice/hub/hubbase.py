@@ -36,7 +36,8 @@ class HubBase:
                 absolute_top_price=config_inputs["absolute_top_price"],
                 cautionhour_type=config_inputs["cautionhour_type"],
                 min_price=config_inputs["min_price"],
-                hub=self
+                hub=self,
+                allow_top_up=config_inputs["allow_top_up"]
             )
         else:
             self.hours = RegularHours(

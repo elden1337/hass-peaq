@@ -131,8 +131,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
 
-
-
 class OptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry):
         """Initialize options flow."""
@@ -158,6 +156,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         _topprice = await self._get_existing_param("absolute_top_price", 0)
         _minprice = await self._get_existing_param("min_priceaware_threshold_price", 0)
         _hourtype = await self._get_existing_param("cautionhour_type", pk.CAUTIONHOURTYPE_INTERMEDIATE)
+        _allow_top_up = await self._get_existing_param("allow_top_up", False)
 
         return self.async_show_form(
             step_id="init",
@@ -165,6 +164,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema(
                 {
                     vol.Optional("priceaware", default=_priceaware): cv.boolean,
+                    vol.Optional("allow_top_up", default=_allow_top_up): cv.boolean,
                     vol.Optional("absolute_top_price", default=_topprice): cv.positive_float,
                     vol.Optional("min_priceaware_threshold_price", default=_minprice): cv.positive_float,
                     vol.Optional(
