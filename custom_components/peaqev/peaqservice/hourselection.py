@@ -101,14 +101,15 @@ class PriceAwareHours(Hours):
             hub,
             absolute_top_price: float = None,
             min_price: float = 0,
-            cautionhour_type: str = CAUTIONHOURTYPE_INTERMEDIATE
+            cautionhour_type: str = CAUTIONHOURTYPE_INTERMEDIATE,
+            allow_top_up: bool = False
     ):
         self._hub = hub
         self._absolute_top_price = self._set_absolute_top_price(absolute_top_price)
         self._min_price = min_price
         self._cautionhour_type = CAUTIONHOURTYPE_DICT[cautionhour_type]
         self._cautionhour_type_string = cautionhour_type
-        self._core = core_hours(self._absolute_top_price, self._min_price, self._cautionhour_type)
+        self._core = core_hours(self._absolute_top_price, self._min_price, self._cautionhour_type, allow_top_up)
         self._hass = hass
         self._prices = []
         self._nordpool_entity = None

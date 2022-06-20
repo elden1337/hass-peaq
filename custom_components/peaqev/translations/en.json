@@ -6,7 +6,8 @@
           "priceaware": "Price aware charging",
           "absolute_top_price": "Max price to allow charging (same currency as your Nordpool sensor)",
           "min_priceaware_threshold_price": "(Optional), all hours below this price will be permitted to charge",
-          "cautionhour_type": "Caution-hour type"
+          "cautionhour_type": "Caution-hour type",
+          "allow_top_up": "Allow top up before expensive day, or delay til tomorrow if very expensive now"
         },
         "description": "Select price-aware if you wish to adhere to Nordpool-prices (requires integration)"
       },
@@ -61,7 +62,8 @@
           "priceaware": "Price aware charging (requires Nordpool)",
           "absolute_top_price": "Max price to allow charging (same currency as your Nordpool sensor)",
           "min_priceaware_threshold_price": "(Optional), all hours below this price will be permitted to charge",
-          "cautionhour_type": "Caution-hour type"
+          "cautionhour_type": "Caution-hour type",
+          "allow_top_up": "Allow top up before expensive day, or delay til tomorrow if very expensive now"
         }
       },
       "hours": {
