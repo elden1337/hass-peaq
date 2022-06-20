@@ -5,7 +5,7 @@ from peaqevcore.Models import (
     CAUTIONHOURTYPE as core_CAUTIONHOURTYPE
 )
 
-from peaqevcore.querytypes import HOURLY as core_HOURLY, QUARTER_HOURLY as core_QUARTER_HOURLY
+from peaqevcore.locale.querytypes.const import HOURLY as core_HOURLY, QUARTER_HOURLY as core_QUARTER_HOURLY
 
 HOURLY = core_HOURLY
 QUARTER_HOURLY = core_QUARTER_HOURLY

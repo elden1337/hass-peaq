@@ -13,6 +13,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_TOTAL_NAME,
     CONSUMPTION_INTEGRAL_NAME
 )
+from custom_components.peaqev.sensors.sql_sensor import PeaqPeakSensor
 from custom_components.peaqev.sensors.utility_sensor import (
     PeaqUtilitySensor,
     METER_OFFSET
@@ -44,6 +45,6 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add
 
     async_add_entities(peaqutilitysensors, update_before_add = True)
 
-    peaqsqlsensors = await _helper.gather_sql_sensors(hass, hub, config.entry_id)
+    peaksensor = [PeaqPeakSensor(hub, config.entry_id)]
+    async_add_entities(peaksensor, update_before_add=True)
 
-    async_add_entities(peaqsqlsensors, update_before_add = True)

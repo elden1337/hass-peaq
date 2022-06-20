@@ -38,7 +38,7 @@ class Charger:
             if self._hub.chargecontroller.status is CHARGERSTATES.Start.name:
                 if self._chargertype_charger_is_on is False and self._charger_running is False:
                     await self._start_charger()
-            elif self._hub.chargecontroller.status is CHARGERSTATES.Stop.name or self._hub.chargecontroller.status is CHARGERSTATES.Idle.name:
+            elif self._hub.chargecontroller.status in [CHARGERSTATES.Stop.name,CHARGERSTATES.Idle.name]:
                 if (self._chargertype_charger_is_on  or self._hub.carpowersensor.value > 0) is True and self._charger_stopped is False:
                     await self._pause_charger()
             elif self._hub.chargecontroller.status is CHARGERSTATES.Done.name and self._hub.charger_done.value is False:
@@ -86,7 +86,7 @@ class Charger:
             calls["params"]
         )
         msg = f"Calling charger {command}"
-        _LOGGER.info(msg)
+        _LOGGER.debug(msg)
         self._latest_charger_call = time.time()
 
     async def _updatemaxcurrent(self):
@@ -99,7 +99,7 @@ class Charger:
                 if await self._hass.async_add_executor_job(self._wait_update_current):
                     serviceparams = await self._setchargerparams(calls)
                     info = f"peaqev updating current with: {calls[DOMAIN]}, {calls[UPDATECURRENT]} and params: {serviceparams}"
-                    _LOGGER.info(info)
+                    _LOGGER.debug(info)
                     await self._hub.hass.services.async_call(
                         calls[DOMAIN],
                         calls[UPDATECURRENT],
@@ -119,7 +119,6 @@ class Charger:
     def _chargertype_charger_is_on(self) -> bool:
         if self._hub.chargertype.charger.powerswitch_controls_charging:
             return self._hub.chargerobject_switch.value
-
         return all(
             [
                 self._hub.chargerobject_switch.value,

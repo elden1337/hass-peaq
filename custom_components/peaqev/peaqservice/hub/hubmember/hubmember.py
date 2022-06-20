@@ -74,10 +74,10 @@ class HubMember:
 class CurrentPeak(HubMember):
     NAME = "CurrentPeak-sensor"
 
-    def __init__(self, data_type: type, listenerentity, initval, startpeaks:dict):
+    def __init__(self, data_type: type, initval, startpeaks:dict):
         self._startpeak = self._set_start_peak(startpeaks)
         self._value = initval
-        super().__init__(data_type, listenerentity, initval)
+        super().__init__(data_type, initval)
 
     def _set_start_peak(self, peaks:dict) -> float:
         peak = peaks.get(datetime.now().month)

@@ -35,7 +35,8 @@ class HubDataBase:
 
         self.locale = LocaleData(
             config_inputs["locale"],
-            domain
+            domain,
+            hass
         )
         self.chargertype = ChargerTypeData(
             hass,
@@ -44,7 +45,6 @@ class HubDataBase:
         )
         self.currentpeak = CurrentPeak(
             data_type=float,
-            listenerentity=self.locale.current_peak_entity,
             initval=0,
             startpeaks=config_inputs["startpeaks"],
         )
@@ -56,8 +56,8 @@ class HubDataBase:
 
         self.carpowersensor = CarPowerSensor(
             data_type=int,
-            listenerentity=self.chargertype.charger.chargerentity,
-            powermeter_is_attribute = self.chargertype.charger.powermeter,
+            listenerentity=self.chargertype.charger.powermeter,
+            powermeter_is_attribute=self.chargertype.charger.powermeter,
             powermeter_factor=self.chargertype.charger.powermeter_factor,
             hubdata=self
         )
