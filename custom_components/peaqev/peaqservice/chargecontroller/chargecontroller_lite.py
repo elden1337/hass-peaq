@@ -1,7 +1,7 @@
 import logging
 import time
 
-from peaqevcore.Models import CHARGERSTATES
+from peaqevcore.models.chargerstates import CHARGERSTATES
 
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontrollerbase import ChargeControllerBase
 

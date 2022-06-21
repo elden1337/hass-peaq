@@ -3,7 +3,7 @@ import time
 from abc import abstractmethod
 from datetime import datetime
 
-from peaqevcore.Models import CHARGERSTATES
+from peaqevcore.models.chargerstates import CHARGERSTATES
 
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 

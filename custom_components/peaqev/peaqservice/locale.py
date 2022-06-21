@@ -1,7 +1,7 @@
 import logging
 
 from homeassistant.core import HomeAssistant
-from peaqevcore.locale.Locale import LOCALETYPEDICT
+from peaqevcore.locale_service.Locale import LOCALETYPEDICT
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -3,7 +3,7 @@ import logging
 import time
 from abc import abstractmethod
 
-from peaqevcore.Models import CHARGERSTATES
+from peaqevcore.models.chargerstates import CHARGERSTATES
 
 from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
 from custom_components.peaqev.peaqservice.chargertypes.servicecalls import ServiceCalls

@@ -1,4 +1,4 @@
-from peaqevcore.session import SessionPrice as _core_session_price
+from peaqevcore.session_service.session import SessionPrice as _core_session_price
 
 class Session:
     def __init__(self, charger):
