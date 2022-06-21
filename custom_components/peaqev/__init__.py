@@ -83,6 +83,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     return True
 
 async def config_entry_update_listener(hass: HomeAssistant, conf: ConfigEntry):
+    _LOGGER.debug("Trying to reboot after options-change.")
     await hass.config_entries.async_reload(conf.entry_id)
 
 async def async_unload_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
