@@ -1,1 +1,1 @@
-peaqevcore~=0.2.0
+peaqevcore~=2.0.0
