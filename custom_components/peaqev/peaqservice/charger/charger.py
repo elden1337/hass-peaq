@@ -34,12 +34,14 @@ class Charger:
 
     async def charge(self):
         """Main function to turn charging on or off"""
+        if self._hub.chargecontroller.status is CHARGERSTATES.Disabled.name:
+            return
         if self._hub.charger_enabled.value is True:
             if self._hub.chargecontroller.status is CHARGERSTATES.Start.name:
                 if self._chargertype_charger_is_on is False and self._charger_running is False:
                     await self._start_charger()
-            elif self._hub.chargecontroller.status in [CHARGERSTATES.Stop.name,CHARGERSTATES.Idle.name]:
-                if (self._chargertype_charger_is_on  or self._hub.carpowersensor.value > 0) is True and self._charger_stopped is False:
+            elif self._hub.chargecontroller.status in [CHARGERSTATES.Stop.name, CHARGERSTATES.Idle.name]:
+                if (self._chargertype_charger_is_on or self._hub.carpowersensor.value > 0) is True and self._charger_stopped is False:
                     await self._pause_charger()
             elif self._hub.chargecontroller.status is CHARGERSTATES.Done.name and self._hub.charger_done.value is False:
                 await self._terminate_charger()
