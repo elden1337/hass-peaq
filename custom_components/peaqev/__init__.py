@@ -72,7 +72,10 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
 
     ATTR_HOURS = "hours"
     async def servicehandler_override_nonhours(call): # pylint:disable=unused-argument
-        hours = call.data.get(ATTR_HOURS)
+        try:
+            hours = call.data.get(ATTR_HOURS)
+        except:
+            hours = 1
         await hub.call_override_nonhours(hours)
 
     hass.services.async_register(DOMAIN, "enable", servicehandler_enable)
