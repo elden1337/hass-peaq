@@ -36,8 +36,6 @@ class ChargeControllerBase:
             if self._chargecontroller_initalized is False:
                 self._chargecontroller_initalized = True
                 _LOGGER.debug("Chargecontroller is initialized and ready to work!")
-        if self._hub.charger_enabled.value is False:
-            return CHARGERSTATES.Disabled.name
         ret = self._get_status()
         if ret == CHARGERSTATES.Error:
             msg = f"Chargecontroller returned faulty state. Charger reported {self._hub.chargerobject.value.lower()} as state."
@@ -53,6 +51,9 @@ class ChargeControllerBase:
         charger_state = self._hub.chargerobject.value.lower()
         free_charge = self._hub.locale.data.free_charge(self._hub.locale.data)
 
+        if self._hub.charger_enabled.value is False:
+            update_timer = True
+            ret = CHARGERSTATES.Disabled
         if charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]:
             self._hub.charger_done.value = True
             ret = CHARGERSTATES.Done
@@ -61,10 +62,6 @@ class ChargeControllerBase:
             ret = CHARGERSTATES.Idle
             if self._hub.charger_done.value is True:
                 self._hub.charger_done.value = False
-        elif charger_state in self._hub.chargertype.charger.chargerstates[
-            CHARGERSTATES.Connected] and self._hub.charger_enabled.value is False:
-            update_timer = True
-            ret = CHARGERSTATES.Connected
         elif charger_state not in self._hub.chargertype.charger.chargerstates[
             CHARGERSTATES.Idle] and self._hub.charger_done.value is True:
             ret = CHARGERSTATES.Done
