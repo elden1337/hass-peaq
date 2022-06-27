@@ -11,7 +11,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class ChargeControllerBase:
-    DONETIMEOUT = 180
+    DONETIMEOUT = 300
 
     def __init__(self, hub):
         self._hub = hub
@@ -73,7 +73,7 @@ class ChargeControllerBase:
             ret = CHARGERSTATES.Stop
 
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Connected]:
-            ret = self._get_status_connected()
+            ret = self._get_status_connected(charger_state)
             update_timer = (ret == CHARGERSTATES.Stop)
 
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Charging]:
@@ -84,10 +84,15 @@ class ChargeControllerBase:
             self.update_latestchargerstart()
         return ret
 
+    def _is_done(self, charger_state) -> bool:
+        if len(self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]) > 0:
+            return charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]
+        return time.time() - self.latest_charger_start > self.DONETIMEOUT
+
     @abstractmethod
     def _get_status_charging(self) -> CHARGERSTATES:
         pass
 
     @abstractmethod
-    def _get_status_connected(self) -> CHARGERSTATES:
+    def _get_status_connected(self, charger_state) -> CHARGERSTATES:
         pass

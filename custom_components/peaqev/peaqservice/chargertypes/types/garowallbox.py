@@ -58,9 +58,9 @@ class GaroWallbox(ChargerBase):
         self._chargerstates[CHARGERSTATES.Connected] = [
             'CONNECTED',
             'CHARGING_PAUSED',
-            'CHARGING_FINISHED',
             'CHARGING_CANCELLED'
         ]
+        self._chargerstates[CHARGERSTATES.Done] = ['CHARGING_FINISHED']
         self._chargerstates[CHARGERSTATES.Charging] = ['CHARGING']
         self.chargerentity = f"sensor.{self._entityschema}_status"
         self.powermeter = f"sensor.{self._entityschema}_current_charging_power"
