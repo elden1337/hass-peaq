@@ -19,15 +19,6 @@ DOMAINNAME = "chargeamps"
 UPDATECURRENT = True
 #docs: https://github.com/kirei/hass-chargeamps
 
-"""
-This is the class that implements a specific chargertype into peaqev.
-Note that you need to change:
-
--manifest.json: add the domain of the charger to after_dependencies
--constants.py: alter the CHARGERTYPES with a new type-constant for your charger. If not, it will not be selectable in configflow
--chargertypes.py|init: update the clause with your type to return this class as the charger.
-"""
-
 HALO = "Halo"
 AURA = "Aura"
 
@@ -46,6 +37,7 @@ class ChargeAmps(ChargerBase):
         self._chargerstates[CHARGERSTATES.Idle] = ["available"]
         self._chargerstates[CHARGERSTATES.Connected] = ["connected"]
         self._chargerstates[CHARGERSTATES.Charging] = ["charging"]
+        self._chargerstates[CHARGERSTATES.Done] = ["n/a"]
 
         self.getentities()
         self.set_sensors()
