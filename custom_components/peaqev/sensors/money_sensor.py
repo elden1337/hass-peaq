@@ -1,8 +1,10 @@
+import logging
 from datetime import datetime
 
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
+_LOGGER = logging.getLogger(__name__)
 
 class PeaqMoneySensor(SensorBase):
     """Special sensor which is only created if priceaware is true"""
@@ -50,6 +52,8 @@ class PeaqMoneySensor(SensorBase):
     def _get_written_state(self) -> str:
         hour = datetime.now().hour
         ret = ""
+        if self._hub.timer.is_override:
+            return self._hub.timer.override_string
         if hour in self._nonhours:
             for idx, h in enumerate(self._nonhours):
                 if idx + 1 < len(self._nonhours):
@@ -64,6 +68,7 @@ class PeaqMoneySensor(SensorBase):
             ret = f"Charging allowed at {int(val * 100)}% of peak"
         else:
             ret = "Charging allowed"
+        #_LOGGER.debug(f"nonhours: {self._nonhours}, ret:{ret}")
         return ret
 
     def _get_stopped_string(self, h) -> str:

@@ -1,13 +1,15 @@
+import logging
+
+from homeassistant.core import HomeAssistant
+from peaqevcore.models.chargerstates import CHARGERSTATES
+
+from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
 from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
-from peaqevcore.Models import CHARGERSTATES
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
     CURRENT,
 )
-from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
-import logging
-from homeassistant.core import HomeAssistant
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -56,9 +58,9 @@ class GaroWallbox(ChargerBase):
         self._chargerstates[CHARGERSTATES.Connected] = [
             'CONNECTED',
             'CHARGING_PAUSED',
-            'CHARGING_FINISHED',
             'CHARGING_CANCELLED'
         ]
+        self._chargerstates[CHARGERSTATES.Done] = ['CHARGING_FINISHED']
         self._chargerstates[CHARGERSTATES.Charging] = ['CHARGING']
         self.chargerentity = f"sensor.{self._entityschema}_status"
         self.powermeter = f"sensor.{self._entityschema}_current_charging_power"

@@ -3,7 +3,7 @@ import time
 from abc import abstractmethod
 from datetime import datetime
 
-from peaqevcore.Models import CHARGERSTATES
+from peaqevcore.models.chargerstates import CHARGERSTATES
 
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
@@ -11,7 +11,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class ChargeControllerBase:
-    DONETIMEOUT = 180
+    DONETIMEOUT = 300
 
     def __init__(self, hub):
         self._hub = hub
@@ -51,7 +51,10 @@ class ChargeControllerBase:
         charger_state = self._hub.chargerobject.value.lower()
         free_charge = self._hub.locale.data.free_charge(self._hub.locale.data)
 
-        if charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]:
+        if self._hub.charger_enabled.value is False:
+            update_timer = True
+            ret = CHARGERSTATES.Disabled
+        elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]:
             self._hub.charger_done.value = True
             ret = CHARGERSTATES.Done
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Idle]:
@@ -59,19 +62,15 @@ class ChargeControllerBase:
             ret = CHARGERSTATES.Idle
             if self._hub.charger_done.value is True:
                 self._hub.charger_done.value = False
-        elif charger_state in self._hub.chargertype.charger.chargerstates[
-            CHARGERSTATES.Connected] and self._hub.charger_enabled.value is False:
-            update_timer = True
-            ret = CHARGERSTATES.Connected
         elif charger_state not in self._hub.chargertype.charger.chargerstates[
             CHARGERSTATES.Idle] and self._hub.charger_done.value is True:
             ret = CHARGERSTATES.Done
-        elif datetime.now().hour in self._hub.hours.non_hours and free_charge is False:
+        elif datetime.now().hour in self._hub.hours.non_hours and free_charge is False and self._hub.timer.is_override is False:
             update_timer = True
             ret = CHARGERSTATES.Stop
 
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Connected]:
-            ret = self._get_status_connected()
+            ret = self._get_status_connected(charger_state)
             update_timer = (ret == CHARGERSTATES.Stop)
 
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Charging]:
@@ -82,10 +81,15 @@ class ChargeControllerBase:
             self.update_latestchargerstart()
         return ret
 
+    def _is_done(self, charger_state) -> bool:
+        if len(self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]) > 0:
+            return charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]
+        return time.time() - self.latest_charger_start > self.DONETIMEOUT
+
     @abstractmethod
     def _get_status_charging(self) -> CHARGERSTATES:
         pass
 
     @abstractmethod
-    def _get_status_connected(self) -> CHARGERSTATES:
+    def _get_status_connected(self, charger_state) -> CHARGERSTATES:
         pass

@@ -6,3 +6,12 @@ enable:
 disable:
   name: Disable Peaqev
   description: Disables Peaqev smart charging
+
+override_nonhours:
+  name: Override non-hours
+  description: Will override non-hours for the set amount of hours. Default per call is to add one hour. Note that this service will not keep state on reboot.
+  fields:
+    hours:
+      description: >
+        The number of hours you wish to add to the override.
+      example: 2

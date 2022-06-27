@@ -1,8 +1,7 @@
 import logging
-import time
 
-from peaqevcore.Chargecontroller import ChargeControllerBase as _core
-from peaqevcore.Models import CHARGERSTATES
+from peaqevcore.chargecontroller_service.chargecontroller import ChargeControllerBase as _core
+from peaqevcore.models.chargerstates import CHARGERSTATES
 
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontrollerbase import ChargeControllerBase
 
@@ -30,7 +29,6 @@ class ChargeController(ChargeControllerBase):
             threshold_stop=self._hub.threshold.stop/100
         )
 
-
     def _get_status_charging(self) -> CHARGERSTATES:
         if self.above_stopthreshold and self._hub.totalhourlyenergy.value > 0 and self._hub.locale.data.free_charge(self._hub.locale.data) is False:
             ret = CHARGERSTATES.Stop
@@ -38,8 +36,8 @@ class ChargeController(ChargeControllerBase):
             ret = CHARGERSTATES.Start
         return ret
 
-    def _get_status_connected(self) -> CHARGERSTATES:
-        if self._hub.carpowersensor.value < 1 and time.time() - self.latest_charger_start > self.DONETIMEOUT:
+    def _get_status_connected(self, charger_state) -> CHARGERSTATES:
+        if self._hub.carpowersensor.value < 1 and self._is_done(charger_state):
             ret = CHARGERSTATES.Done
         else:
             if (self.below_startthreshold and self._hub.totalhourlyenergy.value > 0) or self._hub.locale.data.free_charge(self._hub.locale.data) is True:

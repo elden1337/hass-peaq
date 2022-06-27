@@ -2,7 +2,7 @@ import logging
 import time
 from datetime import datetime
 
-from peaqevcore.Models import CHARGERSTATES
+from peaqevcore.models.chargerstates import CHARGERSTATES
 
 from custom_components.peaqev.peaqservice.charger.session import Session
 from custom_components.peaqev.peaqservice.util.constants import (
@@ -30,16 +30,21 @@ class Charger:
         self._service_calls = servicecalls
         self._session_is_active = False
         self._latest_charger_call = 0
+        self._repeat_is_running = False
         self._session = Session(self)
 
     async def charge(self):
         """Main function to turn charging on or off"""
+        if self._hub.chargecontroller.status is CHARGERSTATES.Disabled.name:
+            return
+        if self._repeat_is_running:
+            self._is_running(False)
         if self._hub.charger_enabled.value is True:
             if self._hub.chargecontroller.status is CHARGERSTATES.Start.name:
                 if self._chargertype_charger_is_on is False and self._charger_running is False:
                     await self._start_charger()
-            elif self._hub.chargecontroller.status in [CHARGERSTATES.Stop.name,CHARGERSTATES.Idle.name]:
-                if (self._chargertype_charger_is_on  or self._hub.carpowersensor.value > 0) is True and self._charger_stopped is False:
+            elif self._hub.chargecontroller.status in [CHARGERSTATES.Stop.name, CHARGERSTATES.Idle.name]:
+                if (self._chargertype_charger_is_on or self._hub.carpowersensor.value > 0) is True and self._charger_stopped is False:
                     await self._pause_charger()
             elif self._hub.chargecontroller.status is CHARGERSTATES.Done.name and self._hub.charger_done.value is False:
                 await self._terminate_charger()
@@ -159,10 +164,8 @@ class Charger:
         timer = 180
         start_time = time.time()
         self._hub.chargerobject_switch.updatecurrent()
-
         while time.time() - start_time < timer:
             time.sleep(3)
-
         self._hub.chargerobject_switch.updatecurrent()
 
     def _is_running(self, determinator: bool):
@@ -176,4 +179,7 @@ class Charger:
             if charger not in chargingstates:
                 self._charger_running = False
                 self._charger_stopped = True
+                self._repeat_is_running = False
                 _LOGGER.debug("charger-class has been stopped")
+            else:
+                self._repeat_is_running = True

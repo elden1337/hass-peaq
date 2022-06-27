@@ -70,8 +70,17 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     async def servicehandler_disable(call): # pylint:disable=unused-argument
         await hub.call_disable_peaq()
 
+    ATTR_HOURS = "hours"
+    async def servicehandler_override_nonhours(call): # pylint:disable=unused-argument
+        try:
+            hours = call.data.get(ATTR_HOURS)
+        except:
+            hours = 1
+        await hub.call_override_nonhours(hours)
+
     hass.services.async_register(DOMAIN, "enable", servicehandler_enable)
     hass.services.async_register(DOMAIN, "disable", servicehandler_disable)
+    hass.services.async_register(DOMAIN, "override_nonhours", servicehandler_override_nonhours)
 
     hass.config_entries.async_setup_platforms(conf, PLATFORMS)
 
@@ -83,6 +92,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     return True
 
 async def config_entry_update_listener(hass: HomeAssistant, conf: ConfigEntry):
+    _LOGGER.debug("Trying to reboot after options-change.")
     await hass.config_entries.async_reload(conf.entry_id)
 
 async def async_unload_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
