@@ -47,4 +47,3 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add
 
     peaksensor = [PeaqPeakSensor(hub, config.entry_id)]
     async_add_entities(peaksensor, update_before_add=True)
-

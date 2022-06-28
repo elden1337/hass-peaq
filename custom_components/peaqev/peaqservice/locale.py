@@ -22,4 +22,3 @@ class LocaleData:
     def data(self):
         return self._data
 
-

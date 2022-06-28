@@ -146,9 +146,9 @@ class ChargerObject(HubMember):
             return True
         if self.value is not None:
             if str(self.value).lower() in self._type:
-               _LOGGER.debug("Chargerobject has initialized")
-               self._is_initialized = True
-               return True
+                _LOGGER.debug("Chargerobject has initialized")
+                self._is_initialized = True
+                return True
         if not self._warned_not_initialized:
             _LOGGER.warning(f"Chargerobject-state not found in given state-list. Value was: {self.value}")
             self._warned_not_initialized = True

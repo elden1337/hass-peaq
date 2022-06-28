@@ -41,7 +41,7 @@ class Timer:
         try:
             assert isinstance(value_in_hours, int)
         except AssertionError as a:
-            _LOGGER.debug(a)
+            _LOGGER.debug(f"could not update override timer: {a}")
             return
         value_in_seconds = value_in_hours * 3600
         self.expire += timedelta(seconds=value_in_seconds)

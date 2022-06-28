@@ -18,7 +18,7 @@ class Threshold(ThresholdBase):
         amps = self._setcurrentdict()
         if self._hub.chargecontroller.status is not CHARGERSTATES.Start.name:
             return min(amps.values())
-        return _core.allowedcurrent(
+        return _core.allowed_current(
             datetime.now().minute,
             self._hub.powersensormovingaverage.value if self._hub.powersensormovingaverage.value is not None else 0,
             self._hub.charger_enabled.value,

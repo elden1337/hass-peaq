@@ -106,6 +106,6 @@ class Easee(ChargerBase):
         ret = self._hass.states.get(sensor)
         if ret is None:
             return False
-        elif ret.state == "Null":
+        if ret.state == "Null":
             return False
         return True
