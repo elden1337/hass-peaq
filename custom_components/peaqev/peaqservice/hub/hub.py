@@ -37,8 +37,7 @@ class Hub(HubBase, HubData):
         self.init_hub_values()
         trackerEntities = [
             self.configpower_entity,
-            self.totalhourlyenergy.entity,
-            # self.currentpeak.entity
+            self.totalhourlyenergy.entity
         ]
 
         self.chargingtracker_entities = [

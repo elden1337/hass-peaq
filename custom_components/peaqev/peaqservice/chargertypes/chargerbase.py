@@ -3,6 +3,7 @@ import logging
 import time
 from abc import abstractmethod
 
+from homeassistant.helpers.entity import entity_sources
 from peaqevcore.models.chargerstates import CHARGERSTATES
 
 from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
@@ -101,6 +102,7 @@ class ChargerBase:
             update_current_on_termination
         )
 
+    #abstractmethod
     def validatecharger(self):
         try:
             assert len(self.chargerentity) > 0
@@ -114,8 +116,7 @@ class ChargerBase:
             if self.servicecalls.allowupdatecurrent is True:
                 assert self.servicecalls.update_current.call is not None
         except Exception as e:
-            msg = f"Peaqev could not initialize charger: {e}"
-            _LOGGER.error(msg)
+            _LOGGER.error(f"Peaqev could not initialize charger: {e}")
         debugprint = {
             "chargerentity": self.chargerentity,
             "powermeter": self.powermeter,
@@ -131,32 +132,17 @@ class ChargerBase:
         }
         _LOGGER.debug(debugprint)
 
-    def _get_entities_fallback(self, domain_name) -> list:
-        from homeassistant.helpers.entity import entity_sources
-
-        ret = [
-            entity_id
-            for entity_id, info in entity_sources(self._hass).items()
-            if info["domain"] == domain_name
-               or info["domain"] == domain_name.capitalize()
-               or info["domain"] == domain_name.upper()
-               or info["domain"] == domain_name.lower()
-        ]
-        return ret
-
+    # abstractmethod
     def getentities(self, domain: str = None, endings: list = None):
         if len(self._entityschema) < 1:
             domain = self._domainname if domain is None else domain
             endings = self._entityendings if endings is None else endings
 
-            entities = self._get_entities_fallback(domain)
+            entities = self._get_entities_from_hass(domain)
 
             if len(entities) < 1:
-                msg = f"no entities found for {domain} at {time.time()}"
-                _LOGGER.error(msg)
+                _LOGGER.error(f"no entities found for {domain} at {time.time()}")
             else:
-                msg = f"entities discovered for {domain} are: {entities}"
-                _LOGGER.debug(msg)
                 _endings = endings
                 candidate = ""
 
@@ -170,10 +156,20 @@ class ChargerBase:
                         break
 
                 self._entityschema = candidate
-                msg = f"entityschema is: {self._entityschema} at {time.time()}"
-                _LOGGER.debug(msg)
+                _LOGGER.debug(f"entityschema is: {self._entityschema} at {time.time()}")
                 self._entities = entities
                 self.set_sensors()
+
+    # remove from base
+    def _get_entities_from_hass(self, domain_name) -> list:
+        return [
+            entity_id
+            for entity_id, info in entity_sources(self._hass).items()
+            if info["domain"] == domain_name
+               or info["domain"] == domain_name.capitalize()
+               or info["domain"] == domain_name.upper()
+               or info["domain"] == domain_name.lower()
+        ]
 
     @abstractmethod
     def set_sensors(self):

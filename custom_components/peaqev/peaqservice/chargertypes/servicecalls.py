@@ -72,28 +72,20 @@ class ServiceCalls:
     def get_call(self, call) -> dict:
         ret = {}
         ret[DOMAIN] = self.domain
-        ret[call] = self._get_call_type(call)
-        ret["params"] = self._get_call_type_params(call)
+        calltype = self._get_call_type(call)
+        ret[call] = calltype.call
+        ret["params"] = calltype.params
         if call is UPDATECURRENT:
             ret[PARAMS] = self.update_current.params
         return ret
 
-    def _get_call_type_params(self, call) -> dict:
+    def _get_call_type(self, call) -> CallType:
         _callsdict = {
-            ON: self.on.params,
-            OFF: self.off.params,
-            PAUSE: self.pause.params,
-            RESUME: self.resume.params
-        }
-        return _callsdict.get(call)
-
-    def _get_call_type(self, call):
-        _callsdict = {
-            ON: self.on.call,
-            OFF: self.off.call,
-            PAUSE: self.pause.call,
-            RESUME: self.resume.call,
-            UPDATECURRENT: self.update_current.call
+            ON: self.on,
+            OFF: self.off,
+            PAUSE: self.pause,
+            RESUME: self.resume,
+            UPDATECURRENT: self.update_current
         }
         return _callsdict.get(call)
 
