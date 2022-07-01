@@ -84,7 +84,6 @@ class ChargeControllerBase:
     def _is_done(self, charger_state) -> bool:
         if len(self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]) > 0:
             return charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]
-        _LOGGER.debug(f"self latest chargerstart etc: {self.latest_charger_start}, {time.time() - self.latest_charger_start > self.DONETIMEOUT}")
         return time.time() - self.latest_charger_start > self.DONETIMEOUT
 
     @abstractmethod

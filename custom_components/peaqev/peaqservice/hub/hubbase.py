@@ -87,4 +87,5 @@ class HubBase:
 
     async def call_override_nonhours(self, hours:int=1):
         """peaqev.override_nonhours"""
+        _LOGGER.debug("calling nonhour override.")
         self.timer.update(hours)
