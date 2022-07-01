@@ -1,10 +1,10 @@
 import logging
 
 from homeassistant.core import HomeAssistant
+from peaqevcore.chargertype_service.chargertype_base import ChargerBase
+from peaqevcore.chargertype_service.models.calltype import CallType
 from peaqevcore.models.chargerstates import CHARGERSTATES
 
-from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
-from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -51,22 +51,22 @@ states:
 
 class GaroWallbox(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid, auth_required: bool = False):
-        super().__init__(hass)
+        self._hass = hass
         self._chargerid = chargerid
         self.getentities(DOMAINNAME, ENTITYENDINGS)
-        self._chargerstates[CHARGERSTATES.Idle] = ['NOT_CONNECTED']
-        self._chargerstates[CHARGERSTATES.Connected] = [
+        self.chargerstates[CHARGERSTATES.Idle] = ['NOT_CONNECTED']
+        self.chargerstates[CHARGERSTATES.Connected] = [
             'CONNECTED',
             'CHARGING_PAUSED',
             'CHARGING_CANCELLED'
         ]
-        self._chargerstates[CHARGERSTATES.Done] = ['CHARGING_FINISHED']
-        self._chargerstates[CHARGERSTATES.Charging] = ['CHARGING']
-        self.chargerentity = f"sensor.{self._entityschema}_status"
-        self.powermeter = f"sensor.{self._entityschema}_current_charging_power"
+        self.chargerstates[CHARGERSTATES.Done] = ['CHARGING_FINISHED']
+        self.chargerstates[CHARGERSTATES.Charging] = ['CHARGING']
+        self.chargerentity = f"sensor.{self.entities.entityschema}_status"
+        self.powermeter = f"sensor.{self.entities.entityschema}_current_charging_power"
         self.powermeter_factor = 1
         # self.powerswitch = f"switch.{self._entityschema}_is_enabled"
-        self.ampmeter = f"sensor.{self._entityschema}_current_charging_current"
+        self.ampmeter = f"sensor.{self.entities.entityschema}_current_charging_current"
         self.ampmeter_is_attribute = False
         self._auth_required = auth_required
 

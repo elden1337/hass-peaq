@@ -1,10 +1,10 @@
 import logging
 
 from homeassistant.core import HomeAssistant
+from peaqevcore.chargertype_service.chargertype_base import ChargerBase
+from peaqevcore.chargertype_service.models.calltype import CallType
 from peaqevcore.models.chargerstates import CHARGERSTATES
 
-from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
-from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -51,17 +51,17 @@ UPDATECURRENT_ON_TERMINATION = False
 
 class Easee(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid, auth_required: bool = False):
-        super().__init__(hass)
+        self._hass = hass
         self._chargerid = chargerid
         self._auth_required = auth_required
         self._powerswitch_controls_charging = False
         self._domainname = DOMAINNAME
-        self._entityendings = ENTITYENDINGS
+        self.entities.imported_entityendings = ENTITYENDINGS
         self._native_chargerstates = NATIVE_CHARGERSTATES
-        self._chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
-        self._chargerstates[CHARGERSTATES.Connected] = ["awaiting_start", "ready_to_charge"]
-        self._chargerstates[CHARGERSTATES.Charging] = ["charging"]
-        self._chargerstates[CHARGERSTATES.Done] = ["completed"]
+        self.chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
+        self.chargerstates[CHARGERSTATES.Connected] = ["awaiting_start", "ready_to_charge"]
+        self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
+        self.chargerstates[CHARGERSTATES.Done] = ["completed"]
         self.getentities()
         self.set_sensors()
 
@@ -91,14 +91,14 @@ class Easee(ChargerBase):
         )
 
     def set_sensors(self):
-        amp_sensor = f"sensor.{self._entityschema}_dynamic_charger_limit"
+        amp_sensor = f"sensor.{self.entities.entityschema}_dynamic_charger_limit"
         if not self._validate_sensor(amp_sensor):
-            amp_sensor = f"sensor.{self._entityschema}_max_charger_limit"
+            amp_sensor = f"sensor.{self.entities.entityschema}_max_charger_limit"
 
-        self.chargerentity = f"sensor.{self._entityschema}_status"
-        self.powermeter = f"sensor.{self._entityschema}_power"
+        self.chargerentity = f"sensor.{self.entities.entityschema}_status"
+        self.powermeter = f"sensor.{self.entities.entityschema}_power"
         self.powermeter_factor = 1000
-        self.powerswitch = f"switch.{self._entityschema}_is_enabled"
+        self.powerswitch = f"switch.{self.entities.entityschema}_is_enabled"
         self.ampmeter = amp_sensor
         self.ampmeter_is_attribute = False
 
