@@ -63,8 +63,10 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     """misc options"""
     ci["behavior_on_default"] = conf.options["behavior_on_default"] if "behavior_on_default" in conf.options.keys() else False
 
-    hub = Hub(hass, ci, DOMAIN)
+    unsub_options_update_listener = conf.add_update_listener(options_update_listener)
+    ci["unsub_options_update_listener"] = unsub_options_update_listener
 
+    hub = Hub(hass, ci, DOMAIN)
     hass.data[DOMAIN]["hub"] = hub
 
     async def servicehandler_enable(call): # pylint:disable=unused-argument
@@ -83,16 +85,11 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
 
     hass.config_entries.async_setup_platforms(conf, PLATFORMS)
 
-    undo_listener = conf.add_update_listener(config_entry_update_listener)
-
-    hass.data[DOMAIN][conf.entry_id] = {
-        LISTENER_FN_CLOSE: undo_listener,
-    }
     return True
 
-async def config_entry_update_listener(hass: HomeAssistant, conf: ConfigEntry):
-    _LOGGER.debug("Trying to reboot after options-change.")
-    await hass.config_entries.async_reload(conf.entry_id)
+async def options_update_listener(hass: HomeAssistant, config_entry: ConfigEntry):
+    """Handle options update."""
+    await hass.config_entries.async_reload(config_entry.entry_id)
 
 async def async_unload_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     """Unload a config entry."""
