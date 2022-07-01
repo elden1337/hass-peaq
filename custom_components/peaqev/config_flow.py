@@ -202,7 +202,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             months_dict = await set_startpeak_dict(user_input)
             self.options["startpeaks"] = months_dict
-            return self.async_create_entry(title="", data=self.options)
+            return await self.async_step_misc()
+            #return self.async_create_entry(title="", data=self.options)
 
         defaultvalues = self.config_entry.options.get(
             "startpeaks") if "startpeaks" in self.config_entry.options.keys() else self.config_entry.data.get(
@@ -210,7 +211,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         return self.async_show_form(
             step_id="months",
-            last_step=True,
+            last_step=False,
             data_schema=vol.Schema(
                 {
                     vol.Optional("jan", default=defaultvalues["1"]): cv.positive_float,
@@ -225,5 +226,23 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Optional("oct", default=defaultvalues["10"]): cv.positive_float,
                     vol.Optional("nov", default=defaultvalues["11"]): cv.positive_float,
                     vol.Optional("dec", default=defaultvalues["12"]): cv.positive_float
+                })
+        )
+
+    async def async_step_misc(self, user_input=None):
+        """Misc"""
+        if user_input is not None:
+            self.options.update(user_input)
+            return self.async_create_entry(title="", data=self.options)
+
+        _behavior_on_default = self.config_entry.options.get(
+            "behavior_on_default") if "behavior_on_default" in self.config_entry.options.keys() else False
+
+        return self.async_show_form(
+            step_id="misc",
+            last_step=True,
+            data_schema=vol.Schema(
+                {
+                    vol.Optional("behavior_on_default", default=_behavior_on_default): cv.boolean
                 })
         )

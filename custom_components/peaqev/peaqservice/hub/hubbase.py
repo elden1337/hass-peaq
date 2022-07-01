@@ -57,6 +57,8 @@ class HubBase:
             listenerentity=f"binary_sensor.{domain}_{ex.nametoid(CHARGERDONE)}",
             initval=False
         )
+        if config_inputs["behavior_on_default"]:
+            self.call_enable_peaq()
 
     @abstractmethod
     def is_initialized(self) -> bool:

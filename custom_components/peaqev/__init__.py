@@ -60,7 +60,10 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
         ci["powersensor"] = conf.data["name"]
         ci["powersensorincludescar"] = conf.data["powersensorincludescar"]
 
-        hub = Hub(hass, ci, DOMAIN)
+    """misc options"""
+    ci["behavior_on_default"] = conf.options["behavior_on_default"] if "behavior_on_default" in conf.options.keys() else False
+
+    hub = Hub(hass, ci, DOMAIN)
 
     hass.data[DOMAIN]["hub"] = hub
 
