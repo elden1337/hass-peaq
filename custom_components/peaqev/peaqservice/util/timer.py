@@ -38,6 +38,8 @@ class Timer:
         return f"Nonhours ignored until {_dt}"
 
     def update(self, value_in_hours:int=DEFAULT_OVERRIDE):
+        if not self.is_override:
+            self.expire = datetime.now()
         try:
             assert isinstance(value_in_hours, int)
         except AssertionError as a:
