@@ -3,6 +3,8 @@ import logging
 from homeassistant.core import HomeAssistant
 from peaqevcore.chargertype_service.chargertype_base import ChargerBase
 from peaqevcore.chargertype_service.models.calltype import CallType
+from peaqevcore.chargertype_service.models.servicecalls_dto import ServiceCallsDTO
+from peaqevcore.chargertype_service.models.servicecalls_options import ServiceCallsOptions
 from peaqevcore.models.chargerstates import CHARGERSTATES
 
 from custom_components.peaqev.peaqservice.util.constants import (
@@ -54,10 +56,10 @@ class Easee(ChargerBase):
         self._hass = hass
         self._chargerid = chargerid
         self._auth_required = auth_required
-        self._powerswitch_controls_charging = False
-        self._domainname = DOMAINNAME
+        self.options.powerswitch_controls_charging = False
+        self.domainname = DOMAINNAME
         self.entities.imported_entityendings = ENTITYENDINGS
-        self._native_chargerstates = NATIVE_CHARGERSTATES
+        self.native_chargerstates = NATIVE_CHARGERSTATES
         self.chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
         self.chargerstates[CHARGERSTATES.Connected] = ["awaiting_start", "ready_to_charge"]
         self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
@@ -80,14 +82,17 @@ class Easee(ChargerBase):
 
         self._set_servicecalls(
             domain=DOMAINNAME,
-            on_call=_on if self._auth_required is True else _resume,
-            off_call=_off if self._auth_required is True else _pause,
-            pause_call=_pause,
-            resume_call=_resume,
-            allowupdatecurrent=UPDATECURRENT,
-            update_current_call="set_charger_dynamic_limit",
-            update_current_params=servicecall_params,
-            update_current_on_termination = UPDATECURRENT_ON_TERMINATION
+            model=ServiceCallsDTO(
+                on=_on if self._auth_required is True else _resume,
+                off=_off if self._auth_required is True else _pause,
+                pause=_pause,
+                resume=_resume,
+                update_current=CallType("set_charger_dynamic_limit", servicecall_params)
+            ),
+            options=ServiceCallsOptions(
+                allowupdatecurrent=UPDATECURRENT,
+                update_current_on_termination=UPDATECURRENT_ON_TERMINATION
+            )
         )
 
     def set_sensors(self):
@@ -95,12 +100,12 @@ class Easee(ChargerBase):
         if not self._validate_sensor(amp_sensor):
             amp_sensor = f"sensor.{self.entities.entityschema}_max_charger_limit"
 
-        self.chargerentity = f"sensor.{self.entities.entityschema}_status"
-        self.powermeter = f"sensor.{self.entities.entityschema}_power"
-        self.powermeter_factor = 1000
-        self.powerswitch = f"switch.{self.entities.entityschema}_is_enabled"
-        self.ampmeter = amp_sensor
-        self.ampmeter_is_attribute = False
+        self.entities.chargerentity = f"sensor.{self.entities.entityschema}_status"
+        self.entities.powermeter = f"sensor.{self.entities.entityschema}_power"
+        self.options.powermeter_factor = 1000
+        self.entities.powerswitch = f"switch.{self.entities.entityschema}_is_enabled"
+        self.entities.ampmeter = amp_sensor
+        self.options.ampmeter_is_attribute = False
 
     def _validate_sensor(self, sensor: str) -> bool:
         ret = self._hass.states.get(sensor)

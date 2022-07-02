@@ -36,7 +36,7 @@ class ChargeAmps(ChargerBase):
 
         self.domainname = DOMAINNAME
         self.entities.imported_entityendings = ENTITYENDINGS
-
+        self.options.powerswitch_controls_charging = True
         self.native_chargerstates = NATIVE_CHARGERSTATES
         self.chargerstates[CHARGERSTATES.Idle] = ["available"]
         self.chargerstates[CHARGERSTATES.Connected] = ["connected"]
@@ -65,7 +65,7 @@ class ChargeAmps(ChargerBase):
             ),
             options=ServiceCallsOptions(
                 allowupdatecurrent=UPDATECURRENT,
-                update_current_on_termination=False
+                update_current_on_termination=True
             )
         )
 
