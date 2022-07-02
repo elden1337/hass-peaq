@@ -1,4 +1,5 @@
 import logging
+import time
 
 from homeassistant.core import HomeAssistant
 from peaqevcore.chargertype_service.chargertype_base import ChargerBase
@@ -7,6 +8,7 @@ from peaqevcore.chargertype_service.models.servicecalls_dto import ServiceCallsD
 from peaqevcore.chargertype_service.models.servicecalls_options import ServiceCallsOptions
 from peaqevcore.models.chargerstates import CHARGERSTATES
 
+import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -64,7 +66,18 @@ class Easee(ChargerBase):
         self.chargerstates[CHARGERSTATES.Connected] = ["awaiting_start", "ready_to_charge"]
         self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
         self.chargerstates[CHARGERSTATES.Done] = ["completed"]
-        self.getentities()
+
+        entitiesobj = helper.getentities(
+            self._hass,
+            helper.EntitiesPostModel(
+                self.domainname,
+                self.entities.entityschema,
+                self.entities.imported_entityendings
+            )
+        )
+        self.entities.imported_entities = entitiesobj.imported_entities
+        self.entities.entityschema = entitiesobj.entityschema
+
         self.set_sensors()
 
         servicecall_params = {
@@ -94,6 +107,32 @@ class Easee(ChargerBase):
                 update_current_on_termination=UPDATECURRENT_ON_TERMINATION
             )
         )
+
+    def getentities(self, domain: str = None, endings: list = None):
+        if len(self.entities.entityschema) < 1:
+            domain = self.domainname if domain is None else domain
+            endings = self.entities.imported_entityendings if endings is None else endings
+
+            entities = helper.get_entities_from_hass(self._hass, domain)
+
+            if len(entities) < 1:
+                _LOGGER.error(f"no entities found for {domain} at {time.time()}")
+            else:
+                _endings = endings
+                candidate = ""
+
+                for e in entities:
+                    splitted = e.split(".")
+                    for ending in _endings:
+                        if splitted[1].endswith(ending):
+                            candidate = splitted[1].replace(ending, '')
+                            break
+                    if len(candidate) > 1:
+                        break
+
+                self.entities.entityschema = candidate
+                _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
+                self.entities.imported_entities = entities
 
     def set_sensors(self):
         amp_sensor = f"sensor.{self.entities.entityschema}_dynamic_charger_limit"

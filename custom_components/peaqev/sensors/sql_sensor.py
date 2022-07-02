@@ -28,7 +28,7 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
 
     def update(self) -> None:
         self._charged_peak = self._hub.locale.data.query_model.charged_peak
-        self._peaks_dict = self._hub.locale.data.query_model.peaks_export
+        self._peaks_dict = self._hub.locale.data.query_model.peaks.export_peaks
         self._observed_peak = self._hub.locale.data.query_model.observed_peak
 
     @property

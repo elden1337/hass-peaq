@@ -9,6 +9,7 @@ from peaqevcore.chargertype_service.models.servicecalls_dto import ServiceCallsD
 from peaqevcore.chargertype_service.models.servicecalls_options import ServiceCallsOptions
 from peaqevcore.models.chargerstates import CHARGERSTATES
 
+import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -42,7 +43,17 @@ class ChargeAmps(ChargerBase):
         self.chargerstates[CHARGERSTATES.Connected] = ["connected"]
         self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
 
-        self.getentities()
+        entitiesobj = helper.getentities(
+            self._hass,
+            helper.EntitiesPostModel(
+                self.domainname,
+                self.entities.entityschema,
+                self.entities.imported_entityendings
+            )
+        )
+        self.entities.imported_entities = entitiesobj.imported_entities
+        self.entities.entityschema = entitiesobj.entityschema
+
         self.set_sensors()
 
         servicecall_params = {
@@ -74,7 +85,7 @@ class ChargeAmps(ChargerBase):
             domain = self.domainname if domain is None else domain
             endings = self.entities.imported_entityendings if endings is None else endings
 
-            entities = self._get_entities_from_hass(domain)
+            entities = helper.get_entities_from_hass(self._hass, domain)
 
             if len(entities) < 1:
                 _LOGGER.error(f"no entities found for {domain} at {time.time()}")
@@ -93,8 +104,7 @@ class ChargeAmps(ChargerBase):
 
                 self.entities.entityschema = candidate
                 _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
-                self._entities = entities
-                self.set_sensors()
+                self.entities.imported_entities = entities
 
     def _get_entities_from_hass(self, domain_name) -> list:
         return [

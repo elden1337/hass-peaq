@@ -50,24 +50,24 @@ class HubDataBase:
         )
         self.chargerobject = ChargerObject(
             data_type=self.chargertype.charger.native_chargerstates,
-            listenerentity=self.chargertype.charger.chargerentity
+            listenerentity=self.chargertype.charger.entities.chargerentity
         )
         resultdict[self.chargerobject.entity] = self.chargerobject.is_initialized
 
         self.carpowersensor = CarPowerSensor(
             data_type=int,
-            listenerentity=self.chargertype.charger.powermeter,
-            powermeter_factor=self.chargertype.charger.powermeter_factor,
+            listenerentity=self.chargertype.charger.entities.powermeter,
+            powermeter_factor=self.chargertype.charger.options.powermeter_factor,
             hubdata=self
         )
 
         self.chargerobject_switch = ChargerSwitch(
             hass=hass,
             data_type=bool,
-            listenerentity=self.chargertype.charger.powerswitch,
+            listenerentity=self.chargertype.charger.entities.powerswitch,
             initval=False,
-            currentname=self.chargertype.charger.ampmeter,
-            ampmeter_is_attribute=self.chargertype.charger.ampmeter_is_attribute,
+            currentname=self.chargertype.charger.entities.ampmeter,
+            ampmeter_is_attribute=self.chargertype.charger.options.ampmeter_is_attribute,
             hubdata=self
         )
         self.charger = Charger(
@@ -76,7 +76,7 @@ class HubDataBase:
             self.chargertype.charger.servicecalls
         )
 
-        _LOGGER.debug(self.chargertype.charger.chargerentity)
+        _LOGGER.debug(self.chargertype.charger.entities.chargerentity)
 
     @abstractmethod
     def init_hub_values(self):
