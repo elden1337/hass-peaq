@@ -15,3 +15,24 @@ override_nonhours:
       description: >
         The number of hours you wish to add to the override.
       example: 2
+
+schedule_needed_charge:
+  name: Schedule needed charge
+  description: Set a one-time schedule to help Peaqev optimize the cheapest hours for your desired charge-amount.
+  fields:
+    charge_amount:
+      description: >
+        The number of kWh you wish to charge within the session
+      example: 7.2
+    departure_time:
+      description: >
+        The datetime you wish to depart from the charger
+      example: 2022-06-02 07:00
+    schedule_starttime:
+      description: >
+        Optional. The datetime you wish for the schedule to begin. Must be less than the departure-time, else it will default to the time of service call.
+      example: 2022-06-01 18:00
+    override_settings:
+      description: >
+        Optional, set to True if you want to let Peaqev ignore your max-price and possibly peak-level during this scheduled session.
+      example: False

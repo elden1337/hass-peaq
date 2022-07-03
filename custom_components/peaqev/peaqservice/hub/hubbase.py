@@ -9,6 +9,7 @@ from homeassistant.core import (
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.hourselection import (PriceAwareHours, RegularHours)
 from custom_components.peaqev.peaqservice.hub.hubmember.hubmember import HubMember
+from custom_components.peaqev.peaqservice.hub.scheduler.schedule import Schedule
 from custom_components.peaqev.peaqservice.util.constants import CHARGERENABLED, CHARGERDONE
 from custom_components.peaqev.peaqservice.util.timer import Timer
 
@@ -50,15 +51,13 @@ class HubBase:
         self.charger_enabled = HubMember(
             data_type=bool,
             listenerentity=f"binary_sensor.{domain}_{ex.nametoid(CHARGERENABLED)}",
-            initval=False
+            initval=config_inputs["behavior_on_default"]
         )
         self.charger_done = HubMember(
             data_type=bool,
             listenerentity=f"binary_sensor.{domain}_{ex.nametoid(CHARGERDONE)}",
             initval=False
         )
-        if config_inputs["behavior_on_default"]:
-            self.call_enable_peaq()
 
     @abstractmethod
     def is_initialized(self) -> bool:
@@ -90,3 +89,13 @@ class HubBase:
     async def call_override_nonhours(self, hours:int=1):
         """peaqev.override_nonhours"""
         self.timer.update(hours)
+
+    async def call_schedule_needed_charge(
+            self,
+            charge_amount:float,
+            departure_time:str,
+            schedule_starttime:str = None,
+            override_settings:bool = False
+        ):
+        """peaqev.schedule_needed_charge"""
+        await Schedule.set_schedule(charge_amount, departure_time, schedule_starttime, override_settings)

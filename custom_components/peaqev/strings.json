@@ -37,7 +37,7 @@
       },
       "misc": {
         "data": {
-          "behavior_on_default": "Peaqev should be turned on after HA-reboot"
+          "behavior_on_default": "[%key:common::config_flow::data::behavior_on_default%]"
         },
         "description": "Miscellaneous options"
       }
