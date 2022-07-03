@@ -7,9 +7,18 @@
 
 ![Peaq logo](https://raw.githubusercontent.com/elden1337/hass-peaq/main/assets/icon.png)
 
-Should you wish to let Peaqev control your charging depending on hourly energy price, you must first disable any other smart-charging capability you may have, such as scheduled charging or energy-price-aware charging.
+Welcome to Peaqev!
 
-This integration does not communicate with any properitary API's. However, the chargers selected will use the integrations set for them, and may include cloud polling of data.
+This application started as an attempt to lower the household's peak energy charges, targeted at charging an ev below a set threshold. 
+Since then, we have evolved, and now offer a broader feature-set including price aware smart charge (a very smart calculation if you ask us), looking ahead at tomorrow's prices automatically, installation without the need for a power meter etc.
+Peaqev covers 16 different energy companies in Sweden, Norway and Belgium and two types of ev-chargers _(2021-07-03)_
+
+The integration does not communicate with any properitary API's. However, the chargers selected will use the integrations set for them, and may include cloud polling of data.
+
+For usage-examples and more in-depth explanations, see the Wiki:
+* [List of available Locales](https://github.com/elden1337/hass-peaq/wiki/Locale)
+* [Price awareness](https://github.com/elden1337/hass-peaq/wiki/Price-awareness)
+* [Usage](https://github.com/elden1337/hass-peaq/wiki/Usage)
 
 ## Installation
 *Required to install is Home Assistant version 2022.4.5 or higher.*
