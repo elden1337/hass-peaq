@@ -65,7 +65,7 @@ class ChargeControllerBase:
         elif charger_state not in self._hub.chargertype.charger.chargerstates[
             CHARGERSTATES.Idle] and self._hub.charger_done.value is True:
             ret = CHARGERSTATES.Done
-        elif datetime.now().hour in self._hub.hours.non_hours and free_charge is False and self._hub.timer.is_override is False:
+        elif datetime.now().hour in self._hub.non_hours and free_charge is False and self._hub.timer.is_override is False:
             update_timer = True
             ret = CHARGERSTATES.Stop
 

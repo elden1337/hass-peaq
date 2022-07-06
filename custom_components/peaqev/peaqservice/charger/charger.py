@@ -31,7 +31,7 @@ class Charger:
         self._session_is_active = False
         self._latest_charger_call = 0
         self._repeat_is_running = False
-        self._session = Session(self)
+        self.session = Session(self)
 
     @property
     def _chargertype_charger_is_on(self) -> bool:
@@ -44,11 +44,20 @@ class Charger:
             ]
         )
 
+    @property
+    def session_is_active(self) -> bool:
+        return self._session_is_active
+
+    @session_is_active.setter
+    def session_is_active(self, val):
+        self._session_is_active = val
+
     async def charge(self):
         """Main function to turn charging on or off"""
         if self._repeat_is_running:
             await self._is_running(False)
         if self._hub.charger_enabled.value is True:
+            self.session_is_active = True
             if self._hub.chargecontroller.status is CHARGERSTATES.Start.name:
                 if self._chargertype_charger_is_on is False and self._charger_running is False:
                     await self._start_charger()
@@ -80,6 +89,7 @@ class Charger:
 
     async def _terminate_charger(self):
         if time.time() - self._latest_charger_call > CALL_WAIT_TIMER:
+            self.session_is_active = False
             await self._is_running(False)
             self._session_is_active = False
             await self._call_charger(OFF)

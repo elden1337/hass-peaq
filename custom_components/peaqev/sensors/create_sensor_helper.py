@@ -1,8 +1,10 @@
 import logging
+from datetime import timedelta
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import (
     DOMAIN)
+from custom_components.peaqev.peaqservice.util.constants import AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H
 from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_TOTAL_NAME,
     CONSUMPTION_INTEGRAL_NAME
@@ -30,7 +32,8 @@ async def gather_Sensors(hub, config) -> list:
         ret.append(PeaqPowerSensor(hub, config.entry_id))
 
     if hub.peaqtype_is_lite is False:
-        ret.append(PeaqAverageSensor(hub, config.entry_id))
+        ret.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION, timedelta(minutes=5)))
+        ret.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION_24H, timedelta(hours=24)))
         ret.append(PeaqPredictionSensor(hub, config.entry_id))
 
     if hub.price_aware is True:

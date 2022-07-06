@@ -16,9 +16,9 @@ override_nonhours:
         The number of hours you wish to add to the override.
       example: 2
 
-schedule_needed_charge:
-  name: Schedule needed charge
-  description: Set a one-time schedule to help Peaqev optimize the cheapest hours for your desired charge-amount.
+scheduler_set:
+  name: Set Peaqev Scheduler
+  description: Set a one-time schedule to help Peaqev optimize the cheapest hours for your desired charge-amount. Does not work with Peaqev-lite.
   fields:
     charge_amount:
       description: >
@@ -36,3 +36,7 @@ schedule_needed_charge:
       description: >
         Optional, set to True if you want to let Peaqev ignore your max-price and possibly peak-level during this scheduled session.
       example: False
+
+scheduler_cancel:
+  name: Cancel Peaqev Scheduler
+  description: Will cancel the previously set scheduled charge.

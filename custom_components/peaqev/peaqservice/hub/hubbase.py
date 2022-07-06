@@ -1,5 +1,6 @@
 import logging
 from abc import abstractmethod
+from datetime import datetime
 
 from homeassistant.core import (
     HomeAssistant,
@@ -9,7 +10,7 @@ from homeassistant.core import (
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.hourselection import (PriceAwareHours, RegularHours)
 from custom_components.peaqev.peaqservice.hub.hubmember.hubmember import HubMember
-from custom_components.peaqev.peaqservice.hub.scheduler.schedule import Schedule
+from custom_components.peaqev.peaqservice.hub.scheduler.schedule import Scheduler
 from custom_components.peaqev.peaqservice.util.constants import CHARGERENABLED, CHARGERDONE
 from custom_components.peaqev.peaqservice.util.timer import Timer
 
@@ -58,6 +59,15 @@ class HubBase:
             listenerentity=f"binary_sensor.{domain}_{ex.nametoid(CHARGERDONE)}",
             initval=False
         )
+        self.scheduler = Scheduler(hub=self)
+
+    @property
+    def non_hours(self) -> list:
+        return self.scheduler.non_hours if self.scheduler.scheduler_active else self.hours.non_hours
+
+    @property
+    def dynamic_caution_hours(self) -> dict:
+        return self.scheduler.caution_hours if self.scheduler.scheduler_active else self.hours.dynamic_caution_hours
 
     @abstractmethod
     def is_initialized(self) -> bool:
@@ -97,5 +107,13 @@ class HubBase:
             schedule_starttime:str = None,
             override_settings:bool = False
         ):
-        """peaqev.schedule_needed_charge"""
-        await Schedule.set_schedule(charge_amount, departure_time, schedule_starttime, override_settings)
+        dep_time = datetime.strptime(departure_time, '%y-%m-%d %H:%M')
+        if schedule_starttime is not None:
+            start_time = datetime.strptime(schedule_starttime, '%y-%m-%d %H:%M')
+        else:
+            start_time = datetime.now()
+        _LOGGER.debug(f"scheduler params. charge: {charge_amount}, dep-time: {dep_time}, start_time: {start_time}")
+        self.scheduler.create_schedule(charge_amount, dep_time, start_time, override_settings)
+
+    async def call_scheduler_cancel(self):
+        self.scheduler.cancel()

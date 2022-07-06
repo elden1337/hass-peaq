@@ -6,6 +6,7 @@ from custom_components.peaqev.peaqservice.hub.hubmember.hubmember import HubMemb
 from custom_components.peaqev.peaqservice.power.power import Power
 from custom_components.peaqev.peaqservice.util.constants import (
     AVERAGECONSUMPTION,
+    AVERAGECONSUMPTION_24H,
     CONSUMPTION_TOTAL_NAME,
     HOURLY
 )
@@ -28,6 +29,11 @@ class HubData(HubDataBase):
         self.powersensormovingaverage = HubMember(
             data_type=int,
             listenerentity=f"sensor.{domain}_{ex.nametoid(AVERAGECONSUMPTION)}",
+            initval=0
+        )
+        self.powersensormovingaverage24 = HubMember(
+            data_type=int,
+            listenerentity=f"sensor.{domain}_{ex.nametoid(AVERAGECONSUMPTION_24H)}",
             initval=0
         )
         self.totalhourlyenergy = HubMember(

@@ -44,6 +44,7 @@ class Hub(HubBase, HubData):
             self.chargerobject_switch.entity,
             self.carpowersensor.entity,
             self.powersensormovingaverage.entity,
+            self.powersensormovingaverage24.entity,
             self.charger_enabled.entity,
             self.charger_done.entity,
             self.chargerobject.entity,
@@ -86,9 +87,9 @@ class Hub(HubBase, HubData):
 
     @property
     def current_peak_dynamic(self):
-        if self.price_aware is True and len(self.hours.dynamic_caution_hours):
-            if datetime.now().hour in self.hours.dynamic_caution_hours.keys() and self.timer.is_override is False:
-                return self.currentpeak.value * self.hours.dynamic_caution_hours[datetime.now().hour]
+        if self.price_aware is True and len(self.dynamic_caution_hours):
+            if datetime.now().hour in self.dynamic_caution_hours.keys() and self.timer.is_override is False:
+                return self.currentpeak.value * self.dynamic_caution_hours[datetime.now().hour]
         return self.currentpeak.value
 
     async def _update_sensor(self, entity, value):
@@ -97,6 +98,8 @@ class Hub(HubBase, HubData):
         elif entity == self.carpowersensor.entity:
             self.carpowersensor.value = value
             self.power.update(carpowersensor_value=self.carpowersensor.value, config_sensor_value=None)
+            if self.charger.session_is_active:
+                self.charger.session.session_energy = value
         elif entity == self.chargerobject.entity:
             self.chargerobject.value = value
         elif entity == self.chargerobject_switch.entity:
@@ -108,7 +111,11 @@ class Hub(HubBase, HubData):
             self.locale.data.query_model.try_update(float(value))
         elif entity == self.powersensormovingaverage.entity:
             self.powersensormovingaverage.value = value
+        elif entity == self.powersensormovingaverage24.entity:
+            self.powersensormovingaverage24.value = value
         elif entity == self.hours.nordpool_entity:
             self.hours.update_nordpool()
         if entity in self.chargingtracker_entities and self.is_initialized is True:
             await self.charger.charge()
+        if self.scheduler.schedule_created is True:
+            self.scheduler.update()

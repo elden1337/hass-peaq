@@ -9,14 +9,16 @@ class PeaqSensor(SensorBase):
 
         self._attr_name = name
         self._state = self._hub.chargecontroller.status
-        self._nonhours = self._hub.hours.non_hours
+        self._nonhours = self._hub.non_hours
         self._cautionhours = self._hub.hours.caution_hours
         self._current_hour = None
         self._price_aware = False
 
     @property
     def state(self):
-        return self._hub.chargecontroller.status
+        if self._hub.scheduler.scheduler_active:
+            return f"(schedule) {self._state}"
+        return self._state
 
     @property
     def icon(self) -> str:
@@ -29,7 +31,7 @@ class PeaqSensor(SensorBase):
 
     def update(self) -> None:
         self._state = self._hub.chargecontroller.status
-        self._nonhours = self._hub.hours.non_hours
+        self._nonhours = self._hub.non_hours
         self._cautionhours = self._hub.hours.caution_hours
         self._current_hour = self._hub.hours.state
         self._price_aware = self._hub.hours.price_aware
@@ -43,5 +45,5 @@ class PeaqSensor(SensorBase):
             attr_dict["caution_hours"] = self._cautionhours
 
         attr_dict["current_hour state"]= self._current_hour
-
+        attr_dict["scheduler_active"] = self._hub.scheduler.scheduler_active
         return attr_dict
