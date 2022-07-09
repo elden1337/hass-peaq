@@ -18,6 +18,7 @@ The integration does not communicate with any properitary API's. However, the ch
 For usage-examples and more in-depth explanations, see the Wiki:
 * [List of available Locales](https://github.com/elden1337/hass-peaq/wiki/Locale)
 * [Price awareness](https://github.com/elden1337/hass-peaq/wiki/Price-awareness)
+* [Scheduler](https://github.com/elden1337/hass-peaq/wiki/Scheduler)
 * [Usage](https://github.com/elden1337/hass-peaq/wiki/Usage)
 
 ## Installation
