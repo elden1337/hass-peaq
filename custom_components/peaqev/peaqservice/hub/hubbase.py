@@ -114,6 +114,7 @@ class HubBase:
             start_time = datetime.now()
         _LOGGER.debug(f"scheduler params. charge: {charge_amount}, dep-time: {dep_time}, start_time: {start_time}")
         self.scheduler.create_schedule(charge_amount, dep_time, start_time, override_settings)
+        self.scheduler.update()
 
     async def call_scheduler_cancel(self):
         self.scheduler.cancel()
