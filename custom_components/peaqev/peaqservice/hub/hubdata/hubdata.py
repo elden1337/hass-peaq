@@ -46,7 +46,6 @@ class HubData(HubDataBase):
             powersensor_includes_car=self.powersensor_includes_car
         )
 
-
     def init_hub_values(self):
         """Initialize values from Home Assistant on the set objects"""
         self.chargerobject.value = self.hass.states.get(self.chargerobject.entity).state if self.hass.states.get(
