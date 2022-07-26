@@ -1,7 +1,6 @@
 import logging
 from abc import abstractmethod
 from datetime import datetime
-
 from homeassistant.core import (
     HomeAssistant,
     callback,

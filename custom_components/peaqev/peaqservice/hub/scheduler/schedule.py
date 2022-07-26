@@ -1,6 +1,6 @@
 from datetime import datetime
-
 from peaqevcore.scheduler_service.scheduler import Scheduler as core_scheduler
+from peaqevcore.models.chargerstates import CHARGERSTATES
 
 
 class Scheduler:
@@ -15,24 +15,25 @@ class Scheduler:
         self.schedule_created = True
 
     def update(self):
-            self.scheduler.update(
-                avg24=self._hub.powersensormovingaverage24.value,
-                peak=self._hub.current_peak_dynamic,
-                charged_amount=self._hub.charger.session.session_energy,
-                prices=self._hub.hours.prices,
-                prices_tomorrow=self._hub.hours.prices_tomorrow
-            )
+        self.scheduler.update(
+            avg24=self._hub.powersensormovingaverage24.value,
+            peak=self._hub.current_peak_dynamic,
+            charged_amount=self._hub.charger.session.session_energy,
+            prices=self._hub.hours.prices,
+            prices_tomorrow=self._hub.hours.prices_tomorrow
+        )
 
     def cancel(self):
         self.scheduler.cancel()
         self.schedule_created = False
 
     def check_states(self):
-        """
-        check here if:
-        chargestate is done or idle (then cancel scheduler)
-        """
-        self.cancel()
+        if not self.scheduler_active and self.schedule_created:
+            self.cancel()
+        elif self._hub.chargecontroller.status is CHARGERSTATES.Idle.name:
+            self.cancel()
+        elif self._hub.chargecontroller.status is CHARGERSTATES.Done.name:
+            self.cancel()
 
     @property
     def non_hours(self) -> list:

@@ -66,13 +66,14 @@ class Hours():
         pass
 
     @abstractmethod
-    def update_nordpool(self):
+    def update_nordpool(self) -> None:
         pass
 
     @property
     @abstractmethod
     def dynamic_caution_hours(self) -> dict:
         pass
+
 
 class RegularHours(Hours):
     def __init__(self, non_hours=None, caution_hours=None):
@@ -105,11 +106,13 @@ class PriceAwareHours(Hours):
             allow_top_up: bool = False
     ):
         self._hub = hub
-        self._absolute_top_price = self._set_absolute_top_price(absolute_top_price)
-        self._min_price = min_price
         self._cautionhour_type = CAUTIONHOURTYPE_DICT[cautionhour_type]
         self._cautionhour_type_string = cautionhour_type
-        self._core = core_hours(self._absolute_top_price, self._min_price, self._cautionhour_type, allow_top_up)
+        self._core = core_hours(
+            self._set_absolute_top_price(absolute_top_price),
+            min_price,
+            self._cautionhour_type, allow_top_up
+        )
         self._hass = hass
         self._prices = []
         self._nordpool_entity = None
@@ -136,11 +139,11 @@ class PriceAwareHours(Hours):
 
     @property
     def absolute_top_price(self):
-        return self._absolute_top_price
+        return self._core.absolute_top_price
 
     @property
     def min_price(self):
-        return self._min_price
+        return self._core.min_price
 
     @property
     def nordpool_entity(self) -> str:

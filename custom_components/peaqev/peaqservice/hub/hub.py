@@ -58,7 +58,6 @@ class Hub(HubBase, HubData):
         trackerEntities += self.chargingtracker_entities
         async_track_state_change(hass, trackerEntities, self.state_changed)
 
-
     initialized_log_last_logged = 0
     not_ready_list_old_state = 0
 
