@@ -1,6 +1,7 @@
 import logging
 from abc import abstractmethod
 from datetime import datetime
+
 from homeassistant.core import (
     HomeAssistant,
     callback,
@@ -58,7 +59,7 @@ class HubBase:
             listenerentity=f"binary_sensor.{domain}_{ex.nametoid(CHARGERDONE)}",
             initval=False
         )
-        self.scheduler = Scheduler(hub=self)
+        self.scheduler = Scheduler(hub=self, options=self.hours.options)
 
     @property
     def non_hours(self) -> list:

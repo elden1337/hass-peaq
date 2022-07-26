@@ -74,6 +74,10 @@ class Hours():
     def dynamic_caution_hours(self) -> dict:
         pass
 
+    @property
+    @abstractmethod
+    def options(self):
+        pass
 
 class RegularHours(Hours):
     def __init__(self, non_hours=None, caution_hours=None):
@@ -94,6 +98,9 @@ class RegularHours(Hours):
     def is_initialized(self) -> bool:
         return True
 
+    @property
+    def options(self):
+        pass
 
 class PriceAwareHours(Hours):
     def __init__(
@@ -120,6 +127,10 @@ class PriceAwareHours(Hours):
         self._is_initialized = False
         self._setup_nordpool()
         super().__init__(True)
+
+    @property
+    def options(self):
+        return self._core.options
 
     @property
     def dynamic_caution_hours(self) -> dict:
