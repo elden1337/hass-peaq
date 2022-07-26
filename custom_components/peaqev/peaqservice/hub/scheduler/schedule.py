@@ -1,6 +1,7 @@
 from datetime import datetime
-from peaqevcore.scheduler_service.scheduler import Scheduler as core_scheduler
+
 from peaqevcore.models.chargerstates import CHARGERSTATES
+from peaqevcore.scheduler_service.scheduler import Scheduler as core_scheduler
 
 
 class Scheduler:
@@ -15,6 +16,7 @@ class Scheduler:
         self.schedule_created = True
 
     def update(self):
+        self.check_states()
         self.scheduler.update(
             avg24=self._hub.powersensormovingaverage24.value,
             peak=self._hub.current_peak_dynamic,
