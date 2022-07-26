@@ -5,9 +5,9 @@ from peaqevcore.scheduler_service.scheduler import Scheduler as core_scheduler
 
 
 class Scheduler:
-    def __init__(self, hub):
+    def __init__(self, hub, options):
         self._hub = hub
-        self.scheduler = core_scheduler()
+        self.scheduler = core_scheduler(options)
         self.schedule_created = False
 
     def create_schedule(self, charge_amount:float, departure_time:datetime, schedule_starttime:datetime, override_settings:bool = False):

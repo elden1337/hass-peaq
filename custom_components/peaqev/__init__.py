@@ -13,7 +13,8 @@ from .const import (
     PLATFORMS, LISTENER_FN_CLOSE
 )
 from .peaqservice.hub.hub_lite import HubLite
-from .peaqservice.hub.models import ConfigModel
+
+#from .peaqservice.hub.models import ConfigModel
 
 _LOGGER = logging.getLogger(__name__)
 

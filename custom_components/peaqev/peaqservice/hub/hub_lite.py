@@ -68,19 +68,20 @@ class HubLite(HubBase, HubDataLite):
         return self.currentpeak.value
 
     async def _update_sensor(self, entity, value):
-        if entity == self.carpowersensor.entity:
-            self.carpowersensor.value = value
-        elif entity == self.chargerobject.entity:
-            self.chargerobject.value = value
-        elif entity == self.chargerobject_switch.entity:
-            self.chargerobject_switch.value = value
-            self.chargerobject_switch.updatecurrent()
-        elif entity == self.currentpeak.entity:
-            self.currentpeak.value = value
-        elif entity == self.totalhourlyenergy.entity:
-            self.totalhourlyenergy.value = value
-        elif entity == self.hours.nordpool_entity:
-            self.hours.update_nordpool()
+        match entity:
+            case self.carpowersensor.entity:
+                self.carpowersensor.value = value
+            case self.chargerobject.entity:
+                self.chargerobject.value = value
+            case self.chargerobject_switch.entity:
+                self.chargerobject_switch.value = value
+                self.chargerobject_switch.updatecurrent()
+            case self.currentpeak.entity:
+                self.currentpeak.value = value
+            case self.totalhourlyenergy.entity:
+                self.totalhourlyenergy.value = value
+            case self.hours.nordpool_entity:
+                self.hours.update_nordpool()
 
         if entity in self.chargingtracker_entities:
             await self.charger.charge()

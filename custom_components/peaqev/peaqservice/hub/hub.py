@@ -92,28 +92,36 @@ class Hub(HubBase, HubData):
         return self.currentpeak.value
 
     async def _update_sensor(self, entity, value):
-        if entity == self.configpower_entity:
-            self.power.update(carpowersensor_value=self.carpowersensor.value, config_sensor_value=value)
-        elif entity == self.carpowersensor.entity:
-            self.carpowersensor.value = value
-            self.power.update(carpowersensor_value=self.carpowersensor.value, config_sensor_value=None)
-            if self.charger.session_is_active:
-                self.charger.session.session_energy = value
-        elif entity == self.chargerobject.entity:
-            self.chargerobject.value = value
-        elif entity == self.chargerobject_switch.entity:
-            self.chargerobject_switch.value = value
-            self.chargerobject_switch.updatecurrent()
-        elif entity == self.totalhourlyenergy.entity:
-            self.totalhourlyenergy.value = value
-            self.currentpeak.value = self.locale.data.query_model.observed_peak
-            self.locale.data.query_model.try_update(float(value))
-        elif entity == self.powersensormovingaverage.entity:
-            self.powersensormovingaverage.value = value
-        elif entity == self.powersensormovingaverage24.entity:
-            self.powersensormovingaverage24.value = value
-        elif entity == self.hours.nordpool_entity:
-            self.hours.update_nordpool()
+        match entity:
+            case self.configpower_entity:
+                self.power.update(
+                    carpowersensor_value=self.carpowersensor.value,
+                    config_sensor_value=value
+                )
+            case self.carpowersensor.entity:
+                self.carpowersensor.value = value
+                self.power.update(
+                    carpowersensor_value=self.carpowersensor.value,
+                    config_sensor_value=None
+                )
+                if self.charger.session_is_active:
+                    self.charger.session.session_energy = value
+            case self.chargerobject.entity:
+                self.chargerobject.value = value
+            case self.chargerobject_switch.entity:
+                self.chargerobject_switch.value = value
+                self.chargerobject_switch.updatecurrent()
+            case self.totalhourlyenergy.entity:
+                self.totalhourlyenergy.value = value
+                self.currentpeak.value = self.locale.data.query_model.observed_peak
+                self.locale.data.query_model.try_update(float(value))
+            case self.powersensormovingaverage.entity:
+                self.powersensormovingaverage.value = value
+            case self.powersensormovingaverage24.entity:
+                self.powersensormovingaverage24.value = value
+            case self.hours.nordpool_entity:
+                self.hours.update_nordpool()
+
         if entity in self.chargingtracker_entities and self.is_initialized is True:
             await self.charger.charge()
         if self.scheduler.schedule_created is True:
