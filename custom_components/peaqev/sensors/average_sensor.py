@@ -31,7 +31,7 @@ class PeaqAverageSensor(SensorFilter):
         """Return a unique ID to use for this sensor."""
         return f"{DOMAIN}_{self._entry_id}_{ex.nametoid(self._attr_name)}"
 
-    def _set_filters(self, hub, filtertimedelta:timedelta):
+    def _set_filters(self, hub, filtertimedelta: timedelta):
         FILTERS = []
 
         FILTERS.append(LowPassFilter(1, 0, hub.power.house.entity, 10))

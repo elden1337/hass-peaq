@@ -22,7 +22,7 @@ ENTITYENDINGS = ["_power", "_1", "_2", "_status", "_dimmer", "_downlight", "_cur
 NATIVE_CHARGERSTATES = ["available", "connected", "charging"]
 DOMAINNAME = "chargeamps"
 UPDATECURRENT = True
-#docs: https://github.com/kirei/hass-chargeamps
+# docs: https://github.com/kirei/hass-chargeamps
 
 HALO = "Halo"
 AURA = "Aura"
@@ -111,9 +111,9 @@ class ChargeAmps(ChargerBase):
             entity_id
             for entity_id, info in entity_sources(self._hass).items()
             if info["domain"] == domain_name
-               or info["domain"] == domain_name.capitalize()
-               or info["domain"] == domain_name.upper()
-               or info["domain"] == domain_name.lower()
+                or info["domain"] == domain_name.capitalize()
+                or info["domain"] == domain_name.upper()
+                or info["domain"] == domain_name.lower()
         ]
 
     def set_sensors(self):
@@ -139,7 +139,6 @@ class ChargeAmps(ChargerBase):
                 self._chargeramps_type = HALO
             elif chargeampstype == "AURA":
                 self._chargeramps_type = AURA
-
 
     def _determine_switch_entity(self):
         ent = self._determine_entities()

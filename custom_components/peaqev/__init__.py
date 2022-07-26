@@ -61,17 +61,17 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     hub = Hub(hass, ci, DOMAIN)
     hass.data[DOMAIN]["hub"] = hub
 
-    async def servicehandler_enable(call): # pylint:disable=unused-argument
+    async def servicehandler_enable(call):  # pylint:disable=unused-argument
         await hub.call_enable_peaq()
 
-    async def servicehandler_disable(call): # pylint:disable=unused-argument
+    async def servicehandler_disable(call):  # pylint:disable=unused-argument
         await hub.call_disable_peaq()
 
-    async def servicehandler_override_nonhours(call): # pylint:disable=unused-argument
+    async def servicehandler_override_nonhours(call):  # pylint:disable=unused-argument
         hours = call.data.get("hours")
         await hub.call_override_nonhours(1 if hours is None else hours)
 
-    async def servicehandler_scheduler_set(call): # pylint:disable=unused-argument
+    async def servicehandler_scheduler_set(call):  # pylint:disable=unused-argument
         charge_amount = call.data.get("charge_amount")
         departure_time = call.data.get("departure_time")
         schedule_starttime = call.data.get("schedule_starttime")
@@ -106,12 +106,14 @@ async def async_unload_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
         hass.data[DOMAIN].pop(conf.entry_id)
     return unload_ok
 
+
 async def _get_existing_param(conf, parameter: str, default_val: any):
     if parameter in conf.options.keys():
         return conf.options.get(parameter)
     if parameter in conf.data.keys():
         return conf.data.get(parameter)
     return default_val
+
 
 # async def _set_configuration_model(self, conf) -> ConfigModel:
 #     if "peaqevtype" in conf.data.keys():

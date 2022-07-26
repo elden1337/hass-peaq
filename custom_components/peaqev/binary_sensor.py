@@ -10,7 +10,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities): # pylint:disable=unused-argument
+async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities):  # pylint:disable=unused-argument
     hub = hass.data[DOMAIN]["hub"]
 
     peaqsensors = []
@@ -20,6 +20,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entitie
     async_add_entities(peaqsensors)
 
 SCAN_INTERVAL = timedelta(seconds=4)
+
 
 class PeaqBinarySensorEnabled(BinarySensorEntity):
     """The binary sensor for peaq being enabled or disabled"""
