@@ -44,6 +44,6 @@ class PeaqSensor(SensorBase):
             attr_dict["non_hours"] = self._nonhours
             attr_dict["caution_hours"] = self._cautionhours
 
-        attr_dict["current_hour state"]= self._current_hour
+        attr_dict["current_hour state"] = self._current_hour
         attr_dict["scheduler_active"] = self._hub.scheduler.scheduler_active
         return attr_dict

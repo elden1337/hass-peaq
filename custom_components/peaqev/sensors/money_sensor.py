@@ -68,7 +68,7 @@ class PeaqMoneySensor(SensorBase):
             ret = f"Charging allowed at {int(val * 100)}% of peak"
         else:
             ret = "Charging allowed"
-        #_LOGGER.debug(f"nonhours: {self._nonhours}, ret:{ret}")
+        # _LOGGER.debug(f"nonhours: {self._nonhours}, ret:{ret}")
         return ret
 
     def _get_stopped_string(self, h) -> str:

@@ -10,7 +10,7 @@ class Scheduler:
         self.scheduler = core_scheduler(options)
         self.schedule_created = False
 
-    def create_schedule(self, charge_amount:float, departure_time:datetime, schedule_starttime:datetime, override_settings:bool = False):
+    def create_schedule(self, charge_amount: float, departure_time: datetime, schedule_starttime: datetime, override_settings: bool = False):
         if not self.scheduler_active:
             self.scheduler.create(charge_amount, departure_time, schedule_starttime, override_settings)
         self.schedule_created = True

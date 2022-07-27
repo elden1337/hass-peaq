@@ -7,6 +7,7 @@ from custom_components.peaqev.peaqservice.util.constants import (TOTALPOWER, HOU
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class Power:
     def __init__(self, configsensor: str, powersensor_includes_car: bool = False):
         self._config_sensor = configsensor

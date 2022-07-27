@@ -1,11 +1,13 @@
 from homeassistant.components.sensor import SensorEntity
-from custom_components.peaqev.const import DOMAIN
+
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
+from custom_components.peaqev.const import DOMAIN
+
 
 class SensorBase(SensorEntity):
     should_poll = True
 
-    def __init__(self, hub, name:str, entry_id):
+    def __init__(self, hub, name: str, entry_id):
         """Initialize the sensor."""
         self._hub = hub
         self._entry_id = entry_id
