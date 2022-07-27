@@ -31,7 +31,7 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
 
     hub = hass.data[DOMAIN]["hub"]
 
-    peaqsensors = await _helper.gather_Sensors(hub, config)
+    peaqsensors = await _helper.gather_sensors(hub, config)
     async_add_entities(peaqsensors, update_before_add=True)
 
     peaqintegrationsensors = await _helper.gather_integration_sensors(hub, config.entry_id)

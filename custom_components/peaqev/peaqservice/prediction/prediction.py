@@ -3,7 +3,7 @@ from datetime import datetime
 from peaqevcore.prediction_service.prediction import PredictionBase as _core
 
 
-class Prediction():
+class Prediction:
     def __init__(self, hub=None):
         self._hub = hub
 

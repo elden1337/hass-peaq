@@ -21,7 +21,7 @@ This class will return the set nonhours and cautionhours, or generate dynamic on
 if user has set that bool in config flow.
 """
 
-class Hours():
+class Hours:
     def __init__(
             self,
             price_aware: bool,

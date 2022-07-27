@@ -19,7 +19,7 @@ from custom_components.peaqev.sensors.threshold_sensor import PeaqThresholdSenso
 
 _LOGGER = logging.getLogger(__name__)
 
-async def gather_Sensors(hub, config) -> list:
+async def gather_sensors(hub, config) -> list:
     ret = []
 
     ret.append(PeaqAmpSensor(hub, config.entry_id))

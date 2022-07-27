@@ -14,13 +14,13 @@ class ChargerTypeData:
         self._type = input_type
         self._hass = hass
 
-        CHARGERYPEDICT = {
+        chargertype_dict = {
             CHARGERTYPE_CHARGEAMPS: ChargeAmps,
             CHARGERTYPE_EASEE: Easee,
             #CHARGERTYPE_GAROWALLBOX: GaroWallbox
         }
 
-        self._charger = CHARGERYPEDICT[input_type](self._hass, chargerid)
+        self._charger = chargertype_dict[input_type](self._hass, chargerid)
         self._charger.validatecharger()
 
     @property

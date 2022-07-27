@@ -8,7 +8,7 @@ import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
 
 
-class Object():
+class Object:
     pass
 
 METER_OFFSET = Object()
