@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from peaqevcore.models.chargerstates import CHARGERSTATES
-from peaqevcore.threshold_service.threshold import ThresholdBase as _core
+from peaqevcore.services.threshold.threshold import ThresholdBase as _core
 
 from custom_components.peaqev.peaqservice.threshold.thresholdbase import ThresholdBase
 

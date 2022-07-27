@@ -3,7 +3,7 @@ from abc import abstractmethod
 from datetime import datetime
 
 import homeassistant.helpers.template as template
-from peaqevcore.hourselection_service.hoursselection import Hoursselectionbase as core_hours
+from peaqevcore.services.hourselection.hoursselection import Hoursselectionbase as core_hours
 
 from custom_components.peaqev.peaqservice.util.constants import (
     NON_HOUR,

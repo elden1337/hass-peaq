@@ -1,7 +1,7 @@
 import logging
 
-from peaqevcore.chargecontroller_service.chargecontroller import ChargeControllerBase as _core
 from peaqevcore.models.chargerstates import CHARGERSTATES
+from peaqevcore.services.chargecontroller.chargecontroller import ChargeControllerBase as _core
 
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontrollerbase import ChargeControllerBase
 

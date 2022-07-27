@@ -1,10 +1,10 @@
-from peaqevcore.locale_service.querytypes.const import HOURLY as core_HOURLY, QUARTER_HOURLY as core_QUARTER_HOURLY
 from peaqevcore.models.const import (
     CAUTIONHOURTYPE_SUAVE,
     CAUTIONHOURTYPE_INTERMEDIATE,
     CAUTIONHOURTYPE_AGGRESSIVE,
     CAUTIONHOURTYPE as core_CAUTIONHOURTYPE
 )
+from peaqevcore.services.locale.querytypes.const import HOURLY as core_HOURLY, QUARTER_HOURLY as core_QUARTER_HOURLY
 
 HOURLY = core_HOURLY
 QUARTER_HOURLY = core_QUARTER_HOURLY
