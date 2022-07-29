@@ -1,7 +1,7 @@
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.const import CONF_NAME
-from peaqevcore.locale_service.Locale import LOCALES
+from peaqevcore.services.locale.Locale import LOCALES
 
 import custom_components.peaqev.peaqservice.util.constants as pk
 

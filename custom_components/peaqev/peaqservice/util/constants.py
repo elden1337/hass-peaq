@@ -1,10 +1,10 @@
-from peaqevcore.locale_service.querytypes.const import HOURLY as core_HOURLY, QUARTER_HOURLY as core_QUARTER_HOURLY
 from peaqevcore.models.const import (
     CAUTIONHOURTYPE_SUAVE,
     CAUTIONHOURTYPE_INTERMEDIATE,
     CAUTIONHOURTYPE_AGGRESSIVE,
     CAUTIONHOURTYPE as core_CAUTIONHOURTYPE
 )
+from peaqevcore.services.locale.querytypes.const import HOURLY as core_HOURLY, QUARTER_HOURLY as core_QUARTER_HOURLY
 
 HOURLY = core_HOURLY
 QUARTER_HOURLY = core_QUARTER_HOURLY
@@ -68,7 +68,7 @@ CHARGERTYPE_ZAPTEC = "Zaptec"
 """Lookup types for config flow"""
 CHARGERTYPES = [
     CHARGERTYPE_CHARGEAMPS,
-    CHARGERTYPE_EASEE,
+    CHARGERTYPE_EASEE
     #CHARGERTYPE_GAROWALLBOX
     CHARGERTYPE_ZAPTEC
     ]
@@ -87,6 +87,7 @@ CONSUMPTION_TOTAL_NAME = "Energy including car"
 CHARGERENABLED = "Charger enabled"
 CHARGERDONE = "Charger done"
 AVERAGECONSUMPTION = "Average consumption"
+AVERAGECONSUMPTION_24H = "Average consumption 24h"
 THRESHOLD = "Threshold"
 SQLSENSOR_BASENAME = "Monthly max peak"
 SQLSENSOR_AVERAGEOFTHREE = "Average of three"

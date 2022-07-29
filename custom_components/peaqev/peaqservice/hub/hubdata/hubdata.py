@@ -6,6 +6,7 @@ from custom_components.peaqev.peaqservice.hub.hubmember.hubmember import HubMemb
 from custom_components.peaqev.peaqservice.power.power import Power
 from custom_components.peaqev.peaqservice.util.constants import (
     AVERAGECONSUMPTION,
+    AVERAGECONSUMPTION_24H,
     CONSUMPTION_TOTAL_NAME,
     HOURLY
 )
@@ -30,6 +31,11 @@ class HubData(HubDataBase):
             listenerentity=f"sensor.{domain}_{ex.nametoid(AVERAGECONSUMPTION)}",
             initval=0
         )
+        self.powersensormovingaverage24 = HubMember(
+            data_type=int,
+            listenerentity=f"sensor.{domain}_{ex.nametoid(AVERAGECONSUMPTION_24H)}",
+            initval=0
+        )
         self.totalhourlyenergy = HubMember(
             data_type=float,
             listenerentity=f"sensor.{domain}_{ex.nametoid(CONSUMPTION_TOTAL_NAME)}_{HOURLY}",
@@ -39,7 +45,6 @@ class HubData(HubDataBase):
             configsensor=config_inputs["powersensor"],
             powersensor_includes_car=self.powersensor_includes_car
         )
-
 
     def init_hub_values(self):
         """Initialize values from Home Assistant on the set objects"""
@@ -53,4 +58,3 @@ class HubData(HubDataBase):
             self.carpowersensor.entity) is not None else 0
         self.totalhourlyenergy.value = self.hass.states.get(self.totalhourlyenergy.entity) if self.hass.states.get(
             self.totalhourlyenergy.entity) is not None else 0
-

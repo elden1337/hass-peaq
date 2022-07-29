@@ -34,6 +34,12 @@
           "dec": "December"
         },
         "description": "Select your allowed monthly start-peak."
+      },
+      "misc": {
+        "data": {
+          "behavior_on_default": "[%key:common::config_flow::data::behavior_on_default%]"
+        },
+        "description": "Miscellaneous options"
       }
     }
   },

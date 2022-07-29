@@ -29,7 +29,7 @@ class ChargeControllerBase:
         self._latestchargerstart = val
 
     @property
-    def status(self):
+    def status(self) -> str:
         if self._hub.is_initialized is False:
             return "Hub not ready. Check logs!"
         if self._hub.is_initialized is True:
@@ -62,17 +62,14 @@ class ChargeControllerBase:
             ret = CHARGERSTATES.Idle
             if self._hub.charger_done.value is True:
                 self._hub.charger_done.value = False
-        elif charger_state not in self._hub.chargertype.charger.chargerstates[
-            CHARGERSTATES.Idle] and self._hub.charger_done.value is True:
+        elif charger_state not in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Idle] and self._hub.charger_done.value is True:
             ret = CHARGERSTATES.Done
-        elif datetime.now().hour in self._hub.hours.non_hours and free_charge is False and self._hub.timer.is_override is False:
+        elif datetime.now().hour in self._hub.non_hours and free_charge is False and self._hub.timer.is_override is False:
             update_timer = True
             ret = CHARGERSTATES.Stop
-
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Connected]:
             ret = self._get_status_connected(charger_state)
             update_timer = (ret == CHARGERSTATES.Stop)
-
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Charging]:
             ret = self._get_status_charging()
             update_timer = True

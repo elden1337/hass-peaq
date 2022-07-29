@@ -25,13 +25,14 @@ _LOGGER = logging.getLogger(__name__)
 
 SCAN_INTERVAL = timedelta(seconds=4)
 
-async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add_entities):
+
+async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_entities):
     """Add sensors for passed config_entry in HA."""
 
     hub = hass.data[DOMAIN]["hub"]
 
-    peaqsensors = await _helper.gather_Sensors(hub, config)
-    async_add_entities(peaqsensors, update_before_add = True)
+    peaqsensors = await _helper.gather_sensors(hub, config)
+    async_add_entities(peaqsensors, update_before_add=True)
 
     peaqintegrationsensors = await _helper.gather_integration_sensors(hub, config.entry_id)
 
@@ -43,8 +44,7 @@ async def async_setup_entry(hass : HomeAssistant, config: ConfigEntry, async_add
     for i in integrationsensors:
         peaqutilitysensors.append(PeaqUtilitySensor(hub, i, hub.locale.data.peak_cycle, METER_OFFSET, config.entry_id))
 
-    async_add_entities(peaqutilitysensors, update_before_add = True)
+    async_add_entities(peaqutilitysensors, update_before_add=True)
 
     peaksensor = [PeaqPeakSensor(hub, config.entry_id)]
     async_add_entities(peaksensor, update_before_add=True)
-

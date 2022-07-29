@@ -1,10 +1,14 @@
 import logging
+import time
 
 from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargerstates import CHARGERSTATES
+from peaqevcore.models.chargertype.calltype import CallType
+from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
+from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
+from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
-from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
-from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
+import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -51,18 +55,29 @@ UPDATECURRENT_ON_TERMINATION = False
 
 class Easee(ChargerBase):
     def __init__(self, hass: HomeAssistant, chargerid, auth_required: bool = False):
-        super().__init__(hass)
+        self._hass = hass
         self._chargerid = chargerid
         self._auth_required = auth_required
-        self._powerswitch_controls_charging = False
-        self._domainname = DOMAINNAME
-        self._entityendings = ENTITYENDINGS
-        self._native_chargerstates = NATIVE_CHARGERSTATES
-        self._chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
-        self._chargerstates[CHARGERSTATES.Connected] = ["awaiting_start", "ready_to_charge"]
-        self._chargerstates[CHARGERSTATES.Charging] = ["charging"]
-        self._chargerstates[CHARGERSTATES.Done] = ["completed"]
-        self.getentities()
+        self.options.powerswitch_controls_charging = False
+        self.domainname = DOMAINNAME
+        self.entities.imported_entityendings = ENTITYENDINGS
+        self.native_chargerstates = NATIVE_CHARGERSTATES
+        self.chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
+        self.chargerstates[CHARGERSTATES.Connected] = ["awaiting_start", "ready_to_charge"]
+        self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
+        self.chargerstates[CHARGERSTATES.Done] = ["completed"]
+
+        entitiesobj = helper.getentities(
+            self._hass,
+            helper.EntitiesPostModel(
+                self.domainname,
+                self.entities.entityschema,
+                self.entities.imported_entityendings
+            )
+        )
+        self.entities.imported_entities = entitiesobj.imported_entities
+        self.entities.entityschema = entitiesobj.entityschema
+
         self.set_sensors()
 
         servicecall_params = {
@@ -80,32 +95,61 @@ class Easee(ChargerBase):
 
         self._set_servicecalls(
             domain=DOMAINNAME,
-            on_call=_on if self._auth_required is True else _resume,
-            off_call=_off if self._auth_required is True else _pause,
-            pause_call=_pause,
-            resume_call=_resume,
-            allowupdatecurrent=UPDATECURRENT,
-            update_current_call="set_charger_dynamic_limit",
-            update_current_params=servicecall_params,
-            update_current_on_termination = UPDATECURRENT_ON_TERMINATION
+            model=ServiceCallsDTO(
+                on=_on if self._auth_required is True else _resume,
+                off=_off if self._auth_required is True else _pause,
+                pause=_pause,
+                resume=_resume,
+                update_current=CallType("set_charger_dynamic_limit", servicecall_params)
+            ),
+            options=ServiceCallsOptions(
+                allowupdatecurrent=UPDATECURRENT,
+                update_current_on_termination=UPDATECURRENT_ON_TERMINATION
+            )
         )
 
-    def set_sensors(self):
-        amp_sensor = f"sensor.{self._entityschema}_dynamic_charger_limit"
-        if not self._validate_sensor(amp_sensor):
-            amp_sensor = f"sensor.{self._entityschema}_max_charger_limit"
+    def getentities(self, domain: str = None, endings: list = None):
+        if len(self.entities.entityschema) < 1:
+            domain = self.domainname if domain is None else domain
+            endings = self.entities.imported_entityendings if endings is None else endings
 
-        self.chargerentity = f"sensor.{self._entityschema}_status"
-        self.powermeter = f"sensor.{self._entityschema}_power"
-        self.powermeter_factor = 1000
-        self.powerswitch = f"switch.{self._entityschema}_is_enabled"
-        self.ampmeter = amp_sensor
-        self.ampmeter_is_attribute = False
+            entities = helper.get_entities_from_hass(self._hass, domain)
+
+            if len(entities) < 1:
+                _LOGGER.error(f"no entities found for {domain} at {time.time()}")
+            else:
+                _endings = endings
+                candidate = ""
+
+                for e in entities:
+                    splitted = e.split(".")
+                    for ending in _endings:
+                        if splitted[1].endswith(ending):
+                            candidate = splitted[1].replace(ending, '')
+                            break
+                    if len(candidate) > 1:
+                        break
+
+                self.entities.entityschema = candidate
+                _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
+                self.entities.imported_entities = entities
+
+    def set_sensors(self):
+        amp_sensor = f"sensor.{self.entities.entityschema}_dynamic_charger_limit"
+        if not self._validate_sensor(amp_sensor):
+            amp_sensor = f"sensor.{self.entities.entityschema}_max_charger_limit"
+
+        self.entities.chargerentity = f"sensor.{self.entities.entityschema}_status"
+        self.entities.powermeter = f"sensor.{self.entities.entityschema}_power"
+        self.options.powermeter_factor = 1000
+        self.entities.powerswitch = f"switch.{self.entities.entityschema}_is_enabled"
+        self.entities.ampmeter = amp_sensor
+        self.options.ampmeter_is_attribute = False
 
     def _validate_sensor(self, sensor: str) -> bool:
         ret = self._hass.states.get(sensor)
         if ret is None:
             return False
-        elif ret.state == "Null":
+        if ret.state == "Null":
             return False
         return True

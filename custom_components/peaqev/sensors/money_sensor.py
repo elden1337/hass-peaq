@@ -30,8 +30,8 @@ class PeaqMoneySensor(SensorBase):
         return "mdi:car-clock"
 
     def update(self) -> None:
-        self._nonhours = self._hub.hours.non_hours
-        self._dynamic_caution_hours = self._hub.hours.dynamic_caution_hours
+        self._nonhours = self._hub.non_hours
+        self._dynamic_caution_hours = self._hub.dynamic_caution_hours
         self._currency = self._hub.hours.currency
         self._prices = self._hub.hours.prices if self._hub.hours.prices is not None else []
         self._prices_tomorrow = self._hub.hours.prices_tomorrow if self._hub.hours.prices_tomorrow is not None else []
@@ -68,7 +68,7 @@ class PeaqMoneySensor(SensorBase):
             ret = f"Charging allowed at {int(val * 100)}% of peak"
         else:
             ret = "Charging allowed"
-        #_LOGGER.debug(f"nonhours: {self._nonhours}, ret:{ret}")
+        # _LOGGER.debug(f"nonhours: {self._nonhours}, ret:{ret}")
         return ret
 
     def _get_stopped_string(self, h) -> str:

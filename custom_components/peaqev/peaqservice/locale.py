@@ -1,7 +1,7 @@
 import logging
 
 from homeassistant.core import HomeAssistant
-from peaqevcore.locale_service.Locale import LOCALETYPEDICT
+from peaqevcore.services.locale.Locale import LOCALETYPEDICT
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,5 +21,3 @@ class LocaleData:
     @property
     def data(self):
         return self._data
-
-
