@@ -32,7 +32,8 @@ async def gather_sensors(hub, config) -> list:
         ret.append(PeaqPowerSensor(hub, config.entry_id))
 
     if hub.peaqtype_is_lite is False:
-        ret.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION, timedelta(minutes=5)))
+        average_delta = 2 if hub.locale.data.is_quarterly(hub.locale.data) else 5
+        ret.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION, timedelta(minutes=average_delta)))
         ret.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION_24H, timedelta(hours=24)))
         ret.append(PeaqPredictionSensor(hub, config.entry_id))
 
