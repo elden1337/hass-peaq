@@ -114,7 +114,10 @@ class Hub(HubBase, HubData):
             case self.totalhourlyenergy.entity:
                 self.totalhourlyenergy.value = value
                 self.currentpeak.value = self.locale.data.query_model.observed_peak
-                self.locale.data.query_model.try_update(new_val=float(value))
+                self.locale.data.query_model.try_update(
+                    new_val=float(value),
+                    timestamp=datetime.now()
+                )
             case self.powersensormovingaverage.entity:
                 self.powersensormovingaverage.value = value
             case self.powersensormovingaverage24.entity:
