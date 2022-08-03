@@ -9,7 +9,6 @@ from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLE
 
 _LOGGER = logging.getLogger(__name__)
 
-
 class ChargeControllerBase:
     DONETIMEOUT = 300
 

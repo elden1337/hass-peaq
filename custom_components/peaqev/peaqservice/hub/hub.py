@@ -114,7 +114,7 @@ class Hub(HubBase, HubData):
             case self.totalhourlyenergy.entity:
                 self.totalhourlyenergy.value = value
                 self.currentpeak.value = self.locale.data.query_model.observed_peak
-                self.locale.data.query_model.try_update(float(value))
+                self.locale.data.query_model.try_update(new_val=float(value))
             case self.powersensormovingaverage.entity:
                 self.powersensormovingaverage.value = value
             case self.powersensormovingaverage24.entity:
@@ -122,7 +122,7 @@ class Hub(HubBase, HubData):
             case self.hours.nordpool_entity:
                 self.hours.update_nordpool()
 
-        if entity in self.chargingtracker_entities and self.is_initialized is True:
-            await self.charger.charge()
         if self.scheduler.schedule_created is True:
             self.scheduler.update()
+        if entity in self.chargingtracker_entities and self.is_initialized is True:
+            await self.charger.charge()

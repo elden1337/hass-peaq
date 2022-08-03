@@ -1,9 +1,6 @@
-import logging
 from datetime import datetime
 
 from custom_components.peaqev.peaqservice.threshold.thresholdbase import ThresholdBase
-
-_LOGGER = logging.getLogger(__name__)
 
 
 class ThresholdLite(ThresholdBase):

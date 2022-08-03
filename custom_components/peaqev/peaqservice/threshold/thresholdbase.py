@@ -2,13 +2,13 @@ import logging
 from abc import abstractmethod
 from datetime import datetime
 
-from peaqevcore.services.threshold.threshold import ThresholdBase as _core
-
-from custom_components.peaqev.peaqservice.util.constants import (
+from peaqevcore.models.const import (
     CURRENTS_ONEPHASE_1_16, CURRENTS_THREEPHASE_1_16
 )
+from peaqevcore.services.threshold.threshold import ThresholdBase as _core
 
 _LOGGER = logging.getLogger(__name__)
+
 
 class ThresholdBase:
     def __init__(self, hub):

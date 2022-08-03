@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 
 from peaqevcore.models.chargerstates import CHARGERSTATES
@@ -6,7 +5,6 @@ from peaqevcore.services.threshold.threshold import ThresholdBase as _core
 
 from custom_components.peaqev.peaqservice.threshold.thresholdbase import ThresholdBase
 
-_LOGGER = logging.getLogger(__name__)
 
 class Threshold(ThresholdBase):
     def __init__(self, hub):
