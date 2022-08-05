@@ -92,20 +92,22 @@ class Hub(HubBase, HubData):
         return self.currentpeak.value
 
     async def _update_sensor(self, entity, value):
+        update_session = False
+
         match entity:
             case self.configpower_entity:
                 self.power.update(
                     carpowersensor_value=self.carpowersensor.value,
                     config_sensor_value=value
                 )
+                update_session = True
             case self.carpowersensor.entity:
                 self.carpowersensor.value = value
                 self.power.update(
                     carpowersensor_value=self.carpowersensor.value,
                     config_sensor_value=None
                 )
-                if self.charger.session_is_active:
-                    self.charger.session.session_energy = value
+                update_session = True
             case self.chargerobject.entity:
                 self.chargerobject.value = value
             case self.chargerobject_switch.entity:
@@ -124,7 +126,11 @@ class Hub(HubBase, HubData):
                 self.powersensormovingaverage24.value = value
             case self.hours.nordpool_entity:
                 self.hours.update_nordpool()
+                update_session = True
 
+        if self.charger.session_is_active and update_session:
+            self.charger.session.session_energy = self.carpowersensor.value
+            self.charger.session.session_price = float(self.hours.nordpool_value)
         if self.scheduler.schedule_created is True:
             self.scheduler.update()
         if entity in self.chargingtracker_entities and self.is_initialized is True:

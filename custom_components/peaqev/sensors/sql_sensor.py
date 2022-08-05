@@ -18,7 +18,7 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
     def __init__(self, hub, entry_id):
         self._name = f"{hub.hubname} peak"
         self._charged_peak = 0
-        self._peaks_dict: dict| None
+        self._peaks_dict: dict = {}
         self._observed_peak = 0
         super().__init__(hub, self._name, entry_id)
 

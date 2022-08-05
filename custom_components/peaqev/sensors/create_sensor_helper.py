@@ -15,6 +15,7 @@ from custom_components.peaqev.sensors.money_sensor import PeaqMoneySensor
 from custom_components.peaqev.sensors.peaq_sensor import PeaqSensor
 from custom_components.peaqev.sensors.power_sensor import (PeaqPowerSensor, PeaqAmpSensor, PeaqHousePowerSensor)
 from custom_components.peaqev.sensors.prediction_sensor import PeaqPredictionSensor
+from custom_components.peaqev.sensors.session_sensor import PeaqSessionSensor, PeaqSessionCostSensor
 from custom_components.peaqev.sensors.threshold_sensor import PeaqThresholdSensor
 
 _LOGGER = logging.getLogger(__name__)
@@ -25,6 +26,8 @@ async def gather_sensors(hub, config) -> list:
     ret.append(PeaqAmpSensor(hub, config.entry_id))
     ret.append(PeaqSensor(hub, config.entry_id))
     ret.append(PeaqThresholdSensor(hub, config.entry_id))
+    ret.append(PeaqSessionSensor(hub, config.entry_id))
+    ret.append(PeaqSessionCostSensor(hub, config.entry_id))
 
     if hub.powersensor_includes_car is True:
         ret.append(PeaqHousePowerSensor(hub, config.entry_id))

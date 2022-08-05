@@ -110,9 +110,11 @@ RESUME = "resume"
 PAUSE = "pause"
 
 """States for the Hours-object"""
-# NON_HOUR = "Charging stopped"
-# CAUTION_HOUR = "Charging-permittance degraded"
-# CHARGING_PERMITTED = "Charging permitted"
+# moved to core
+NON_HOUR = "Charging stopped"
+CAUTION_HOUR = "Charging-permittance degraded"
+CHARGING_PERMITTED = "Charging permitted"
+# moved to core
 
 CAUTIONHOURTYPE_NAMES =[
     CAUTIONHOURTYPE_SUAVE,

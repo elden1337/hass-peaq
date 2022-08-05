@@ -123,6 +123,7 @@ class PriceAwareHours(Hours):
         self._hass = hass
         self._prices = []
         self._nordpool_entity = None
+        self._nordpool_value = 0
         self._nordpool_currency = ""
         self._is_initialized = False
         self._setup_nordpool()
@@ -150,11 +151,11 @@ class PriceAwareHours(Hours):
 
     @property
     def absolute_top_price(self):
-        return self._core.absolute_top_price
+        return self._core.options.absolute_top_price
 
     @property
     def min_price(self):
-        return self._core.min_price
+        return self._core.options.min_price
 
     @property
     def nordpool_entity(self) -> str:
@@ -163,6 +164,14 @@ class PriceAwareHours(Hours):
     @nordpool_entity.setter
     def nordpool_entity(self, val):
         self._nordpool_entity = val
+
+    @property
+    def nordpool_value(self) -> str:
+        return self._nordpool_value
+
+    @nordpool_value.setter
+    def nordpool_value(self, val):
+        self._nordpool_value = val
 
     @property
     def prices(self) -> list:
@@ -220,6 +229,7 @@ class PriceAwareHours(Hours):
             ret_attr = list(ret.attributes.get("today"))
             ret_attr_tomorrow = list(ret.attributes.get("tomorrow"))
             ret_attr_currency = str(ret.attributes.get("currency"))
+            self.nordpool_value = ret.state
             self.currency = ret_attr_currency
             self.prices = ret_attr
             self.prices_tomorrow = ret_attr_tomorrow

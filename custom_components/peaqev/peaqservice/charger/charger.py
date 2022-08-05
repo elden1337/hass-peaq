@@ -57,7 +57,9 @@ class Charger:
         if self._repeat_is_running:
             await self._is_running(False)
         if self._hub.charger_enabled.value is True:
-            self.session_is_active = True
+            if not self.session_is_active:
+                self.session.core.reset()
+                self.session_is_active = True
             if self._hub.chargecontroller.status is CHARGERSTATES.Start.name:
                 if self._chargertype_charger_is_on is False and self._charger_running is False:
                     await self._start_charger()

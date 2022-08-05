@@ -1,4 +1,9 @@
+import logging
+
 from peaqevcore.services.session.session import SessionPrice as _core_session_price
+
+_LOGGER = logging.getLogger(__name__)
+
 
 class Session:
     def __init__(self, charger):
