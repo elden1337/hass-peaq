@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from peaqevcore.services.prediction.prediction import PredictionBase as _core
+from peaqevcore.services.prediction.prediction import Prediction as _core
 
 
 class Prediction:
