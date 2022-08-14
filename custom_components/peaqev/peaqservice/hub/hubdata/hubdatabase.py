@@ -2,12 +2,14 @@ import logging
 from abc import abstractmethod
 
 from homeassistant.core import HomeAssistant
+from peaqevcore.models.hub.carpowersensor import CarPowerSensor
+from peaqevcore.models.hub.chargerobject import ChargerObject
+from peaqevcore.models.hub.chargerswitch import ChargerSwitch
+from peaqevcore.models.hub.currentpeak import CurrentPeak
+from peaqevcore.models.hub.hubmember import HubMember
 
 from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
-from custom_components.peaqev.peaqservice.hub.hubmember.chargerswitch import ChargerSwitch
-from custom_components.peaqev.peaqservice.hub.hubmember.hubmember import CurrentPeak, HubMember, CarPowerSensor, \
-    ChargerObject
 from custom_components.peaqev.peaqservice.locale import LocaleData
 
 _LOGGER = logging.getLogger(__name__)
@@ -16,7 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 class HubDataBase:
     locale: LocaleData
     chargertype: ChargerTypeData
-    currentpeak: CurrentPeak
+    current_peak: CurrentPeak
     carpowersensor: CarPowerSensor
     chargerobject: HubMember
     chargerobject_switch: ChargerSwitch
@@ -43,7 +45,7 @@ class HubDataBase:
             config_inputs["chargertype"],
             config_inputs["chargerid"]
         )
-        self.currentpeak = CurrentPeak(
+        self.current_peak = CurrentPeak(
             data_type=float,
             initval=0,
             startpeaks=config_inputs["startpeaks"],

@@ -6,13 +6,13 @@ from homeassistant.core import (
     HomeAssistant,
 )
 from homeassistant.helpers.event import async_track_state_change
+from peaqevcore.services.prediction.prediction import Prediction
+from peaqevcore.services.threshold.threshold import Threshold
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller import ChargeController
 from custom_components.peaqev.peaqservice.hub.hubbase import HubBase
 from custom_components.peaqev.peaqservice.hub.hubdata.hubdata import HubData
-from custom_components.peaqev.peaqservice.prediction.prediction import Prediction
-from custom_components.peaqev.peaqservice.threshold.threshold import Threshold
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
 _LOGGER = logging.getLogger(__name__)
@@ -88,8 +88,8 @@ class Hub(HubBase, HubData):
     def current_peak_dynamic(self):
         if self.price_aware is True and len(self.dynamic_caution_hours):
             if datetime.now().hour in self.dynamic_caution_hours.keys() and self.timer.is_override is False:
-                return self.currentpeak.value * self.dynamic_caution_hours[datetime.now().hour]
-        return self.currentpeak.value
+                return self.current_peak.value * self.dynamic_caution_hours[datetime.now().hour]
+        return self.current_peak.value
 
     async def _update_sensor(self, entity, value):
         update_session = False
@@ -115,7 +115,7 @@ class Hub(HubBase, HubData):
                 self.chargerobject_switch.updatecurrent()
             case self.totalhourlyenergy.entity:
                 self.totalhourlyenergy.value = value
-                self.currentpeak.value = self.locale.data.query_model.observed_peak
+                self.current_peak.value = self.locale.data.query_model.observed_peak
                 self.locale.data.query_model.try_update(
                     new_val=float(value),
                     timestamp=datetime.now()

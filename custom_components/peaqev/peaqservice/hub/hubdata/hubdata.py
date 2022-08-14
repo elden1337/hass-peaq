@@ -1,15 +1,17 @@
 
 
+from peaqevcore.models.hub.hubmember import HubMember
+from peaqevcore.models.hub.power import Power
+
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.hub.hubdata.hubdatabase import HubDataBase
-from custom_components.peaqev.peaqservice.hub.hubmember.hubmember import HubMember
-from custom_components.peaqev.peaqservice.power.power import Power
 from custom_components.peaqev.peaqservice.util.constants import (
     AVERAGECONSUMPTION,
     AVERAGECONSUMPTION_24H,
     CONSUMPTION_TOTAL_NAME,
     HOURLY
 )
+
 
 class HubData(HubDataBase):
     powersensor_includes_car: bool

@@ -35,7 +35,7 @@ class PeaqMoneySensor(SensorBase):
         self._currency = self._hub.hours.currency
         self._prices = self._hub.hours.prices if self._hub.hours.prices is not None else []
         self._prices_tomorrow = self._hub.hours.prices_tomorrow if self._hub.hours.prices_tomorrow is not None else []
-        self._current_peak = self._hub.currentpeak.value
+        self._current_peak = self._hub.current_peak.value
 
     @property
     def extra_state_attributes(self) -> dict:

@@ -1,4 +1,4 @@
-from peaqevcore.models.const import (
+from peaqevcore.models.hourselection.const import (
     CAUTIONHOURTYPE_SUAVE,
     CAUTIONHOURTYPE_INTERMEDIATE,
     CAUTIONHOURTYPE_AGGRESSIVE,
@@ -8,56 +8,6 @@ from peaqevcore.services.locale.querytypes.const import HOURLY as core_HOURLY, Q
 
 HOURLY = core_HOURLY
 QUARTER_HOURLY = core_QUARTER_HOURLY
-
-# CURRENTS_ONEPHASE_1_16 = {
-#     3600: 16,
-#     3150: 14,
-#     2700: 12,
-#     2250: 10,
-#     1800: 8,
-#     1350: 6
-# } #moved to core
-# CURRENTS_THREEPHASE_1_16 = {
-#     11000: 16,
-#     9625: 14,
-#     8250: 12,
-#     6875: 10,
-#     5500: 8,
-#     4100: 6
-# } #moved to core
-# CURRENTS_ONEPHASE_1_32 = {
-#     7200: 32,
-#     6750: 30,
-#     6300: 28,
-#     5850: 26,
-#     5400: 24,
-#     4950: 22,
-#     4500: 20,
-#     4050: 18,
-#     3600: 16,
-#     3150: 14,
-#     2700: 12,
-#     2250: 10,
-#     1800: 8,
-#     1350: 6
-# } #moved to core
-# CURRENTS_THREEPHASE_1_32 = {
-#     22000: 32,
-#     20625: 30,
-#     19250: 28,
-#     17875: 26,
-#     16500: 24,
-#     15125: 22,
-#     13750: 20,
-#     12375: 18,
-#     11000: 16,
-#     9625: 14,
-#     8250: 12,
-#     6875: 10,
-#     5500: 8,
-#     4100: 6
-# } #moved to core
-
 
 """CHARGERTYPES"""
 CHARGERTYPE_CHARGEAMPS = "Chargeamps"

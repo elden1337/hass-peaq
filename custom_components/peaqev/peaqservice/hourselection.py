@@ -3,7 +3,7 @@ from abc import abstractmethod
 from datetime import datetime
 
 import homeassistant.helpers.template as template
-from peaqevcore.services.hourselection.hoursselection import Hoursselectionbase as core_hours
+from peaqevcore.services.hourselection.hoursselection import Hoursselection as core_hours
 
 from custom_components.peaqev.peaqservice.util.constants import (
     NON_HOUR,
@@ -218,7 +218,7 @@ class PriceAwareHours(Hours):
     def get_total_charge(self):
         if self._is_initialized:
             try:
-                return self._core.get_total_charge(self._hub.currentpeak.value)
+                return self._core.get_total_charge(self._hub.current_peak.value)
             except ZeroDivisionError as e:
                 _LOGGER.warning(e)
         return 0

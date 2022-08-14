@@ -6,11 +6,11 @@ from homeassistant.core import (
     HomeAssistant,
     callback,
 )
+from peaqevcore.models.hub.hubmember import HubMember
 from peaqevcore.services.timer.timer import Timer
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.hourselection import (PriceAwareHours, RegularHours)
-from custom_components.peaqev.peaqservice.hub.hubmember.hubmember import HubMember
 from custom_components.peaqev.peaqservice.hub.scheduler.schedule import Scheduler
 from custom_components.peaqev.peaqservice.util.constants import CHARGERENABLED, CHARGERDONE
 

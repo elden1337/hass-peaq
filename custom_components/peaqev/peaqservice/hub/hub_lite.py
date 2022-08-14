@@ -5,12 +5,12 @@ from homeassistant.core import (
     HomeAssistant,
 )
 from homeassistant.helpers.event import async_track_state_change
+from peaqevcore.services.threshold.threshold_lite import ThresholdLite
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_lite import ChargeControllerLite
 from custom_components.peaqev.peaqservice.hub.hubbase import HubBase
 from custom_components.peaqev.peaqservice.hub.hubdata.hubdata_lite import HubDataLite
-from custom_components.peaqev.peaqservice.threshold.threshold_lite import ThresholdLite
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
 _LOGGER = logging.getLogger(__name__)
@@ -64,8 +64,8 @@ class HubLite(HubBase, HubDataLite):
     def current_peak_dynamic(self):
         if self.price_aware is True and len(self.dynamic_caution_hours):
             if datetime.now().hour in self.dynamic_caution_hours.keys() and self.timer.is_override is False:
-                return self.currentpeak.value * self.dynamic_caution_hours[datetime.now().hour]
-        return self.currentpeak.value
+                return self.current_peak.value * self.dynamic_caution_hours[datetime.now().hour]
+        return self.current_peak.value
 
     async def _update_sensor(self, entity, value):
         match entity:
@@ -76,11 +76,11 @@ class HubLite(HubBase, HubDataLite):
             case self.chargerobject_switch.entity:
                 self.chargerobject_switch.value = value
                 self.chargerobject_switch.updatecurrent()
-            case self.currentpeak.entity:
-                self.currentpeak.value = value
+            case self.current_peak.entity:
+                self.current_peak.value = value
             case self.totalhourlyenergy.entity:
                 self.totalhourlyenergy.value = value
-                self.currentpeak.value = self.locale.data.query_model.observed_peak
+                self.current_peak.value = self.locale.data.query_model.observed_peak
                 self.locale.data.query_model.try_update(
                     new_val=float(value),
                     timestamp=datetime.now()
