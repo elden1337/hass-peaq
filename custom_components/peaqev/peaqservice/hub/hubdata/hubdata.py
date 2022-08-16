@@ -1,5 +1,4 @@
-
-
+from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.hub.hubmember import HubMember
 from peaqevcore.models.hub.power import Power
 
@@ -16,17 +15,19 @@ from custom_components.peaqev.peaqservice.util.constants import (
 class HubData(HubDataBase):
     powersensor_includes_car: bool
     powersensormovingaverage: HubMember
+    powersensormovingaverage24: HubMember
     totalhourlyenergy: HubMember
     power: Power
 
     def create_hub_data(
             self,
             hass,
-            config_inputs:dict,
-            domain: str):
+            options: HubOptions,
+            domain: str,
+            config_inputs:dict):
 
-        self.powersensor_includes_car = bool(config_inputs["powersensorincludescar"])
-        self.create_hub_base_data(hass, config_inputs, domain)
+        self.powersensor_includes_car = bool(options.powersensor_includes_car)
+        super().create_hub_base_data(hass, options, domain, config_inputs)
 
         self.powersensormovingaverage = HubMember(
             data_type=int,

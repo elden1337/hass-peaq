@@ -5,6 +5,7 @@ from homeassistant.core import (
     HomeAssistant,
 )
 from homeassistant.helpers.event import async_track_state_change
+from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.services.threshold.threshold_lite import ThresholdLite
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
@@ -20,11 +21,12 @@ class HubLite(HubBase, HubDataLite):
     def __init__(
         self,
         hass: HomeAssistant,
-        config_inputs: dict,
-        domain: str
+        options: HubOptions,
+        domain: str,
+        config_inputs: dict
         ):
-        super().__init__(hass=hass, config_inputs=config_inputs, domain=domain)
-        self.create_hub_data(self.hass, config_inputs, self.domain)
+        super().__init__(hass=hass, options=options, domain=domain)
+        self.create_hub_data(self.hass, options, self.domain, config_inputs)
 
         self.threshold = ThresholdLite(self)
         self.chargecontroller = ChargeControllerLite(self)

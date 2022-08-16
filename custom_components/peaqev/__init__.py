@@ -5,8 +5,9 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from peaqevcore.hub.hub_options import HubOptions
 
-from custom_components.peaqev.peaqservice.hub.hub import Hub
+from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 from custom_components.peaqev.peaqservice.util.constants import TYPELITE
 from .const import (
     DOMAIN,
@@ -28,37 +29,34 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     else:
         peaqtype_is_lite = False
 
-    ci = dict()
+    options = HubOptions()
+    options.peaqev_lite = peaqtype_is_lite
+    options.powersensor_includes_car = conf.data["powersensorincludescar"] if "powersensorincludescar" in conf.data.keys() else False
+    options.locale= conf.data["locale"]
+    options.chargertype = conf.data["chargertype"]
+    options.chargerid = conf.data["chargerid"]
+    options.startpeaks = conf.options["startpeaks"] if "startpeaks" in conf.options.keys() else conf.data["startpeaks"]
+    options.behavior_on_default = conf.options["behavior_on_default"] if "behavior_on_default" in conf.options.keys() else False
+    options.cautionhours = conf.options["cautionhours"] if "cautionhours" in conf.options.keys() else conf.data["cautionhours"] if "cautionhours" in conf.data.keys() else []
+    options.nonhours = conf.options["nonhours"] if "nonhours" in conf.options.keys() else conf.data["nonhours"] if "nonhours" in conf.data.keys() else []
+    options.price.price_aware = await _get_existing_param(conf, "priceaware", False)
+    options.price.allow_top_up = await _get_existing_param(conf, "allow_top_up", False)
+    options.price.min_price = await _get_existing_param(conf, "min_priceaware_threshold_price", 0)
+    options.price.top_price = await _get_existing_param(conf, "absolute_top_price", 0)
+    options.price.cautionhour_type = conf.options["cautionhour_type"] if "cautionhour_type" in conf.options.keys() else conf.data["cautionhour_type"]
 
-    ci["locale"] = conf.data["locale"]
-    ci["chargertype"] = conf.data["chargertype"]
-    ci["chargerid"] = conf.data["chargerid"]
-    ci["startpeaks"] = conf.options["startpeaks"] if "startpeaks" in conf.options.keys() else conf.data["startpeaks"]
-    ci["priceaware"] = await _get_existing_param(conf, "priceaware", False)
-    ci["peaqtype_is_lite"] = peaqtype_is_lite
-
-    if ci["priceaware"] is False:
-        ci["cautionhours"] = conf.options["cautionhours"] if "cautionhours" in conf.options.keys() else conf.data["cautionhours"] if "cautionhours" in conf.data.keys() else []
-        ci["nonhours"] = conf.options["nonhours"] if "nonhours" in conf.options.keys() else conf.data["nonhours"] if "nonhours" in conf.data.keys() else []
-    else:
-        ci["absolute_top_price"] = await _get_existing_param(conf, "absolute_top_price", 0)
-        ci["min_price"] = await _get_existing_param(conf, "min_priceaware_threshold_price", 0)
-        ci["cautionhour_type"] = conf.options["cautionhour_type"] if "cautionhour_type" in conf.options.keys() else conf.data["cautionhour_type"]
-        ci["allow_top_up"] = await _get_existing_param(conf, "allow_top_up", False)
+    ci = {}
 
     if peaqtype_is_lite is True:
-        hub = HubLite(hass, ci, DOMAIN)
+        hub = HubLite(hass, options, DOMAIN, ci)
     else:
         ci["powersensor"] = conf.data["name"]
-        ci["powersensorincludescar"] = conf.data["powersensorincludescar"]
 
-    """misc options"""
-    ci["behavior_on_default"] = conf.options["behavior_on_default"] if "behavior_on_default" in conf.options.keys() else False
+        unsub_options_update_listener = conf.add_update_listener(options_update_listener)
+        ci["unsub_options_update_listener"] = unsub_options_update_listener
 
-    unsub_options_update_listener = conf.add_update_listener(options_update_listener)
-    ci["unsub_options_update_listener"] = unsub_options_update_listener
+        hub = HomeAssistantHub(hass, options, DOMAIN, ci)
 
-    hub = Hub(hass, ci, DOMAIN)
     hass.data[DOMAIN]["hub"] = hub
 
     async def servicehandler_enable(call):  # pylint:disable=unused-argument

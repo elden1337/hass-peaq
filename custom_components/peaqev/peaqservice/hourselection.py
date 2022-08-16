@@ -166,7 +166,7 @@ class PriceAwareHours(Hours):
         self._nordpool_entity = val
 
     @property
-    def nordpool_value(self) -> str:
+    def nordpool_value(self):
         return self._nordpool_value
 
     @nordpool_value.setter

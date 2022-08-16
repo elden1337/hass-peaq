@@ -2,15 +2,16 @@ import logging
 from abc import abstractmethod
 
 from homeassistant.core import HomeAssistant
+from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.hub.carpowersensor import CarPowerSensor
 from peaqevcore.models.hub.chargerobject import ChargerObject
 from peaqevcore.models.hub.chargerswitch import ChargerSwitch
 from peaqevcore.models.hub.currentpeak import CurrentPeak
 from peaqevcore.models.hub.hubmember import HubMember
+from peaqevcore.services.locale.Locale import LocaleData
 
 from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
-from custom_components.peaqev.peaqservice.locale import LocaleData
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,27 +29,27 @@ class HubDataBase:
     def create_hub_base_data(
             self,
             hass,
-            config_inputs: dict,
-            domain: str
+            options: HubOptions,
+            domain: str,
+            config_inputs: dict
     ):
         self.hass = hass
 
         resultdict = {}
 
         self.locale = LocaleData(
-            config_inputs["locale"],
-            domain,
-            hass
+            options.locale,
+            domain
         )
         self.chargertype = ChargerTypeData(
             hass,
-            config_inputs["chargertype"],
-            config_inputs["chargerid"]
+            options.chargertype,
+            options.chargerid
         )
         self.current_peak = CurrentPeak(
             data_type=float,
             initval=0,
-            startpeaks=config_inputs["startpeaks"],
+            startpeaks=options.startpeaks,
         )
         self.chargerobject = ChargerObject(
             data_type=self.chargertype.charger.native_chargerstates,

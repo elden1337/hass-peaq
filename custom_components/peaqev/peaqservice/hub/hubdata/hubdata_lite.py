@@ -1,4 +1,5 @@
 
+from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.hub.hubmember import HubMember
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
@@ -14,10 +15,11 @@ class HubDataLite(HubDataBase):
     def create_hub_data(
             self,
             hass,
-            config_inputs:dict,
-            domain: str
+            options: HubOptions,
+            domain: str,
+            config_inputs: dict
     ):
-        self.create_hub_base_data(hass, config_inputs, domain)
+        super().create_hub_base_data(hass, options, domain, config_inputs)
 
         self.totalhourlyenergy = HubMember(
             data_type=float,

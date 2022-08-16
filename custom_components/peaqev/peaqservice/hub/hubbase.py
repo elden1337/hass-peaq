@@ -6,6 +6,7 @@ from homeassistant.core import (
     HomeAssistant,
     callback,
 )
+from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.hub.hubmember import HubMember
 from peaqevcore.services.timer.timer import Timer
 
@@ -24,35 +25,35 @@ class HubBase:
     def __init__(
             self,
             hass: HomeAssistant,
-            config_inputs: dict,
+            options: HubOptions,
             domain: str
     ):
         self.hass = hass
         self.hubname = domain.capitalize()
         self.domain = domain
-        self.price_aware = config_inputs["priceaware"]
-        self.peaqtype_is_lite = config_inputs["peaqtype_is_lite"]
+        self.price_aware = options.price.price_aware
+        self.peaqtype_is_lite = options.peaqev_lite
         self.timer = Timer()
 
         if self.price_aware is True:
             self.hours = PriceAwareHours(
                 hass=self.hass,
-                absolute_top_price=config_inputs["absolute_top_price"],
-                cautionhour_type=config_inputs["cautionhour_type"],
-                min_price=config_inputs["min_price"],
+                absolute_top_price=options.price.top_price,
+                cautionhour_type=options.price.cautionhour_type,
+                min_price=options.price.min_price,
                 hub=self,
-                allow_top_up=config_inputs["allow_top_up"]
+                allow_top_up=options.price.allow_top_up
             )
         else:
             self.hours = RegularHours(
-                non_hours=config_inputs["nonhours"],
-                caution_hours=config_inputs["cautionhours"]
+                non_hours=options.nonhours,
+                caution_hours=options.cautionhours
             )
 
         self.charger_enabled = HubMember(
             data_type=bool,
             listenerentity=f"binary_sensor.{domain}_{ex.nametoid(CHARGERENABLED)}",
-            initval=config_inputs["behavior_on_default"]
+            initval=options.behavior_on_default
         )
         self.charger_done = HubMember(
             data_type=bool,
