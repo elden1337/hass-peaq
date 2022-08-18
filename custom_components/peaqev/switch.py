@@ -41,7 +41,7 @@ class PeaqSwitch(SwitchEntity):
 
     @property
     def is_on(self) -> bool:
-        return self._hub.charger_enabled.value
+        return self._hub.sensors.charger_enabled.value
 
     @property
     def state(self) -> str:
@@ -52,11 +52,11 @@ class PeaqSwitch(SwitchEntity):
         self._state = value
 
     def turn_on(self):
-        self._hub.charger_enabled.value = True
+        self._hub.sensors.charger_enabled.value = True
 
     def turn_off(self):
-        self._hub.charger_enabled.value = False
+        self._hub.sensors.charger_enabled.value = False
 
     def update(self):
-        new_state = self._hub.charger_enabled.value
+        new_state = self._hub.sensors.charger_enabled.value
         self.state = "on" if new_state is True else "off"

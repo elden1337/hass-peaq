@@ -37,7 +37,7 @@ class ChargeControllerBase:
                 _LOGGER.debug("Chargecontroller is initialized and ready to work!")
         ret = self._get_status()
         if ret == CHARGERSTATES.Error:
-            msg = f"Chargecontroller returned faulty state. Charger reported {self._hub.chargerobject.value.lower()} as state."
+            msg = f"Chargecontroller returned faulty state. Charger reported {self._hub.sensors.chargerobject.value.lower()} as state."
             _LOGGER.error(msg)
         return ret.name
 
@@ -47,21 +47,21 @@ class ChargeControllerBase:
     def _get_status(self):
         ret = CHARGERSTATES.Error
         update_timer = False
-        charger_state = self._hub.chargerobject.value.lower()
-        free_charge = self._hub.locale.data.free_charge(self._hub.locale.data)
+        charger_state = self._hub.sensors.chargerobject.value.lower()
+        free_charge = self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data)
 
-        if self._hub.charger_enabled.value is False:
+        if self._hub.sensors.charger_enabled.value is False:
             update_timer = True
             ret = CHARGERSTATES.Disabled
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]:
-            self._hub.charger_done.value = True
+            self._hub.sensors.charger_done.value = True
             ret = CHARGERSTATES.Done
         elif charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Idle]:
             update_timer = True
             ret = CHARGERSTATES.Idle
-            if self._hub.charger_done.value is True:
-                self._hub.charger_done.value = False
-        elif charger_state not in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Idle] and self._hub.charger_done.value is True:
+            if self._hub.sensors.charger_done.value is True:
+                self._hub.sensors.charger_done.value = False
+        elif charger_state not in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Idle] and self._hub.sensors.charger_done.value is True:
             ret = CHARGERSTATES.Done
         elif datetime.now().hour in self._hub.non_hours and free_charge is False and self._hub.timer.is_override is False:
             update_timer = True

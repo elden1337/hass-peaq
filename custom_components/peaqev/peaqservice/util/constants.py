@@ -32,10 +32,10 @@ HOUSEPOWER = "House power"
 ALLOWEDCURRENT = "Allowed current"
 CONSUMPTION_INTEGRAL_NAME = "Energy excluding car"
 CONSUMPTION_TOTAL_NAME = "Energy including car"
-CHARGERENABLED = "Charger enabled"
-CHARGERDONE = "Charger done"
-AVERAGECONSUMPTION = "Average consumption"
-AVERAGECONSUMPTION_24H = "Average consumption 24h"
+CHARGERENABLED = "Charger enabled" #core
+CHARGERDONE = "Charger done" #core
+AVERAGECONSUMPTION = "Average consumption" # core
+AVERAGECONSUMPTION_24H = "Average consumption 24h" # core
 THRESHOLD = "Threshold"
 SQLSENSOR_BASENAME = "Monthly max peak"
 SQLSENSOR_AVERAGEOFTHREE = "Average of three"
@@ -61,9 +61,9 @@ PAUSE = "pause"
 
 """States for the Hours-object"""
 # moved to core
-NON_HOUR = "Charging stopped"
-CAUTION_HOUR = "Charging-permittance degraded"
-CHARGING_PERMITTED = "Charging permitted"
+NON_HOUR = "Charging stopped"  # core
+CAUTION_HOUR = "Charging-permittance degraded" # core
+CHARGING_PERMITTED = "Charging permitted" # core
 # moved to core
 
 CAUTIONHOURTYPE_NAMES =[

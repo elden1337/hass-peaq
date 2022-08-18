@@ -48,7 +48,7 @@ class PeaqSessionCostSensor(SensorBase, RestoreEntity):
         name = f"{hub.hubname} Session energy cost"
         super().__init__(hub, name, entry_id)
         self._attr_name = name
-        self._attr_unit_of_measurement = self._hub.hours.currency
+        self._attr_unit_of_measurement = self._hub.nordpool.currency
         self._state = 0
 
     @property
@@ -65,7 +65,7 @@ class PeaqSessionCostSensor(SensorBase, RestoreEntity):
 
     def update(self) -> None:
         self._state = self._hub.charger.session.session_price
-        self._attr_unit_of_measurement = self._hub.hours.currency
+        self._attr_unit_of_measurement = self._hub.nordpool.currency
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()

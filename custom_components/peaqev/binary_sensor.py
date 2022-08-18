@@ -42,7 +42,7 @@ class PeaqBinarySensorEnabled(BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         try:
-            return self._hub.charger_enabled.value
+            return self._hub.sensors.charger_enabled.value
         except:
             _LOGGER.debug("Binarysensor_enabled could not get state from hub.")
             return False
@@ -66,7 +66,7 @@ class PeaqBinarySensorDone(BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         try:
-            return self._hub.charger_done.value
+            return self._hub.sensors.charger_done.value
         except:
             _LOGGER.debug("Binarysensor_charger_done could not get state from hub.")
             return False

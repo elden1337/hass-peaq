@@ -18,7 +18,7 @@ class PeaqAmpSensor(SensorBase):
         self._hub = hub
         self._state = self._hub.threshold.allowedcurrent
         self._attr_icon = "mdi:current-ac"
-        self._charger_current = self._hub.chargerobject_switch.current
+        self._charger_current = self._hub.sensors.chargerobject_switch.current
 
     @property
     def state(self) -> int:
@@ -26,7 +26,7 @@ class PeaqAmpSensor(SensorBase):
 
     def update(self) -> None:
         self._state = self._hub.threshold.allowedcurrent
-        self._charger_current = self._hub.chargerobject_switch.current
+        self._charger_current = self._hub.sensors.chargerobject_switch.current
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -41,10 +41,10 @@ class PeaqPowerSensor(SensorBase):
     unit_of_measurement = POWER_WATT
 
     def __init__(self, hub, entry_id):
-        name = f"{hub.hubname} {hub.power.total.name}"
+        name = f"{hub.hubname} {hub.sensors.power.total.name}"
         super().__init__(hub, name, entry_id)
         self._hub = hub
-        self._state = self._hub.power.total.value
+        self._state = self._hub.sensors.power.total.value
         self._attr_icon = "mdi:flash"
 
     @property
@@ -52,7 +52,7 @@ class PeaqPowerSensor(SensorBase):
         return self._state
 
     def update(self) -> None:
-        self._state = self._hub.power.total.value
+        self._state = self._hub.sensors.power.total.value
 
 
 class PeaqHousePowerSensor(SensorBase):
@@ -60,10 +60,10 @@ class PeaqHousePowerSensor(SensorBase):
     unit_of_measurement = POWER_WATT
 
     def __init__(self, hub, entry_id):
-        name = f"{hub.hubname} {hub.power.house.name}"
+        name = f"{hub.hubname} {hub.sensors.power.house.name}"
         super().__init__(hub, name, entry_id)
         self._hub = hub
-        self._state = self._hub.power.house.value
+        self._state = self._hub.sensors.power.house.value
         self._attr_icon = "mdi:home-lightning-bolt"
 
     @property
@@ -71,4 +71,4 @@ class PeaqHousePowerSensor(SensorBase):
         return self._state
 
     def update(self) -> None:
-        self._state = self._hub.power.house.value
+        self._state = self._hub.sensors.power.house.value

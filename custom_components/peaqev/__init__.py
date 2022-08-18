@@ -51,6 +51,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
         hub = HubLite(hass, options, DOMAIN, ci)
     else:
         ci["powersensor"] = conf.data["name"]
+        options.powersensor = conf.data["name"]
 
         unsub_options_update_listener = conf.add_update_listener(options_update_listener)
         ci["unsub_options_update_listener"] = unsub_options_update_listener

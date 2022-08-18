@@ -32,10 +32,10 @@ class PeaqMoneySensor(SensorBase):
     def update(self) -> None:
         self._nonhours = self._hub.non_hours
         self._dynamic_caution_hours = self._hub.dynamic_caution_hours
-        self._currency = self._hub.hours.currency
+        self._currency = self._hub.nordpool.currency
         self._prices = self._hub.hours.prices if self._hub.hours.prices is not None else []
         self._prices_tomorrow = self._hub.hours.prices_tomorrow if self._hub.hours.prices_tomorrow is not None else []
-        self._current_peak = self._hub.current_peak.value
+        self._current_peak = self._hub.sensors.current_peak.value
 
     @property
     def extra_state_attributes(self) -> dict:

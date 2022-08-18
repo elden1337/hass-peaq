@@ -1,19 +1,14 @@
 import logging
 from abc import abstractmethod
-from datetime import datetime
 
 from homeassistant.core import (
     HomeAssistant,
     callback,
 )
 from peaqevcore.hub.hub_options import HubOptions
-from peaqevcore.models.hub.hubmember import HubMember
-from peaqevcore.services.timer.timer import Timer
 
-import custom_components.peaqev.peaqservice.util.extensionmethods as ex
-from custom_components.peaqev.peaqservice.hourselection import (PriceAwareHours, RegularHours)
-from custom_components.peaqev.peaqservice.hub.scheduler.schedule import Scheduler
-from custom_components.peaqev.peaqservice.util.constants import CHARGERENABLED, CHARGERDONE
+from custom_components.peaqev.peaqservice.charger.charger import Charger
+from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,42 +28,17 @@ class HubBase:
         self.domain = domain
         self.price_aware = options.price.price_aware
         self.peaqtype_is_lite = options.peaqev_lite
-        self.timer = Timer()
 
-        if self.price_aware is True:
-            self.hours = PriceAwareHours(
-                hass=self.hass,
-                absolute_top_price=options.price.top_price,
-                cautionhour_type=options.price.cautionhour_type,
-                min_price=options.price.min_price,
-                hub=self,
-                allow_top_up=options.price.allow_top_up
-            )
-        else:
-            self.hours = RegularHours(
-                non_hours=options.nonhours,
-                caution_hours=options.cautionhours
-            )
-
-        self.charger_enabled = HubMember(
-            data_type=bool,
-            listenerentity=f"binary_sensor.{domain}_{ex.nametoid(CHARGERENABLED)}",
-            initval=options.behavior_on_default
+        self.chargertype = ChargerTypeData(
+            hass,
+            options.chargertype,
+            options.chargerid
         )
-        self.charger_done = HubMember(
-            data_type=bool,
-            listenerentity=f"binary_sensor.{domain}_{ex.nametoid(CHARGERDONE)}",
-            initval=False
+        self.charger = Charger(
+            self,
+            hass,
+            self.chargertype.charger.servicecalls
         )
-        self.scheduler = Scheduler(hub=self, options=self.hours.options)
-
-    @property
-    def non_hours(self) -> list:
-        return self.scheduler.non_hours if self.scheduler.scheduler_active else self.hours.non_hours
-
-    @property
-    def dynamic_caution_hours(self) -> dict:
-        return self.scheduler.caution_hours if self.scheduler.scheduler_active else self.hours.dynamic_caution_hours
 
     @abstractmethod
     def is_initialized(self) -> bool:
@@ -87,35 +57,5 @@ class HubBase:
     async def _update_sensor(self, entity, value):
         pass
 
-    async def call_enable_peaq(self):
-        """peaqev.enable"""
-        self.charger_enabled.value = True
-        self.charger_done.value = False
 
-    async def call_disable_peaq(self):
-        """peaqev.disable"""
-        self.charger_enabled.value = False
-        self.charger_done.value = False
 
-    async def call_override_nonhours(self, hours:int=1):
-        """peaqev.override_nonhours"""
-        self.timer.update(hours)
-
-    async def call_schedule_needed_charge(
-            self,
-            charge_amount:float,
-            departure_time:str,
-            schedule_starttime:str = None,
-            override_settings:bool = False
-        ):
-        dep_time = datetime.strptime(departure_time, '%y-%m-%d %H:%M')
-        if schedule_starttime is not None:
-            start_time = datetime.strptime(schedule_starttime, '%y-%m-%d %H:%M')
-        else:
-            start_time = datetime.now()
-        _LOGGER.debug(f"scheduler params. charge: {charge_amount}, dep-time: {dep_time}, start_time: {start_time}")
-        self.scheduler.create_schedule(charge_amount, dep_time, start_time, override_settings)
-        self.scheduler.update()
-
-    async def call_scheduler_cancel(self):
-        self.scheduler.cancel()

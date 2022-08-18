@@ -42,7 +42,7 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
     peaqutilitysensors = []
 
     for i in integrationsensors:
-        peaqutilitysensors.append(PeaqUtilitySensor(hub, i, hub.locale.data.peak_cycle, METER_OFFSET, config.entry_id))
+        peaqutilitysensors.append(PeaqUtilitySensor(hub, i, hub.sensors.locale.data.peak_cycle, METER_OFFSET, config.entry_id))
 
     async_add_entities(peaqutilitysensors, update_before_add=True)
 
