@@ -95,7 +95,7 @@ class Charger:
             await self._is_running(False)
             self._session_is_active = False
             await self._call_charger(OFF)
-            self._hub.charger_done.value = True
+            self._hub.sensors.charger_done.value = True
 
     async def _pause_charger(self):
         if time.time() - self._latest_charger_call > CALL_WAIT_TIMER:
