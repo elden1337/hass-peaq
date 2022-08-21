@@ -52,15 +52,16 @@ class PeaqMoneySensor(SensorBase):
     def _get_written_state(self) -> str:
         hour = datetime.now().hour
         ret = ""
+        hours = list(set(self._nonhours))
         if self._hub.timer.is_override:
             return self._hub.timer.override_string
         if hour in self._nonhours:
-            for idx, h in enumerate(self._nonhours):
-                if idx + 1 < len(self._nonhours):
-                    if self._getuneven(self._nonhours[idx + 1], self._nonhours[idx]):
+            for idx, h in enumerate(hours):
+                if idx + 1 < len(hours):
+                    if self._getuneven(hours[idx + 1], hours[idx]):
                         ret = self._get_stopped_string(h)
                         break
-                elif idx + 1 == len(self._nonhours):
+                elif idx + 1 == len(hours):
                     ret = self._get_stopped_string(h)
                     break
         elif hour in self._dynamic_caution_hours.keys():
@@ -84,7 +85,8 @@ class PeaqMoneySensor(SensorBase):
 
     def set_non_hours_display_model(self, input_hour) -> list:
         ret = []
-        for i in input_hour:
+        hours = list(set(input_hour))
+        for i in hours:
             if i < datetime.now().hour:
                 ret.append(f"{str(i)}⁺¹")
             else:

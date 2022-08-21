@@ -13,7 +13,6 @@ import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller import ChargeController
 from custom_components.peaqev.peaqservice.hub.hubbase import HubBase
 from custom_components.peaqev.peaqservice.hub.nordpool import NordPoolUpdater
-from custom_components.peaqev.peaqservice.hub.scheduler.schedule import Scheduler
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
 _LOGGER = logging.getLogger(__name__)
@@ -32,9 +31,7 @@ class HomeAssistantHub(HubBase, Hub):
         HubBase.__init__(self, hass=hass, options=options, domain=domain)
         Hub.__init__(self, state_machine=hass, options=options, domain=domain, chargerobj=self.chargertype)
         self.configpower_entity = config_inputs["powersensor"]
-
         self.chargecontroller = ChargeController(self) #move to core
-        self.scheduler = Scheduler(hub=self, options=self.hours.options)
 
         trackerEntities = [
             self.configpower_entity,
@@ -118,6 +115,7 @@ class HomeAssistantHub(HubBase, Hub):
                     config_sensor_value=None
                 )
                 update_session = True
+                self.sensors.chargerobject_switch.updatecurrent()
             case self.sensors.chargerobject.entity:
                 self.sensors.chargerobject.value = value
             case self.sensors.chargerobject_switch.entity:

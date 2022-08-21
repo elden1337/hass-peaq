@@ -12,7 +12,6 @@ import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_lite import ChargeControllerLite
 from custom_components.peaqev.peaqservice.hub.hubbase import HubBase
 from custom_components.peaqev.peaqservice.hub.nordpool import NordPoolUpdater
-from custom_components.peaqev.peaqservice.hub.scheduler.schedule import Scheduler
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
 _LOGGER = logging.getLogger(__name__)
@@ -32,7 +31,6 @@ class HubLite(HubBase, Hub):
         Hub.__init__(self, state_machine=hass, options=options, domain=domain, chargerobj=self.chargertype)
 
         self.chargecontroller = ChargeControllerLite(self)
-        self.scheduler = Scheduler(hub=self, options=self.hours.options)
 
         trackerEntities = [
             self.sensors.chargerobject_switch.entity,
@@ -83,6 +81,7 @@ class HubLite(HubBase, Hub):
         match entity:
             case self.sensors.carpowersensor.entity:
                 self.sensors.carpowersensor.value = value
+                self.sensors.chargerobject_switch.updatecurrent()
             case self.sensors.chargerobject.entity:
                 self.sensors.chargerobject.value = value
             case self.sensors.chargerobject_switch.entity:
