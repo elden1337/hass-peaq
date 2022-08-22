@@ -52,7 +52,7 @@ class PeaqMoneySensor(SensorBase):
     def _get_written_state(self) -> str:
         hour = datetime.now().hour
         ret = ""
-        hours = list(set(self._nonhours))
+        hours = self._nonhours
         if self._hub.timer.is_override:
             return self._hub.timer.override_string
         if hour in self._nonhours:
@@ -69,7 +69,6 @@ class PeaqMoneySensor(SensorBase):
             ret = f"Charging allowed at {int(val * 100)}% of peak"
         else:
             ret = "Charging allowed"
-        # _LOGGER.debug(f"nonhours: {self._nonhours}, ret:{ret}")
         return ret
 
     def _get_stopped_string(self, h) -> str:
@@ -85,7 +84,7 @@ class PeaqMoneySensor(SensorBase):
 
     def set_non_hours_display_model(self, input_hour) -> list:
         ret = []
-        hours = list(set(input_hour))
+        hours = input_hour
         for i in hours:
             if i < datetime.now().hour:
                 ret.append(f"{str(i)}⁺¹")

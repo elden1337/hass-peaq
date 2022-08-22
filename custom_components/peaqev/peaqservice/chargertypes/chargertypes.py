@@ -4,8 +4,14 @@ from custom_components.peaqev.peaqservice.chargertypes.types.chargeamps import C
 from custom_components.peaqev.peaqservice.chargertypes.types.easee import Easee
 # from custom_components.peaqev.peaqservice.chargertypes.types.garowallbox import GaroWallbox
 from custom_components.peaqev.peaqservice.util.constants import (
-    CHARGERTYPE_EASEE, CHARGERTYPE_CHARGEAMPS,  # CHARGERTYPE_GAROWALLBOX
+    CHARGERTYPE_EASEE, CHARGERTYPE_CHARGEAMPS  # CHARGERTYPE_GAROWALLBOX
 )
+
+CHARGERTYPE_DICT = {
+            CHARGERTYPE_CHARGEAMPS: ChargeAmps,
+            CHARGERTYPE_EASEE: Easee,
+            #CHARGERTYPE_GAROWALLBOX: GaroWallbox
+        }
 
 
 class ChargerTypeData:
@@ -14,13 +20,7 @@ class ChargerTypeData:
         self._type = input_type
         self._hass = hass
 
-        chargertype_dict = {
-            CHARGERTYPE_CHARGEAMPS: ChargeAmps,
-            CHARGERTYPE_EASEE: Easee,
-            #CHARGERTYPE_GAROWALLBOX: GaroWallbox
-        }
-
-        self._charger = chargertype_dict[input_type](self._hass, chargerid)
+        self._charger = CHARGERTYPE_DICT[input_type](self._hass, chargerid)
         self._charger.validatecharger()
 
     @property

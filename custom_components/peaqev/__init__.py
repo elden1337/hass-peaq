@@ -13,9 +13,6 @@ from .const import (
     DOMAIN,
     PLATFORMS, LISTENER_FN_CLOSE
 )
-from .peaqservice.hub.hub_lite import HubLite
-
-#from .peaqservice.hub.models import ConfigModel
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,7 +45,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     ci = {}
 
     if peaqtype_is_lite is True:
-        hub = HubLite(hass, options, DOMAIN, ci)
+        hub = HomeAssistantHub(hass, options, DOMAIN, ci)
     else:
         ci["powersensor"] = conf.data["name"]
         options.powersensor = conf.data["name"]
@@ -61,21 +58,21 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     hass.data[DOMAIN]["hub"] = hub
 
     async def servicehandler_enable(call):  # pylint:disable=unused-argument
-        await hub.call_enable_peaq()
+        await hub.servicecalls.call_enable_peaq()
 
     async def servicehandler_disable(call):  # pylint:disable=unused-argument
-        await hub.call_disable_peaq()
+        await hub.servicecalls.call_disable_peaq()
 
     async def servicehandler_override_nonhours(call):  # pylint:disable=unused-argument
         hours = call.data.get("hours")
-        await hub.call_override_nonhours(1 if hours is None else hours)
+        await hub.servicecalls.call_override_nonhours(1 if hours is None else hours)
 
     async def servicehandler_scheduler_set(call):  # pylint:disable=unused-argument
         charge_amount = call.data.get("charge_amount")
         departure_time = call.data.get("departure_time")
         schedule_starttime = call.data.get("schedule_starttime")
         override_settings = call.data.get("override_settings")
-        await hub.call_schedule_needed_charge(
+        await hub.servicecalls.call_schedule_needed_charge(
             charge_amount=charge_amount,
             departure_time=departure_time,
             schedule_starttime=schedule_starttime,
@@ -83,7 +80,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
         )
 
     async def servicehandler_scheduler_cancel(call):
-        await hub.call_scheduler_cancel()
+        await hub.servicecalls.call_scheduler_cancel()
 
     hass.services.async_register(DOMAIN, "enable", servicehandler_enable)
     hass.services.async_register(DOMAIN, "disable", servicehandler_disable)

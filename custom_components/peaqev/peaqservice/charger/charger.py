@@ -107,7 +107,7 @@ class Charger:
 
     async def _call_charger(self, command: str):
         calls = self._service_calls.get_call(command)
-        await self._hub.hass.services.async_call(
+        await self._hub.state_machine.services.async_call(
             calls[DOMAIN],
             calls[command],
             calls["params"]
@@ -126,7 +126,7 @@ class Charger:
                 if await self._hass.async_add_executor_job(self._wait_update_current):
                     serviceparams = await self._setchargerparams(calls)
                     _LOGGER.debug(f"peaqev updating current with: {calls[DOMAIN]}, {calls[UPDATECURRENT]} and params: {serviceparams}")
-                    await self._hub.hass.services.async_call(
+                    await self._hub.state_machine.services.async_call(
                         calls[DOMAIN],
                         calls[UPDATECURRENT],
                         serviceparams
@@ -135,7 +135,7 @@ class Charger:
 
             if self._hub.chargertype.charger.servicecalls.options.update_current_on_termination:
                 final_service_params = await self._setchargerparams(calls, ampoverride=6)
-                await self._hub.hass.services.async_call(
+                await self._hub.state_machine.services.async_call(
                     calls[DOMAIN],
                     calls[UPDATECURRENT],
                     final_service_params
