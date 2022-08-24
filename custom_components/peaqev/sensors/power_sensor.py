@@ -1,3 +1,5 @@
+import logging
+
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.const import (
     POWER_WATT,
@@ -6,6 +8,8 @@ from homeassistant.const import (
 
 from custom_components.peaqev.peaqservice.util.constants import ALLOWEDCURRENT
 from custom_components.peaqev.sensors.sensorbase import SensorBase
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class PeaqAmpSensor(SensorBase):

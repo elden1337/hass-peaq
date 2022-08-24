@@ -42,7 +42,7 @@ class PeaqMoneySensor(SensorBase):
         attr_dict = {
             "Non hours": self.set_non_hours_display_model(self._nonhours),
             "Caution hours": self.set_dynamic_caution_hours_display(),
-            "Current hour charge permittance": self.set_dynamic_caution_hour_display(),
+            "Current hour charge permittance": self.set_charge_permittance_display(),
             "Avg price per kWh next 24h": f"{self._hub.hours.get_average_kwh_price()} {self._currency}",
             "Max charge next 24h": f"{self._hub.hours.get_total_charge()} kWh"
         }
@@ -52,16 +52,15 @@ class PeaqMoneySensor(SensorBase):
     def _get_written_state(self) -> str:
         hour = datetime.now().hour
         ret = ""
-        hours = self._nonhours
         if self._hub.timer.is_override:
             return self._hub.timer.override_string
         if hour in self._nonhours:
-            for idx, h in enumerate(hours):
-                if idx + 1 < len(hours):
-                    if self._getuneven(hours[idx + 1], hours[idx]):
+            for idx, h in enumerate(self._nonhours):
+                if idx + 1 < len(self._nonhours):
+                    if self._getuneven(self._nonhours[idx + 1], self._nonhours[idx]):
                         ret = self._get_stopped_string(h)
                         break
-                elif idx + 1 == len(hours):
+                elif idx + 1 == len(self._nonhours):
                     ret = self._get_stopped_string(h)
                     break
         elif hour in self._dynamic_caution_hours.keys():
@@ -103,7 +102,7 @@ class PeaqMoneySensor(SensorBase):
                 ret[hh] = f"{str((int(self._dynamic_caution_hours[h] * 100)))}%"
         return ret
 
-    def set_dynamic_caution_hour_display(self) -> str:
+    def set_charge_permittance_display(self) -> str:
         hour = datetime.now().hour
         if hour in self._nonhours:
             return "0%"
