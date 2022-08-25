@@ -1,10 +1,11 @@
 import logging
 from datetime import timedelta
 
+from peaqevcore.models.hub.const import AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H
+
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import (
     DOMAIN)
-from custom_components.peaqev.peaqservice.util.constants import AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H
 from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_TOTAL_NAME,
     CONSUMPTION_INTEGRAL_NAME

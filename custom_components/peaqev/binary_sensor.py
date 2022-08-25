@@ -3,8 +3,8 @@ from datetime import timedelta
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.core import HomeAssistant
+from peaqevcore.models.hub.const import CHARGERENABLED, CHARGERDONE
 
-from custom_components.peaqev.peaqservice.util.constants import CHARGERENABLED, CHARGERDONE
 from .const import (
     DOMAIN)
 
