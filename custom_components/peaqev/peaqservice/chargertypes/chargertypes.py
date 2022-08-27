@@ -23,7 +23,7 @@ class ChargerTypeData:
         self._type = input_type
         self._hass = hass
 
-        self._charger = CHARGERTYPE_DICT[input_type](self._hass, options)
+        self._charger = CHARGERTYPE_DICT[input_type](hass=self._hass, options=options)
         self._charger.validatecharger()
 
     @property

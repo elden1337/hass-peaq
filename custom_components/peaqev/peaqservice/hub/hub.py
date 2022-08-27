@@ -38,9 +38,9 @@ class HomeAssistantHub(Hub):
 
         self.hubname = domain.capitalize()
         self.chargertype = ChargerTypeData(
-            hass,
-            options.chargertype,
-            options.chargerid
+            hass=hass,
+            input_type=options.charger.chargertype,
+            options=options
         )
         self.charger = Charger(
             self,

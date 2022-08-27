@@ -1,6 +1,6 @@
 import logging
 
-# from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargerstates import CHARGERSTATES
 from peaqevcore.models.chargertype.calltype import CallType
