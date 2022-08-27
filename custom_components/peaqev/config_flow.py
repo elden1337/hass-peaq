@@ -17,9 +17,12 @@ from custom_components.peaqev.configflow.config_flow_schemas import (
     HOURS_SCHEMA,
     MONTHS_SCHEMA,
     CHARGER_SCHEMA,
-    TYPE_SCHEMA
+    TYPE_SCHEMA,
+    OUTLET_DETAILS_SCHEMA,
+    CHARGER_DETAILS_SCHEMA
 )
 from custom_components.peaqev.configflow.config_flow_validation import ConfigFlowValidation, FaultyPowerSensor
+from custom_components.peaqev.peaqservice.util.constants import CHARGERTYPE_OUTLET
 from .const import DOMAIN  # pylint:disable=unused-import
 
 _LOGGER = logging.getLogger(__name__)
@@ -78,6 +81,26 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 self.data.update(user_input)
+                if self.data["chargertype"] == CHARGERTYPE_OUTLET:
+                    return await self.async_step_outlet_details()
+                else:
+                    return await self.async_step_charger_details()
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception")
+                errors["base"] = "unknown"
+
+        return self.async_show_form(
+            step_id="charger",
+            data_schema=CHARGER_SCHEMA,
+            errors=errors,
+            last_step=False
+        )
+
+    async def async_step_charger_details(self, user_input=None):
+        errors = {}
+        if user_input is not None:
+            try:
+                self.data.update(user_input)
                 return await self.async_step_priceaware()
             except FaultyPowerSensor:
                 errors["base"] = "cannot_connect"
@@ -86,8 +109,25 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "unknown"
 
         return self.async_show_form(
-            step_id="charger",
-            data_schema=CHARGER_SCHEMA,
+            step_id="chargerdetails",
+            data_schema=CHARGER_DETAILS_SCHEMA,
+            errors=errors,
+            last_step=False
+        )
+
+    async def async_step_outlet_details(self, user_input=None):
+        errors = {}
+        if user_input is not None:
+            try:
+                self.data.update(user_input)
+                return await self.async_step_priceaware()
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception")
+                errors["base"] = "unknown"
+
+        return self.async_show_form(
+            step_id="outletdetails",
+            data_schema=OUTLET_DETAILS_SCHEMA,
             errors=errors,
             last_step=False
         )

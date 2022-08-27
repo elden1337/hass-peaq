@@ -8,7 +8,7 @@ from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
 
 from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
-from custom_components.peaqev.peaqservice.util.constants import TYPELITE
+from custom_components.peaqev.peaqservice.util.constants import TYPELITE, CHARGERTYPE_OUTLET
 from .const import (
     DOMAIN,
     PLATFORMS, LISTENER_FN_CLOSE
@@ -30,8 +30,12 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     options.peaqev_lite = peaqtype_is_lite
     options.powersensor_includes_car = conf.data["powersensorincludescar"] if "powersensorincludescar" in conf.data.keys() else False
     options.locale= conf.data["locale"]
-    options.chargertype = conf.data["chargertype"]
-    options.chargerid = conf.data["chargerid"]
+    options.charger.chargertype = conf.data["chargertype"]
+    if options.charger.chargertype == CHARGERTYPE_OUTLET:
+        options.charger.powerswitch = conf.data["outletswitch"]
+        options.charger.powermeter = conf.data["outletpowermeter"]
+    else:
+        options.charger.chargerid = conf.data["chargerid"]
     options.startpeaks = conf.options["startpeaks"] if "startpeaks" in conf.options.keys() else conf.data["startpeaks"]
     options.behavior_on_default = conf.options["behavior_on_default"] if "behavior_on_default" in conf.options.keys() else False
     options.cautionhours = conf.options["cautionhours"] if "cautionhours" in conf.options.keys() else conf.data["cautionhours"] if "cautionhours" in conf.data.keys() else []

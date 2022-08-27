@@ -3,6 +3,7 @@ import time
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import entity_sources
+from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargerstates import CHARGERSTATES
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
@@ -29,10 +30,10 @@ AURA = "Aura"
 
 
 class ChargeAmps(ChargerBase):
-    def __init__(self, hass: HomeAssistant, chargerid):
+    def __init__(self, hass: HomeAssistant, options: HubOptions):
         self._hass = hass
         self._chargeramps_type = ""
-        self._chargerid = chargerid
+        self._chargerid = options.charger.chargerid
         self._chargeamps_connector = 1
 
         self.domainname = DOMAINNAME

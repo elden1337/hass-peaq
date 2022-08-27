@@ -58,10 +58,21 @@
       },
       "charger": {
         "data": {
-          "chargerid": "Chargepoint Id (single chargepoint)",
           "chargertype": "Charger brand",
           "locale": "City, or Grid owner company"
         }
+      },
+      "chargerdetails": {
+        "data": {
+          "chargerid": "Chargepoint Id (single chargepoint)"
+        }
+      },
+      "outletdetails": {
+        "data": {
+          "outletswitch": "Home assistant switch to turn the outlet on/off",
+          "outletpowermeter": "Home assistant sensor to read the nominal power"
+        },
+        "description": "Set sensors for outlet switch and powermeter. Note that Peaqev cannot know which outlet you are using. Therefore, make sure that you use a safe smart outlet to not cause damage to your system."
       },
       "priceaware": {
         "data": {

@@ -27,13 +27,25 @@ CHARGER_SCHEMA = vol.Schema(
                         "chargertype",
                         default="",
                         ): vol.In(pk.CHARGERTYPES),
-                    vol.Optional("chargerid"): cv.string,
                     vol.Optional(
                         "locale",
                         default="",
                         ): vol.In(LOCALES)
                 }
             )
+
+CHARGER_DETAILS_SCHEMA = vol.Schema(
+                {
+                    vol.Optional("chargerid"): cv.string,
+                }
+)
+
+OUTLET_DETAILS_SCHEMA = vol.Schema(
+                {
+                    vol.Optional("outletswitch"): cv.string,
+                    vol.Optional("outletpowermeter"): cv.string,
+                }
+)
 
 HOURS_SCHEMA = vol.Schema(
             {

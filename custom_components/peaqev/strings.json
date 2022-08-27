@@ -58,10 +58,21 @@
       },
       "charger": {
         "data": {
-          "chargerid": "[%key:common::config_flow::data::chargerid%]",
           "chargertype": "[%key:common::config_flow::data::chargertype%]",
           "locale": "[%key:common::config_flow::data::locale%]"
         }
+      },
+      "chargerdetails": {
+        "data": {
+          "chargerid": "[%key:common::config_flow::data::chargerid%]"
+        }
+      },
+      "outletdetails": {
+        "data": {
+          "outletswitch": "[%key:common::config_flow::data::outletswitch%]",
+          "outletpowermeter": "[%key:common::config_flow::data::outletpowermeter%]"
+        },
+        "description": "Set sensors for outlet switch and powermeter. Note that Peaqev cannot know which outlet you are using. Therefore, make sure that you use a safe smart outlet to not cause damage to your system."
       },
       "priceaware": {
         "data": {

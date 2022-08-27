@@ -2,6 +2,7 @@ import logging
 import time
 
 from homeassistant.core import HomeAssistant
+from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargerstates import CHARGERSTATES
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
@@ -54,9 +55,9 @@ UPDATECURRENT_ON_TERMINATION = False
 
 
 class Easee(ChargerBase):
-    def __init__(self, hass: HomeAssistant, chargerid, auth_required: bool = False):
+    def __init__(self, hass: HomeAssistant, options: HubOptions, auth_required: bool = False):
         self._hass = hass
-        self._chargerid = chargerid
+        self._chargerid = options.charger.chargerid
         self._auth_required = auth_required
         self.options.powerswitch_controls_charging = False
         self.domainname = DOMAINNAME

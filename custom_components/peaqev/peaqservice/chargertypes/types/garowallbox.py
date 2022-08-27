@@ -2,6 +2,7 @@ import logging
 import time
 
 from homeassistant.core import HomeAssistant
+from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargerstates import CHARGERSTATES
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
@@ -54,9 +55,9 @@ states:
 """
 
 class GaroWallbox(ChargerBase):
-    def __init__(self, hass: HomeAssistant, chargerid, auth_required: bool = False):
+    def __init__(self, hass: HomeAssistant, options: HubOptions, auth_required: bool = False):
         self._hass = hass
-        self._chargerid = chargerid
+        self._chargerid = options.charger.chargerid
         self.getentities(DOMAINNAME, ENTITYENDINGS)
         self.chargerstates[CHARGERSTATES.Idle] = ['NOT_CONNECTED']
         self.chargerstates[CHARGERSTATES.Connected] = [

@@ -1,26 +1,29 @@
 from homeassistant.core import HomeAssistant
+from peaqevcore.hub.hub_options import HubOptions
 
 from custom_components.peaqev.peaqservice.chargertypes.types.chargeamps import ChargeAmps
 from custom_components.peaqev.peaqservice.chargertypes.types.easee import Easee
+from custom_components.peaqev.peaqservice.chargertypes.types.outlet import SmartOutlet
 # from custom_components.peaqev.peaqservice.chargertypes.types.garowallbox import GaroWallbox
 from custom_components.peaqev.peaqservice.util.constants import (
-    CHARGERTYPE_EASEE, CHARGERTYPE_CHARGEAMPS  # CHARGERTYPE_GAROWALLBOX
+    CHARGERTYPE_EASEE, CHARGERTYPE_CHARGEAMPS, CHARGERTYPE_OUTLET  # CHARGERTYPE_GAROWALLBOX
 )
 
 CHARGERTYPE_DICT = {
             CHARGERTYPE_CHARGEAMPS: ChargeAmps,
             CHARGERTYPE_EASEE: Easee,
+            CHARGERTYPE_OUTLET: SmartOutlet
             #CHARGERTYPE_GAROWALLBOX: GaroWallbox
         }
 
 
 class ChargerTypeData:
-    def __init__(self, hass: HomeAssistant, input_type, chargerid):
+    def __init__(self, hass: HomeAssistant, input_type, options: HubOptions):
         self._charger = None
         self._type = input_type
         self._hass = hass
 
-        self._charger = CHARGERTYPE_DICT[input_type](self._hass, chargerid)
+        self._charger = CHARGERTYPE_DICT[input_type](self._hass, options)
         self._charger.validatecharger()
 
     @property

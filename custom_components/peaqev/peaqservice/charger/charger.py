@@ -107,11 +107,14 @@ class Charger:
 
     async def _call_charger(self, command: str):
         calls = self._service_calls.get_call(command)
-        await self._hub.state_machine.services.async_call(
-            calls[DOMAIN],
-            calls[command],
-            calls["params"]
-        )
+        if self._hub.chargertype.charger.servicecalls.options.switch_controls_charger:
+            await self._hub.state_machine.states.async_set(self._hub.chargertype.charger.entities.powerswitch, calls[command])
+        else:
+            await self._hub.state_machine.services.async_call(
+                calls[DOMAIN],
+                calls[command],
+                calls["params"]
+            )
         msg = f"Calling charger {command}"
         _LOGGER.debug(msg)
         self._latest_charger_call = time.time()
