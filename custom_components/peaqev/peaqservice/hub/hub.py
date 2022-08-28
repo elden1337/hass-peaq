@@ -23,7 +23,6 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class HomeAssistantHub(Hub):
-    """This is the hub used under normal circumstances. Ie when there is a power-meter to read from."""
     hub_id = 1337
     initialized_log_last_logged = 0
     not_ready_list_old_state = 0
@@ -104,8 +103,8 @@ class HomeAssistantHub(Hub):
         ret = {#"hours": self.hours.is_initialized,
                "carpowersensor": self.sensors.carpowersensor.is_initialized,
                "chargerobject_switch": self.sensors.chargerobject_switch.is_initialized,
-               "power": self.sensors.power.is_initialized,
-               "chargerobject": self.sensors.chargerobject.is_initialized
+               "power": self.sensors.power.is_initialized
+               #"chargerobject": self.sensors.chargerobject.is_initialized
                }
 
         if all(ret.values()):

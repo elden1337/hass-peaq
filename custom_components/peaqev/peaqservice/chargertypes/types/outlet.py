@@ -20,15 +20,18 @@ UPDATECURRENT = False
 
 
 class SmartOutlet(ChargerBase):
-    def __init__(self, hass: HomeAssistant, options: HubOptions):
+    def __init__(self, hass: HomeAssistant, huboptions: HubOptions):
         self._hass = hass
-        self.entities.powerswitch = options.charger.powerswitch
-        self.entities.powermeter = options.charger.powermeter
+        self.entities.powerswitch = huboptions.charger.powerswitch
+        self.entities.powermeter = huboptions.charger.powermeter
+        self.options.charger_is_outlet = True
         self.options.powerswitch_controls_charging = True
         self.domainname = DOMAINNAME
+        self.native_chargerstates = []
         self.chargerstates[CHARGERSTATES.Idle] = []
         self.chargerstates[CHARGERSTATES.Connected] = []
         self.chargerstates[CHARGERSTATES.Charging] = []
+        self._hass.async_add_executor_job(self._validate_setup())
 
         self._set_servicecalls(
             domain=DOMAINNAME,
@@ -41,4 +44,22 @@ class SmartOutlet(ChargerBase):
                 update_current_on_termination=False,
                 switch_controls_charger = True
             )
+        )
+
+    def _validate_setup(self):
+        def check_states(entity:str, type_format: type) -> bool:
+            try:
+                s = self._hass.states.get(entity)
+                if s is not None:
+                    if isinstance(s.state, type_format):
+                        return True
+            except:
+                _LOGGER.error(f"Unable to validate outlet-sensor: {entity}")
+                return False
+
+        return all(
+            [check_states(
+                self.entities.powerswitch, str),
+                check_states(self.entities.powermeter, float)
+            ]
         )

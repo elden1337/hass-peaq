@@ -35,7 +35,7 @@ class Charger:
 
     @property
     def _chargertype_charger_is_on(self) -> bool:
-        if self._hub.chargertype.charger.options.powerswitch_controls_charging:
+        if self._hub.options.charger.powerswitch_controls_charging:
             return self._hub.sensors.chargerobject_switch.value
         return all(
             [
@@ -136,7 +136,7 @@ class Charger:
                     )
                     await self._hass.async_add_executor_job(self._wait_loop_cycle)
 
-            if self._hub.chargertype.charger.servicecalls.options.update_current_on_termination:
+            if self._hub.chargertype.charger.servicecalls.options.update_current_on_termination is True:
                 final_service_params = await self._setchargerparams(calls, ampoverride=6)
                 await self._hub.state_machine.services.async_call(
                     calls[DOMAIN],

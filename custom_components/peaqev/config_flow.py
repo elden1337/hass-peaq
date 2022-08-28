@@ -21,7 +21,7 @@ from custom_components.peaqev.configflow.config_flow_schemas import (
     OUTLET_DETAILS_SCHEMA,
     CHARGER_DETAILS_SCHEMA
 )
-from custom_components.peaqev.configflow.config_flow_validation import ConfigFlowValidation, FaultyPowerSensor
+from custom_components.peaqev.configflow.config_flow_validation import ConfigFlowValidation
 from custom_components.peaqev.peaqservice.util.constants import CHARGERTYPE_OUTLET
 from .const import DOMAIN  # pylint:disable=unused-import
 
@@ -82,9 +82,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 self.data.update(user_input)
                 if self.data["chargertype"] == CHARGERTYPE_OUTLET:
-                    return await self.async_step_outlet_details()
+                    return await self.async_step_outletdetails()
                 else:
-                    return await self.async_step_charger_details()
+                    return await self.async_step_chargerdetails()
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
@@ -96,17 +96,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             last_step=False
         )
 
-    async def async_step_charger_details(self, user_input=None):
+    async def async_step_chargerdetails(self, user_input=None):
         errors = {}
         if user_input is not None:
-            try:
-                self.data.update(user_input)
-                return await self.async_step_priceaware()
-            except FaultyPowerSensor:
-                errors["base"] = "cannot_connect"
-            except Exception:  # pylint: disable=broad-except
-                _LOGGER.exception("Unexpected exception")
-                errors["base"] = "unknown"
+            self.data.update(user_input)
+            return await self.async_step_priceaware()
 
         return self.async_show_form(
             step_id="chargerdetails",
@@ -115,15 +109,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             last_step=False
         )
 
-    async def async_step_outlet_details(self, user_input=None):
+    async def async_step_outletdetails(self, user_input=None):
         errors = {}
         if user_input is not None:
-            try:
-                self.data.update(user_input)
-                return await self.async_step_priceaware()
-            except Exception:  # pylint: disable=broad-except
-                _LOGGER.exception("Unexpected exception")
-                errors["base"] = "unknown"
+            self.data.update(user_input)
+            return await self.async_step_priceaware()
 
         return self.async_show_form(
             step_id="outletdetails",

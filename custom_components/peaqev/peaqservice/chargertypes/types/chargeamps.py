@@ -30,10 +30,10 @@ AURA = "Aura"
 
 
 class ChargeAmps(ChargerBase):
-    def __init__(self, hass: HomeAssistant, options: HubOptions):
+    def __init__(self, hass: HomeAssistant, huboptions: HubOptions):
         self._hass = hass
         self._chargeramps_type = ""
-        self._chargerid = options.charger.chargerid
+        self._chargerid = huboptions.charger.chargerid
         self._chargeamps_connector = 1
 
         self.domainname = DOMAINNAME

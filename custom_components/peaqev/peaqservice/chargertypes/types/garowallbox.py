@@ -55,9 +55,9 @@ states:
 """
 
 class GaroWallbox(ChargerBase):
-    def __init__(self, hass: HomeAssistant, options: HubOptions, auth_required: bool = False):
+    def __init__(self, hass: HomeAssistant, huboptions: HubOptions, auth_required: bool = False):
         self._hass = hass
-        self._chargerid = options.charger.chargerid
+        self._chargerid = huboptions.charger.chargerid
         self.getentities(DOMAINNAME, ENTITYENDINGS)
         self.chargerstates[CHARGERSTATES.Idle] = ['NOT_CONNECTED']
         self.chargerstates[CHARGERSTATES.Connected] = [
