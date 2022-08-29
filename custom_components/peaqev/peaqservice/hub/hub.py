@@ -66,10 +66,11 @@ class HomeAssistantHub(Hub):
             self.sensors.carpowersensor.entity,
             self.sensors.charger_enabled.entity,
             self.sensors.charger_done.entity,
-            self.sensors.chargerobject.entity,
             f"sensor.{self.domain}_{ex.nametoid(CHARGERCONTROLLER)}",
             ]
 
+        if self.chargertype.charger.domainname != "SmartOutlet":
+            self.chargingtracker_entities.append(self.sensors.chargerobject.entity)
         if options.peaqev_lite is False:
             trackerEntities.append(self.configpower_entity)
             self.chargingtracker_entities.append(self.sensors.powersensormovingaverage.entity)
@@ -100,11 +101,11 @@ class HomeAssistantHub(Hub):
 
     @property
     def is_initialized(self) -> bool:
-        ret = {#"hours": self.hours.is_initialized,
+        ret = {"hours": self.hours.is_initialized,
                "carpowersensor": self.sensors.carpowersensor.is_initialized,
                "chargerobject_switch": self.sensors.chargerobject_switch.is_initialized,
-               "power": self.sensors.power.is_initialized
-               #"chargerobject": self.sensors.chargerobject.is_initialized
+               "power": self.sensors.power.is_initialized,
+               "chargerobject": self.sensors.chargerobject.is_initialized
                }
 
         if all(ret.values()):

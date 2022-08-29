@@ -35,7 +35,7 @@ class Charger:
 
     @property
     def _chargertype_charger_is_on(self) -> bool:
-        if self._hub.options.charger.powerswitch_controls_charging:
+        if self._hub.chargertype.charger.options.powerswitch_controls_charging:
             return self._hub.sensors.chargerobject_switch.value
         return all(
             [

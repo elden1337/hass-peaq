@@ -21,14 +21,22 @@ class NordPoolUpdater:
     def update_nordpool(self):
         ret = self._hass.states.get(self.nordpool_entity)
         if ret is not None:
-            ret_attr = list(ret.attributes.get("today"))
-            ret_attr_tomorrow = list(ret.attributes.get("tomorrow"))
+            try:
+                ret_attr = list(ret.attributes.get("today"))
+                self.prices = ret_attr
+            except Exception as e:
+                _LOGGER.exception(f"Could not parse today's prices from Nordpool. Unsolveable error. {e}")
+                return
+            try:
+                ret_attr_tomorrow = list(ret.attributes.get("tomorrow"))
+                self.prices_tomorrow = ret_attr_tomorrow
+            except Exception as e:
+                _LOGGER.warning(f"Couldn't parse tomorrow's prices from Nordpool. Array will be empty. {e}")
+                self.prices_tomorrow = []
+
             ret_attr_currency = str(ret.attributes.get("currency"))
             self.currency = ret_attr_currency
-            self.prices = ret_attr
-            self.prices_tomorrow = ret_attr_tomorrow
             self.state = ret.state
-
             self._hub.hours.prices = self.prices
             self._hub.hours.prices_tomorrow = self.prices_tomorrow
         else:

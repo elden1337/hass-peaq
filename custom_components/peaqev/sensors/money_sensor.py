@@ -20,6 +20,8 @@ class PeaqMoneySensor(SensorBase):
         self._prices = []
         self._prices_tomorrow = []
         self._current_peak = None
+        self._avg_cost = None
+        self._max_charge = None
 
     @property
     def state(self):
@@ -36,6 +38,8 @@ class PeaqMoneySensor(SensorBase):
         self._prices = self._hub.hours.prices if self._hub.hours.prices is not None else []
         self._prices_tomorrow = self._hub.hours.prices_tomorrow if self._hub.hours.prices_tomorrow is not None else []
         self._current_peak = self._hub.sensors.current_peak.value
+        self._avg_cost = f"{self._hub.hours.get_average_kwh_price()} {self._currency}"
+        self._max_charge = f"{self._hub.hours.get_total_charge()} kWh"
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -43,8 +47,8 @@ class PeaqMoneySensor(SensorBase):
             "Non hours": self.set_non_hours_display_model(self._nonhours),
             "Caution hours": self.set_dynamic_caution_hours_display(),
             "Current hour charge permittance": self.set_charge_permittance_display(),
-            "Avg price per kWh next 24h": f"{self._hub.hours.get_average_kwh_price()} {self._currency}",
-            "Max charge next 24h": f"{self._hub.hours.get_total_charge()} kWh"
+            "Avg price per kWh next 24h": self._avg_cost,
+            "Max charge next 24h": self._max_charge
         }
 
         return attr_dict
