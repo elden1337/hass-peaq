@@ -83,8 +83,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self.data.update(user_input)
                 if self.data["chargertype"] == CHARGERTYPE_OUTLET:
                     return await self.async_step_outletdetails()
-                else:
-                    return await self.async_step_chargerdetails()
+                return await self.async_step_chargerdetails()
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
