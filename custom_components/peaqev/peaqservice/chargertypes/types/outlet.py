@@ -10,12 +10,12 @@ from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 from custom_components.peaqev.peaqservice.util.constants import (
     ON,
-    OFF
+    OFF,
+    SMARTOUTLET
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-DOMAINNAME = "SmartOutlet"
+NATIVE_CHARGERSTATES = ["idle", "connected", "charging"]
 UPDATECURRENT = False
 
 
@@ -26,15 +26,15 @@ class SmartOutlet(ChargerBase):
         self.entities.powermeter = huboptions.charger.powermeter
         self.options.charger_is_outlet = True
         self.options.powerswitch_controls_charging = True
-        self.domainname = DOMAINNAME
-        self.native_chargerstates = []
-        self.chargerstates[CHARGERSTATES.Idle] = []
-        self.chargerstates[CHARGERSTATES.Connected] = []
-        self.chargerstates[CHARGERSTATES.Charging] = []
+        self.domainname = SMARTOUTLET
+        self.native_chargerstates = NATIVE_CHARGERSTATES
+        self.chargerstates[CHARGERSTATES.Idle] = ["idle"]
+        self.chargerstates[CHARGERSTATES.Connected] = ["connected"]
+        self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
         self._hass.async_add_executor_job(self._validate_setup())
 
         self._set_servicecalls(
-            domain=DOMAINNAME,
+            domain=SMARTOUTLET,
             model=ServiceCallsDTO(
                 on=CallType(ON, {}),
                 off=CallType(OFF, {})

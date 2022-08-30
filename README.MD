@@ -22,7 +22,7 @@ For usage-examples and more in-depth explanations, see the Wiki:
 * [Usage](https://github.com/elden1337/hass-peaq/wiki/Usage)
 
 ## Installation
-*Required to install is Home Assistant version 2022.4.5 or higher.*
+*Required to install is Home Assistant version 2022.8.0 or higher.*
 
 Preferred if you have HACS installed is to search for Peaqev there.
 
@@ -46,8 +46,9 @@ Peaqev has two types of installations: Regular and Lite. Regular is much more pr
 
 ##### Charger and Locale:
 - `City, or Grid owner company` - Chose your city from the list. The characteristics differ in how peak hours are stored and measured. If you don't live in a supported location but just want to test the integration, or lower your peaks for other reasons, you may check *"Other, just want to test"*
-- `Charger type` - Pick the installed ev-charger you have. Currently Chargeamps and Easee are supported. Check links for required custom components per charger-type: [Chargeamps](https://github.com/kirei/hass-chargeamps), [Easee](https://github.com/fondberg/easee_hass/)
+- `Charger type` - Pick the installed ev-charger you have. Currently Chargeamps, Easee and Outdoor smart outlets are supported. Check links for required custom components per charger-type: [Chargeamps](https://github.com/kirei/hass-chargeamps), [Easee](https://github.com/fondberg/easee_hass/)
 - `Charger id` - Your local identifier to tell Peaqev which charger unit we mean to manipulate. If your chargertype does not provide this, leave blank
+- *If you have selected Smart outlet as charger type, you will need to provide the switch to turn on/off, and the sensor to read power from the outlet instead of charger id.*
 
 ##### Price-aware:
 - `Price aware charging` - Check this to calculate the cheapest hours from Nordpool (requires [Nordpool](https://github.com/custom-components/nordpool)). Above Non- and Caution-hours will be ignored.

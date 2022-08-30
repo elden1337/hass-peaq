@@ -44,11 +44,11 @@ class PeaqMoneySensor(SensorBase):
     @property
     def extra_state_attributes(self) -> dict:
         attr_dict = {
-            "Non hours": self.set_non_hours_display_model(self._nonhours),
+            "Non hours": self.set_non_hours_display_model(),
             "Caution hours": self.set_dynamic_caution_hours_display(),
             "Current hour charge permittance": self.set_charge_permittance_display(),
-            "Avg price per kWh next 24h": self._avg_cost,
-            "Max charge next 24h": self._max_charge
+            "Avg price per kWh": self._avg_cost,
+            "Max charge amount": self._max_charge
         }
 
         return attr_dict
@@ -85,13 +85,12 @@ class PeaqMoneySensor(SensorBase):
             return first - (second - 24) != 1
         return first - second != 1
 
-    def set_non_hours_display_model(self, input_hour) -> list:
+    def set_non_hours_display_model(self) -> list:
         ret = []
-        hours = input_hour
-        for i in hours:
-            if i < datetime.now().hour:
+        for i in self._nonhours:
+            if i < datetime.now().hour and len(self._prices_tomorrow) > 0:
                 ret.append(f"{str(i)}⁺¹")
-            else:
+            elif i >= datetime.now().hour:
                 ret.append(str(i))
         return ret
 

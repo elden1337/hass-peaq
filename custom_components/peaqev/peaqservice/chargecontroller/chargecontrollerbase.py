@@ -35,14 +35,41 @@ class ChargeControllerBase:
             if self._chargecontroller_initalized is False:
                 self._chargecontroller_initalized = True
                 _LOGGER.debug("Chargecontroller is initialized and ready to work!")
-        ret = self._get_status()
+        if self._hub.chargertype.charger.options.charger_is_outlet is True:
+            ret = self._get_status_outlet()
+        else:
+            ret = self._get_status()
         if ret == CHARGERSTATES.Error:
-            msg = f"Chargecontroller returned faulty state. Charger reported {self._hub.sensors.chargerobject.value.lower()} as state."
+            msg = f"Chargecontroller returned faulty state. Charger reported {self._hub.sensors.chargerobject.value} as state."
             _LOGGER.error(msg)
         return ret.name
 
     def update_latestchargerstart(self):
         self.latest_charger_start = time.time()
+
+    def _get_status_outlet(self):
+        ret = CHARGERSTATES.Error
+        update_timer = False
+        free_charge = self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data)
+
+        if self._hub.sensors.charger_enabled.value is False:
+            update_timer = True
+            ret = CHARGERSTATES.Disabled
+        elif self._hub.sensors.charger_done.value is True:
+            ret = CHARGERSTATES.Done
+        elif datetime.now().hour in self._hub.non_hours and free_charge is False and self._hub.timer.is_override is False:
+            update_timer = True
+            ret = CHARGERSTATES.Stop
+        elif self._hub.chargertype.charger.entities.powerswitch == "on" and self._hub.chargertype.charger.entities.powermeter < 1:
+            ret = self._get_status_connected()
+            update_timer = (ret == CHARGERSTATES.Stop)
+        else:
+            ret = self._get_status_charging()
+            update_timer = True
+
+        if update_timer is True:
+            self.update_latestchargerstart()
+        return ret
 
     def _get_status(self):
         ret = CHARGERSTATES.Error
@@ -87,5 +114,5 @@ class ChargeControllerBase:
         pass
 
     @abstractmethod
-    def _get_status_connected(self, charger_state) -> CHARGERSTATES:
+    def _get_status_connected(self, charger_state=None) -> CHARGERSTATES:
         pass

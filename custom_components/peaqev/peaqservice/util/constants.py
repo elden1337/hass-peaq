@@ -35,7 +35,7 @@ SQLSENSOR_BASENAME = "Monthly max peak"
 SQLSENSOR_AVERAGEOFTHREE = "Average of three"
 SQLSENSOR_AVERAGEOFTHREE_MIN = "Min of three"
 SQLSENSOR_HIGHLOAD = "High load"
-
+SMARTOUTLET = "SmartOutlet"
 
 """Chargertype helpers"""
 UPDATECURRENT = "updatecurrent"

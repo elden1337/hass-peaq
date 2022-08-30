@@ -18,7 +18,7 @@ class NordPoolUpdater:
 
         self._setup_nordpool()
 
-    def update_nordpool(self):
+    async def update_nordpool(self):
         ret = self._hass.states.get(self.nordpool_entity)
         if ret is not None:
             try:

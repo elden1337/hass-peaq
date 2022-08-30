@@ -17,7 +17,7 @@ from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
 from custom_components.peaqev.peaqservice.hub.nordpool import NordPoolUpdater
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
-from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
+from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER, SMARTOUTLET
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,6 +26,7 @@ class HomeAssistantHub(Hub):
     hub_id = 1337
     initialized_log_last_logged = 0
     not_ready_list_old_state = 0
+    latest_nordpool_update = 0
 
     def __init__(
         self,
@@ -69,7 +70,7 @@ class HomeAssistantHub(Hub):
             f"sensor.{self.domain}_{ex.nametoid(CHARGERCONTROLLER)}",
             ]
 
-        if self.chargertype.charger.domainname != "SmartOutlet":
+        if self.chargertype.charger.domainname != SMARTOUTLET:
             self.chargingtracker_entities.append(self.sensors.chargerobject.entity)
         if options.peaqev_lite is False:
             trackerEntities.append(self.configpower_entity)
@@ -128,12 +129,14 @@ class HomeAssistantHub(Hub):
             match entity:
                 case self.sensors.carpowersensor.entity:
                     self.sensors.carpowersensor.value = value
+                    await self.handle_outlet_updates()
                     self.sensors.chargerobject_switch.updatecurrent()
                 case self.sensors.chargerobject.entity:
                     self.sensors.chargerobject.value = value
                 case self.sensors.chargerobject_switch.entity:
                     self.sensors.chargerobject_switch.value = value
                     self.sensors.chargerobject_switch.updatecurrent()
+                    await self.handle_outlet_updates()
                 case self.sensors.current_peak.entity:
                     self.sensors.current_peak.value = value
                 case self.sensors.totalhourlyenergy.entity:
@@ -144,7 +147,7 @@ class HomeAssistantHub(Hub):
                         timestamp=datetime.now()
                     )
                 case self.nordpool.nordpool_entity:
-                    self.nordpool.update_nordpool()
+                    await self.nordpool.update_nordpool()
         else:
             match entity:
                 case self.configpower_entity:
@@ -161,11 +164,13 @@ class HomeAssistantHub(Hub):
                     )
                     update_session = True
                     self.sensors.chargerobject_switch.updatecurrent()
+                    await self.handle_outlet_updates()
                 case self.sensors.chargerobject.entity:
                     self.sensors.chargerobject.value = value
                 case self.sensors.chargerobject_switch.entity:
                     self.sensors.chargerobject_switch.value = value
                     self.sensors.chargerobject_switch.updatecurrent()
+                    await self.handle_outlet_updates()
                 case self.sensors.totalhourlyenergy.entity:
                     self.sensors.totalhourlyenergy.value = value
                     self.sensors.current_peak.value = self.sensors.locale.data.query_model.observed_peak
@@ -178,9 +183,13 @@ class HomeAssistantHub(Hub):
                 case self.sensors.powersensormovingaverage24.entity:
                     self.sensors.powersensormovingaverage24.value = value
                 case self.nordpool.nordpool_entity:
-                    self.nordpool.update_nordpool()
+                    await self.nordpool.update_nordpool()
                     update_session = True
 
+        if entity != self.nordpool.nordpool_entity and (not self.hours.is_initialized or time.time() - self.latest_nordpool_update > 60 ):
+            """tweak to provoke nordpool to update more often"""
+            self.latest_nordpool_update = time.time()
+            await self.nordpool.update_nordpool()
         if self.charger.session_is_active and update_session:
             self.charger.session.session_energy = self.sensors.carpowersensor.value
             self.charger.session.session_price = float(self.nordpool.state)
@@ -189,11 +198,27 @@ class HomeAssistantHub(Hub):
         if entity in self.chargingtracker_entities and self.is_initialized is True:
             await self.charger.charge()
 
+    latest_outlet_update = 0
+
+    async def handle_outlet_updates(self):
+        old_state = self.sensors.chargerobject.value
+        if self.chargertype.charger.domainname == SMARTOUTLET:
+            if time.time() - self.latest_outlet_update < 10:
+                return
+            self.latest_outlet_update = time.time()
+            if self.sensors.carpowersensor.value > 0:
+                self.sensors.chargerobject.value = "charging"
+            else:
+                self.sensors.chargerobject.value = "connected"
+            if old_state != self.sensors.chargerobject.value:
+                _LOGGER.debug(f"smartoutlet is now {self.sensors.chargerobject.value}")
+
     @callback
     async def state_changed(self, entity_id, old_state, new_state):
-        try:
-            if old_state is None or old_state.state != new_state.state:
-                await self._update_sensor(entity_id, new_state.state)
-        except Exception as e:
-            msg = f"Unable to handle data: {entity_id} ({e})"
-            _LOGGER.error(msg)
+        if entity_id is not None:
+            try:
+                if old_state is None or old_state != new_state:
+                    await self._update_sensor(entity_id, new_state.state)
+            except Exception as e:
+                msg = f"Unable to handle data: {entity_id} ({e}) {old_state}|{new_state}"
+                _LOGGER.error(msg)
