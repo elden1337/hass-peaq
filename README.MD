@@ -83,3 +83,8 @@ Dec| 2.0 | 4.0
 
 
 *While this integration will try to not break your monthly energy peak hour, there is off course no guarantee. Various factors beyond control of this logic do occur, so for those aiming at staying below their threshold, I do suggest you think about the non-hours, caution-hours etc in the setup. These hours should be set when you commonly utilize a lot of extra energy in your home, such as cooking, doing laundry etc.*
+
+-----
+
+A special thanks to my sponsors! Your support is greatly appreciated. 
+- [@mejje](https://github.com/mejje)
