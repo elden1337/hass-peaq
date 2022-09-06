@@ -104,8 +104,9 @@ class Easee(ChargerBase):
                 update_current=CallType("set_charger_dynamic_limit", servicecall_params)
             ),
             options=ServiceCallsOptions(
-                allowupdatecurrent=UPDATECURRENT,
-                update_current_on_termination=UPDATECURRENT_ON_TERMINATION
+                allowupdatecurrent=True,
+                update_current_on_termination=False,
+                switch_controls_charger=False
             )
         )
 

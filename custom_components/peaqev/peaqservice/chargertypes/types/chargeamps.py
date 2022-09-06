@@ -77,7 +77,8 @@ class ChargeAmps(ChargerBase):
             ),
             options=ServiceCallsOptions(
                 allowupdatecurrent=UPDATECURRENT,
-                update_current_on_termination=True
+                update_current_on_termination=True,
+                switch_controls_charger=False
             )
         )
 
