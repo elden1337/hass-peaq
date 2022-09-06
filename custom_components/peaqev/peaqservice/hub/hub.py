@@ -17,6 +17,7 @@ from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
 from custom_components.peaqev.peaqservice.hub.nordpool import NordPoolUpdater
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
+from custom_components.peaqev.peaqservice.hub.state_changes import StateChanges
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER, SMARTOUTLET
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,7 +27,6 @@ class HomeAssistantHub(Hub):
     hub_id = 1337
     initialized_log_last_logged = 0
     not_ready_list_old_state = 0
-    latest_nordpool_update = 0
 
     def __init__(
         self,
@@ -48,9 +48,16 @@ class HomeAssistantHub(Hub):
             self.chargertype.charger.servicecalls
         )
 
-        Hub.__init__(self, state_machine=hass, options=options, domain=domain, chargerobj=self.chargertype)
+        Hub.__init__(
+            self,
+            state_machine=hass,
+            options=options,
+            domain=domain,
+            chargerobj=self.chargertype
+        )
 
         self.servicecalls = ServiceCalls(self)
+        self.states = StateChanges(self)
 
         trackerEntities = [
             self.sensors.totalhourlyenergy.entity
@@ -129,112 +136,12 @@ class HomeAssistantHub(Hub):
             ret.append(self.hours.nordpool_entity)
         return ret
 
-    async def _update_sensor(self, entity, value):
-        if self.options.peaqev_lite is True:
-            await self._update_sensor_lite(entity, value)
-            update_session = False
-        else:
-            update_session = await self._update_sensor_regular(entity, value)
-
-        if entity != self.nordpool.nordpool_entity and (not self.hours.is_initialized or time.time() - self.latest_nordpool_update > 60 ):
-            """tweak to provoke nordpool to update more often"""
-            self.latest_nordpool_update = time.time()
-            await self.nordpool.update_nordpool()
-        if self.charger.session_active and update_session:
-            self.charger.session.session_energy = self.sensors.carpowersensor.value
-            self.charger.session.session_price = float(self.nordpool.state)
-        if self.scheduler.schedule_created is True:
-            self.scheduler.update()
-        if entity in self.chargingtracker_entities and self.is_initialized is True:
-            await self.charger.charge()
-
-    async def _update_sensor_lite(self, entity, value) -> None:
-        match entity:
-            case self.sensors.carpowersensor.entity:
-                self.sensors.carpowersensor.value = value
-                await self._handle_outlet_updates()
-                self.sensors.chargerobject_switch.updatecurrent()
-            case self.sensors.chargerobject.entity:
-                self.sensors.chargerobject.value = value
-            case self.sensors.chargerobject_switch.entity:
-                self.sensors.chargerobject_switch.value = value
-                self.sensors.chargerobject_switch.updatecurrent()
-                await self._handle_outlet_updates()
-            case self.sensors.current_peak.entity:
-                self.sensors.current_peak.value = value
-            case self.sensors.totalhourlyenergy.entity:
-                self.sensors.totalhourlyenergy.value = value
-                self.sensors.current_peak.value = self.sensors.locale.data.query_model.observed_peak
-                self.sensors.locale.data.query_model.try_update(
-                    new_val=float(value),
-                    timestamp=datetime.now()
-                )
-            case self.nordpool.nordpool_entity:
-                await self.nordpool.update_nordpool()
-
-    async def _update_sensor_regular(self, entity, value) -> bool:
-        update_session = False
-        match entity:
-            case self.configpower_entity:
-                self.sensors.power.update(
-                    carpowersensor_value=self.sensors.carpowersensor.value,
-                    config_sensor_value=value
-                )
-                update_session = True
-            case self.sensors.carpowersensor.entity:
-                self.sensors.carpowersensor.value = value
-                self.sensors.power.update(
-                    carpowersensor_value=self.sensors.carpowersensor.value,
-                    config_sensor_value=None
-                )
-                update_session = True
-                self.sensors.chargerobject_switch.updatecurrent()
-                await self._handle_outlet_updates()
-            case self.sensors.chargerobject.entity:
-                self.sensors.chargerobject.value = value
-            case self.sensors.chargerobject_switch.entity:
-                self.sensors.chargerobject_switch.value = value
-                self.sensors.chargerobject_switch.updatecurrent()
-                await self._handle_outlet_updates()
-            case self.sensors.totalhourlyenergy.entity:
-                self.sensors.totalhourlyenergy.value = value
-                self.sensors.current_peak.value = self.sensors.locale.data.query_model.observed_peak
-                self.sensors.locale.data.query_model.try_update(
-                    new_val=float(value),
-                    timestamp=datetime.now()
-                )
-            case self.sensors.powersensormovingaverage.entity:
-                self.sensors.powersensormovingaverage.value = value
-            case self.sensors.powersensormovingaverage24.entity:
-                self.sensors.powersensormovingaverage24.value = value
-            case self.nordpool.nordpool_entity:
-                await self.nordpool.update_nordpool()
-                update_session = True
-        return update_session
-
-
-
-    latest_outlet_update = 0
-
-    async def _handle_outlet_updates(self):
-        old_state = self.sensors.chargerobject.value
-        if self.chargertype.charger.domainname == SMARTOUTLET:
-            if time.time() - self.latest_outlet_update < 10:
-                return
-            self.latest_outlet_update = time.time()
-            if self.sensors.carpowersensor.value > 0:
-                self.sensors.chargerobject.value = "charging"
-            else:
-                self.sensors.chargerobject.value = "connected"
-            if old_state != self.sensors.chargerobject.value:
-                _LOGGER.debug(f"smartoutlet is now {self.sensors.chargerobject.value}")
-
     @callback
     async def state_changed(self, entity_id, old_state, new_state):
         if entity_id is not None:
             try:
                 if old_state is None or old_state != new_state:
-                    await self._update_sensor(entity_id, new_state.state)
+                    await self.states.update_sensor(entity_id, new_state.state)
             except Exception as e:
                 msg = f"Unable to handle data: {entity_id} ({e}) {old_state}|{new_state}"
                 _LOGGER.error(msg)
