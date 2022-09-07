@@ -48,7 +48,7 @@ class ChargerHelpers:
             self._charger._params._stopped,
             self._charger._params._disable_current_updates
         ]
-        return any(ret)
+        return not any(ret)
 
     async def _checkchargerparams(self, calls) -> bool:
         return len(calls[PARAMS][CHARGER]) > 0 and len(calls[PARAMS][CHARGERID]) > 0
