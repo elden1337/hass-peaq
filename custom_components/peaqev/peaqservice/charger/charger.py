@@ -18,6 +18,14 @@ from custom_components.peaqev.peaqservice.util.constants import (
 _LOGGER = logging.getLogger(__name__)
 CALL_WAIT_TIMER = 60
 
+from enum import Enum
+
+class ChargerStateEnum(Enum):
+    Stop = 0
+    Start = 1
+    Pause = 2
+    Resume = 3
+
 
 class Charger:
     def __init__(self, hub, hass, servicecalls):
@@ -50,7 +58,7 @@ class Charger:
     async def charge(self):
         """Main function to turn charging on or off"""
         if self._params._check_running_state:
-            await self._is_running(False)
+            await self._update_charger_state_internal(ChargerStateEnum.Pause)
         if self._hub.sensors.charger_enabled.value is True:
             if not self.session_active:
                 self.session.core.reset()
@@ -74,7 +82,7 @@ class Charger:
 
     async def _start_charger(self):
         if time.time() - self._params._latest_charger_call > CALL_WAIT_TIMER:
-            await self._is_running(True)
+            await self._update_charger_state_internal(ChargerStateEnum.Start)
             if self.session_active is False:
                 await self._call_charger(ON)
                 self.session_active = True
@@ -87,18 +95,18 @@ class Charger:
     async def _terminate_charger(self):
         if time.time() - self._params._latest_charger_call > CALL_WAIT_TIMER:
             self.session_active = False
-            await self._is_running(False)
+            await self._update_charger_state_internal(ChargerStateEnum.Stop)
             self.session_active = False
             await self._call_charger(OFF)
             self._hub.sensors.charger_done.value = True
 
     async def _pause_charger(self):
         if time.time() - self._params._latest_charger_call > CALL_WAIT_TIMER:
-            await self._is_running(False)
             if self._hub.sensors.charger_done.value is True or self._hub.chargecontroller.status is CHARGERSTATES.Idle:
                 await self._terminate_charger()
             else:
                 await self._call_charger(PAUSE)
+                await self._update_charger_state_internal(ChargerStateEnum.Pause)
 
     async def _call_charger(self, command: str):
         calls = self._service_calls.get_call(command)
@@ -139,18 +147,22 @@ class Charger:
                     final_service_params
                 )
 
-    async def _is_running(self, turn_on: bool):
-        if turn_on:
+    async def _update_charger_state_internal(self, state: ChargerStateEnum):
+        if state in [ChargerStateEnum.Start, ChargerStateEnum.Resume]:
             self._params._running = True
             self._params._stopped = False
             self._params._disable_current_updates = False
-            _LOGGER.debug("charger-class has been started")
-        elif not turn_on:
+            _LOGGER.debug("Charger-class has been started")
+        elif state in [ChargerStateEnum.Stop, ChargerStateEnum.Pause]:
             self._params._disable_current_updates = True
             charger = self._hub.sensors.chargerobject.value.lower()
+
             chargingstates = self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Charging]
             if charger not in chargingstates or len(charger) < 1:
                 self._params._running = False
                 self._params._stopped = True
                 self._params._check_running_state = False
-                _LOGGER.debug("charger-class has been stopped")
+                _LOGGER.debug("Charger-class has been stopped")
+            else:
+                self._params._check_running_state = True
+                _LOGGER.debug(f"Tried to stop charger, but chargerobj is: {charger}. Retrying stop-attempt.")
