@@ -11,7 +11,6 @@ from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 _LOGGER = logging.getLogger(__name__)
 
-
 class PeaqSessionSensor(SensorBase, RestoreEntity):
     device_class = DEVICE_CLASS_ENERGY
     unit_of_measurement = ENERGY_KILO_WATT_HOUR
