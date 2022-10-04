@@ -10,10 +10,10 @@
 <img src="https://raw.githubusercontent.com/elden1337/hass-peaq/main/assets/icon.png" width="125">
 
 ### :cherries: Sponsorship and prioritized development :cherries:
-Peaqev is developed without static funding. If you lack your locale/chargertype or have wishes for other specific features that you would like to see prioritized, please consider becoming a [Github-sponsor](https://github.com/sponsors/elden1337) to bump your desired changes in my backlog.
+Peaqev is developed without static funding. If you lack your locale/charger type or have wishes for other specific features that you would like to see prioritized, please consider becoming a [Github sponsor](https://github.com/sponsors/elden1337) to bump your desired changes in my backlog.
 - In order to flag a ticket, either create a new one or comment on an existing one after you've started your sponsorship. I will then flag the ticket with `sponsored-change` and try to prioritize this going forward
-- Becoming a sponsor is not a guarantee that a wish will be created, or a guarantee for a specified resolution-time. Peaqev is being developed in my sparetime and every feature has to be considered by me before taking it into development
-- I may need to reach out for testing, especially if your wish includes implementing new chargertypes
+- Becoming a sponsor is not a guarantee that a wish will be created, or a guarantee for a specified resolution time. Peaqev is being developed in my spare time and every feature has to be considered by me before taking it into development
+- I may need to reach out for testing, especially if your wish includes implementing new charger types
 - Critical bugs discovered of course always triages higher than features
 
 :love_letter:
@@ -22,9 +22,9 @@ Peaqev is developed without static funding. If you lack your locale/chargertype 
 
 Welcome to Peaqev!
 
-This application started as an attempt to lower the household's peak energy charges, targeted at charging an ev below a set threshold. 
-Since then, we have evolved, and now offer a broader feature-set including price aware smart charge (a very smart calculation if you ask us), looking ahead at tomorrow's prices automatically, installation without the need for a power meter etc.
-Peaqev covers 23 different energy companies in Sweden, Norway and Belgium and two types of ev-chargers _(2021-08-26)_
+This application started as an attempt to lower the household's peak energy charges, targeted at charging an electronic vehicle (EV) below a set threshold. 
+Since then, we have evolved, and now offer a broader feature set including price aware smart charge (a very smart calculation if you ask us), looking ahead at tomorrow's prices automatically, installation without the need for a power meter etc.
+Peaqev covers 23 different energy companies in Sweden, Norway and Belgium and two types of ev chargers _(2021-08-26)_
 
 The integration does not communicate with any properitary API's. However, the chargers selected will use the integrations set for them, and may include cloud polling of data.
 
@@ -46,28 +46,28 @@ Otherwise you may:
 
 ### Config setup:
 
-Peaqev has two types of installations: Regular and Lite. Regular is much more precise, but requires an installed powersensor while Lite does not.
+Peaqev has two types of installations: Regular and Lite. Regular is much more precise, but requires an installed power sensor while Lite does not.
 
 [![](https://mermaid.ink/img/pako:eNpVkNtqwzAMhl_F-CqD5gVyMRg5NIUMRrO7eRciVhuDYwdFZpSm7z7nUNh0Jen_pB_pLjuvUWbySjD2ojkrJ2K8fbUMxN8iTV9FnpzcxGAtsPFO8G3Elw3LF31uDOMsiiTvga5IApwWje_A_sfOeA0WaBZl0qKbPO1quZoUW1GsRZV8kOkwhR-g55JqXVKBnaLZMal9oGmXjutQ_Zf7pBCxOnn3jvuFU7zJ8iAHpAGMjkffl56S3OOASmYx1XiBYFlJ5R4RDaMGxlIb9iSzy2J-kBDYtzfXyYyjyxMqDMQfDjv1-AUWBWqX)](https://mermaid-js.github.io/mermaid-live-editor/edit#pako:eNpVkNtqwzAMhl_F-CqD5gVyMRg5NIUMRrO7eRciVhuDYwdFZpSm7z7nUNh0Jen_pB_pLjuvUWbySjD2ojkrJ2K8fbUMxN8iTV9FnpzcxGAtsPFO8G3Elw3LF31uDOMsiiTvga5IApwWje_A_sfOeA0WaBZl0qKbPO1quZoUW1GsRZV8kOkwhR-g55JqXVKBnaLZMal9oGmXjutQ_Zf7pBCxOnn3jvuFU7zJ8iAHpAGMjkffl56S3OOASmYx1XiBYFlJ5R4RDaMGxlIb9iSzy2J-kBDYtzfXyYyjyxMqDMQfDjv1-AUWBWqX)
 
 ##### Installation type:
-- `Installation type` - Pick regular for the full Peaqev-experience. This will charge according to your home's total energy. Pick Lite if you do not have such a sensor installed. Peaqev will then charge the allowed hourly amount set further down in "Months"
+- `Installation type` - Pick regular for the full Peaqev experience. This will charge according to your home's total energy. Pick Lite if you do not have such a sensor installed. Peaqev will then charge the allowed hourly amount set further down in "Months"
 
 ##### Sensor:
-- `Power sensor` - The already existing power sensor in your setup. This is required to get the reading to work. Examples of devices sending such data is Tibber Pulse/Watty, Shelly DIN-mounted devices or similar.
+- `Power sensor` - The already existing power sensor in your setup. This is required to get the reading to work. Examples of devices sending such data is Tibber Pulse/Watty, Shelly DIN mounted devices or similar.
 - `Power sensor includes car` - Check this option if the above sensor includes your car's power draw. The calutions will be altered accordingly
 
 ##### Charger and Locale:
 - `City, or Grid owner company` - Chose your city from the list. The characteristics differ in how peak hours are stored and measured. If you don't live in a supported location but just want to test the integration, or lower your peaks for other reasons, you may check *"Other, just want to test"*
-- `Charger type` - Pick the installed ev-charger you have. Currently Chargeamps, Easee and Outdoor smart outlets are supported. Check links for required custom components per charger-type: [Chargeamps](https://github.com/kirei/hass-chargeamps), [Easee](https://github.com/fondberg/easee_hass/)
-- `Charger id` - Your local identifier to tell Peaqev which charger unit we mean to manipulate. If your chargertype does not provide this, leave blank
+- `Charger type` - Pick the installed ev charger you have. Currently Chargeamps, Easee and Outdoor smart outlets are supported. Check links for required custom components per charger type: [Chargeamps](https://github.com/kirei/hass-chargeamps), [Easee](https://github.com/fondberg/easee_hass/)
+- `Charger id` - Your local identifier to tell Peaqev which charger unit we mean to manipulate. If your charger type does not provide this, leave blank
 - *If you have selected Smart outlet as charger type, you will need to provide the switch to turn on/off, and the sensor to read power from the outlet instead of charger id.*
 
 ##### Price-aware:
-- `Price aware charging` - Check this to calculate the cheapest hours from Nordpool (requires [Nordpool](https://github.com/custom-components/nordpool)). Above Non- and Caution-hours will be ignored.
-- `Absolute top price` - The limit (if any) where your charger should be stopped, regardless of the hour-algorithm.
-- `Min price` - The lower limit (if any) where charging will always be permitted (must be lower than top-price if set).
-- `Caution-hour type` - Choose to what extent you would like Peaqev to hold back during caution-hours. *Suave > Aggressive* 
+- `Price-aware charging` - Check this to calculate the cheapest hours from Nordpool (requires [Nordpool](https://github.com/custom-components/nordpool)). Above Non- and Caution hours will be ignored.
+- `Absolute top price` - The limit (if any) where your charger should be stopped, regardless of the hour algorithm.
+- `Min price` - The lower limit (if any) where charging will always be permitted (must be lower than top price if set).
+- `Caution hour type` - Choose to what extent you would like Peaqev to hold back during caution hours. *Suave > Aggressive* 
 
 ##### Hours:
 - `Non hours` - Click to select the hours (if any) where you do not wish to charge.  
