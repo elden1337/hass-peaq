@@ -7,7 +7,7 @@
 
 # Peaqev ev-charging
 
-![Peaq logo](https://raw.githubusercontent.com/elden1337/hass-peaq/main/assets/icon.png)
+<img src="https://raw.githubusercontent.com/elden1337/hass-peaq/main/assets/icon.png" width="125">
 
 ### :cherries: Sponsorship and prioritized development :cherries:
 Peaqev is developed without static funding. If you lack your locale/chargertype or have wishes for other specific features that you would like to see prioritized, please consider becoming a [Github-sponsor](https://github.com/sponsors/elden1337) to bump your desired changes in my backlog.
