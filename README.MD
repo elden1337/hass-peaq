@@ -9,6 +9,17 @@
 
 ![Peaq logo](https://raw.githubusercontent.com/elden1337/hass-peaq/main/assets/icon.png)
 
+### :cherries: Sponsorship and prioritized development :cherries:
+Peaqev is developed without static funding. If you lack your locale/chargertype or have wishes for other specific features that you would like to see prioritized, please consider becoming a [Github-sponsor](https://github.com/sponsors/elden1337) to bump your desired changes in my backlog.
+- In order to flag a ticket, either create a new one or comment on an existing one after you've started your sponsorship. I will then flag the ticket with `sponsored-change` and try to prioritize this going forward
+- Becoming a sponsor is not a guarantee that a wish will be created, or a guarantee for a specified resolution-time. Peaqev is being developed in my sparetime and every feature has to be considered by me before taking it into development
+- I may need to reach out for testing, especially if your wish includes implementing new chargertypes
+- Critical bugs discovered of course always triages higher than features
+
+:love_letter:
+
+---
+
 Welcome to Peaqev!
 
 This application started as an attempt to lower the household's peak energy charges, targeted at charging an ev below a set threshold. 
