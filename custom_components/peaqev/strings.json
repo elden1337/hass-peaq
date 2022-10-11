@@ -6,8 +6,7 @@
           "priceaware": "[%key:common::config_flow::data::priceaware%]",
           "absolute_top_price": "[%key:common::config_flow::data::absolute_top_price%]",
           "min_priceaware_threshold_price": "[%key:common::config_flow::data::min_priceaware_threshold_price%]",
-          "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]",
-          "allow_top_up": "[%key:common::config_flow::data::allow_top_up%]"
+          "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]"
         },
         "description": "Select price-aware if you wish to adhere to Nordpool-prices (requires integration)"
       },
@@ -79,8 +78,7 @@
           "priceaware": "[%key:common::config_flow::data::priceaware%]",
           "absolute_top_price": "[%key:common::config_flow::data::absolute_top_price%]",
           "min_priceaware_threshold_price": "[%key:common::config_flow::data::min_priceaware_threshold_price%]",
-          "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]",
-          "allow_top_up": "[%key:common::config_flow::data::allow_top_up%]"
+          "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]"
         }
       },
       "hours": {

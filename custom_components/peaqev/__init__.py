@@ -41,7 +41,6 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     options.cautionhours = conf.options["cautionhours"] if "cautionhours" in conf.options.keys() else conf.data["cautionhours"] if "cautionhours" in conf.data.keys() else []
     options.nonhours = conf.options["nonhours"] if "nonhours" in conf.options.keys() else conf.data["nonhours"] if "nonhours" in conf.data.keys() else []
     options.price.price_aware = await _get_existing_param(conf, "priceaware", False)
-    options.price.allow_top_up = await _get_existing_param(conf, "allow_top_up", False)
     options.price.min_price = await _get_existing_param(conf, "min_priceaware_threshold_price", 0)
     options.price.top_price = await _get_existing_param(conf, "absolute_top_price", 0)
     options.price.cautionhour_type = conf.options["cautionhour_type"] if "cautionhour_type" in conf.options.keys() else conf.data["cautionhour_type"]

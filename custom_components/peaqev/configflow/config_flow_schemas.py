@@ -60,7 +60,6 @@ HOURS_SCHEMA = vol.Schema(
 PRICEAWARE_SCHEMA = vol.Schema(
                 {
                     vol.Optional("priceaware", default=False): cv.boolean,
-                    vol.Optional("allow_top_up", default=False): cv.boolean,
                     vol.Optional("absolute_top_price"): cv.positive_float,
                     vol.Optional("min_priceaware_threshold_price"): cv.positive_float,
                     vol.Optional(
