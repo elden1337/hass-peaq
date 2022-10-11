@@ -23,7 +23,7 @@ Welcome to Peaqev!
 
 This application started as an attempt to lower the household's peak energy charges, targeted at charging an electronic vehicle (EV) below a set threshold. 
 Since then, we have evolved, and now offer a broader feature set including price aware smart charge (a very smart calculation if you ask us), looking ahead at tomorrow's prices automatically, installation without the need for a power meter etc.
-Peaqev covers 23 different energy companies in Sweden, Norway and Belgium and two types of ev chargers _(2021-08-26)_
+Peaqev covers 24 different energy companies in Sweden, Norway and Belgium and two types of ev chargers _(2021-10-11)_
 
 The integration does not communicate with any properitary API's. However, the chargers selected will use the integrations set for them, and may include cloud polling of data.
 
