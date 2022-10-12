@@ -23,6 +23,7 @@ class PeaqAmpSensor(SensorBase):
         self._state = self._hub.threshold.allowedcurrent
         self._attr_icon = "mdi:current-ac"
         self._charger_current = self._hub.sensors.chargerobject_switch.current
+        self._charger_phases = self._hub.threshold.phases
 
     @property
     def state(self) -> int:
@@ -31,12 +32,14 @@ class PeaqAmpSensor(SensorBase):
     def update(self) -> None:
         self._state = self._hub.threshold.allowedcurrent
         self._charger_current = self._hub.sensors.chargerobject_switch.current
+        self._charger_phases = self._hub.threshold.phases
 
     @property
     def extra_state_attributes(self) -> dict:
         curr = self._charger_current if self._charger_current > 0 else "unreachable"
         return {
-            "charger_reported_current": curr
+            "charger_reported_current": curr,
+            "peaqev phase-setting": self._charger_phases
         }
 
 
