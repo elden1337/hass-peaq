@@ -1,5 +1,4 @@
 import logging
-import time
 
 from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
@@ -68,32 +67,34 @@ class Easee(ChargerBase):
         self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
         self.chargerstates[CHARGERSTATES.Done] = ["completed"]
 
-        entitiesobj = helper.getentities(
-            self._hass,
-            helper.EntitiesPostModel(
-                self.domainname,
-                self.entities.entityschema,
-                self.entities.imported_entityendings
-            )
-        )
-        self.entities.imported_entities = entitiesobj.imported_entities
-        self.entities.entityschema = entitiesobj.entityschema
-
+        self.get_entities()
         self.set_sensors()
 
-        servicecall_params = {
-            CHARGER: "charger_id",
+        _on = CallType("action_command",
+                       {
+                           "device_id": self._chargerid,
+                           "action_command": "start"
+                       })
+        _off = CallType("action_command",
+                        {
+                            "device_id": self._chargerid,
+                            "action_command": "stop"
+                        })
+        _resume = CallType("set_charger_dynamic_limit",
+                           {
+                               "current": "7",
+                               "device_id": self._chargerid
+                           })
+        _pause = CallType("set_charger_dynamic_limit",
+                          {
+                                "current": "0",
+                                "device_id": self._chargerid
+                           })
+        _update_current = CallType("set_charger_dynamic_limit", {
+            CHARGER: "device_id",
             CHARGERID: self._chargerid,
             CURRENT: "current"
-        }
-
-        _on_off_params = {"charger_id": self._chargerid}
-
-        _on = CallType("start", _on_off_params)
-        _off = CallType("stop", _on_off_params)
-        _resume = CallType("set_charger_dynamic_limit", {"current": "7", "charger_id": self._chargerid})
-        _pause = CallType("set_charger_dynamic_limit", {"current": "0", "charger_id": self._chargerid})
-
+        })
         self._set_servicecalls(
             domain=DOMAINNAME,
             model=ServiceCallsDTO(
@@ -101,8 +102,8 @@ class Easee(ChargerBase):
                 off=_off if self._auth_required is True else _pause,
                 pause=_pause,
                 resume=_resume,
-                update_current=CallType("set_charger_dynamic_limit", servicecall_params)
-            ),
+                update_current=_update_current)
+        ,
             options=ServiceCallsOptions(
                 allowupdatecurrent=True,
                 update_current_on_termination=False,
@@ -110,31 +111,20 @@ class Easee(ChargerBase):
             )
         )
 
-    def getentities(self, domain: str = None, endings: list = None):
-        if len(self.entities.entityschema) < 1:
-            domain = self.domainname if domain is None else domain
-            endings = self.entities.imported_entityendings if endings is None else endings
+    def validate_charger(self):
+        return True
 
-            entities = helper.get_entities_from_hass(self._hass, domain)
-
-            if len(entities) < 1:
-                _LOGGER.error(f"no entities found for {domain} at {time.time()}")
-            else:
-                _endings = endings
-                candidate = ""
-
-                for e in entities:
-                    splitted = e.split(".")
-                    for ending in _endings:
-                        if splitted[1].endswith(ending):
-                            candidate = splitted[1].replace(ending, '')
-                            break
-                    if len(candidate) > 1:
-                        break
-
-                self.entities.entityschema = candidate
-                _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
-                self.entities.imported_entities = entities
+    def get_entities(self):
+        _ret = helper.getentities(
+            self._hass,
+            helper.EntitiesPostModel(
+                domain=self.domainname,
+                entityschema=self.entities.entityschema,
+                endings=self.entities.imported_entityendings
+            )
+        )
+        self.entities.imported_entities = _ret.imported_entities
+        self.entities.entityschema = _ret.entityschema
 
     def set_sensors(self):
         amp_sensor = f"sensor.{self.entities.entityschema}_dynamic_charger_limit"

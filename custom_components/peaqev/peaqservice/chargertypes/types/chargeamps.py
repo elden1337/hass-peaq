@@ -1,8 +1,6 @@
 import logging
-import time
 
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import entity_sources
 from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargerstates import CHARGERSTATES
 from peaqevcore.models.chargertype.calltype import CallType
@@ -44,17 +42,7 @@ class ChargeAmps(ChargerBase):
         self.chargerstates[CHARGERSTATES.Connected] = ["connected"]
         self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
 
-        entitiesobj = helper.getentities(
-            self._hass,
-            helper.EntitiesPostModel(
-                self.domainname,
-                self.entities.entityschema,
-                self.entities.imported_entityendings
-            )
-        )
-        self.entities.imported_entities = entitiesobj.imported_entities
-        self.entities.entityschema = entitiesobj.entityschema
-
+        self.get_entities()
         self.set_sensors()
 
         servicecall_params = {
@@ -82,41 +70,20 @@ class ChargeAmps(ChargerBase):
             )
         )
 
-    def getentities(self, domain: str = None, endings: list = None):
-        if len(self.entities.entityschema) < 1:
-            domain = self.domainname if domain is None else domain
-            endings = self.entities.imported_entityendings if endings is None else endings
+    def validate_charger(self):
+        return True
 
-            entities = helper.get_entities_from_hass(self._hass, domain)
-
-            if len(entities) < 1:
-                _LOGGER.error(f"no entities found for {domain} at {time.time()}")
-            else:
-                _endings = endings
-                candidate = ""
-
-                for e in entities:
-                    splitted = e.split(".")
-                    for ending in _endings:
-                        if splitted[1].endswith(ending):
-                            candidate = splitted[1].replace(ending, '')
-                            break
-                    if len(candidate) > 1:
-                        break
-
-                self.entities.entityschema = candidate
-                _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
-                self.entities.imported_entities = entities
-
-    def _get_entities_from_hass(self, domain_name) -> list:
-        return [
-            entity_id
-            for entity_id, info in entity_sources(self._hass).items()
-            if info["domain"] == domain_name
-                or info["domain"] == domain_name.capitalize()
-                or info["domain"] == domain_name.upper()
-                or info["domain"] == domain_name.lower()
-        ]
+    def get_entities(self):
+        _ret = helper.getentities(
+            self._hass,
+            helper.EntitiesPostModel(
+                domain=self.domainname,
+                entityschema=self.entities.entityschema,
+                endings=self.entities.imported_entityendings
+            )
+        )
+        self.entities.imported_entities = _ret.imported_entities
+        self.entities.entityschema = _ret.entityschema
 
     def set_sensors(self):
         self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"

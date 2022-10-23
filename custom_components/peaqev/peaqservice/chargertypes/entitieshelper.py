@@ -28,7 +28,6 @@ def getentities(hass,
         if len(entities) < 1:
             _LOGGER.error(f"no entities found for {model.domain} at {time.time()}")
         else:
-            #_endings = model.endings
             candidate = ""
 
             for e in entities:

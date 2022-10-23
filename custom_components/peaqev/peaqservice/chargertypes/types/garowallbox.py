@@ -1,5 +1,4 @@
 import logging
-import time
 
 from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
@@ -58,7 +57,8 @@ class GaroWallbox(ChargerBase):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, auth_required: bool = False):
         self._hass = hass
         self._chargerid = huboptions.charger.chargerid
-        self.getentities(DOMAINNAME, ENTITYENDINGS)
+        self.get_entities()
+
         self.chargerstates[CHARGERSTATES.Idle] = ['NOT_CONNECTED']
         self.chargerstates[CHARGERSTATES.Connected] = [
             'CONNECTED',
@@ -99,28 +99,17 @@ class GaroWallbox(ChargerBase):
             )
         )
 
-    def getentities(self, domain: str = None, endings: list = None):
-        if len(self.entities.entityschema) < 1:
-            domain = self.domainname if domain is None else domain
-            endings = self.entities.imported_entityendings if endings is None else endings
+    def validate_charger(self):
+        return True
 
-            entities = helper.get_entities_from_hass(self._hass, domain)
-
-            if len(entities) < 1:
-                _LOGGER.error(f"no entities found for {domain} at {time.time()}")
-            else:
-                _endings = endings
-                candidate = ""
-
-                for e in entities:
-                    splitted = e.split(".")
-                    for ending in _endings:
-                        if splitted[1].endswith(ending):
-                            candidate = splitted[1].replace(ending, '')
-                            break
-                    if len(candidate) > 1:
-                        break
-
-                self.entities.entityschema = candidate
-                _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
-                self.entities.imported_entities = entities
+    def get_entities(self):
+        _ret = helper.getentities(
+            self._hass,
+            helper.EntitiesPostModel(
+                domain=self.domainname,
+                entityschema=self.entities.entityschema,
+                endings=self.entities.imported_entityendings
+            )
+        )
+        self.entities.imported_entities = _ret.imported_entities
+        self.entities.entityschema = _ret.entityschema
