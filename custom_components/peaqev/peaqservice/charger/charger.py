@@ -64,8 +64,11 @@ class Charger:
                 self.session.core.reset()
                 self.session_active = True
             if self._hub.chargecontroller.status is CHARGERSTATES.Start.name:
-                if self._chargertype_charger_is_on is False and self._params.running is False:
-                    await self._start_charger()
+                if self._params.running is False:
+                    if self._chargertype_charger_is_on is False:
+                        await self._start_charger()
+                    elif self._chargertype_charger_is_on is True:
+                        await self._overtake_charger()
             elif self._hub.chargecontroller.status in [CHARGERSTATES.Stop.name, CHARGERSTATES.Idle.name]:
                 if (self._chargertype_charger_is_on or self._hub.sensors.carpowersensor.value > 0) is True and self._params.stopped is False:
                     await self._pause_charger()
@@ -81,6 +84,13 @@ class Charger:
                     _LOGGER.info("Peaqev detected running charger outside of peaqev-session. Stopping charger...")
                     await self._terminate_charger(aux=True)
             return
+
+    async def _overtake_charger(self):
+        await self._update_charger_state_internal(ChargerStateEnum.Start)
+        self.session_active = True
+        self._hub.chargecontroller.update_latestchargerstart()
+        if self._hub.chargertype.charger.servicecalls.options.allowupdatecurrent is True and self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data) is False:
+            self._hass.async_create_task(self._updatemaxcurrent())
 
     async def _start_charger(self):
         if time.time() - self._params.latest_charger_call > CALL_WAIT_TIMER:
