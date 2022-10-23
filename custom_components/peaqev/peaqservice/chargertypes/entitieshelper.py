@@ -19,9 +19,9 @@ class EntitiesModel:
     imported_entities: list
 
 
-def getentities(hass,
-                model: EntitiesPostModel,
-                ) -> EntitiesModel:
+def get_entities(hass,
+                 model: EntitiesPostModel,
+                 ) -> EntitiesModel:
     if len(model.entityschema) < 1:
         entities = get_entities_from_hass(hass, model.domain)
 

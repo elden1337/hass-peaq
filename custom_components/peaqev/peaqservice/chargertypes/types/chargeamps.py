@@ -74,7 +74,7 @@ class ChargeAmps(ChargerBase):
         return True
 
     def get_entities(self):
-        _ret = helper.getentities(
+        _ret = helper.get_entities(
             self._hass,
             helper.EntitiesPostModel(
                 domain=self.domainname,
