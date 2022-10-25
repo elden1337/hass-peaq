@@ -69,50 +69,57 @@ class Easee(ChargerBase):
 
         self.get_entities()
         self.set_sensors()
+        self._device_id = helper.get_device_id_from_hass(self._hass, self.entities.chargerentity)
 
-        _on = CallType("action_command",
-                       {
-                           "device_id": self._chargerid,
-                           "action_command": "start"
-                       })
-        _off = CallType("action_command",
-                        {
-                            "device_id": self._chargerid,
-                            "action_command": "stop"
-                        })
-        _resume = CallType("set_charger_dynamic_limit",
+        if self.validate_charger():
+            _on = CallType("action_command",
                            {
-                               "current": "7",
-                               "device_id": self._chargerid
+                               "device_id": self._chargerid,
+                               "action_command": "start"
                            })
-        _pause = CallType("set_charger_dynamic_limit",
-                          {
-                                "current": "0",
-                                "device_id": self._chargerid
-                           })
-        _update_current = CallType("set_charger_dynamic_limit", {
-            CHARGER: "device_id",
-            CHARGERID: self._chargerid,
-            CURRENT: "current"
-        })
-        self._set_servicecalls(
-            domain=DOMAINNAME,
-            model=ServiceCallsDTO(
-                on=_on if self._auth_required is True else _resume,
-                off=_off if self._auth_required is True else _pause,
-                pause=_pause,
-                resume=_resume,
-                update_current=_update_current)
-        ,
-            options=ServiceCallsOptions(
-                allowupdatecurrent=True,
-                update_current_on_termination=False,
-                switch_controls_charger=False
+            _off = CallType("action_command",
+                            {
+                                "device_id": self._chargerid,
+                                "action_command": "stop"
+                            })
+            _resume = CallType("set_charger_dynamic_limit",
+                               {
+                                   "current": "7",
+                                   "device_id": self._chargerid
+                               })
+            _pause = CallType("set_charger_dynamic_limit",
+                              {
+                                    "current": "0",
+                                    "device_id": self._chargerid
+                               })
+            _update_current = CallType("set_charger_dynamic_limit", {
+                CHARGER: "device_id",
+                CHARGERID: self._chargerid,
+                CURRENT: "current"
+            })
+            self._set_servicecalls(
+                domain=DOMAINNAME,
+                model=ServiceCallsDTO(
+                    on=_on if self._auth_required is True else _resume,
+                    off=_off if self._auth_required is True else _pause,
+                    pause=_pause,
+                    resume=_resume,
+                    update_current=_update_current)
+            ,
+                options=ServiceCallsOptions(
+                    allowupdatecurrent=True,
+                    update_current_on_termination=False,
+                    switch_controls_charger=False
+                )
             )
-        )
 
     def validate_charger(self):
-        return True
+        try:
+            assert(self._device_id is not None)
+            return True
+        except AssertionError as e:
+            _LOGGER.exception(f"Can't init Easee due to lack of necessary device-id. Please report to Peaqev-developers. {e}")
+            return False
 
     def get_entities(self):
         _ret = helper.get_entities(

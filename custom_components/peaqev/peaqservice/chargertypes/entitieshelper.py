@@ -2,6 +2,7 @@ import logging
 import time
 from dataclasses import dataclass
 
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import entity_sources
 
 _LOGGER = logging.getLogger(__name__)
@@ -51,3 +52,15 @@ def get_entities_from_hass(hass, domain_name) -> list:
            or info["domain"] == domain_name.upper()
            or info["domain"] == domain_name.lower()
     ]
+
+def get_device_id_from_hass(hass, sensor):
+    try:
+        entity_reg = er.async_get(hass)
+        entry = entity_reg.async_get(sensor)
+        _LOGGER.debug(f"this is it for {sensor}: {entry.device_id}")
+        return str(entry.device_id)
+    except Exception as e:
+        _LOGGER.debug(f"Could not get device-id for {sensor}: {e}")
+        return None
+
+
