@@ -74,27 +74,27 @@ class Easee(ChargerBase):
         if self.validate_charger():
             _on = CallType("action_command",
                            {
-                               "device_id": self._chargerid,
+                               "device_id": self._device_id,
                                "action_command": "start"
                            })
             _off = CallType("action_command",
                             {
-                                "device_id": self._chargerid,
+                                "device_id": self._device_id,
                                 "action_command": "stop"
                             })
             _resume = CallType("set_charger_dynamic_limit",
                                {
                                    "current": "7",
-                                   "device_id": self._chargerid
+                                   "device_id": self._device_id
                                })
             _pause = CallType("set_charger_dynamic_limit",
                               {
                                     "current": "0",
-                                    "device_id": self._chargerid
+                                    "device_id": self._device_id
                                })
             _update_current = CallType("set_charger_dynamic_limit", {
                 CHARGER: "device_id",
-                CHARGERID: self._chargerid,
+                CHARGERID: self._device_id,
                 CURRENT: "current"
             })
             self._set_servicecalls(
