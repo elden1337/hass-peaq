@@ -51,4 +51,7 @@ class ChargerHelpers:
         return not any(ret)
 
     async def _checkchargerparams(self, calls) -> bool:
-        return len(calls[PARAMS][CHARGER]) > 0 and len(calls[PARAMS][CHARGERID]) > 0
+        return all([
+            len(calls[PARAMS][CHARGER]) > 0,
+            len(calls[PARAMS][CHARGERID]) > 0
+        ])

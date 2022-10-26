@@ -29,19 +29,17 @@ AURA = "Aura"
 
 class ChargeAmps(ChargerBase):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions):
+        self.domainname = DOMAINNAME
+        self.entities.imported_entityendings = ENTITYENDINGS
+        self.native_chargerstates = NATIVE_CHARGERSTATES
+
         self._hass = hass
         self._chargeramps_type = ""
         self._chargerid = huboptions.charger.chargerid
         self._chargeamps_connector = 1
-
-        self.domainname = DOMAINNAME
-        self.entities.imported_entityendings = ENTITYENDINGS
         self.options.powerswitch_controls_charging = True
-        self.native_chargerstates = NATIVE_CHARGERSTATES
-        self.chargerstates[CHARGERSTATES.Idle] = ["available"]
-        self.chargerstates[CHARGERSTATES.Connected] = ["connected"]
-        self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
 
+        self.chargerstates = ChargeAmps._get_charger_states()
         self.get_entities()
         self.set_sensors()
 
@@ -69,6 +67,15 @@ class ChargeAmps(ChargerBase):
                 switch_controls_charger=False
             )
         )
+
+    @staticmethod
+    def _get_charger_states() -> dict:
+        chargerstates = {
+            CHARGERSTATES.Idle:      ["available"],
+            CHARGERSTATES.Connected: ["connected"],
+            CHARGERSTATES.Charging:  ["charging"]
+        }
+        return chargerstates
 
     def validate_charger(self):
         return True
