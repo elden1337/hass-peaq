@@ -62,76 +62,46 @@ class Easee(ChargerBase):
         self.domainname = DOMAINNAME
         self.entities.imported_entityendings = ENTITYENDINGS
         self.native_chargerstates = NATIVE_CHARGERSTATES
-        self.chargerstates = Easee._get_charger_states()
+        self.chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
+        self.chargerstates[CHARGERSTATES.Connected] = ["awaiting_start", "ready_to_charge"]
+        self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
+        self.chargerstates[CHARGERSTATES.Done] = ["completed"]
 
         self.get_entities()
-        self._device_id = helper.get_device_id_from_hass(self._hass, self.entities.chargerentity)
+        self.set_sensors()
 
-        self.validate_charger()
+        servicecall_params = {
+            CHARGER: "charger_id",
+            CHARGERID: self._chargerid,
+            CURRENT: "current"
+        }
 
-        _call_types = self._get_call_types()
+        _on = CallType("action_command", {
+            "charger_id": self._chargerid,
+            "action_command": "start"
+        })
+        _off = CallType("action_command", {
+            "charger_id": self._chargerid,
+            "action_command": "stop"
+        })
+        _resume = CallType("set_charger_dynamic_limit", {"current": "7", "charger_id": self._chargerid})
+        _pause = CallType("set_charger_dynamic_limit", {"current": "0", "charger_id": self._chargerid})
+
         self._set_servicecalls(
             domain=DOMAINNAME,
             model=ServiceCallsDTO(
-                on=_call_types["on"] if self._auth_required is True else _call_types["resume"],
-                off=_call_types["off"] if self._auth_required is True else _call_types["pause"],
-                pause=_call_types["pause"],
-                resume=_call_types["resume"],
-                update_current=_call_types["update_current"])
-        ,
+                on=_on if self._auth_required is True else _resume,
+                off=_off if self._auth_required is True else _pause,
+                pause=_pause,
+                resume=_resume,
+                update_current=CallType("set_charger_dynamic_limit", servicecall_params)
+            ),
             options=ServiceCallsOptions(
                 allowupdatecurrent=True,
                 update_current_on_termination=False,
                 switch_controls_charger=False
             )
         )
-
-    @staticmethod
-    def _get_charger_states() -> dict:
-        chargerstates = {
-            CHARGERSTATES.Idle:      ["disconnected"],
-            CHARGERSTATES.Connected: ["awaiting_start", "ready_to_charge"],
-            CHARGERSTATES.Charging:  ["charging"],
-            CHARGERSTATES.Done: ["completed"]
-        }
-        return chargerstates
-
-    def _get_call_types(self) -> dict[str, CallType]:
-        return {
-        'on' : CallType("action_command",
-                       {
-                           "device_id":      self._device_id,
-                           "action_command": "start"
-                       }),
-        'off' : CallType("action_command",
-                        {
-                            "device_id":      self._device_id,
-                            "action_command": "stop"
-                        }),
-        'resume': CallType("set_charger_dynamic_limit",
-                           {
-                               "current":   "7",
-                               "device_id": self._device_id
-                           }),
-        'pause': CallType("set_charger_dynamic_limit",
-                          {
-                              "current":   "0",
-                              "device_id": self._device_id
-                          }),
-        'update_current': CallType("set_charger_dynamic_limit", {
-            CHARGER:   "device_id",
-            CHARGERID: self._device_id,
-            CURRENT:   "current"
-        })
-        }
-
-    def validate_charger(self):
-        try:
-            assert(self._device_id is not None)
-            return True
-        except AssertionError as e:
-            _LOGGER.exception(f"Can't init Easee due to lack of necessary device-id. Please report to Peaqev-developers. {e}")
-            return False
 
     def get_entities(self):
         _ret = helper.get_entities(
@@ -142,20 +112,18 @@ class Easee(ChargerBase):
                 endings=self.entities.imported_entityendings
             )
         )
-        _LOGGER.debug(f"schema: {_ret.entityschema}. Imported entities: {_ret.imported_entities}")
         self.entities.imported_entities = _ret.imported_entities
         self.entities.entityschema = _ret.entityschema
-        self.set_sensors(_ret.entityschema)
 
-    def set_sensors(self, schema:str):
-        amp_sensor = f"sensor.{schema}_dynamic_charger_limit"
+    def set_sensors(self):
+        amp_sensor = f"sensor.{self.entities.entityschema}_dynamic_charger_limit"
         if not self._validate_sensor(amp_sensor):
-            amp_sensor = f"sensor.{schema}_max_charger_limit"
+            amp_sensor = f"sensor.{self.entities.entityschema}_max_charger_limit"
 
-        self.entities.chargerentity = f"sensor.{schema}_status"
-        self.entities.powermeter = f"sensor.{schema}_power"
+        self.entities.chargerentity = f"sensor.{self.entities.entityschema}_status"
+        self.entities.powermeter = f"sensor.{self.entities.entityschema}_power"
         self.options.powermeter_factor = 1000
-        self.entities.powerswitch = f"switch.{schema}_is_enabled"
+        self.entities.powerswitch = f"switch.{self.entities.entityschema}_is_enabled"
         self.entities.ampmeter = amp_sensor
         self.options.ampmeter_is_attribute = False
 

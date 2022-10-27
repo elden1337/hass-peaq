@@ -1,6 +1,5 @@
 from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
-from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 from custom_components.peaqev.peaqservice.chargertypes.types.chargeamps import ChargeAmps
 from custom_components.peaqev.peaqservice.chargertypes.types.easee import Easee
@@ -33,6 +32,6 @@ class ChargerTypeData:
         return self._type
 
     @property
-    def charger(self) -> ChargerBase:
+    def charger(self):
         """charger returns the set charger with all its properties of states, servicecalls etc."""
         return self._charger
