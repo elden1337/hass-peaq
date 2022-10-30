@@ -87,10 +87,14 @@ class Easee(ChargerBase):
             CURRENT: "current"
         }
 
-        _on_off_params = {"charger_id": self._chargerid}
-
-        _on = CallType("start", _on_off_params)
-        _off = CallType("stop", _on_off_params)
+        _on = CallType("action_command", {
+            "charger_id":     self._chargerid,
+            "action_command": "start"
+        })
+        _off = CallType("action_command", {
+            "charger_id":     self._chargerid,
+            "action_command": "stop"
+        })
         _resume = CallType("set_charger_dynamic_limit", {"current": "7", "charger_id": self._chargerid})
         _pause = CallType("set_charger_dynamic_limit", {"current": "0", "charger_id": self._chargerid})
 
