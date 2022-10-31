@@ -8,4 +8,4 @@ class ChargerParams:
     disable_current_updates: bool = False
     session_active: bool = False
     latest_charger_call: int = 0
-    check_running_state: bool = False
+    charger_state_mismatch: bool = False

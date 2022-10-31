@@ -22,7 +22,7 @@ class ChargerHelpers:
         return serviceparams
 
     def wait_turn_on(self) -> bool:
-        while self._charger._chargertype_charger_is_on is False and self._charger._params.stopped is False:
+        while self._charger._charger_is_active is False and self._charger._params.stopped is False:
             time.sleep(3)
         return self._updates_should_continue()
 
