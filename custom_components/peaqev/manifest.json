@@ -5,12 +5,12 @@
     "documentation": "https://github.com/elden1337/hass-peaq",
     "issue_tracker": "https://github.com/elden1337/hass-peaq/issues",
     "requirements": [
-      "peaqevcore==7.0.13"
+      "peaqevcore==7.1.6"
     ],
     "codeowners": [
       "@elden1337"
     ],
-    "version": "2.0.2-beta.7",
+    "version": "2.1.0-beta",
     "iot_class": "calculated",
     "dependencies": [
       "recorder",
@@ -22,6 +22,7 @@
       "garo_wallbox",
       "nordpool",
       "filter",
-      "integration"
+      "integration",
+      "tibber"
     ]
   }
