@@ -20,6 +20,8 @@ class PeaqSessionSensor(SensorBase, RestoreEntity):
         super().__init__(hub, name, entry_id)
         self._attr_name = name
         self._state = 0
+        self._average_session = 0
+        self._average_weekly = {}
 
     @property
     def state(self):
@@ -29,13 +31,25 @@ class PeaqSessionSensor(SensorBase, RestoreEntity):
     def icon(self) -> str:
         return "mdi:ev-station"
 
+    @property
+    def extra_state_attributes(self) -> dict:
+        attr_dict = {}
+        attr_dict["average session"] = self._average_session
+        attr_dict["average weekly"] = self._average_weekly
+        return attr_dict
+
     def update(self) -> None:
         self._state = self._hub.charger.session.session_energy
+        self._average_session = self._hub.charger.session.energy_average
+        self._average_weekly = self._hub.charger.session.energy_weekly_dict
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
         if state:
             self._state = state.state
+            self._average_session = state.attributes.get('average session', 50)
+            self._average_weekly = state.attributes.get('average weekly', 50)
+            self._hub.charger.session.unpack(self._average_weekly)
         else:
             self._state = 0
 
