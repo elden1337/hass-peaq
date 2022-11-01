@@ -49,9 +49,14 @@ class PeaqSessionSensor(SensorBase, RestoreEntity):
             self._state = state.state
             self._average_session = state.attributes.get('average session', 50)
             self._average_weekly = state.attributes.get('average weekly', 50)
-            self._hub.charger.session.unpack(self._average_weekly)
+            if self._average_weekly is None:
+                self._average_weekly = {}
+            self._hub.charger.session.core.average_data.unpack(self._average_weekly)
+            _LOGGER.debug(f"this is average_weekly: {self._hub.charger.session.core.average_data.export}")
         else:
             self._state = 0
+            self._average_session = 0
+            self._average_weekly = self._hub.charger.session.core.average_data.set_init_model()
 
 
 class PeaqSessionCostSensor(SensorBase, RestoreEntity):

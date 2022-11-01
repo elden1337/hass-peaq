@@ -48,13 +48,13 @@ class Charger:
         """Main function to turn charging on or off"""
         if self._params.charger_state_mismatch:
             await self._update_charger_state_internal(ChargerStateEnum.Pause)
-        if self._hub.sensors.charger_enabled.value is True:
-            if not self.session_active:
+        if self._hub.sensors.charger_enabled.value:
+            if not self.session_active and self._hub.chargecontroller.status != CHARGERSTATES.Done.name:
                 _LOGGER.debug("There was no session active, so I created one.")
                 self.session.core.reset()
                 self.session_active = True
             if self._hub.chargecontroller.status is CHARGERSTATES.Start.name:
-                if self._params.running is False:
+                if not self._params.running:
                     if not self._charger_is_active:
                         await self._start_charger()
                     else:
@@ -62,10 +62,10 @@ class Charger:
                         await self._overtake_charger()
             elif self._hub.chargecontroller.status in [CHARGERSTATES.Stop.name, CHARGERSTATES.Idle.name]:
                 if self._charger_is_active:
-                    if self._params.stopped is True:
+                    if self._params.stopped:
                         _LOGGER.debug("Detected charger running outside of peaqev-session, overtaking command and pausing.")
                     await self._pause_charger()
-            elif self._hub.chargecontroller.status is CHARGERSTATES.Done.name and self._hub.sensors.charger_done.value is False:
+            elif self._hub.chargecontroller.status is CHARGERSTATES.Done.name and not self._hub.sensors.charger_done.value:
                 await self._terminate_charger()
             elif self._hub.chargecontroller.status is CHARGERSTATES.Idle.name:
                 self._hub.sensors.charger_done.value = False
@@ -92,25 +92,24 @@ class Charger:
         await self._update_charger_state_internal(ChargerStateEnum.Start)
         self.session_active = True
         self._hub.chargecontroller.update_latestchargerstart()
-        if self._hub.chargertype.charger.servicecalls.options.allowupdatecurrent is True and self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data) is False:
+        if self._hub.chargertype.charger.servicecalls.options.allowupdatecurrent and not self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data):
             self._hass.async_create_task(self._updatemaxcurrent())
 
     async def _start_charger(self):
         if time.time() - self._params.latest_charger_call > CALL_WAIT_TIMER:
             await self._update_charger_state_internal(ChargerStateEnum.Start)
-            if self.session_active is False:
+            if not self.session_active:
                 await self._call_charger(ON)
                 self.session_active = True
             else:
                 await self._call_charger(RESUME)
             self._hub.chargecontroller.update_latestchargerstart()
-            if self._hub.chargertype.charger.servicecalls.options.allowupdatecurrent is True and self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data) is False:
+            if self._hub.chargertype.charger.servicecalls.options.allowupdatecurrent and not self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data):
                 self._hass.async_create_task(self._updatemaxcurrent())
 
     async def _terminate_charger(self):
         if time.time() - self._params.latest_charger_call > CALL_WAIT_TIMER:
-            self.session.core.terminate()
-            self.session_active = False
+            await self._hass.async_add_executor_job(self.session.core.terminate())
             await self._update_charger_state_internal(ChargerStateEnum.Stop)
             self.session_active = False
             await self._call_charger(OFF)
