@@ -41,22 +41,21 @@ class PeaqSessionSensor(SensorBase, RestoreEntity):
     def update(self) -> None:
         self._state = self._hub.charger.session.session_energy
         self._average_session = self._hub.charger.session.energy_average
-        self._average_weekly = self._hub.charger.session.energy_weekly_dict
+        self._average_weekly = self._hub.charger.session.core.average_data.export
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
         if state:
-            self._state = state.state
-            self._average_session = state.attributes.get('average session', 50)
+            self._state = 0
             self._average_weekly = state.attributes.get('average weekly', 50)
-            if self._average_weekly is None:
-                self._average_weekly = {}
             self._hub.charger.session.core.average_data.unpack(self._average_weekly)
-            _LOGGER.debug(f"this is average_weekly: {self._hub.charger.session.core.average_data.export}")
+            self._average_weekly = self._hub.charger.session.core.average_data.export
+            self._average_session = self._hub.charger.session.energy_average
         else:
             self._state = 0
             self._average_session = 0
-            self._average_weekly = self._hub.charger.session.core.average_data.set_init_model()
+            self._hub.charger.session.core.average_data.set_init_model()
+            self._average_weekly = self._hub.charger.session.core.average_data.export
 
 
 class PeaqSessionCostSensor(SensorBase, RestoreEntity):
