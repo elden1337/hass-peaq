@@ -103,8 +103,14 @@ class ChargeControllerBase:
 
     def _is_done(self, charger_state) -> bool:
         if len(self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]) > 0:
-            return charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]
-        return time.time() - self.latest_charger_start > self.DONETIMEOUT
+            _states_test = charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]
+            if _states_test:
+                _LOGGER.debug(f"'is_done' reported that charger is Done based on current charger state")
+            return _states_test
+        _regular_test = time.time() - self.latest_charger_start > self.DONETIMEOUT
+        if _regular_test:
+            _LOGGER.debug(f"'is_done' reported that charger is Done because of idle-charging for more than {self.DONETIMEOUT} seconds.")
+        return _regular_test
 
     @abstractmethod
     def _get_status_charging(self) -> CHARGERSTATES:

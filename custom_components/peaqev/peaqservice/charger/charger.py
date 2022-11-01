@@ -50,35 +50,38 @@ class Charger:
             await self._update_charger_state_internal(ChargerStateEnum.Pause)
         if self._hub.sensors.charger_enabled.value is True:
             if not self.session_active:
+                _LOGGER.debug("There was no session active, so I created one.")
                 self.session.core.reset()
                 self.session_active = True
             if self._hub.chargecontroller.status is CHARGERSTATES.Start.name:
                 if self._params.running is False:
-                    if not self._charger_is_active():
+                    if not self._charger_is_active:
                         await self._start_charger()
                     else:
+                        _LOGGER.debug("Detected charger running outside of peaqev-session, overtaking command.")
                         await self._overtake_charger()
             elif self._hub.chargecontroller.status in [CHARGERSTATES.Stop.name, CHARGERSTATES.Idle.name]:
-                if self._charger_is_active():
+                if self._charger_is_active:
                     if self._params.stopped is True:
-                        _LOGGER.debug("detected charger running outside of peaqev-session, pausing.")
+                        _LOGGER.debug("Detected charger running outside of peaqev-session, overtaking command and pausing.")
                     await self._pause_charger()
             elif self._hub.chargecontroller.status is CHARGERSTATES.Done.name and self._hub.sensors.charger_done.value is False:
                 await self._terminate_charger()
             elif self._hub.chargecontroller.status is CHARGERSTATES.Idle.name:
                 self._hub.sensors.charger_done.value = False
-                if self._charger_is_active():
+                if self._charger_is_active:
                     await self._terminate_charger()
         else:
-            if self._charger_is_active() and self._params.stopped is False:
-                _LOGGER.info("Peaqev detected running charger outside of peaqev-session. Stopping charger...")
-                await self._terminate_charger(aux=True)
+            if self._charger_is_active and not self._params.stopped:
+                _LOGGER.debug(f"I'm here even though i Shouldn't be. Executing Terminate_charger to be sure.")
+                await self._terminate_charger()
             return
 
+    @property
     def _charger_is_active(self) -> bool:
         if self._hub.chargertype.charger.options.powerswitch_controls_charging:
             return self._hub.sensors.chargerobject_switch.value
-        return any(
+        return all(
             [
                 self._hub.sensors.chargerobject_switch.value,
                 self._hub.sensors.carpowersensor.value > 0
@@ -104,16 +107,14 @@ class Charger:
             if self._hub.chargertype.charger.servicecalls.options.allowupdatecurrent is True and self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data) is False:
                 self._hass.async_create_task(self._updatemaxcurrent())
 
-    async def _terminate_charger(self, aux: bool = False):
+    async def _terminate_charger(self):
         if time.time() - self._params.latest_charger_call > CALL_WAIT_TIMER:
+            self.session.core.terminate()
             self.session_active = False
             await self._update_charger_state_internal(ChargerStateEnum.Stop)
             self.session_active = False
             await self._call_charger(OFF)
-            if not aux:
-                self._hub.sensors.charger_done.value = True
-            else:
-                _LOGGER.info("Peaqev turned off charger because it was running outside of a peaqev-session.")
+            self._hub.sensors.charger_done.value = True
 
     async def _pause_charger(self):
         if time.time() - self._params.latest_charger_call > CALL_WAIT_TIMER:
@@ -127,14 +128,14 @@ class Charger:
         calls = self._service_calls.get_call(command)
         if self._hub.chargertype.charger.servicecalls.options.switch_controls_charger:
             await self._hub.state_machine.states.async_set(self._hub.chargertype.charger.entities.powerswitch, calls[command])
+            _LOGGER.debug(f"Calling charger-outlet")
         else:
             await self._hub.state_machine.services.async_call(
                 calls[DOMAIN],
                 calls[command],
                 calls["params"]
             )
-        msg = f"Calling charger {command}"
-        _LOGGER.debug(msg)
+            _LOGGER.debug(f"Calling charger {command} for domain '{calls[DOMAIN]}' as internal_call '{calls[command]}' with parameters: {calls['params']}")
         self._params.latest_charger_call = time.time()
 
     async def _updatemaxcurrent(self):
@@ -146,7 +147,7 @@ class Charger:
                 if await self._hass.async_add_executor_job(self.helpers.wait_update_current):
                     serviceparams = await self.helpers.setchargerparams(calls)
                     if not self._params.disable_current_updates:
-                        _LOGGER.debug(f"peaqev updating current with: {calls[DOMAIN]}, {calls[UPDATECURRENT]} and params: {serviceparams}")
+                        _LOGGER.debug(f"Peaqev updating current with: {calls[DOMAIN]}, {calls[UPDATECURRENT]} and params: {serviceparams}")
                         await self._hub.state_machine.services.async_call(
                             calls[DOMAIN],
                             calls[UPDATECURRENT],
@@ -167,17 +168,16 @@ class Charger:
             self._params.running = True
             self._params.stopped = False
             self._params.disable_current_updates = False
-            _LOGGER.debug("Charger-class has been started")
+            _LOGGER.debug("Peaqev internal charger has been started")
         elif state in [ChargerStateEnum.Stop, ChargerStateEnum.Pause]:
             self._params.disable_current_updates = True
             charger = self._hub.sensors.chargerobject.value.lower()
-
             chargingstates = self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Charging]
             if charger not in chargingstates or len(charger) < 1:
                 self._params.running = False
                 self._params.stopped = True
                 self._params.charger_state_mismatch = False
-                _LOGGER.debug("Charger-class has been stopped")
+                _LOGGER.debug("Peaqev internal charger has been stopped")
             else:
                 self._params.charger_state_mismatch = True
-                _LOGGER.debug(f"Tried to stop charger, but chargerobj is: {charger}. Retrying stop-attempt.")
+                _LOGGER.debug(f"Tried to stop connected charger, but it's reporting: {charger} as state. Retrying stop-attempt.")
