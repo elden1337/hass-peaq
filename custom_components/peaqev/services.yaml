@@ -40,3 +40,28 @@ scheduler_set:
 scheduler_cancel:
   name: Cancel Peaqev Scheduler
   description: Will cancel the previously set scheduled charge.
+
+scheduler_alter_existing_schedule:
+  name: Alter Peaqev Schedule
+  description: Will alter
+  fields:
+    schedule_id:
+      description: >
+        The number of kWh you wish to charge within the session
+      example: 1
+    departure_time:
+      description: >
+        The datetime you wish to depart from the charger. If you are adding weekdays below you may add time only here, dates will be ignored
+      example: 2022-06-02 07:00
+    schedule_starttime:
+      description: >
+        Optional. The datetime you wish for the schedule to begin. Must be less than the departure-time, else it will default to the time the service call was made.
+      example: 2022-06-01 18:00
+    override_settings:
+      description: >
+        Optional, set to True if you want to let Peaqev ignore your max-price and possibly peak-level during this scheduled session.
+      example: False
+    weekdays:
+      description: >
+        Optional, Add weekdays as comma-separated numbers (1 is Monday, 7 is Sunday) or as shorthand-written Mon, Tue, Fri. Schedule will initiate on these days
+      example: 1, 2, 3
