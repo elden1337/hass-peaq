@@ -48,7 +48,7 @@ class Charger:
         """Main function to turn charging on or off"""
         if self._params.charger_state_mismatch:
             await self._update_charger_state_internal(ChargerStateEnum.Pause)
-        if self._hub.sensors.charger_enabled.value:
+        if self._hub.sensors.charger_enabled.value and not self._hub.sensors.power.killswitch.is_dead:
             if not self.session_active and self._hub.chargecontroller.status != CHARGERSTATES.Done.name:
                 _LOGGER.debug("There was no session active, so I created one.")
                 self.session.core.reset()
@@ -73,8 +73,12 @@ class Charger:
                     await self._terminate_charger()
         else:
             if self._charger_is_active and not self._params.stopped:
-                _LOGGER.debug(f"I'm here even though i Shouldn't be. Executing Terminate_charger to be sure.")
-                await self._terminate_charger()
+                if self._hub.sensors.power.killswitch.is_dead:
+                    _LOGGER.error(f"Your powersensor has failed to update peaqev for more than {self._hub.sensors.power.killswitch.total_timer} seconds. Therefore charging is paused until it comes alive again.")
+                    await self._pause_charger()
+                else:
+                    _LOGGER.debug(f"I'm here even though i Shouldn't be. Executing Terminate_charger to be sure.")
+                    await self._terminate_charger()
             return
 
     @property
@@ -96,7 +100,7 @@ class Charger:
             self._hass.async_create_task(self._updatemaxcurrent())
 
     async def _start_charger(self):
-        if time.time() - self._params.latest_charger_call > CALL_WAIT_TIMER:
+        if time.time() - self._params.latest_charger_call > CALL_WAIT_TIMER and not self._hub.sensors.power.killswitch.is_dead:
             await self._update_charger_state_internal(ChargerStateEnum.Start)
             if not self.session_active:
                 await self._call_charger(ON)

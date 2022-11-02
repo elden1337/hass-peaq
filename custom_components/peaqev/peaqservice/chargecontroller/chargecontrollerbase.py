@@ -86,6 +86,8 @@ class ChargeControllerBase:
             ret = CHARGERSTATES.Idle
             if self._hub.sensors.charger_done.value is True:
                 self._hub.sensors.charger_done.value = False
+        elif self._hub.sensors.power.killswitch.is_dead:
+            ret = CHARGERSTATES.Error
         elif _state not in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Idle] and self._hub.sensors.charger_done.value is True:
             ret = CHARGERSTATES.Done
             update_timer = False
