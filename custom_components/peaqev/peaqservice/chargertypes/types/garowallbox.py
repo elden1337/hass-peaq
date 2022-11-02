@@ -56,6 +56,7 @@ states:
 
 class GaroWallbox(ChargerBase):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, auth_required: bool = False):
+        _LOGGER.warning("You are initiating GaroWallbox as Chargertype. Bare in mind that this chargertype is not finalized and may be very unstable.")
         self._hass = hass
         self._chargerid = huboptions.charger.chargerid
         self.getentities(DOMAINNAME, ENTITYENDINGS)
