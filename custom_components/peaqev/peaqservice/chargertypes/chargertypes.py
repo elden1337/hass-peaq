@@ -3,17 +3,17 @@ from peaqevcore.hub.hub_options import HubOptions
 
 from custom_components.peaqev.peaqservice.chargertypes.types.chargeamps import ChargeAmps
 from custom_components.peaqev.peaqservice.chargertypes.types.easee import Easee
+from custom_components.peaqev.peaqservice.chargertypes.types.garowallbox import GaroWallbox
 from custom_components.peaqev.peaqservice.chargertypes.types.outlet import SmartOutlet
-# from custom_components.peaqev.peaqservice.chargertypes.types.garowallbox import GaroWallbox
 from custom_components.peaqev.peaqservice.util.constants import (
-    CHARGERTYPE_EASEE, CHARGERTYPE_CHARGEAMPS, CHARGERTYPE_OUTLET  # CHARGERTYPE_GAROWALLBOX
+    CHARGERTYPE_EASEE, CHARGERTYPE_CHARGEAMPS, CHARGERTYPE_OUTLET, CHARGERTYPE_GAROWALLBOX
 )
 
 CHARGERTYPE_DICT = {
             CHARGERTYPE_CHARGEAMPS: ChargeAmps,
             CHARGERTYPE_EASEE: Easee,
-            CHARGERTYPE_OUTLET: SmartOutlet
-            #CHARGERTYPE_GAROWALLBOX: GaroWallbox
+            CHARGERTYPE_OUTLET: SmartOutlet,
+            CHARGERTYPE_GAROWALLBOX: GaroWallbox
         }
 
 

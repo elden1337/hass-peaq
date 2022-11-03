@@ -33,12 +33,6 @@
           "dec": "December"
         },
         "description": "Select your allowed monthly start-peak."
-      },
-      "misc": {
-        "data": {
-          "behavior_on_default": "Peaqev should be turned on after HA-reboot"
-        },
-        "description": "Miscellaneous options"
       }
     }
   },

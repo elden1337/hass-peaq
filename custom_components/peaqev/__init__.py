@@ -37,7 +37,6 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     else:
         options.charger.chargerid = conf.data["chargerid"]
     options.startpeaks = conf.options["startpeaks"] if "startpeaks" in conf.options.keys() else conf.data["startpeaks"]
-    options.behavior_on_default = conf.options["behavior_on_default"] if "behavior_on_default" in conf.options.keys() else False
     options.cautionhours = conf.options["cautionhours"] if "cautionhours" in conf.options.keys() else conf.data["cautionhours"] if "cautionhours" in conf.data.keys() else []
     options.nonhours = conf.options["nonhours"] if "nonhours" in conf.options.keys() else conf.data["nonhours"] if "nonhours" in conf.data.keys() else []
     options.price.price_aware = await _get_existing_param(conf, "priceaware", False)
@@ -143,7 +142,5 @@ async def _get_existing_param(conf, parameter: str, default_val: any):
 #         model.powersensor = conf.data["name"]
 #         model.powersensorincludescar = conf.data["powersensorincludescar"]
 #
-#     """misc options"""
-#     model.options.behavior_on_default = conf.options["behavior_on_default"] if "behavior_on_default" in conf.options.keys() else False
 #
 #     return model
