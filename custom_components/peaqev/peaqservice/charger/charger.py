@@ -110,9 +110,7 @@ class Charger:
 
     async def _terminate_charger(self):
         if time.time() - self._params.latest_charger_call > CALL_WAIT_TIMER:
-            #could be this one being problematic.
-            self.session.core.terminate()
-            #await self._hass.async_add_executor_job(self.session.core.terminate())
+            await self._hass.async_add_executor_job(self.session.core.terminate)
             await self._update_charger_state_internal(ChargerStateEnum.Stop)
             self.session_active = False
             await self._call_charger(OFF)
