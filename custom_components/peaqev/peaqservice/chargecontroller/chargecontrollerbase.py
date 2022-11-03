@@ -11,6 +11,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class ChargeControllerBase:
     DONETIMEOUT = 180
+    DEBUGLOG_TIMEOUT = 60
 
     def __init__(self, hub):
         self._hub = hub
@@ -18,6 +19,7 @@ class ChargeControllerBase:
         self._status = CHARGERSTATES.Idle
         self._chargecontroller_initalized = False
         self._latestchargerstart = time.time()
+        self._latest_debuglog = 0
 
     @property
     def latest_charger_start(self) -> float:
@@ -34,7 +36,7 @@ class ChargeControllerBase:
         if self._hub.is_initialized is True:
             if self._chargecontroller_initalized is False:
                 self._chargecontroller_initalized = True
-                _LOGGER.debug("Chargecontroller is initialized and ready to work!")
+                self._debug_log("Chargecontroller is initialized and ready to work!")
         if self._hub.chargertype.charger.options.charger_is_outlet is True:
             ret = self._get_status_outlet()
         else:
@@ -107,12 +109,17 @@ class ChargeControllerBase:
         if len(self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]) > 0:
             _states_test = charger_state in self._hub.chargertype.charger.chargerstates[CHARGERSTATES.Done]
             if _states_test:
-                _LOGGER.debug(f"'is_done' reported that charger is Done based on current charger state")
+                self._debug_log(f"'is_done' reported that charger is Done based on current charger state")
             return _states_test
         _regular_test = time.time() - self.latest_charger_start > self.DONETIMEOUT
         if _regular_test:
-            _LOGGER.debug(f"'is_done' reported that charger is Done because of idle-charging for more than {self.DONETIMEOUT} seconds.")
+            self._debug_log(f"'is_done' reported that charger is Done because of idle-charging for more than {self.DONETIMEOUT} seconds.")
         return _regular_test
+
+    def _debug_log(self, message: str):
+        if time.time() - self._latest_debuglog > self.DEBUGLOG_TIMEOUT:
+            _LOGGER.debug(message)
+            self._latest_debuglog = time.time()
 
     @abstractmethod
     def _get_status_charging(self) -> CHARGERSTATES:

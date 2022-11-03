@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import DOMAIN
 
@@ -21,7 +22,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entitie
 
     async_add_entities(PeaqSwitch(s, hub) for s in switches)
 
-class PeaqSwitch(SwitchEntity):
+class PeaqSwitch(SwitchEntity, RestoreEntity):
     def __init__(self, switch, hub) -> None:
         """Initialize a PeaqSwitch."""
         self._switch = switch
@@ -41,7 +42,7 @@ class PeaqSwitch(SwitchEntity):
 
     @property
     def is_on(self) -> bool:
-        return self._hub.sensors.charger_enabled.value
+        return self._state is True
 
     @property
     def state(self) -> str:
@@ -60,3 +61,11 @@ class PeaqSwitch(SwitchEntity):
     def update(self):
         new_state = self._hub.sensors.charger_enabled.value
         self.state = "on" if new_state is True else "off"
+
+    async def async_added_to_hass(self):
+        state = await super().async_get_last_state()
+        if state:
+            self._state = state.state
+            self._hub.sensors.charger_enabled.value = self._state
+        else:
+            self._state = self._hub.sensors.charger_enabled.value
