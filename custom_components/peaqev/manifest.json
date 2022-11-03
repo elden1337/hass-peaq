@@ -5,12 +5,12 @@
     "documentation": "https://github.com/elden1337/hass-peaq",
     "issue_tracker": "https://github.com/elden1337/hass-peaq/issues",
     "requirements": [
-      "peaqevcore>=4.0.1"
+      "peaqevcore==7.2.0"
     ],
     "codeowners": [
       "@elden1337"
     ],
-    "version": "1.6.1",
+    "version": "2.1.0",
     "iot_class": "calculated",
     "dependencies": [
       "recorder",
@@ -23,6 +23,7 @@
       "zaptec",
       "nordpool",
       "filter",
-      "integration"
+      "integration",
+      "tibber"
     ]
   }

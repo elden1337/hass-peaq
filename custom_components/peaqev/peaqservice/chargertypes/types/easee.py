@@ -2,6 +2,7 @@ import logging
 import time
 
 from homeassistant.core import HomeAssistant
+from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargerstates import CHARGERSTATES
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
@@ -54,9 +55,9 @@ UPDATECURRENT_ON_TERMINATION = False
 
 
 class Easee(ChargerBase):
-    def __init__(self, hass: HomeAssistant, chargerid, auth_required: bool = False):
+    def __init__(self, hass: HomeAssistant, huboptions: HubOptions, auth_required: bool = False):
         self._hass = hass
-        self._chargerid = chargerid
+        self._chargerid = huboptions.charger.chargerid
         self._auth_required = auth_required
         self.options.powerswitch_controls_charging = False
         self.domainname = DOMAINNAME
@@ -86,10 +87,14 @@ class Easee(ChargerBase):
             CURRENT: "current"
         }
 
-        _on_off_params = {"charger_id": self._chargerid}
-
-        _on = CallType("start", _on_off_params)
-        _off = CallType("stop", _on_off_params)
+        _on = CallType("action_command", {
+            "charger_id":     self._chargerid,
+            "action_command": "start"
+        })
+        _off = CallType("action_command", {
+            "charger_id":     self._chargerid,
+            "action_command": "stop"
+        })
         _resume = CallType("set_charger_dynamic_limit", {"current": "7", "charger_id": self._chargerid})
         _pause = CallType("set_charger_dynamic_limit", {"current": "0", "charger_id": self._chargerid})
 
@@ -103,8 +108,9 @@ class Easee(ChargerBase):
                 update_current=CallType("set_charger_dynamic_limit", servicecall_params)
             ),
             options=ServiceCallsOptions(
-                allowupdatecurrent=UPDATECURRENT,
-                update_current_on_termination=UPDATECURRENT_ON_TERMINATION
+                allowupdatecurrent=True,
+                update_current_on_termination=False,
+                switch_controls_charger=False
             )
         )
 

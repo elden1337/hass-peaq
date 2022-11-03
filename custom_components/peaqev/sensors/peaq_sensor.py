@@ -31,7 +31,7 @@ class PeaqSensor(SensorBase):
 
     def update(self) -> None:
         self._state = self._hub.chargecontroller.status
-        self._nonhours = self._hub.non_hours
+        self._nonhours = self._hub.hours.non_hours
         self._cautionhours = self._hub.hours.caution_hours
         self._current_hour = self._hub.hours.state
         self._price_aware = self._hub.hours.price_aware

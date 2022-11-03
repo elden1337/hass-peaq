@@ -27,13 +27,25 @@ CHARGER_SCHEMA = vol.Schema(
                         "chargertype",
                         default="",
                         ): vol.In(pk.CHARGERTYPES),
-                    vol.Optional("chargerid"): cv.string,
                     vol.Optional(
                         "locale",
                         default="",
                         ): vol.In(LOCALES)
                 }
             )
+
+CHARGER_DETAILS_SCHEMA = vol.Schema(
+                {
+                    vol.Optional("chargerid"): cv.string,
+                }
+)
+
+OUTLET_DETAILS_SCHEMA = vol.Schema(
+                {
+                    vol.Optional("outletswitch"): cv.string,
+                    vol.Optional("outletpowermeter"): cv.string,
+                }
+)
 
 HOURS_SCHEMA = vol.Schema(
             {
@@ -48,7 +60,6 @@ HOURS_SCHEMA = vol.Schema(
 PRICEAWARE_SCHEMA = vol.Schema(
                 {
                     vol.Optional("priceaware", default=False): cv.boolean,
-                    vol.Optional("allow_top_up", default=False): cv.boolean,
                     vol.Optional("absolute_top_price"): cv.positive_float,
                     vol.Optional("min_priceaware_threshold_price"): cv.positive_float,
                     vol.Optional(

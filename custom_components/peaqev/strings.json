@@ -6,8 +6,7 @@
           "priceaware": "[%key:common::config_flow::data::priceaware%]",
           "absolute_top_price": "[%key:common::config_flow::data::absolute_top_price%]",
           "min_priceaware_threshold_price": "[%key:common::config_flow::data::min_priceaware_threshold_price%]",
-          "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]",
-          "allow_top_up": "[%key:common::config_flow::data::allow_top_up%]"
+          "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]"
         },
         "description": "Select price-aware if you wish to adhere to Nordpool-prices (requires integration)"
       },
@@ -34,12 +33,6 @@
           "dec": "December"
         },
         "description": "Select your allowed monthly start-peak."
-      },
-      "misc": {
-        "data": {
-          "behavior_on_default": "[%key:common::config_flow::data::behavior_on_default%]"
-        },
-        "description": "Miscellaneous options"
       }
     }
   },
@@ -58,18 +51,28 @@
       },
       "charger": {
         "data": {
-          "chargerid": "[%key:common::config_flow::data::chargerid%]",
           "chargertype": "[%key:common::config_flow::data::chargertype%]",
           "locale": "[%key:common::config_flow::data::locale%]"
         }
+      },
+      "chargerdetails": {
+        "data": {
+          "chargerid": "[%key:common::config_flow::data::chargerid%]"
+        }
+      },
+      "outletdetails": {
+        "data": {
+          "outletswitch": "[%key:common::config_flow::data::outletswitch%]",
+          "outletpowermeter": "[%key:common::config_flow::data::outletpowermeter%]"
+        },
+        "description": "Set sensors for outlet switch and powermeter. Note that Peaqev cannot know which outlet you are using. Therefore, make sure that you use a safe smart outlet to not cause damage to your system."
       },
       "priceaware": {
         "data": {
           "priceaware": "[%key:common::config_flow::data::priceaware%]",
           "absolute_top_price": "[%key:common::config_flow::data::absolute_top_price%]",
           "min_priceaware_threshold_price": "[%key:common::config_flow::data::min_priceaware_threshold_price%]",
-          "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]",
-          "allow_top_up": "[%key:common::config_flow::data::allow_top_up%]"
+          "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]"
         }
       },
       "hours": {

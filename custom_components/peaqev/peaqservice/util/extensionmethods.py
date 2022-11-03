@@ -1,6 +1,8 @@
 
 def nametoid(input_string) -> str:
-    return input_string.lower().replace(" ", "_").replace(",", "")
+    if isinstance(input_string, str):
+        return input_string.lower().replace(" ", "_").replace(",", "")
+    return input_string
 
 def try_parse(input_string:str, parsetype:type):
     try:
