@@ -65,7 +65,6 @@ class PeaqSwitch(SwitchEntity, RestoreEntity):
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
         if state:
-            _LOGGER.debug("last state of %s = %s", self._name, state)
             self._state = state.state
             self._hub.sensors.charger_enabled.value = self._state
         else:
