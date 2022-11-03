@@ -66,6 +66,7 @@ class Charger:
                         _LOGGER.debug("Detected charger running outside of peaqev-session, overtaking command and pausing.")
                     await self._pause_charger()
             elif self._hub.chargecontroller.status is CHARGERSTATES.Done.name and not self._hub.sensors.charger_done.value:
+                _LOGGER.debug("Going to terminate since the charger is done.")
                 await self._terminate_charger()
             elif self._hub.chargecontroller.status is CHARGERSTATES.Idle.name:
                 self._hub.sensors.charger_done.value = False
@@ -109,7 +110,9 @@ class Charger:
 
     async def _terminate_charger(self):
         if time.time() - self._params.latest_charger_call > CALL_WAIT_TIMER:
-            await self._hass.async_add_executor_job(self.session.core.terminate())
+            #could be this one being problematic.
+            self.session.core.terminate()
+            #await self._hass.async_add_executor_job(self.session.core.terminate())
             await self._update_charger_state_internal(ChargerStateEnum.Stop)
             self.session_active = False
             await self._call_charger(OFF)
