@@ -1,19 +1,18 @@
 import logging
 
+from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
 from homeassistant.core import HomeAssistant
 from peaqevcore.Models import CHARGERSTATES
+from peaqevcore.hub.hub_options import HubOptions
 
-from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
+import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
 from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
-from custom_components.peaqev.peaqservice.util.constants import (
-    CHARGER,
-    CHARGERID,
-    CURRENT,
-)
 
 _LOGGER = logging.getLogger(__name__)
 
-#ENTITYENDINGS = []
+ENTITYENDINGS = [
+    "_switch"
+]
 
 NATIVE_CHARGERSTATES = [
 "unknown",
@@ -30,25 +29,32 @@ UPDATECURRENT_ON_TERMINATION = False
 
 
 class Zaptec(ChargerBase):
-    def __init__(self, hass: HomeAssistant, chargerid, auth_required: bool = False):
+    def __init__(self, hass: HomeAssistant, huboptions: HubOptions, auth_required: bool = False):
         super().__init__(hass)
-        self._chargerid = chargerid
+        self._hass = hass
+        self._chargerid = huboptions.charger.chargerid
         self._auth_required = auth_required
         self._powerswitch_controls_charging = False
         self._domainname = DOMAINNAME
+        self.entities.imported_entityendings = ENTITYENDINGS
         self._native_chargerstates = NATIVE_CHARGERSTATES
         self._chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
         self._chargerstates[CHARGERSTATES.Connected] = ["waiting"]
         self._chargerstates[CHARGERSTATES.Charging] = ["charging"]
         self._chargerstates[CHARGERSTATES.Done] = ["charge_done"]
-        self.getentities()
+
         self.set_sensors()
 
-        # servicecall_params = {
-        #     CHARGER: "charger_id",
-        #     CHARGERID: self._chargerid,
-        #     CURRENT: "current"
-        # }
+        entitiesobj = helper.getentities(
+            self._hass,
+            helper.EntitiesPostModel(
+                self.domainname,
+                self.entities.entityschema,
+                self.entities.imported_entityendings
+            )
+        )
+        self.entities.imported_entities = entitiesobj.imported_entities
+        self.entities.entityschema = entitiesobj.entityschema
 
         _on_off_params = {"charger_id": self._chargerid}
 
