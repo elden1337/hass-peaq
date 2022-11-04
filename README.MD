@@ -19,11 +19,14 @@ Peaqev is developed without static funding. If you lack your locale/charger type
 
 ---
 
-Welcome to Peaqev!
+Peaqev aims at lowering the household's peak energy charges, targeted at charging an electronic vehicle (EV) below a set threshold. 
+Peaqev covers 24 different energy companies in Sweden, Norway and Belgium and two types of ev chargers _(2021-11-03)_
+You will get the best experience with a supported charger that can update amps while charging, as well as using a connected power meter that update your total power draw frequently. Examples of such meters are:
 
-This application started as an attempt to lower the household's peak energy charges, targeted at charging an electronic vehicle (EV) below a set threshold. 
-Since then, we have evolved, and now offer a broader feature set including price aware smart charge (a very smart calculation if you ask us), looking ahead at tomorrow's prices automatically, installation without the need for a power meter etc.
-Peaqev covers 24 different energy companies in Sweden, Norway and Belgium and two types of ev chargers _(2021-10-11)_
+- Shelly 3EM
+- Tibber Watty
+- Tibber Pulse
+
 
 The integration does not communicate with any properitary API's. However, the chargers selected will use the integrations set for them, and may include cloud polling of data.
 
@@ -34,7 +37,7 @@ For usage-examples and more in-depth explanations, see the Wiki:
 * [Usage](https://github.com/elden1337/hass-peaq/wiki/Usage)
 
 ## Installation
-*Required to install is Home Assistant version 2022.8.0 or higher.*
+*Required to install is Home Assistant version 2022.10.5 or higher.*
 
 Preferred if you have HACS installed is to search for Peaqev there.
 
@@ -50,34 +53,40 @@ Peaqev has two types of installations: Regular and Lite. Regular is much more pr
 [![](https://mermaid.ink/img/pako:eNpVkNtqwzAMhl_F-CqD5gVyMRg5NIUMRrO7eRciVhuDYwdFZpSm7z7nUNh0Jen_pB_pLjuvUWbySjD2ojkrJ2K8fbUMxN8iTV9FnpzcxGAtsPFO8G3Elw3LF31uDOMsiiTvga5IApwWje_A_sfOeA0WaBZl0qKbPO1quZoUW1GsRZV8kOkwhR-g55JqXVKBnaLZMal9oGmXjutQ_Zf7pBCxOnn3jvuFU7zJ8iAHpAGMjkffl56S3OOASmYx1XiBYFlJ5R4RDaMGxlIb9iSzy2J-kBDYtzfXyYyjyxMqDMQfDjv1-AUWBWqX)](https://mermaid-js.github.io/mermaid-live-editor/edit#pako:eNpVkNtqwzAMhl_F-CqD5gVyMRg5NIUMRrO7eRciVhuDYwdFZpSm7z7nUNh0Jen_pB_pLjuvUWbySjD2ojkrJ2K8fbUMxN8iTV9FnpzcxGAtsPFO8G3Elw3LF31uDOMsiiTvga5IApwWje_A_sfOeA0WaBZl0qKbPO1quZoUW1GsRZV8kOkwhR-g55JqXVKBnaLZMal9oGmXjutQ_Zf7pBCxOnn3jvuFU7zJ8iAHpAGMjkffl56S3OOASmYx1XiBYFlJ5R4RDaMGxlIb9iSzy2J-kBDYtzfXyYyjyxMqDMQfDjv1-AUWBWqX)
 
 ##### Installation type:
-- `Installation type` - Pick regular for the full Peaqev experience. This will charge according to your home's total energy. Pick Lite if you do not have such a sensor installed. Peaqev will then charge the allowed hourly amount set further down in "Months"
+- `Installation type` - Pick Lite if you do not have a power meter installed. Peaqev will then charge the allowed hourly amount set further down in "Months". Otherwise pick Regular
 
 ##### Sensor:
-- `Power sensor` - The already existing power sensor in your setup. This is required to get the reading to work. Examples of devices sending such data is Tibber Pulse/Watty, Shelly DIN mounted devices or similar.
-- `Power sensor includes car` - Check this option if the above sensor includes your car's power draw. The calutions will be altered accordingly
+- `Power sensor` - The wattage reading sensor for your connected powermeter. Must be in Watts (W)
+- `Power sensor includes car` - Check this option if the above sensor includes your car's power draw
 
 ##### Charger and Locale:
-- `City, or Grid owner company` - Chose your city from the list. The characteristics differ in how peak hours are stored and measured. If you don't live in a supported location but just want to test the integration, or lower your peaks for other reasons, you may check *"Other, just want to test"*
-- `Charger type` - Pick the installed ev charger you have. Currently Chargeamps, Easee and Outdoor smart outlets are supported. Check links for required custom components per charger type: [Chargeamps](https://github.com/kirei/hass-chargeamps), [Easee](https://github.com/fondberg/easee_hass/)
+- `City, or Grid owner company` - The characteristics differ in how peak hours are stored and measured
+- `Charger type` - Pick the installed ev charger you have. _Check table below for for required custom component and features per charger type_
 - `Charger id` - Your local identifier to tell Peaqev which charger unit we mean to manipulate. If your charger type does not provide this, leave blank
 - *If you have selected Smart outlet as charger type, you will need to provide the switch to turn on/off, and the sensor to read power from the outlet instead of charger id.*
 
+Charger | Required integration | Can update amps | Supported models | Notes
+--- | --- | --- | --- | ---
+Chargeamps| [hass-chargeamps](https://github.com/kirei/hass-chargeamps) | Yes | Halo |
+Easee| [easee-hass](https://github.com/fondberg/easee_hass/) | Yes | Robot | _Turn off all smart charging before using peaqev_
+Smart outlet| - | No | | _Stability depends on the outlet used_
+
+
 ##### Price-aware:
-- `Price-aware charging` - Check this to calculate the cheapest hours from Nordpool (requires [Nordpool](https://github.com/custom-components/nordpool)). Above Non- and Caution hours will be ignored.
-- `Absolute top price` - The limit (if any) where your charger should be stopped, regardless of the hour algorithm.
-- `Min price` - The lower limit (if any) where charging will always be permitted (must be lower than top price if set).
+- `Price-aware charging` - Check this to calculate the cheapest hours from Nordpool (requires [Nordpool](https://github.com/custom-components/nordpool)). Non- and Caution hours below here will be ignored
+- `Absolute top price` - The limit (if any) where your charger should be stopped, regardless of the hour algorithm
+- `Min price` - The lower limit (if any) where charging will always be permitted (must be lower than top price if set)
 - `Caution hour type` - Choose to what extent you would like Peaqev to hold back during caution hours. *Suave > Aggressive* 
 
 ##### Hours:
-- `Non hours` - Click to select the hours (if any) where you do not wish to charge.  
-- `Caution hours` - Click to select the hours (if any) where you want the charger to be extra cautious to not break the peak.
+- `Non hours` - Click to select the hours (if any) where you do not wish to charge
+- `Caution hours` - Click to select the hours (if any) where you want the charger to be extra cautious to not break the peak
 
 ##### Months:
 - `Monthly allowed peak` - Needs to be set in order to determine a minimum allowed peak. In the beginning of each month this is necessary to be able to charge at all. *Format is in kW. See examples below*
 
 
-These are two (quite restrained) examples of monthly start peaks, for 1-phase and 3-phase charging respectively. This option is always up to your house and it's other appliances. The below are made for a modern house with installed heat pump.
-These suggestions are also made for hourly calculation. Should your Locale apply other, like quarter-hourly, do consider altering the numbers accordingly.
+Examples for hourly peak-shaving. A tip is to look at your current peaks and set it to about 50-70% of those.
 
 Month | 1-phase charge | 3-phase charge
 --- | --- | ---
