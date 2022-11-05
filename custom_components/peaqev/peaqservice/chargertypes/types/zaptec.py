@@ -75,9 +75,8 @@ class Zaptec(ChargerBase):
         )
 
     def set_sensors(self):
-        self.entities.chargerentity = f"sensor.zaptec_{self.entities.entityschema}"
+        self.entities.chargerentity = f"sensor.zaptec_charger_{self.entities.entityschema}"
         self.entities.powermeter = f"{self.entities.chargerentity}|total_charge_power"
-        #self.powermeter_is_attribute = True
         self.options.powermeter_factor = 1
         self.entities.powerswitch = f"switch.zaptec_{self.entities.entityschema}_switch"
 
