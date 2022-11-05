@@ -35,7 +35,7 @@ class HomeAssistantHub(Hub):
         domain: str,
         config_inputs: dict
         ):
-
+        self._is_initialized = False
         self.hubname = domain.capitalize()
         self.chargertype = ChargerTypeData(
             hass=hass,
@@ -100,25 +100,32 @@ class HomeAssistantHub(Hub):
 
     @property
     def is_initialized(self) -> bool:
-        ret = {"hours": self.hours.is_initialized,
-               "carpowersensor": self.sensors.carpowersensor.is_initialized,
-               "chargerobject_switch": self.sensors.chargerobject_switch.is_initialized,
-               "power": self.sensors.power.is_initialized,
-               "chargerobject": self.sensors.chargerobject.is_initialized
-               }
-        if all(ret.values()):
-            return True
-        not_ready = []
-        for r in ret:
-            if ret[r] is False:
-                not_ready.append(r)
-        if len(not_ready) != self.not_ready_list_old_state or self.initialized_log_last_logged - time.time() > 30:
-            _LOGGER.warning(f"{not_ready} has not initialized yet.")
-            self.not_ready_list_old_state = len(not_ready)
-            self.initialized_log_last_logged = time.time()
-        if "chargerobject" in not_ready:
-            self.chargertype.charger.getentities()
-        return False
+        return self._check_initialized()
+
+    def _check_initialized(self):
+        if self._is_initialized is False:
+            ret = {"hours":                self.hours.is_initialized,
+                   "carpowersensor":       self.sensors.carpowersensor.is_initialized,
+                   "chargerobject_switch": self.sensors.chargerobject_switch.is_initialized,
+                   "power":                self.sensors.power.is_initialized,
+                   "chargerobject":        self.sensors.chargerobject.is_initialized
+                   }
+            if all(ret.values()):
+                self._is_initialized = True
+                _LOGGER.info(f"Chargecontroller is ready to use.")
+                return True
+            not_ready = []
+            for r in ret:
+                if ret[r] is False:
+                    not_ready.append(r)
+            if len(not_ready) != self.not_ready_list_old_state or self.initialized_log_last_logged - time.time() > 30:
+                _LOGGER.warning(f"Chargecontroller is awaiting {not_ready} before being ready to use.")
+                self.not_ready_list_old_state = len(not_ready)
+                self.initialized_log_last_logged = time.time()
+            if "chargerobject" in not_ready:
+                self.chargertype.charger.getentities()
+            return False
+        return True
 
     def _set_chargingtracker_entities(self) -> list:
         ret = [
