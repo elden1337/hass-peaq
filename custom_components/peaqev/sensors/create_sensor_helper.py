@@ -28,7 +28,6 @@ async def gather_sensors(hub, config) -> list:
     ret.append(PeaqSensor(hub, config.entry_id))
     ret.append(PeaqThresholdSensor(hub, config.entry_id))
     ret.append(PeaqSessionSensor(hub, config.entry_id))
-    ret.append(PeaqSessionCostSensor(hub, config.entry_id))
 
     if hub.options.powersensor_includes_car is True:
         ret.append(PeaqHousePowerSensor(hub, config.entry_id))
@@ -43,6 +42,7 @@ async def gather_sensors(hub, config) -> list:
 
     if hub.options.price.price_aware is True:
         ret.append(PeaqMoneySensor(hub, config.entry_id))
+        ret.append(PeaqSessionCostSensor(hub, config.entry_id))
     return ret
 
 async def gather_integration_sensors(hub, entry_id):
