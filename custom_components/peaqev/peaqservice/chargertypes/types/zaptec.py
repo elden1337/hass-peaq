@@ -4,9 +4,11 @@ from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
 from homeassistant.core import HomeAssistant
 from peaqevcore.Models import CHARGERSTATES
 from peaqevcore.hub.hub_options import HubOptions
+from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
+from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
+from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
-from custom_components.peaqev.peaqservice.chargertypes.chargerbase import ChargerBase
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,14 +36,13 @@ class Zaptec(ChargerBase):
         self._hass = hass
         self._chargerid = huboptions.charger.chargerid
         self._auth_required = auth_required
-        self._powerswitch_controls_charging = False
         self._domainname = DOMAINNAME
         self.entities.imported_entityendings = ENTITYENDINGS
         self._native_chargerstates = NATIVE_CHARGERSTATES
-        self._chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
-        self._chargerstates[CHARGERSTATES.Connected] = ["waiting"]
-        self._chargerstates[CHARGERSTATES.Charging] = ["charging"]
-        self._chargerstates[CHARGERSTATES.Done] = ["charge_done"]
+        self.chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
+        self.chargerstates[CHARGERSTATES.Connected] = ["waiting"]
+        self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
+        self.chargerstates[CHARGERSTATES.Done] = ["charge_done"]
 
         self.set_sensors()
 
@@ -58,26 +59,27 @@ class Zaptec(ChargerBase):
 
         _on_off_params = {"charger_id": self._chargerid}
 
-        _on = CallType("start_charging", _on_off_params)
-        _off = CallType("stop_charging", _on_off_params)
-        _resume = CallType("resume_charging", _on_off_params)
-        _pause = CallType("stop_pause_charging", _on_off_params)
-
         self._set_servicecalls(
             domain=DOMAINNAME,
-            on_call=_on,
-            off_call=_off,
-            pause_call=_pause,
-            resume_call=_resume,
-            allowupdatecurrent=UPDATECURRENT
+            model=ServiceCallsDTO(
+                on=CallType("start_charging", _on_off_params),
+                off=CallType("stop_charging", _on_off_params),
+                resume=CallType("resume_charging", _on_off_params),
+                pause=CallType("stop_pause_charging", _on_off_params)
+            ),
+            options=ServiceCallsOptions(
+                allowupdatecurrent=UPDATECURRENT,
+                update_current_on_termination=UPDATECURRENT_ON_TERMINATION,
+                switch_controls_charger=False
+            )
         )
 
     def set_sensors(self):
-        self.chargerentity = f"sensor.zaptec_{self._entityschema}"
-        self.powermeter = "total_charge_power" #attribute on chargerentity
-        self.powermeter_is_attribute = True
-        self.powermeter_factor = 1
-        self.powerswitch = f"switch.zaptec_{self._entityschema}_switch"
+        self.entities.chargerentity = f"sensor.zaptec_{self.entities.entityschema}"
+        self.entities.powermeter = f"{self.entities.chargerentity}|total_charge_power"
+        #self.powermeter_is_attribute = True
+        self.options.powermeter_factor = 1
+        self.entities.powerswitch = f"switch.zaptec_{self.entities.entityschema}_switch"
 
     def _validate_sensor(self, sensor: str) -> bool:
         ret = self._hass.states.get(sensor)
