@@ -6,17 +6,18 @@ _LOGGER = logging.getLogger(__name__)
 
 NORDPOOL = "nordpool"
 
+
 class NordPoolUpdater:
-    def __init__(self, hass, hub):
+    def __init__(self, hass, hub, is_active: bool = True):
         self._hass = hass
         self._hub = hub
         self.currency: str = ""
         self.prices: list = []
         self.prices_tomorrow: list = []
-        self.state:float  = 0
+        self.state: float = 0
         self.nordpool_entity: str = ""
-
-        self._setup_nordpool()
+        if is_active:
+            self._setup_nordpool()
 
     async def update_nordpool(self):
         ret = self._hass.states.get(self.nordpool_entity)

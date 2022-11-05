@@ -72,6 +72,8 @@ class HomeAssistantHub(Hub):
 
         if self.hours.price_aware is True:
             self.nordpool = NordPoolUpdater(hass=self.state_machine, hub=self)
+        else:
+            self.nordpool = NordPoolUpdater(hass=self.state_machine, hub=self, is_active=False)
 
         self.chargingtracker_entities = self._set_chargingtracker_entities()
         trackerEntities += self.chargingtracker_entities
