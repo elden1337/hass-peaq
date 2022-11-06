@@ -49,7 +49,7 @@ class Charger:
         if self._params.charger_state_mismatch:
             await self._update_charger_state_internal(ChargerStateEnum.Pause)
         if self._hub.sensors.charger_enabled.value and not self._hub.sensors.power.killswitch.is_dead:
-            if not self.session_active and self._hub.chargecontroller.status != CHARGERSTATES.Done.name:
+            if not self.session_active and self._hub.chargecontroller.status is not CHARGERSTATES.Done.name:
                 _LOGGER.debug("There was no session active, so I created one.")
                 self.session.core.reset()
                 self.session_active = True
@@ -77,9 +77,13 @@ class Charger:
                 if self._hub.sensors.power.killswitch.is_dead:
                     _LOGGER.error(f"Your powersensor has failed to update peaqev for more than {self._hub.sensors.power.killswitch.total_timer} seconds. Therefore charging is paused until it comes alive again.")
                     await self._pause_charger()
-                else:
-                    _LOGGER.debug(f"I'm here even though i Shouldn't be. Executing Terminate_charger to be sure.")
-                    await self._terminate_charger()
+                elif self._hub.sensors.charger_enabled.value:
+                    _LOGGER.debug("Detected charger running outside of peaqev-session, overtaking command and pausing.")
+                    await self._pause_charger()
+                # else:
+                #     _LOGGER.debug(f"I'm here even though i Shouldn't be. Executing Terminate_charger to be sure.")
+                #     await self._terminate_charger()
+
             return
 
     @property
