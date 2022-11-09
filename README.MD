@@ -12,7 +12,7 @@
 
 First time here? Check the [getting-started](https://github.com/elden1337/hass-peaq/wiki/Getting-started)
 
-Interested in sponsoring or prioritizting a certain feature, look [here](https://github.com/elden1337/hass-peaq/wiki/Sponsorship-and-prioritized-development)
+Interested in sponsoring or prioritizing a certain feature, look [here](https://github.com/elden1337/hass-peaq/wiki/Sponsorship-and-prioritized-development)
 
 Peaqev aims at lowering the household's peak energy charges, targeted at charging an electronic vehicle (EV) below a set threshold. 
 Peaqev covers 26 different energy companies in Sweden, Norway and Belgium and two types of ev chargers _(2021-11-08)_
@@ -22,7 +22,7 @@ You will get the best experience with a supported charger that can update amps w
 - Tibber Watty
 - Tibber Pulse
 
-The integration does not communicate with any properitary API's. However, the chargers selected will use the integrations set for them, and may include cloud polling of data.
+The integration does not communicate with any proprietary API's. However, the chargers selected will use the integrations set for them, and may include cloud polling of data.
 
 For usage-examples and more in-depth explanations, see the Wiki:
 * [List of available Locales](https://github.com/elden1337/hass-peaq/wiki/Locale)
@@ -55,7 +55,7 @@ Peaqev has two types of installations: Regular and Lite. Regular is much more pr
 
 #### Charger and Locale:
 - `City, or Grid owner company` - The characteristics differ in how peak hours are stored and measured
-- `Charger type` - Pick the installed ev charger you have. _Check table below for for required custom component and features per charger type_
+- `Charger type` - Pick the installed ev charger you have. _Check table below for required custom component and features per charger type_
 - `Charger id` - Your local identifier to tell Peaqev which charger unit we mean to manipulate. If your charger type does not provide this, leave blank
 - *If you have selected Smart outlet as charger type, you will need to provide the switch to turn on/off, and the sensor to read power from the outlet instead of charger id.*
 
