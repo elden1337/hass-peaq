@@ -20,13 +20,15 @@ class StateChanges:
         else:
             update_session = await self._update_sensor_regular(entity, value)
 
-        if entity != self._hub.nordpool.nordpool_entity and (not self._hub.hours.is_initialized or time.time() - self.latest_nordpool_update > 60):
-            """tweak to provoke nordpool to update more often"""
-            self.latest_nordpool_update = time.time()
-            await self._hub.nordpool.update_nordpool()
+        if self._hub.options.price.price_aware is True:
+            if entity != self._hub.nordpool.nordpool_entity and (not self._hub.hours.is_initialized or time.time() - self.latest_nordpool_update > 60):
+                """tweak to provoke nordpool to update more often"""
+                self.latest_nordpool_update = time.time()
+                await self._hub.nordpool.update_nordpool()
         if self._hub.charger.session_active and update_session:
             self._hub.charger.session.session_energy = self._hub.sensors.carpowersensor.value
-            self._hub.charger.session.session_price = float(self._hub.nordpool.state)
+            if self._hub.options.price.price_aware is True:
+                self._hub.charger.session.session_price = float(self._hub.nordpool.state)
         if self._hub.scheduler.schedule_created is True:
             self._hub.scheduler.update()
         if entity in self._hub.chargingtracker_entities and self._hub.is_initialized is True:
