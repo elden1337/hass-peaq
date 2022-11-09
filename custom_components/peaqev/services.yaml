@@ -69,3 +69,21 @@ scheduler_alter_existing_schedule:
       description: >
         Optional, Add weekdays as comma-separated numbers (1 is Monday, 7 is Sunday) or as shorthand-written Mon, Tue, Fri. Schedule will initiate on these days
       example: 1, 2, 3
+
+  pause_schedule:
+    name: Alter Peaqev Schedule
+    description: Pause a schedule by calling this service with the schedule's unique id
+    fields:
+      schedule_id:
+        description: >
+          The id of the schedule you wish to pause
+        example: 1
+
+  resumee_schedule:
+    name: Alter Peaqev Schedule
+    description: Resume a paused schedule by calling this service with the schedule's unique id
+    fields:
+      schedule_id:
+        description: >
+          The id of the schedule you wish to resume
+        example: 1
