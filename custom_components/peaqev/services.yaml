@@ -36,6 +36,10 @@ scheduler_set:
       description: >
         Optional, set to True if you want to let Peaqev ignore your max-price and possibly peak-level during this scheduled session.
       example: False
+    weekdays:
+      description: >
+        Optional, Add weekdays as comma-separated numbers (1 is Monday, 7 is Sunday) or as shorthand-written Mon, Tue, Fri. Schedule will initiate on these days
+      example: 1, 2, 3
 
 scheduler_cancel:
   name: Cancel Peaqev Scheduler
