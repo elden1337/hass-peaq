@@ -34,8 +34,8 @@ class PeaqSessionSensor(SensorBase, RestoreEntity):
     @property
     def extra_state_attributes(self) -> dict:
         attr_dict = {}
-        attr_dict["average session"] = self._average_session
-        attr_dict["average weekly"] = self._average_weekly
+        attr_dict["average_session"] = self._average_session
+        attr_dict["average_weekly"] = self._average_weekly
         return attr_dict
 
     def update(self) -> None:
@@ -47,7 +47,7 @@ class PeaqSessionSensor(SensorBase, RestoreEntity):
         state = await super().async_get_last_state()
         if state:
             self._state = 0
-            self._average_weekly = state.attributes.get('average weekly', 50)
+            self._average_weekly = state.attributes.get('average_weekly', 50)
             self._hub.charger.session.core.average_data.unpack(self._average_weekly)
             self._average_weekly = self._hub.charger.session.core.average_data.export
             self._average_session = self._hub.charger.session.energy_average
