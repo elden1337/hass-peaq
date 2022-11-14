@@ -90,4 +90,4 @@ class NordPoolUpdater:
             return 0.0
         else:
             ret = self.average_data
-        return round(mean(ret),2)
+        return round(mean(ret), 2)

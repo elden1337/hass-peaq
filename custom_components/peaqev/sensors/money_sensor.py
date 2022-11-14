@@ -44,7 +44,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._current_peak = self._hub.sensors.current_peak.value
         self._avg_cost = f"{self._hub.hours.get_average_kwh_price()} {self._currency}"
         self._max_charge = f"{self._hub.hours.get_total_charge()} kWh"
-        self._average_nordpool = self._hub.nordpool.get_average(7)
+        self._average_nordpool = f"{self._hub.nordpool.get_average(7)} {self._currency}"
         self._average_nordpool_data = self._hub.nordpool.average_data
 
     @property
@@ -64,9 +64,9 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         state = await super().async_get_last_state()
         if state:
             self._hub.nordpool.import_average_data(state.attributes.get('Nordpool average data', 50))
-            self._average_nordpool = self._hub.nordpool.get_average(7)
+            self._average_nordpool = f"{self._hub.nordpool.get_average(7)} {self._currency}"
         else:
-            self._average_nordpool = "-"
+            self._average_nordpool = f"- {self._currency}"
 
     def _get_written_state(self) -> str:
         hour = datetime.now().hour
