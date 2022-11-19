@@ -21,6 +21,10 @@ class NordPoolUpdater:
         if is_active:
             self._setup_nordpool()
 
+    @property
+    def average_ready(self) -> bool:
+        return len(self.average_data) >= AVERAGE_MAX_LEN
+
     async def update_nordpool(self):
         ret = self._hass.states.get(self.nordpool_entity)
         if ret is not None:
