@@ -43,6 +43,8 @@ class NordPoolUpdater:
             ret_attr_currency = str(ret.attributes.get("currency"))
             self.currency = ret_attr_currency
             self.state = ret.state
+            if len(self.average_data) >= 7:
+                self._hub.hours.adjusted_average = self.get_average(7)
             self._hub.hours.prices = self.prices
             self._hub.hours.prices_tomorrow = self.prices_tomorrow
             try:
@@ -88,10 +90,13 @@ class NordPoolUpdater:
             del self.average_data[0]
 
     def get_average(self, days: int) -> float:
-        if len(self.average_data) > days:
-            ret = self.average_data[-days]
-        elif len(self.average_data) == 0:
-            return 0.0
-        else:
-            ret = self.average_data
-        return round(mean(ret), 2)
+        try:
+            if len(self.average_data) > days:
+                ret = self.average_data[-days:]
+            elif len(self.average_data) == 0:
+                return 0.0
+            else:
+                ret = self.average_data
+            return round(mean(ret), 2)
+        except Exception as e:
+            _LOGGER.debug(f"Could not calculate average. indata: {self.average_data}, error: {e}")
