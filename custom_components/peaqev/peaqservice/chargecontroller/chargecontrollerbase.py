@@ -53,6 +53,10 @@ class ChargeControllerBase:
         update_timer = False
         free_charge = self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data)
 
+        if self._hub.svk.should_stop:
+            """interim fix for svk peak hours"""
+            return CHARGERSTATES.Stop
+
         if self._hub.sensors.charger_enabled.value is False:
             update_timer = True
             ret = CHARGERSTATES.Disabled
@@ -77,6 +81,10 @@ class ChargeControllerBase:
         update_timer = True
         _state = self._hub.sensors.chargerobject.value.lower()
         free_charge = self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data)
+
+        if self._hub.svk.should_stop:
+            """interim fix for svk peak hours"""
+            return CHARGERSTATES.Stop
 
         if self._hub.sensors.charger_enabled.value is False:
             ret = CHARGERSTATES.Disabled
