@@ -31,7 +31,7 @@ class svk:
                             LOCALE_SE_BJERKE_ENERGI,LOCALE_SE_LINDE_ENERGI,LOCALE_SE_FALBYDGENS_ENERGI,LOCALE_SE_MALARENERGI]
 
     @property
-    def should_stop(self):
+    def should_stop(self) -> bool:
         if not self.hub.options.locale in self.localelist:
             return False
         if time.time() > self.stopdate:
