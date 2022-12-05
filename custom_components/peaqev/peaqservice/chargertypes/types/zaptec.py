@@ -1,6 +1,8 @@
 import logging
+import time
 
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import entity_sources
 from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargerstates import CHARGERSTATES
 from peaqevcore.models.chargertype.calltype import CallType
@@ -73,6 +75,42 @@ class Zaptec(ChargerBase):
                 switch_controls_charger=False
             )
         )
+
+    def getentities(self, domain: str = None, endings: list = None):
+        if len(self.entities.entityschema) < 1:
+            domain = self.domainname if domain is None else domain
+            endings = self.entities.imported_entityendings if endings is None else endings
+
+            entities = helper.get_entities_from_hass(self._hass, domain)
+
+            if len(entities) < 1:
+                _LOGGER.error(f"no entities found for {domain} at {time.time()}")
+            else:
+                _endings = endings
+                candidate = ""
+
+                for e in entities:
+                    splitted = e.split(".")
+                    for ending in _endings:
+                        if splitted[1].endswith(ending):
+                            candidate = splitted[1].replace(ending, '')
+                            break
+                    if len(candidate) > 1:
+                        break
+
+                self.entities.entityschema = candidate
+                _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
+                self.entities.imported_entities = entities
+
+    def _get_entities_from_hass(self, domain_name) -> list:
+        return [
+            entity_id
+            for entity_id, info in entity_sources(self._hass).items()
+            if info["domain"] == domain_name
+                or info["domain"] == domain_name.capitalize()
+                or info["domain"] == domain_name.upper()
+                or info["domain"] == domain_name.lower()
+        ]
 
     def set_sensors(self):
         self.entities.chargerentity = f"sensor.zaptec_charger_{self.entities.entityschema}"
