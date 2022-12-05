@@ -15,7 +15,7 @@ First time here? Check the [getting-started](https://github.com/elden1337/hass-p
 
 Interested in sponsoring or prioritizing a certain feature, look [here](https://github.com/elden1337/hass-peaq/wiki/Sponsorship-and-prioritized-development)
 
-Peaqev aims at lowering the household's peak energy charges, targeted at charging an electronic vehicle (EV) below a set threshold. 
+Peaqev aims at lowering the household's peak energy charges, targeted at charging an electronic vehicle (EV) below a dynamic threshold. 
 Peaqev covers [26 different energy companies](https://github.com/elden1337/hass-peaq/wiki/Locale) in Sweden, Norway and Belgium and two types of ev chargers _(2021-11-08)_
 You will get the best experience with a supported charger that can update amps while charging, as well as using a connected power meter that update your total power draw frequently. Examples of such meters are:
 
@@ -60,11 +60,12 @@ Peaqev has two types of installations: Regular and Lite. Regular is much more pr
 - `Charger id` - Your local identifier to tell Peaqev which charger unit we mean to manipulate. If your charger type does not provide this, leave blank
 - *If you have selected Smart outlet as charger type, you will need to provide the switch to turn on/off, and the sensor to read power from the outlet instead of charger id.*
 
-Charger | Required integration | Can update amps | Supported models | Notes
---- | --- | --- | --- | ---
+Charger | Required integration                                        | Can update amps | Supported models | Notes
+--- |-------------------------------------------------------------| --- | --- | ---
 Chargeamps| [hass-chargeamps](https://github.com/kirei/hass-chargeamps) | Yes | Halo |
-Easee| [easee-hass](https://github.com/fondberg/easee_hass/) | Yes | Robot | _Turn off all smart charging before using peaqev_
-Smart outlet| - | No | | _Stability depends on the outlet used_
+Easee| [easee-hass](https://github.com/fondberg/easee_hass/)       | Yes | Robot | _Turn off all smart charging before using peaqev_
+Zaptec| [zaptec](https://github.com/custom-components/zaptec)       | No* | Go | *Anticipate update amps to be fixed soon
+Smart outlet| -                                                           | No | | _Stability depends on the outlet used_
 
 
 #### Price-aware:
@@ -99,5 +100,5 @@ Nov| 1.8 | 3.6
 Dec| 2.0 | 4.0
 
 
-*While this integration will try to not break your monthly energy peak hour, there is off course no guarantee. Various factors beyond control of this logic do occur, so for those aiming at staying below their threshold, I do suggest you think about the non-hours, caution-hours etc in the setup. These hours should be set when you commonly utilize a lot of extra energy in your home, such as cooking, doing laundry etc.*
+*While this integration will try to not break your monthly energy peaks, there is off course no guarantee. Various factors beyond control of this logic do occur, so for those aiming at staying below their threshold, I do suggest you think about the non-hours, caution-hours etc in the setup. These hours should be set when you commonly utilize a lot of extra energy in your home, such as cooking, doing laundry etc.*
 
