@@ -71,6 +71,8 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
     def _get_written_state(self) -> str:
         hour = datetime.now().hour
         ret = ""
+        if self._hub.svk.should_stop:
+            return self._hub.svk.stopped_string
         if self._hub.timer.is_override:
             return self._hub.timer.override_string
         if hour in self._nonhours:
