@@ -1,9 +1,9 @@
 import logging
 
-from custom_components.peaqev.peaqservice.chargertypes.calltype import CallType
 from homeassistant.core import HomeAssistant
-from peaqevcore.Models import CHARGERSTATES
 from peaqevcore.hub.hub_options import HubOptions
+from peaqevcore.models.chargerstates import CHARGERSTATES
+from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
