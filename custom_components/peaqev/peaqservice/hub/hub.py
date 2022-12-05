@@ -18,6 +18,7 @@ from custom_components.peaqev.peaqservice.chargertypes.chargertypes import Charg
 from custom_components.peaqev.peaqservice.hub.nordpool import NordPoolUpdater
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.hub.state_changes import StateChanges
+from custom_components.peaqev.peaqservice.hub.svk import svk
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER, SMARTOUTLET
 
 _LOGGER = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ class HomeAssistantHub(Hub):
         config_inputs: dict
         ):
         self._is_initialized = False
+
         self.hubname = domain.capitalize()
         self.chargertype = ChargerTypeData(
             hass=hass,
@@ -58,7 +60,7 @@ class HomeAssistantHub(Hub):
 
         self.servicecalls = ServiceCalls(self)
         self.states = StateChanges(self)
-
+        self.svk = svk(self)  # interim solution for svk peak hours
         trackerEntities = [
             self.sensors.totalhourlyenergy.entity
         ]
