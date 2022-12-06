@@ -43,7 +43,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     options.price.min_price = await _get_existing_param(conf, "min_priceaware_threshold_price", 0)
     options.price.top_price = await _get_existing_param(conf, "absolute_top_price", 0)
     options.price.cautionhour_type = conf.options["cautionhour_type"] if "cautionhour_type" in conf.options.keys() else conf.data["cautionhour_type"]
-
+    options.fuse_max = conf.options["mains"] if "mains" in conf.options.keys() else conf.data["mains"]
     ci = {}
 
     if peaqtype_is_lite is True:
