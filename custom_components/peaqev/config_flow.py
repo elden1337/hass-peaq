@@ -22,6 +22,7 @@ from custom_components.peaqev.configflow.config_flow_schemas import (
     CHARGER_DETAILS_SCHEMA
 )
 from custom_components.peaqev.configflow.config_flow_validation import ConfigFlowValidation
+from custom_components.peaqev.peaqservice.hub.power_orchestrator import FUSES_LIST
 from custom_components.peaqev.peaqservice.util.constants import CHARGERTYPE_OUTLET
 from .const import DOMAIN  # pylint:disable=unused-import
 
@@ -170,7 +171,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             last_step=True,
             data_schema=vol.Schema(
                 {
-                    vol.Optional("mains", default=0): cv.positive_float
+                    vol.Optional(
+                        "mains",
+                        default="",
+                    ): vol.In(FUSES_LIST)
                 })
         )
 
@@ -276,15 +280,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self.options["mains"] = user_input["mains"]
             return self.async_create_entry(title="", data=self.options)
 
-        mainsvalue = self.config_entry.options.get(
-            "mains") if "mains" in self.config_entry.options.keys() else self.config_entry.data.get(
-            "mains")
+        mainsvalue = await self._get_existing_param("mains", "")
 
         return self.async_show_form(
             step_id="misc",
             last_step=True,
             data_schema=vol.Schema(
-                {
-                    vol.Optional("mains", default=mainsvalue): cv.positive_float
-                })
+                data_schema=vol.Schema(
+                    {
+                        vol.Optional(
+                            "mains",
+                            default=mainsvalue,
+                        ): vol.In(FUSES_LIST)
+                    })
+            )
         )

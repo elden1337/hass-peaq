@@ -30,14 +30,13 @@
           "sep": "September",
           "oct": "October",
           "nov": "November",
-          "dec": "December",
-          "mains": "(Optional), add your max-powerdraw in W to stop Peaqev from breaching your fuses."
+          "dec": "December"
         },
         "description": "Select your allowed monthly start-peak."
       },
       "misc": {
         "data": {
-          "mains": "(Optional), add your max-powerdraw in W to stop Peaqev from breaching your fuses."
+          "mains": "(Optional), pick your main fuses to allow peaqev to act as an ampguard."
         },
         "description": "Experimental and extra options."
       }
@@ -101,13 +100,12 @@
           "sep": "September",
           "oct": "October",
           "nov": "November",
-          "dec": "December",
-          "mains": "(Optional), add your max-powerdraw in W to stop Peaqev from breaching your fuses."
+          "dec": "December"
         }
       },
       "misc": {
         "data": {
-          "mains": "(Optional), add your max-powerdraw in W to stop Peaqev from breaching your fuses."
+          "mains": "(Optional), pick your main fuses to allow peaqev to act as an ampguard."
         },
         "description": "Experimental and extra options."
       }
