@@ -15,6 +15,7 @@ from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller impo
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_lite import ChargeControllerLite
 from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
+from custom_components.peaqev.peaqservice.hub.fuse_guard import FuseGuard
 from custom_components.peaqev.peaqservice.hub.nordpool import NordPoolUpdater
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.hub.state_changes import StateChanges
@@ -61,6 +62,7 @@ class HomeAssistantHub(Hub):
         self.servicecalls = ServiceCalls(self)
         self.states = StateChanges(self)
         self.svk = svk(self)  # interim solution for svk peak hours
+
         trackerEntities = [
             self.sensors.totalhourlyenergy.entity
         ]
@@ -77,6 +79,7 @@ class HomeAssistantHub(Hub):
         else:
             self.nordpool = NordPoolUpdater(hass=self.state_machine, hub=self, is_active=False)
 
+        self.fuse_guard = FuseGuard(hub=self)
         self.chargingtracker_entities = self._set_chargingtracker_entities()
         trackerEntities += self.chargingtracker_entities
         async_track_state_change(hass, trackerEntities, self.state_changed)

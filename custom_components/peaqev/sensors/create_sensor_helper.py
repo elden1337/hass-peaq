@@ -11,6 +11,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_INTEGRAL_NAME
 )
 from custom_components.peaqev.sensors.average_sensor import PeaqAverageSensor
+from custom_components.peaqev.sensors.fuseguard_sensor import FuseGuardSensor
 from custom_components.peaqev.sensors.integration_sensor import PeaqIntegrationSensor
 from custom_components.peaqev.sensors.money_sensor import PeaqMoneySensor
 from custom_components.peaqev.sensors.peaq_sensor import PeaqSensor
@@ -33,6 +34,9 @@ async def gather_sensors(hub, config) -> list:
         ret.append(PeaqHousePowerSensor(hub, config.entry_id))
     else:
         ret.append(PeaqPowerSensor(hub, config.entry_id))
+
+    if hub.fuse_guard.enabled:
+        ret.append(FuseGuardSensor(hub, config.entry_id))
 
     if hub.options.peaqev_lite is False:
         average_delta = 2 if hub.sensors.locale.data.is_quarterly(hub.sensors.locale.data) else 5
