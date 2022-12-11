@@ -8,6 +8,7 @@ from homeassistant.components.filter.sensor import (
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
+from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
 
 
 class PeaqAverageSensor(SensorFilter):
@@ -24,7 +25,7 @@ class PeaqAverageSensor(SensorFilter):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
+        return {"identifiers": {(DOMAIN, self._hub.hub_id, POWERCONTROLS)}}
 
     @property
     def unique_id(self):

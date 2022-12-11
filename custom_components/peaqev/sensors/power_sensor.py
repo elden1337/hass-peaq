@@ -7,12 +7,12 @@ from homeassistant.const import (
 )
 
 from custom_components.peaqev.peaqservice.util.constants import ALLOWEDCURRENT
-from custom_components.peaqev.sensors.sensorbase import SensorBase
+from custom_components.peaqev.sensors.sensorbase import PowerDevice
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class PeaqAmpSensor(SensorBase):
+class PeaqAmpSensor(PowerDevice):
     device_class = SensorDeviceClass.ENERGY
     unit_of_measurement = ELECTRIC_CURRENT_AMPERE
 
@@ -43,7 +43,7 @@ class PeaqAmpSensor(SensorBase):
         }
 
 
-class PeaqPowerSensor(SensorBase):
+class PeaqPowerSensor(PowerDevice):
     device_class = SensorDeviceClass.POWER
     unit_of_measurement = POWER_WATT
 
@@ -62,7 +62,7 @@ class PeaqPowerSensor(SensorBase):
         self._state = self._hub.sensors.power.total.value
 
 
-class PeaqHousePowerSensor(SensorBase):
+class PeaqHousePowerSensor(PowerDevice):
     device_class = SensorDeviceClass.POWER
     unit_of_measurement = POWER_WATT
 

@@ -10,6 +10,7 @@ from homeassistant.const import (
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
+from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
 
 
 class PeaqIntegrationSensor(IntegrationSensor):
@@ -39,4 +40,4 @@ class PeaqIntegrationSensor(IntegrationSensor):
     @property
     def device_info(self):
         """Return information to link this entity with the correct device."""
-        return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
+        return {"identifiers": {(DOMAIN, self._hub.hub_id, POWERCONTROLS)}}
