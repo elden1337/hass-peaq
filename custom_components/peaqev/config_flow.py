@@ -286,12 +286,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             step_id="misc",
             last_step=True,
             data_schema=vol.Schema(
-                data_schema=vol.Schema(
-                    {
-                        vol.Optional(
-                            "mains",
-                            default=mainsvalue,
-                        ): vol.In(FUSES_LIST)
-                    })
-            )
+                {
+                    vol.Optional(
+                        "mains",
+                        default=mainsvalue,
+                    ): vol.In(FUSES_LIST)
+                })
+
         )
