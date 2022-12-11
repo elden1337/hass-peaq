@@ -38,7 +38,7 @@ CUTOFF_THRESHOLD = 0.9
 WARNING_THRESHOLD = 0.75
 
 
-class FuseGuard:
+class PowerCanary:
     def __init__(self, hub):
         self._hub = hub
         self._fuse = Fuses.parse_from_config(hub.options.fuse_type)
@@ -56,7 +56,7 @@ class FuseGuard:
 
     @property
     def fuse(self) -> str:
-        return self._fuse.name
+        return self._fuse.value
 
     @property
     def active(self) -> bool:

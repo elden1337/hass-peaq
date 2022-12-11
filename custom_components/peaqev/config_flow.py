@@ -22,7 +22,7 @@ from custom_components.peaqev.configflow.config_flow_schemas import (
     CHARGER_DETAILS_SCHEMA
 )
 from custom_components.peaqev.configflow.config_flow_validation import ConfigFlowValidation
-from custom_components.peaqev.peaqservice.hub.fuse_guard import FUSES_LIST
+from custom_components.peaqev.peaqservice.hub.power_canary import FUSES_LIST
 from custom_components.peaqev.peaqservice.util.constants import CHARGERTYPE_OUTLET
 from .const import DOMAIN  # pylint:disable=unused-import
 
