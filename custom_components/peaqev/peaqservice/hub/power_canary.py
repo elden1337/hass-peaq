@@ -94,13 +94,18 @@ class PowerCanary:
 
     @property
     def threephase_amps(self) -> dict:
-        return self._threephase_amps
+        return self._get_currently_allowed_threephase_amps()
 
     def allow_adjustment(self, new_amps: int) -> bool:
         """this method returns true if the desired adjustment 'new_amps' is not breaching threshold"""
         if not self._allow_amp_adjustment:
             return False
         return False
+
+    def _get_currently_allowed_threephase_amps(self) -> dict:
+        """get the currently allowed amps based on the current power draw"""
+        _max = (self._fuse_max * CUTOFF_THRESHOLD)
+        return {k: v for (k, v) in self._threephase_amps.items() if k+self._hub.sensors.power.total.value < _max}
 
     def _set_allowed_threephase_amps(self) -> dict:
         """only allow amps 16-32 threephase if user has set this value high enough"""

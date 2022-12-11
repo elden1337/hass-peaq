@@ -15,7 +15,8 @@ from custom_components.peaqev.sensors.integration_sensor import PeaqIntegrationS
 from custom_components.peaqev.sensors.money_sensor import PeaqMoneySensor
 from custom_components.peaqev.sensors.peaq_sensor import PeaqSensor
 from custom_components.peaqev.sensors.power_sensor import (PeaqPowerSensor, PeaqAmpSensor, PeaqHousePowerSensor)
-from custom_components.peaqev.sensors.powercanary_sensor import PowerCanaryStatusSensor, PowerCanaryPercentageSensor
+from custom_components.peaqev.sensors.powercanary_sensor import PowerCanaryStatusSensor, PowerCanaryPercentageSensor, \
+    PowerCanaryMaxAmpSensor
 from custom_components.peaqev.sensors.prediction_sensor import PeaqPredictionSensor
 from custom_components.peaqev.sensors.session_sensor import PeaqSessionSensor, PeaqSessionCostSensor
 from custom_components.peaqev.sensors.threshold_sensor import PeaqThresholdSensor
@@ -38,6 +39,7 @@ async def gather_sensors(hub, config) -> list:
     if hub.power_canary.enabled:
         ret.append(PowerCanaryStatusSensor(hub, config.entry_id))
         ret.append(PowerCanaryPercentageSensor(hub, config.entry_id))
+        ret.append(PowerCanaryMaxAmpSensor(hub, config.entry_id))
 
     if hub.options.peaqev_lite is False:
         average_delta = 2 if hub.sensors.locale.data.is_quarterly(hub.sensors.locale.data) else 5

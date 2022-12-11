@@ -1,7 +1,10 @@
 import logging
 
-from homeassistant.components.sensor import SensorEntity
-from homeassistant.const import PERCENTAGE
+from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
+from homeassistant.const import (
+    PERCENTAGE,
+    ELECTRIC_CURRENT_AMPERE
+)
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
@@ -63,7 +66,7 @@ class PowerCanaryPercentageSensor(PowerCanaryDevice):
         self.update()
 
     @property
-    def state(self) -> int:
+    def state(self) -> float:
         return self._state
 
     @property
@@ -71,9 +74,9 @@ class PowerCanaryPercentageSensor(PowerCanaryDevice):
         return PERCENTAGE
 
     def update(self) -> None:
-        self._state = self._hub.power_canary.current_percentage * 100
-        self._warning = self._hub.power_canary.warning_threshold * 100
-        self._cutoff = self._hub.power_canary.cutoff_threshold * 100
+        self._state = round(self._hub.power_canary.current_percentage * 100,2)
+        self._warning = round(self._hub.power_canary.warning_threshold * 100,2)
+        self._cutoff = round(self._hub.power_canary.cutoff_threshold * 100,2)
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -81,5 +84,26 @@ class PowerCanaryPercentageSensor(PowerCanaryDevice):
             "warning_threshold": self._warning,
             "cutoff_threshold": self._cutoff
         }
+
+
+class PowerCanaryMaxAmpSensor(PowerCanaryDevice):
+    device_class = SensorDeviceClass.ENERGY
+    unit_of_measurement = ELECTRIC_CURRENT_AMPERE
+
+    def __init__(self, hub, entry_id):
+        name = f"{hub.hubname} {POWERCANARY} allowed amps"
+        super().__init__(hub, name, entry_id)
+        self._hub = hub
+        self._state = None
+        self._attr_icon = "mdi:sine-wave"
+        self.update()
+
+    @property
+    def state(self) -> int:
+        return self._state
+
+    def update(self) -> None:
+        self._state = max(self._hub.power_canary.threephase_amps.values())
+
 
 
