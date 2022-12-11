@@ -34,15 +34,15 @@ FUSES_DICT = {
 
 FUSES_LIST = [f.value for f in Fuses]
 
-MAINS_THRESHOLD = 0.9
-MAINS_REDLINE = 0.75
+CUTOFF_THRESHOLD = 0.9
+WARNING_THRESHOLD = 0.75
 
 
 class FuseGuard:
-    def __init(self, hub):
+    def __init__(self, hub):
         self._hub = hub
-        self._fuse = Fuses.parse_from_config(hub.options.fuse)
-        self._fuse_max = FUSES_DICT[self._fuse]
+        self._fuse = Fuses.parse_from_config(hub.options.fuse_type)
+        self._fuse_max = FUSES_DICT[self._fuse] if self._fuse is not None else 0
         # self._current_amps: int = 0
         # self._current_car_power: int = 0
         self._threephase_amps: dict = self._set_allowed_threephase_amps()
@@ -55,15 +55,27 @@ class FuseGuard:
         return self._enabled
 
     @property
+    def fuse(self) -> str:
+        return self._fuse.name
+
+    @property
     def active(self) -> bool:
         return self._active
+
+    @property
+    def warning_threshold(self) -> float:
+        return WARNING_THRESHOLD
+
+    @property
+    def cutoff_threshold(self) -> float:
+        return CUTOFF_THRESHOLD
 
     @property
     def alive(self) -> bool:
         """if returns false no charging can be conducted"""
         if self._enabled is False:
             return True
-        return self._hub.sensors.power.total.value < self._fuse_max * MAINS_THRESHOLD
+        return self._hub.sensors.power.total.value < self._fuse_max * CUTOFF_THRESHOLD
 
     @property
     def current_percentage(self) -> float:
@@ -74,11 +86,11 @@ class FuseGuard:
         if not self.enabled:
             return "Disabled"
         if not self.alive:
-            return f"Critical. Lower consumption! {round(self.current_percentage * 100, 0)}%"
+            return f"Critical. Lower consumption!"
         if self.active:
-            if self.current_percentage >= MAINS_REDLINE:
-                return f"Warning! {round(self.current_percentage * 100, 0)}%"
-            return f"Ok. {round(self.current_percentage * 100, 0)}%"
+            if self.current_percentage >= WARNING_THRESHOLD:
+                return f"Warning!"
+            return f"Ok"
 
     @property
     def threephase_amps(self) -> dict:
