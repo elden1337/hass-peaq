@@ -90,12 +90,13 @@ class PowerCanaryMaxAmpSensor(PowerCanaryDevice):
     device_class = SensorDeviceClass.ENERGY
     unit_of_measurement = ELECTRIC_CURRENT_AMPERE
 
-    def __init__(self, hub, entry_id):
-        name = f"{hub.hubname} {POWERCANARY} allowed amps"
+    def __init__(self, hub, entry_id, phases:int):
+        name = f"{hub.hubname} {POWERCANARY} allowed amps {phases}-phase"
         super().__init__(hub, name, entry_id)
         self._hub = hub
         self._state = None
         self._attr_icon = "mdi:sine-wave"
+        self.phases = phases
         self.update()
 
     @property
@@ -103,7 +104,10 @@ class PowerCanaryMaxAmpSensor(PowerCanaryDevice):
         return self._state
 
     def update(self) -> None:
-        self._state = max(self._hub.power_canary.threephase_amps.values())
+        if self.phases == 1:
+            self._state = max(self._hub.power_canary.onephase_amps.values())
+        if self.phases == 3:
+            self._state = max(self._hub.power_canary.threephase_amps.values())
 
 
 

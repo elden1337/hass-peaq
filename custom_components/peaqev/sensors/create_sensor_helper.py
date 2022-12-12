@@ -39,7 +39,8 @@ async def gather_sensors(hub, config) -> list:
     if hub.power_canary.enabled:
         ret.append(PowerCanaryStatusSensor(hub, config.entry_id))
         ret.append(PowerCanaryPercentageSensor(hub, config.entry_id))
-        ret.append(PowerCanaryMaxAmpSensor(hub, config.entry_id))
+        ret.append(PowerCanaryMaxAmpSensor(hub, config.entry_id, 1))
+        ret.append(PowerCanaryMaxAmpSensor(hub, config.entry_id, 3))
 
     if hub.options.peaqev_lite is False:
         average_delta = 2 if hub.sensors.locale.data.is_quarterly(hub.sensors.locale.data) else 5

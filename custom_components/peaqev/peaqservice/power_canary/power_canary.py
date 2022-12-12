@@ -1,27 +1,13 @@
 # from peaqevcore.models.fuses import Fuses
-from enum import Enum
+import logging
 
 from peaqevcore.models.const import CURRENTS_THREEPHASE_1_32, CURRENTS_THREEPHASE_1_16, CURRENTS_ONEPHASE_1_16, \
     CURRENTS_ONEPHASE_1_32
 
+from custom_components.peaqev.peaqservice.power_canary.fuses import Fuses
+from custom_components.peaqev.peaqservice.power_canary.smooth_average import SmoothAverage
 
-class Fuses(Enum):
-    FUSE_3_16 = "3phase 16A"
-    FUSE_3_20 = "3phase 20A"
-    FUSE_3_25 = "3phase 25A"
-    FUSE_3_35 = "3phase 35A"
-    FUSE_3_50 = "3phase 50A"
-    FUSE_3_63 = "3phase 63A"
-    DEFAULT = "Not set"
-
-    def parse_from_config(fusetype: str):
-        try:
-            for f in Fuses:
-                if fusetype == f.value:
-                    return f
-        except Exception as e:
-            print("Unable to parse fuse-type, invalid value: {e}")
-            return Fuses.DEFAULT
+_LOGGER = logging.getLogger(__name__)
 
 
 FUSES_DICT = {
@@ -31,6 +17,15 @@ FUSES_DICT = {
     Fuses.FUSE_3_35: 24000,
     Fuses.FUSE_3_50: 35000,
     Fuses.FUSE_3_63: 44000
+}
+
+FUSES_MAX_SINGLE_FUSE = {
+    Fuses.FUSE_3_16: 16,
+    Fuses.FUSE_3_20: 20,
+    Fuses.FUSE_3_25: 25,
+    Fuses.FUSE_3_35: 35,
+    Fuses.FUSE_3_50: 50,
+    Fuses.FUSE_3_63: 63
 }
 
 FUSES_LIST = [f.value for f in Fuses]
@@ -52,7 +47,18 @@ class PowerCanary:
         self._threephase_amps: dict = self._set_allowed_amps(CURRENTS_THREEPHASE_1_32, CURRENTS_THREEPHASE_1_16)
         self._onephase_amps: dict = self._set_allowed_amps(CURRENTS_ONEPHASE_1_32, CURRENTS_ONEPHASE_1_16)
         self._allow_amp_adjustment: bool = self._hub.chargertype.charger.servicecalls.options.allowupdatecurrent
+        self._total_power = SmoothAverage(max_age=60, max_samples=30)
         self._validate()
+
+    @property
+    def total_power(self) -> float:
+        if self.enabled and self.active:
+            return self._total_power.value
+
+    @total_power.setter
+    def total_power(self, value) -> None:
+        if self.enabled and self.active:
+            self._total_power.add_reading(value)
 
     @property
     def enabled(self) -> bool:
@@ -75,7 +81,9 @@ class PowerCanary:
 
     @property
     def current_percentage(self) -> float:
-        return self._hub.sensors.power.total.value / self._fuse_max
+        if isinstance(self.total_power, float):
+            return self.total_power / self._fuse_max
+        return 0
 
     @property
     def state_string(self) -> str:
@@ -90,7 +98,8 @@ class PowerCanary:
 
     @property
     def onephase_amps(self) -> dict:
-        return self._get_currently_allowed_amps(self._onephase_amps)
+        ret = self._get_currently_allowed_amps(self._onephase_amps)
+        return {k: v for (k, v) in ret.items() if v < FUSES_MAX_SINGLE_FUSE[self._fuse]}
 
     @property
     def threephase_amps(self) -> dict:

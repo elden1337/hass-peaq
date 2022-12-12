@@ -16,10 +16,10 @@ from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_lite
 from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
 from custom_components.peaqev.peaqservice.hub.nordpool import NordPoolUpdater
-from custom_components.peaqev.peaqservice.hub.power_canary import PowerCanary
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.hub.state_changes import StateChanges
 from custom_components.peaqev.peaqservice.hub.svk import svk
+from custom_components.peaqev.peaqservice.power_canary.power_canary import PowerCanary
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER, SMARTOUTLET
 
 _LOGGER = logging.getLogger(__name__)

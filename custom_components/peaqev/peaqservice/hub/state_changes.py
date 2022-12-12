@@ -96,6 +96,7 @@ class StateChanges:
             case self._hub.nordpool.nordpool_entity:
                 await self._hub.nordpool.update_nordpool()
                 update_session = True
+        self._hub.power_canary.total_power = self._hub.sensors.power.total.value
         return update_session
 
     async def _handle_outlet_updates(self):
