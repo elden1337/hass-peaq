@@ -81,6 +81,7 @@ class Easee(ChargerBase):
 
         self.set_sensors()
         self.max_amps = self.get_allowed_amps()
+
         servicecall_params = {
             CHARGER: "charger_id",
             CHARGERID: self._chargerid,
