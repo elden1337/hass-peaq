@@ -67,6 +67,7 @@ class StateChanges:
                     config_sensor_value=value
                 )
                 update_session = True
+                self._hub.power_canary.total_power = self._hub.sensors.power.total.value
             case self._hub.sensors.carpowersensor.entity:
                 self._hub.sensors.carpowersensor.value = value
                 self._hub.sensors.power.update(
@@ -75,6 +76,7 @@ class StateChanges:
                 )
                 update_session = True
                 self._hub.sensors.chargerobject_switch.updatecurrent()
+                self._hub.power_canary.total_power = self._hub.sensors.power.total.value
                 await self._handle_outlet_updates()
             case self._hub.sensors.chargerobject.entity:
                 self._hub.sensors.chargerobject.value = value
@@ -96,7 +98,7 @@ class StateChanges:
             case self._hub.nordpool.nordpool_entity:
                 await self._hub.nordpool.update_nordpool()
                 update_session = True
-        self._hub.power_canary.total_power = self._hub.sensors.power.total.value
+
         return update_session
 
     async def _handle_outlet_updates(self):

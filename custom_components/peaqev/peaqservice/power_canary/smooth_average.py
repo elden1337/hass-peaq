@@ -1,5 +1,8 @@
+import logging
 import statistics as stat
 import time
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class SmoothAverage:
@@ -15,7 +18,11 @@ class SmoothAverage:
     @property
     def value(self) -> float | None:
         if len(self._readings) > 0:
-            return stat.mean([i[1] for i in self._readings])
+            ret = stat.mean([i[1] for i in self._readings])
+            if ret == 0:
+                _LOGGER.debug(f"Reading was 0. The samples are {self._readings}")
+            return ret
+        #_LOGGER.debug(f"No readings available for smooth average")
         return None
 
     @property
@@ -39,10 +46,14 @@ class SmoothAverage:
             ]
         )
 
-    def add_reading(self, val: float):
+    def add_reading(self, val):
         t = time.time()
-        if self._ignore is None or self._ignore < val:
-            self._readings.append((int(t), round(val, 3)))
+        try:
+            floatval = float(val)
+        except:
+            return
+        if self._ignore is None or floatval > self._ignore:
+            self._readings.append((int(t), floatval))
             self._latest_update = time.time()
             self._remove_from_list()
 
@@ -52,5 +63,6 @@ class SmoothAverage:
             self._readings.pop(0)
         gen = (x for x in self._readings if time.time() - int(x[0]) > self._max_age)
         for i in gen:
-            if len(self._readings) > 1:
+            if len(self._readings) > 2:
                 self._readings.remove(i)
+

@@ -12,7 +12,9 @@ from custom_components.peaqev.peaqservice.util.constants import (
     OFF,
     RESUME,
     PAUSE,
-    UPDATECURRENT
+    UPDATECURRENT,
+    PARAMS,
+    CURRENT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -149,7 +151,7 @@ class Charger:
             while self._hub.sensors.chargerobject_switch.value is True and self._params.running is True:
                 if await self._hass.async_add_executor_job(self.helpers.wait_update_current):
                     serviceparams = await self.helpers.setchargerparams(calls)
-                    if not self._params.disable_current_updates:
+                    if not self._params.disable_current_updates and self._hub.power_canary.allow_adjustment(new_amps=serviceparams[calls[PARAMS][CURRENT]]):
                         await self._do_service_call(calls[DOMAIN], calls[UPDATECURRENT], serviceparams)
                     await self._hass.async_add_executor_job(self.helpers.wait_loop_cycle)
 

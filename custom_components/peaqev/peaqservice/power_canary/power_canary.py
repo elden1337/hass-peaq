@@ -1,14 +1,16 @@
 # from peaqevcore.models.fuses import Fuses
+from __future__ import annotations
+
 import logging
 
 from peaqevcore.models.const import CURRENTS_THREEPHASE_1_32, CURRENTS_THREEPHASE_1_16, CURRENTS_ONEPHASE_1_16, \
     CURRENTS_ONEPHASE_1_32
+from peaqevcore.models.phases import Phases
 
 from custom_components.peaqev.peaqservice.power_canary.fuses import Fuses
 from custom_components.peaqev.peaqservice.power_canary.smooth_average import SmoothAverage
 
 _LOGGER = logging.getLogger(__name__)
-
 
 FUSES_DICT = {
     Fuses.FUSE_3_16: 11000,
@@ -47,7 +49,7 @@ class PowerCanary:
         self._threephase_amps: dict = self._set_allowed_amps(CURRENTS_THREEPHASE_1_32, CURRENTS_THREEPHASE_1_16)
         self._onephase_amps: dict = self._set_allowed_amps(CURRENTS_ONEPHASE_1_32, CURRENTS_ONEPHASE_1_16)
         self._allow_amp_adjustment: bool = self._hub.chargertype.charger.servicecalls.options.allowupdatecurrent
-        self._total_power = SmoothAverage(max_age=60, max_samples=30)
+        self._total_power = SmoothAverage(max_age=60, max_samples=30, ignore=0)
         self._validate()
 
     @property
@@ -58,7 +60,8 @@ class PowerCanary:
     @total_power.setter
     def total_power(self, value) -> None:
         if self.enabled and self.active:
-            self._total_power.add_reading(value)
+            self._total_power.add_reading(float(value))
+            self.check_current_percentage()
 
     @property
     def enabled(self) -> bool:
@@ -81,9 +84,10 @@ class PowerCanary:
 
     @property
     def current_percentage(self) -> float:
-        if isinstance(self.total_power, float):
-            return self.total_power / self._fuse_max
-        return 0
+        try:
+            return self._total_power.value / self._fuse_max
+        except:
+            return 0
 
     @property
     def state_string(self) -> str:
@@ -105,21 +109,36 @@ class PowerCanary:
     def threephase_amps(self) -> dict:
         return self._get_currently_allowed_amps(self._threephase_amps)
 
-    def allow_adjustment(self, current_amps: int, new_amps: int, phase) -> bool:
+    def check_current_percentage(self):
+        if not self.alive:
+            # turn_off
+            pass
+        if self.current_percentage >= WARNING_THRESHOLD:
+            # lower or turn_off
+            #self._hub.charger._updatemaxcurrent()
+            pass
+
+    def allow_adjustment(self, new_amps: int) -> bool:
         """this method returns true if the desired adjustment 'new_amps' is not breaching threshold"""
+        if not self.active:
+            return True
         if not self._allow_amp_adjustment:
             return False
-        _new_power = self._get_power_from_amps(current_amps, new_amps, phase)
-        return all(
-            [
-                self._hub.sensors.power.total.value + _new_power < self._fuse_max * CUTOFF_THRESHOLD,
-                self._hub.sensors.power.car.value + _new_power + self._hub.sensors.powersensormovingaverage.value < self._fuse_max * CUTOFF_THRESHOLD,
-            ]
-        )
 
-    def _get_power_from_amps(self, current_amps, new_amps, phases) -> int:
-        #get from dict and diff it. check based on phase-charging.
-        return 5
+        max_amps = 0
+        match self._hub.threshold.phases:
+            case Phases.OnePhase:
+                max_amps = max(self.onephase_amps.values())
+            case Phases.ThreePhase:
+                max_amps = max(self.onephase_amps.values())
+
+        ret = new_amps <= max_amps
+
+        if ret is False:
+            _LOGGER.info(f"Power Canary cannot allow amp-increase due to the current power-draw.")
+        else:
+            _LOGGER.debug(f"Power Canary allows charger to set {new_amps}A for {self._hub.threshold.phases.value}.")
+        return ret
 
     def _get_currently_allowed_amps(self, amps) -> dict:
         """get the currently allowed amps based on the current power draw"""
@@ -129,7 +148,7 @@ class PowerCanary:
     def _set_allowed_amps(self, amps_dict, default_amps) -> dict:
         """only allow amps if user has set this value high enough"""
         if self._fuse_max > 0:
-            return {k: v for (k, v) in amps_dict.items() if k < self._fuse_max}
+            return {k: v for (k, v) in default_amps.items() if k < self._fuse_max}
         return default_amps
 
     def _validate(self):
