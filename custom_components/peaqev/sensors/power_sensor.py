@@ -24,7 +24,7 @@ class PeaqAmpSensor(PowerDevice):
         self._attr_icon = "mdi:current-ac"
         self._charger_current = self._hub.sensors.chargerobject_switch.current
         self._charger_phases = self._hub.threshold.phases
-        self._all_currents = self._hub.threshold.currents
+        self._all_currents = self._hub.threshold.currents.values()
 
     @property
     def state(self) -> int:
@@ -34,7 +34,7 @@ class PeaqAmpSensor(PowerDevice):
         self._state = self._hub.threshold.allowedcurrent
         self._charger_current = self._hub.sensors.chargerobject_switch.current
         self._charger_phases = self._hub.threshold.phases
-        self._all_currents = self._hub.threshold.currents
+        self._all_currents = self._hub.threshold.currents.values()
 
     @property
     def extra_state_attributes(self) -> dict:
