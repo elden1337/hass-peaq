@@ -5,7 +5,7 @@
     "documentation": "https://github.com/elden1337/hass-peaq",
     "issue_tracker": "https://github.com/elden1337/hass-peaq/issues",
     "requirements": [
-      "peaqevcore==9.2.0"
+      "peaqevcore==9.2.1"
     ],
     "codeowners": [
       "@elden1337"
