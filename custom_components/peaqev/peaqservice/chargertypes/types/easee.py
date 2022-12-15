@@ -80,7 +80,7 @@ class Easee(ChargerBase):
         self.entities.entityschema = entitiesobj.entityschema
 
         self.set_sensors()
-
+        self.max_amps = self.get_allowed_amps()
         servicecall_params = {
             CHARGER: "charger_id",
             CHARGERID: self._chargerid,
@@ -144,13 +144,23 @@ class Easee(ChargerBase):
         amp_sensor = f"sensor.{self.entities.entityschema}_dynamic_charger_limit"
         if not self._validate_sensor(amp_sensor):
             amp_sensor = f"sensor.{self.entities.entityschema}_max_charger_limit"
-
+        self.entities.maxamps = f"sensor.{self.entities.entityschema}_max_charger_limit"
         self.entities.chargerentity = f"sensor.{self.entities.entityschema}_status"
         self.entities.powermeter = f"sensor.{self.entities.entityschema}_power"
         self.options.powermeter_factor = 1000
         self.entities.powerswitch = f"switch.{self.entities.entityschema}_is_enabled"
         self.entities.ampmeter = amp_sensor
         self.options.ampmeter_is_attribute = False
+
+    def get_allowed_amps(self) -> int:
+        try:
+            ret = self._hass.states.get(self.entities.maxamps)
+            if ret is not None:
+                return int(ret.state)
+            return 16
+        except:
+            _LOGGER.warning("Unable to get max amps for circuit. Setting max amps to 16.")
+            return 16
 
     def _validate_sensor(self, sensor: str) -> bool:
         ret = self._hass.states.get(sensor)
