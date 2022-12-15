@@ -25,10 +25,10 @@ class PowerCanaryDevice(SensorEntity):
     @property
     def device_info(self):
         return {
-            "identifiers": {(DOMAIN, self._hub.hub_id, POWERCANARY)},
-            "name": f"{DOMAIN} {POWERCANARY}",
-            "sw_version": 1,
-            "model": f"{self._hub.power_canary.fuse}",
+            "identifiers":  {(DOMAIN, self._hub.hub_id, POWERCANARY)},
+            "name":         f"{DOMAIN} {POWERCANARY}",
+            "sw_version":   1,
+            "model":        f"{self._hub.power_canary.fuse}",
             "manufacturer": "Peaq systems",
         }
 
@@ -74,15 +74,15 @@ class PowerCanaryPercentageSensor(PowerCanaryDevice):
         return PERCENTAGE
 
     def update(self) -> None:
-        self._state = round(self._hub.power_canary.current_percentage * 100,2)
-        self._warning = round(self._hub.power_canary.warning_threshold * 100,2)
-        self._cutoff = round(self._hub.power_canary.cutoff_threshold * 100,2)
+        self._state = round(self._hub.power_canary.current_percentage * 100, 2)
+        self._warning = round(self._hub.power_canary.model.warning_threshold * 100, 2)
+        self._cutoff = round(self._hub.power_canary.model.cutoff_threshold * 100, 2)
 
     @property
     def extra_state_attributes(self) -> dict:
         return {
             "warning_threshold": self._warning,
-            "cutoff_threshold": self._cutoff
+            "cutoff_threshold":  self._cutoff
         }
 
 
@@ -90,7 +90,7 @@ class PowerCanaryMaxAmpSensor(PowerCanaryDevice):
     device_class = SensorDeviceClass.ENERGY
     unit_of_measurement = ELECTRIC_CURRENT_AMPERE
 
-    def __init__(self, hub, entry_id, phases:int):
+    def __init__(self, hub, entry_id, phases: int):
         name = f"{hub.hubname} {POWERCANARY} allowed amps {phases}-phase"
         super().__init__(hub, name, entry_id)
         self._hub = hub
@@ -108,6 +108,3 @@ class PowerCanaryMaxAmpSensor(PowerCanaryDevice):
             self._state = max(self._hub.power_canary.onephase_amps.values())
         if self.phases == 3:
             self._state = max(self._hub.power_canary.threephase_amps.values())
-
-
-
