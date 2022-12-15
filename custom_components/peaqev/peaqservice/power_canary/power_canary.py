@@ -28,7 +28,6 @@ WARNING_THRESHOLD = 0.75
 class PowerCanary:
     def __init__(self, hub):
         self._enabled: bool = False
-        self._active: bool = False
         self._hub = hub
         self.model = PowerCanaryModel(
             warning_threshold=WARNING_THRESHOLD,
@@ -42,10 +41,6 @@ class PowerCanary:
     @property
     def enabled(self) -> bool:
         return self._enabled
-
-    @property
-    def active(self) -> bool:
-        return self._active
 
     @property
     def alive(self) -> bool:
@@ -67,12 +62,12 @@ class PowerCanary:
 
     @property
     def total_power(self) -> float:
-        if self.enabled and self.active:
+        if self.enabled:
             return self._total_power.value
 
     @total_power.setter
     def total_power(self, value) -> None:
-        if self.enabled and self.active:
+        if self.enabled:
             self._total_power.add_reading(float(value))
             self.check_current_percentage()
 
@@ -81,11 +76,10 @@ class PowerCanary:
         if not self.enabled:
             return "Disabled"
         if not self.alive:
-            return f"Critical. Lower consumption!"
-        if self.active:
-            if self.current_percentage >= self.model.warning_threshold:
-                return f"Warning!"
-            return f"Ok"
+            return f"Critical!"
+        if self.current_percentage >= self.model.warning_threshold:
+            return f"Warning!"
+        return f"Ok"
 
     @property
     def onephase_amps(self) -> dict:
@@ -105,19 +99,24 @@ class PowerCanary:
             #self._hub.charger._updatemaxcurrent()
             pass
 
+    @property
+    def max_current_amp(self) -> int:
+        if not self.enabled:
+            return -1
+        match self._hub.threshold.phases:
+            case Phases.OnePhase:
+                return max(self.onephase_amps.values())
+            case Phases.ThreePhase:
+                return max(self.onephase_amps.values())
+        return -1
+
     def allow_adjustment(self, new_amps: int) -> bool:
         """this method returns true if the desired adjustment 'new_amps' is not breaching threshold"""
-        if not self.active:
+        if not self.enabled:
             return True
         if not self.model.allow_amp_adjustment:
             return False
-        max_amps = 0
-        match self._hub.threshold.phases:
-            case Phases.OnePhase:
-                max_amps = max(self.onephase_amps.values())
-            case Phases.ThreePhase:
-                max_amps = max(self.onephase_amps.values())
-        ret = new_amps <= max_amps
+        ret = new_amps <= self.max_current_amp
 
         if ret is False:
             _LOGGER.warning(f"Power Canary cannot allow amp-increase due to the current power-draw.")

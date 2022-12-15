@@ -31,11 +31,11 @@ class ChargeController(ChargeControllerBase):
         )
 
     def _get_status_charging(self) -> CHARGERSTATES:
+        if not self._hub.power_canary.alive:
+            return CHARGERSTATES.Stop
         if self.above_stopthreshold and self._hub.sensors.totalhourlyenergy.value > 0 and self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data) is False:
-            ret = CHARGERSTATES.Stop
-        else:
-            ret = CHARGERSTATES.Start
-        return ret
+            return CHARGERSTATES.Stop
+        return CHARGERSTATES.Start
 
     def _get_status_connected(self, charger_state=None) -> CHARGERSTATES:
         if charger_state is not None and self._hub.sensors.carpowersensor.value < 1 and self._is_done(charger_state):

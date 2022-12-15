@@ -22,16 +22,13 @@ class ChargerHelpers:
         return serviceparams
 
     def wait_turn_on(self) -> bool:
-        while self._charger._charger_is_active is False and self._charger._params.stopped is False:
+        while not self._charger._charger_is_active and not self._charger._params.stopped:
             time.sleep(3)
         return self._updates_should_continue()
 
     def wait_update_current(self) -> bool:
         self._charger._hub.sensors.chargerobject_switch.updatecurrent()
-        while (self._charger._hub.sensors.chargerobject_switch.current == self._charger._hub.threshold.allowedcurrent
-               or (datetime.now().minute >= 55
-                   and self._charger._hub.threshold.allowedcurrent > self._charger._hub.sensors.chargerobject_switch.current)) \
-                and self._charger._params.stopped is False:
+        while (self._current_is_equal() or self._too_late_to_change()) and not self._charger._params.stopped:
             time.sleep(3)
         return self._updates_should_continue()
 
@@ -52,3 +49,9 @@ class ChargerHelpers:
 
     async def _checkchargerparams(self, calls) -> bool:
         return len(calls[PARAMS][CHARGER]) > 0 and len(calls[PARAMS][CHARGERID]) > 0
+
+    def _current_is_equal(self) -> bool:
+        return self._charger._hub.sensors.chargerobject_switch.current == self._charger._hub.threshold.allowedcurrent
+
+    def _too_late_to_change(self) -> bool:
+        return datetime.now().minute >= 55 and self._charger._hub.threshold.allowedcurrent > self._charger._hub.sensors.chargerobject_switch.current
