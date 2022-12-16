@@ -104,9 +104,9 @@ class PowerCanary:
         if not self.enabled:
             return -1
         match self._hub.threshold.phases:
-            case Phases.OnePhase:
+            case Phases.OnePhase.name:
                 return max(self.onephase_amps.values())
-            case Phases.ThreePhase:
+            case Phases.ThreePhase.name:
                 return max(self.onephase_amps.values())
         return -1
 
@@ -119,9 +119,9 @@ class PowerCanary:
         ret = new_amps <= self.max_current_amp
 
         if ret is False:
-            _LOGGER.warning(f"Power Canary cannot allow amp-increase due to the current power-draw.")
+            _LOGGER.warning(f"Power Canary cannot allow amp-increase due to the current power-draw. max-amp is:{self.max_current_amp} ")
         else:
-            _LOGGER.debug(f"Power Canary allows charger to set {new_amps}A for {self._hub.threshold.phases.value}.")
+            _LOGGER.debug(f"Power Canary allows charger to set {new_amps}A for {self._hub.threshold.phases}.")
         return ret
 
     def _get_currently_allowed_amps(self, amps) -> dict:
