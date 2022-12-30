@@ -1,3 +1,5 @@
+import logging
+
 from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
 
@@ -9,6 +11,8 @@ from custom_components.peaqev.peaqservice.chargertypes.types.zaptec import Zapte
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGERTYPE_EASEE, CHARGERTYPE_CHARGEAMPS, CHARGERTYPE_OUTLET, CHARGERTYPE_GAROWALLBOX, CHARGERTYPE_ZAPTEC
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 CHARGERTYPE_DICT = {
             CHARGERTYPE_CHARGEAMPS: ChargeAmps,
@@ -24,9 +28,11 @@ class ChargerTypeData:
         self._charger = None
         self._type = input_type
         self._hass = hass
-
-        self._charger = CHARGERTYPE_DICT[input_type](hass=self._hass, huboptions=options)
-        self._charger.validatecharger()
+        try:
+            self._charger = CHARGERTYPE_DICT[input_type](hass=self._hass, huboptions=options)
+            self._charger.validatecharger()
+        except Exception as e:
+            raise Exception
 
     @property
     def type(self) -> str:

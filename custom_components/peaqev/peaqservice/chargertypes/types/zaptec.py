@@ -98,9 +98,12 @@ class Zaptec(ChargerBase):
                     if len(candidate) > 1:
                         break
 
-                self.entities.entityschema = candidate
-                _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
-                self.entities.imported_entities = entities
+                if candidate == "":
+                    _LOGGER.exception(f"Unable to find valid sensorschema for Zaptec.")
+                else:
+                    self.entities.entityschema = candidate
+                    _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
+                    self.entities.imported_entities = entities
 
     def _get_entities_from_hass(self, domain_name) -> list:
         return [
@@ -113,10 +116,13 @@ class Zaptec(ChargerBase):
         ]
 
     def set_sensors(self):
-        self.entities.chargerentity = f"sensor.zaptec_charger_{self.entities.entityschema}"
-        self.entities.powermeter = f"{self.entities.chargerentity}|total_charge_power"
-        self.options.powermeter_factor = 1
-        self.entities.powerswitch = f"switch.zaptec_{self.entities.entityschema}_switch"
+        try:
+            self.entities.chargerentity = f"sensor.zaptec_charger_{self.entities.entityschema}"
+            self.entities.powermeter = f"{self.entities.chargerentity}|total_charge_power"
+            self.options.powermeter_factor = 1
+            self.entities.powerswitch = f"switch.zaptec_{self.entities.entityschema}_switch"
+        except Exception as e:
+            _LOGGER.exception(f"Could not set needed sensors for Zaptec. {e}")
 
     def _validate_sensor(self, sensor: str) -> bool:
         ret = self._hass.states.get(sensor)
