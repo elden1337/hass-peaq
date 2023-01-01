@@ -128,7 +128,7 @@ class HomeAssistantHub(Hub):
                 self.not_ready_list_old_state = len(not_ready)
                 self.initialized_log_last_logged = time.time()
             if "chargerobject" in not_ready:
-                self.chargertype.charger.getentities()
+                self.chargertype.charger.set_entitiesmodel()
             return False
         return True
 

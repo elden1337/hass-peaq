@@ -2,7 +2,6 @@ import logging
 import time
 
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import entity_sources
 from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargerstates import CHARGERSTATES
 from peaqevcore.models.chargertype.calltype import CallType
@@ -48,7 +47,7 @@ class Zaptec(ChargerBase):
 
         self.set_sensors()
 
-        entitiesobj = helper.getentities(
+        entitiesobj = helper.set_entitiesmodel(
             self._hass,
             helper.EntitiesPostModel(
                 self.domainname,
@@ -99,21 +98,11 @@ class Zaptec(ChargerBase):
                         break
 
                 if candidate == "":
-                    _LOGGER.exception(f"Unable to find valid sensorschema for Zaptec.")
+                    _LOGGER.exception(f"Unable to find valid sensorschema for your {domain}.")
                 else:
                     self.entities.entityschema = candidate
                     _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
                     self.entities.imported_entities = entities
-
-    def _get_entities_from_hass(self, domain_name) -> list:
-        return [
-            entity_id
-            for entity_id, info in entity_sources(self._hass).items()
-            if info["domain"] == domain_name
-                or info["domain"] == domain_name.capitalize()
-                or info["domain"] == domain_name.upper()
-                or info["domain"] == domain_name.lower()
-        ]
 
     def set_sensors(self):
         try:

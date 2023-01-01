@@ -2,7 +2,6 @@ import logging
 import time
 
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import entity_sources
 from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargerstates import CHARGERSTATES
 from peaqevcore.models.chargertype.calltype import CallType
@@ -11,6 +10,7 @@ from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptio
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
+from custom_components.peaqev.peaqservice.chargertypes.models.chargeamps_types import ChargeAmpsTypes
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -24,9 +24,6 @@ NATIVE_CHARGERSTATES = ["available", "connected", "charging"]
 DOMAINNAME = "chargeamps"
 UPDATECURRENT = True
 # docs: https://github.com/kirei/hass-chargeamps
-
-HALO = "Halo"
-AURA = "Aura"
 
 
 class ChargeAmps(ChargerBase):
@@ -44,7 +41,7 @@ class ChargeAmps(ChargerBase):
         self.chargerstates[CHARGERSTATES.Connected] = ["connected"]
         self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
 
-        entitiesobj = helper.getentities(
+        entitiesobj = helper.set_entitiesmodel(
             self._hass,
             helper.EntitiesPostModel(
                 self.domainname,
@@ -104,23 +101,16 @@ class ChargeAmps(ChargerBase):
                     if len(candidate) > 1:
                         break
 
-                self.entities.entityschema = candidate
-                _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
-                self.entities.imported_entities = entities
-
-    def _get_entities_from_hass(self, domain_name) -> list:
-        return [
-            entity_id
-            for entity_id, info in entity_sources(self._hass).items()
-            if info["domain"] == domain_name
-                or info["domain"] == domain_name.capitalize()
-                or info["domain"] == domain_name.upper()
-                or info["domain"] == domain_name.lower()
-        ]
+                if candidate == "":
+                    _LOGGER.exception(f"Unable to find valid sensorschema for your {domain}.")
+                else:
+                    self.entities.entityschema = candidate
+                    _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
+                    self.entities.imported_entities = entities
 
     def set_sensors(self):
         self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"
-        self._set_chargeamps_type(self.entities.chargerentity)
+        self._chargeramps_type = self._set_chargeamps_type(self.entities.chargerentity)
         self.entities.powermeter = f"sensor.{self.entities.entityschema}_1_power"
         self.entities.powerswitch = self._determine_switch_entity()
         self.entities.ampmeter = "max_current"
@@ -134,13 +124,10 @@ class ChargeAmps(ChargerBase):
                 ret.append(e)
         return ret
 
-    def _set_chargeamps_type(self, main_sensor_entity):
+    def _set_chargeamps_type(self, main_sensor_entity) -> ChargeAmpsTypes:
         if self._hass.states.get(main_sensor_entity) is not None:
             chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get("chargepoint_type")
-            if chargeampstype == "HALO":
-                self._chargeramps_type = HALO
-            elif chargeampstype == "AURA":
-                self._chargeramps_type = AURA
+            return ChargeAmpsTypes.get_type(chargeampstype)
 
     def _determine_switch_entity(self):
         ent = self._determine_entities()

@@ -68,7 +68,7 @@ class Easee(ChargerBase):
         self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
         self.chargerstates[CHARGERSTATES.Done] = ["completed"]
 
-        entitiesobj = helper.getentities(
+        entitiesobj = helper.set_entitiesmodel(
             self._hass,
             helper.EntitiesPostModel(
                 self.domainname,
@@ -137,9 +137,12 @@ class Easee(ChargerBase):
                     if len(candidate) > 1:
                         break
 
-                self.entities.entityschema = candidate
-                _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
-                self.entities.imported_entities = entities
+                if candidate == "":
+                    _LOGGER.exception(f"Unable to find valid sensorschema for your {domain}.")
+                else:
+                    self.entities.entityschema = candidate
+                    _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
+                    self.entities.imported_entities = entities
 
     def set_sensors(self):
         amp_sensor = f"sensor.{self.entities.entityschema}_dynamic_charger_limit"

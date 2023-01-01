@@ -1,27 +1,16 @@
 import logging
 import time
-from dataclasses import dataclass
 
 from homeassistant.helpers.entity import entity_sources
 
+from custom_components.peaqev.peaqservice.chargertypes.models.entities_model import EntitiesModel
+from custom_components.peaqev.peaqservice.chargertypes.models.entities_postmodel import EntitiesPostModel
+
 _LOGGER = logging.getLogger(__name__)
 
-@dataclass
-class EntitiesPostModel:
-    domain: str = None
-    entityschema: str = None
-    endings: list = None
-
-
-@dataclass
-class EntitiesModel:
-    entityschema: str
-    imported_entities: list
-
-
-def getentities(hass,
-                model: EntitiesPostModel,
-                ) -> EntitiesModel:
+def set_entitiesmodel(hass,
+                      model: EntitiesPostModel,
+                      ) -> EntitiesModel:
     if len(model.entityschema) < 1:
         entities = get_entities_from_hass(hass, model.domain)
 
