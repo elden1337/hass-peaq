@@ -19,10 +19,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
 
 _LOGGER = logging.getLogger(__name__)
 
-ENTITYENDINGS = ["_power", "_1", "_2", "_status", "_dimmer", "_downlight", "_current", "_voltage"]
-NATIVE_CHARGERSTATES = ["available", "connected", "charging"]
-DOMAINNAME = "chargeamps"
-UPDATECURRENT = True
+POWERSWITCH_CONTROLS_CHARGING = True
 # docs: https://github.com/kirei/hass-chargeamps
 
 
@@ -31,12 +28,9 @@ class ChargeAmps(ChargerBase):
         self._hass = hass
         self._chargeramps_type = ""
         self._chargerid = huboptions.charger.chargerid
-        self._chargeamps_connector = 1
-
-        self.domainname = DOMAINNAME
-        self.entities.imported_entityendings = ENTITYENDINGS
-        self.options.powerswitch_controls_charging = True
-        self.native_chargerstates = NATIVE_CHARGERSTATES
+        self._chargeamps_connector = 1 #fix this later
+        self.entities.imported_entityendings = self.entity_endings
+        self.options.powerswitch_controls_charging = POWERSWITCH_CONTROLS_CHARGING
         self.chargerstates[CHARGERSTATES.Idle] = ["available"]
         self.chargerstates[CHARGERSTATES.Connected] = ["connected"]
         self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
@@ -44,7 +38,7 @@ class ChargeAmps(ChargerBase):
         entitiesobj = helper.set_entitiesmodel(
             self._hass,
             helper.EntitiesPostModel(
-                self.domainname,
+                self.domain_name,
                 self.entities.entityschema,
                 self.entities.imported_entityendings
             )
@@ -54,30 +48,67 @@ class ChargeAmps(ChargerBase):
 
         self.set_sensors()
 
-        servicecall_params = {
+        self._set_servicecalls(
+            domain=self.domain_name,
+            model=ServiceCallsDTO(
+                on=self.call_on,
+                off=self.call_off,
+                pause=self.call_pause,
+                resume=self.call_resume,
+                update_current=self.call_update_current
+            ),
+            options=self.servicecalls_options
+        )
+
+    @property
+    def domain_name(self) -> str:
+        return "chargeamps"
+
+    @property
+    def entity_endings(self) -> list:
+        return ["_power", "_1", "_2", "_status", "_dimmer", "_downlight", "_current", "_voltage"]
+
+    @property
+    def native_chargerstates(self) -> list:
+        return ["available", "connected", "charging"]
+
+    @property
+    def call_on(self) -> CallType:
+        return CallType("enable", {
+            "chargepoint": self._chargerid,
+            "connector": self._chargeamps_connector
+        })
+
+    @property
+    def call_off(self) -> CallType:
+        return CallType("disable", {
+            "chargepoint": self._chargerid,
+            "connector":   self._chargeamps_connector
+        })
+
+    @property
+    def call_resume(self) -> CallType:
+        return self.call_on
+
+    @property
+    def call_pause(self) -> CallType:
+        return self.call_off
+
+    @property
+    def call_update_current(self) -> CallType:
+        return CallType("set_max_current", {
             CHARGER: "chargepoint",
             CHARGERID: self._chargerid,
             CURRENT: "max_current"
-        }
+        })
 
-        _on_off_params = {
-            "chargepoint": self._chargerid,
-            "connector": self._chargeamps_connector
-        }
-
-        self._set_servicecalls(
-            domain=DOMAINNAME,
-            model=ServiceCallsDTO(
-                on=CallType("enable", _on_off_params),
-                off=CallType("disable", _on_off_params),
-                update_current=CallType("set_max_current", servicecall_params)
-            ),
-            options=ServiceCallsOptions(
-                allowupdatecurrent=UPDATECURRENT,
+    @property
+    def servicecalls_options(self) -> ServiceCallsOptions:
+        return ServiceCallsOptions(
+                allowupdatecurrent=True,
                 update_current_on_termination=True,
                 switch_controls_charger=False
             )
-        )
 
     def getentities(self, domain: str = None, endings: list = None):
         if len(self.entities.entityschema) < 1:
@@ -108,15 +139,15 @@ class ChargeAmps(ChargerBase):
                     _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
                     self.entities.imported_entities = entities
 
-    def set_sensors(self):
+    def set_sensors(self) -> None:
         self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"
-        self._chargeramps_type = self._set_chargeamps_type(self.entities.chargerentity)
         self.entities.powermeter = f"sensor.{self.entities.entityschema}_1_power"
-        self.entities.powerswitch = self._determine_switch_entity()
         self.entities.ampmeter = "max_current"
         self.options.ampmeter_is_attribute = True
+        self.entities.powerswitch = self._determine_switch_entity()
+        self._chargeramps_type = self._set_chargeamps_type(self.entities.chargerentity)
 
-    def _determine_entities(self):
+    def _determine_entities(self) -> list:
         ret = []
         for e in self.entities.imported_entities:
             entity_state = self._hass.states.get(e)
@@ -129,7 +160,7 @@ class ChargeAmps(ChargerBase):
             chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get("chargepoint_type")
             return ChargeAmpsTypes.get_type(chargeampstype)
 
-    def _determine_switch_entity(self):
+    def _determine_switch_entity(self) -> str:
         ent = self._determine_entities()
         for e in ent:
             if e.startswith("switch."):
