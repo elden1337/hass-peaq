@@ -11,6 +11,7 @@ from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
 from custom_components.peaqev.peaqservice.chargertypes.models.chargeamps_types import ChargeAmpsTypes
+from custom_components.peaqev.peaqservice.chargertypes.models.entities_postmodel import EntitiesPostModel
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -37,7 +38,7 @@ class ChargeAmps(ChargerBase):
 
         entitiesobj = helper.set_entitiesmodel(
             self._hass,
-            helper.EntitiesPostModel(
+            EntitiesPostModel(
                 self.domain_name,
                 self.entities.entityschema,
                 self.entities.imported_entityendings
@@ -62,14 +63,17 @@ class ChargeAmps(ChargerBase):
 
     @property
     def domain_name(self) -> str:
+        """declare the domain name as stated in HA"""
         return "chargeamps"
 
     @property
     def entity_endings(self) -> list:
+        """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
         return ["_power", "_1", "_2", "_status", "_dimmer", "_downlight", "_current", "_voltage"]
 
     @property
     def native_chargerstates(self) -> list:
+        """declare a list of the native-charger states available for the type."""
         return ["available", "connected", "charging"]
 
     @property
