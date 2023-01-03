@@ -44,17 +44,12 @@ HUB = "Hub"
 SMARTOUTLET = "SmartOutlet"
 
 """Chargertype helpers"""
-UPDATECURRENT = "updatecurrent"
 PARAMS = "params"
 CHARGER = "charger"
 CHARGERID = "chargerid"
 CURRENT = "current"
 DOMAIN = "domain"
 NAME = "name"
-ON = "on"
-OFF = "off"
-RESUME = "resume"
-PAUSE = "pause"
 
 CAUTIONHOURTYPE_NAMES =[
     CAUTIONHOURTYPE_SUAVE,

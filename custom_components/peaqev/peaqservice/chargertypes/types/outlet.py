@@ -4,13 +4,12 @@ from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargerstates import CHARGERSTATES
 from peaqevcore.models.chargertype.calltype import CallType
+from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 from custom_components.peaqev.peaqservice.util.constants import (
-    ON,
-    OFF,
     SMARTOUTLET
 )
 
@@ -36,8 +35,8 @@ class SmartOutlet(ChargerBase):
         self._set_servicecalls(
             domain=SMARTOUTLET,
             model=ServiceCallsDTO(
-                on=CallType(ON, {}),
-                off=CallType(OFF, {})
+                on=CallType(CallTypes.ON, {}),
+                off=CallType(CallTypes.OFF, {})
             ),
             options=ServiceCallsOptions(
                 allowupdatecurrent=UPDATECURRENT,
