@@ -10,6 +10,7 @@ from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptio
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
+from custom_components.peaqev.peaqservice.chargertypes.models.entities_postmodel import EntitiesPostModel
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -70,7 +71,7 @@ class Easee(ChargerBase):
 
         entitiesobj = helper.set_entitiesmodel(
             self._hass,
-            helper.EntitiesPostModel(
+            EntitiesPostModel(
                 self.domainname,
                 self.entities.entityschema,
                 self.entities.imported_entityendings
