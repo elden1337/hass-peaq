@@ -1,6 +1,7 @@
 import logging
 import time
 
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import entity_sources
 
 from custom_components.peaqev.peaqservice.chargertypes.models.entities_model import EntitiesModel
@@ -8,16 +9,17 @@ from custom_components.peaqev.peaqservice.chargertypes.models.entities_postmodel
 
 _LOGGER = logging.getLogger(__name__)
 
-def set_entitiesmodel(hass,
+
+def set_entitiesmodel(hass: HomeAssistant,
                       model: EntitiesPostModel,
                       ) -> EntitiesModel:
     if len(model.entityschema) < 1:
-        entities = get_entities_from_hass(hass, model.domain)
+        entities = get_entities_from_hass(hass=hass, domain_name=model.domain)
 
         if len(entities) < 1:
             _LOGGER.error(f"no entities found for {model.domain} at {time.time()}")
         else:
-            #_endings = model.endings
+            # _endings = model.endings
             candidate = ""
 
             for e in entities:
@@ -32,12 +34,17 @@ def set_entitiesmodel(hass,
             _LOGGER.debug(f"entityschema is: {candidate} at {time.time()}")
             return EntitiesModel(entityschema=candidate, imported_entities=entities)
 
-def get_entities_from_hass(hass, domain_name) -> list:
-    return [
-        entity_id
-        for entity_id, info in entity_sources(hass).items()
-        if info["domain"] == domain_name
-           or info["domain"] == domain_name.capitalize()
-           or info["domain"] == domain_name.upper()
-           or info["domain"] == domain_name.lower()
-    ]
+
+def get_entities_from_hass(hass: HomeAssistant, domain_name: str) -> list:
+    try:
+        return [
+            entity_id
+            for entity_id, info in entity_sources(hass).items()
+            if info["domain"] == domain_name
+               or info["domain"] == domain_name.capitalize()
+               or info["domain"] == domain_name.upper()
+               or info["domain"] == domain_name.lower()
+        ]
+    except Exception as e:
+        _LOGGER.exception(f"Could not get charger-entities from Home Assistant: {e}")
+        return []

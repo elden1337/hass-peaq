@@ -10,6 +10,7 @@ from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptio
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
+from custom_components.peaqev.peaqservice.chargertypes.models.entities_postmodel import EntitiesPostModel
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,12 +49,12 @@ class Zaptec(ChargerBase):
         self.set_sensors()
 
         entitiesobj = helper.set_entitiesmodel(
-            self._hass,
-            helper.EntitiesPostModel(
-                self.domainname,
-                self.entities.entityschema,
-                self.entities.imported_entityendings
-            )
+            hass=self._hass,
+            model=EntitiesPostModel(
+                    self.domainname,
+                    self.entities.entityschema,
+                    self.entities.imported_entityendings
+                    )
         )
         self.entities.imported_entities = entitiesobj.imported_entities
         self.entities.entityschema = entitiesobj.entityschema
@@ -80,7 +81,10 @@ class Zaptec(ChargerBase):
             domain = self.domainname if domain is None else domain
             endings = self.entities.imported_entityendings if endings is None else endings
 
-            entities = helper.get_entities_from_hass(self._hass, domain)
+            entities = helper.get_entities_from_hass(
+                hass=self._hass,
+                domain_name=domain
+            )
 
             if len(entities) < 1:
                 _LOGGER.error(f"no entities found for {domain} at {time.time()}")
