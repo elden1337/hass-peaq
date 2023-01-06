@@ -64,7 +64,7 @@ PRICEAWARE_SCHEMA = vol.Schema(
                     vol.Optional("min_priceaware_threshold_price"): cv.positive_float,
                     vol.Optional(
                         "cautionhour_type",
-                        default=pk.CAUTIONHOURTYPE_INTERMEDIATE,
+                        default=pk.CautionHourType.INTERMEDIATE.value,
                     ): vol.In(pk.CAUTIONHOURTYPE_NAMES),
                 })
 

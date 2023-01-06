@@ -1,9 +1,7 @@
-from peaqevcore.models.hourselection.const import (
-    CAUTIONHOURTYPE_SUAVE,
-    CAUTIONHOURTYPE_INTERMEDIATE,
-    CAUTIONHOURTYPE_AGGRESSIVE,
-    CAUTIONHOURTYPE as core_CAUTIONHOURTYPE
-)
+# from peaqevcore.models.hourselection.const import (
+#     CAUTIONHOURTYPE as core_CAUTIONHOURTYPE
+# )
+from peaqevcore.models.hourselection.cautionhourtype import CautionHourType
 
 """CHARGERTYPES"""
 CHARGERTYPE_CHARGEAMPS = "Chargeamps"
@@ -52,12 +50,12 @@ DOMAIN = "domain"
 NAME = "name"
 
 CAUTIONHOURTYPE_NAMES =[
-    CAUTIONHOURTYPE_SUAVE,
-    CAUTIONHOURTYPE_INTERMEDIATE,
-    CAUTIONHOURTYPE_AGGRESSIVE
+    CautionHourType.SUAVE.value,
+    CautionHourType.INTERMEDIATE.value,
+    CautionHourType.AGGRESSIVE.value
 ]
 
-CAUTIONHOURTYPE_DICT = core_CAUTIONHOURTYPE
+#CAUTIONHOURTYPE_DICT = core_CAUTIONHOURTYPE
 
 TYPEREGULAR = "Regular (requires power sensor)"
 TYPELITE = "Lite"
