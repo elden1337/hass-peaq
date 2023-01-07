@@ -55,8 +55,6 @@ CAUTIONHOURTYPE_NAMES =[
     CautionHourType.AGGRESSIVE.value
 ]
 
-#CAUTIONHOURTYPE_DICT = core_CAUTIONHOURTYPE
-
 TYPEREGULAR = "Regular (requires power sensor)"
 TYPELITE = "Lite"
 
