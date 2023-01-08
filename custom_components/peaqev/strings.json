@@ -33,6 +33,11 @@
           "dec": "December"
         },
         "description": "Select your allowed monthly start-peak."
+      },
+      "misc": {
+        "data": {
+          "mains": "[%key:common::config_flow::data::mains%]"
+        }
       }
     }
   },
@@ -95,6 +100,11 @@
           "oct": "October",
           "nov": "November",
           "dec": "December"
+        }
+      },
+      "misc": {
+        "data": {
+          "mains": "[%key:common::config_flow::data::mains%]"
         }
       }
     },

@@ -33,6 +33,12 @@
           "dec": "December"
         },
         "description": "Select your allowed monthly start-peak."
+      },
+      "misc": {
+        "data": {
+          "mains": "(Optional), pick your main fuses to allow peaqev to act as an ampguard."
+        },
+        "description": "Experimental and extra options."
       }
     }
   },
@@ -96,6 +102,12 @@
           "nov": "November",
           "dec": "December"
         }
+      },
+      "misc": {
+        "data": {
+          "mains": "(Optional), pick your main fuses to allow peaqev to act as an ampguard."
+        },
+        "description": "Experimental and extra options."
       }
     },
     "error": {

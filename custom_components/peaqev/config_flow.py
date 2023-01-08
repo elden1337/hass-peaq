@@ -9,7 +9,6 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 
-import custom_components.peaqev.peaqservice.util.constants as pk
 from custom_components.peaqev.configflow.config_flow_helpers import set_startpeak_dict
 from custom_components.peaqev.configflow.config_flow_schemas import (
     SENSOR_SCHEMA,
@@ -22,7 +21,9 @@ from custom_components.peaqev.configflow.config_flow_schemas import (
     CHARGER_DETAILS_SCHEMA
 )
 from custom_components.peaqev.configflow.config_flow_validation import ConfigFlowValidation
-from custom_components.peaqev.peaqservice.util.constants import CHARGERTYPE_OUTLET
+from custom_components.peaqev.peaqservice.power_canary.power_canary import FUSES_LIST
+from custom_components.peaqev.peaqservice.util.constants import CHARGERTYPE_OUTLET, CautionHourType, TYPELITE, \
+    CAUTIONHOURTYPE_NAMES
 from .const import DOMAIN  # pylint:disable=unused-import
 
 _LOGGER = logging.getLogger(__name__)
@@ -45,8 +46,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             self.data = user_input
-            if self.data["peaqevtype"] == pk.TYPELITE:
-                self.info = {"title": pk.TYPELITE}
+            if self.data["peaqevtype"] == TYPELITE:
+                self.info = {"title": TYPELITE}
                 return await self.async_step_charger()
             return await self.async_step_sensor()
 
@@ -151,12 +152,30 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             months_dict = await set_startpeak_dict(user_input)
             self.data["startpeaks"] = months_dict
-            return self.async_create_entry(title=self.info["title"], data=self.data)
+            return await self.async_step_misc()
 
         return self.async_show_form(
             step_id="months",
             data_schema=MONTHS_SCHEMA,
+            last_step=False,
+        )
+
+    async def async_step_misc(self, user_input=None):
+        """Misc options"""
+        if user_input is not None:
+            self.data["mains"] = user_input["mains"]
+            return self.async_create_entry(title=self.info["title"], data=self.data)
+
+        return self.async_show_form(
+            step_id="misc",
             last_step=True,
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        "mains",
+                        default="",
+                    ): vol.In(FUSES_LIST)
+                })
         )
 
 
@@ -184,7 +203,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         _priceaware = await self._get_existing_param("priceaware", False)
         _topprice = await self._get_existing_param("absolute_top_price", 0)
         _minprice = await self._get_existing_param("min_priceaware_threshold_price", 0)
-        _hourtype = await self._get_existing_param("cautionhour_type", pk.CAUTIONHOURTYPE_INTERMEDIATE)
+        _hourtype = await self._get_existing_param("cautionhour_type", CautionHourType.INTERMEDIATE.value)
 
         return self.async_show_form(
             step_id="init",
@@ -197,7 +216,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Optional(
                         "cautionhour_type",
                         default=_hourtype,
-                    ): vol.In(pk.CAUTIONHOURTYPE_NAMES),
+                    ): vol.In(CAUTIONHOURTYPE_NAMES),
                 }),
         )
 
@@ -229,7 +248,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             months_dict = await set_startpeak_dict(user_input)
             self.options["startpeaks"] = months_dict
-            return self.async_create_entry(title="", data=self.options)
+            return await self.async_step_misc()
 
         defaultvalues = self.config_entry.options.get(
             "startpeaks") if "startpeaks" in self.config_entry.options.keys() else self.config_entry.data.get(
@@ -237,7 +256,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         return self.async_show_form(
             step_id="months",
-            last_step=True,
+            last_step=False,
             data_schema=vol.Schema(
                 {
                     vol.Optional("jan", default=defaultvalues["1"]): cv.positive_float,
@@ -253,4 +272,25 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Optional("nov", default=defaultvalues["11"]): cv.positive_float,
                     vol.Optional("dec", default=defaultvalues["12"]): cv.positive_float
                 })
+        )
+
+    async def async_step_misc(self, user_input=None):
+        """Misc options"""
+        if user_input is not None:
+            self.options["mains"] = user_input["mains"]
+            return self.async_create_entry(title="", data=self.options)
+
+        mainsvalue = await self._get_existing_param("mains", "")
+        _LOGGER.debug(f"existing mainsvalue is: {mainsvalue}")
+        return self.async_show_form(
+            step_id="misc",
+            last_step=True,
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        "mains",
+                        default=mainsvalue,
+                    ): vol.In(FUSES_LIST)
+                })
+
         )

@@ -1,18 +1,44 @@
 import logging
 
+from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
 from homeassistant.const import (
-    DEVICE_CLASS_ENERGY,
     ENERGY_KILO_WATT_HOUR,
-    DEVICE_CLASS_MONETARY
 )
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from custom_components.peaqev.sensors.sensorbase import SensorBase
+import custom_components.peaqev.peaqservice.util.extensionmethods as ex
+from custom_components.peaqev.const import DOMAIN
+from custom_components.peaqev.peaqservice.util.constants import SESSION
 
 _LOGGER = logging.getLogger(__name__)
 
-class PeaqSessionSensor(SensorBase, RestoreEntity):
-    device_class = DEVICE_CLASS_ENERGY
+
+class SessionDevice(SensorEntity):
+    should_poll = True
+
+    def __init__(self, hub, name: str, entry_id):
+        self._hub = hub
+        self._entry_id = entry_id
+        self._attr_name = name
+        self._attr_available = True
+
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {(DOMAIN, self._hub.hub_id, SESSION)},
+            "name": f"{DOMAIN} {SESSION}",
+            "sw_version": 1,
+            "manufacturer": "Peaq systems",
+        }
+
+    @property
+    def unique_id(self):
+        """Return a unique ID to use for this sensor."""
+        return f"{DOMAIN}_{self._entry_id}_{ex.nametoid(self._attr_name)}"
+
+
+class PeaqSessionSensor(SessionDevice, RestoreEntity):
+    device_class = SensorDeviceClass.ENERGY
     unit_of_measurement = ENERGY_KILO_WATT_HOUR
 
     def __init__(self, hub, entry_id):
@@ -58,8 +84,8 @@ class PeaqSessionSensor(SensorBase, RestoreEntity):
             self._average_weekly = self._hub.charger.session.core.average_data.export
 
 
-class PeaqSessionCostSensor(SensorBase, RestoreEntity):
-    device_class = DEVICE_CLASS_MONETARY
+class PeaqSessionCostSensor(SessionDevice, RestoreEntity):
+    device_class = SensorDeviceClass.MONETARY
 
     def __init__(self, hub, entry_id):
         name = f"{hub.hubname} Session energy cost"

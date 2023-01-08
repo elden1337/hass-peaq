@@ -15,10 +15,11 @@ from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller impo
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_lite import ChargeControllerLite
 from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
-from custom_components.peaqev.peaqservice.hub.nordpool import NordPoolUpdater
+from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import NordPoolUpdater
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.hub.state_changes import StateChanges
 from custom_components.peaqev.peaqservice.hub.svk import svk
+from custom_components.peaqev.peaqservice.power_canary.power_canary import PowerCanary
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER, SMARTOUTLET
 
 _LOGGER = logging.getLogger(__name__)
@@ -61,6 +62,7 @@ class HomeAssistantHub(Hub):
         self.servicecalls = ServiceCalls(self)
         self.states = StateChanges(self)
         self.svk = svk(self)  # interim solution for svk peak hours
+
         trackerEntities = [
             self.sensors.totalhourlyenergy.entity
         ]
@@ -77,6 +79,7 @@ class HomeAssistantHub(Hub):
         else:
             self.nordpool = NordPoolUpdater(hass=self.state_machine, hub=self, is_active=False)
 
+        self.power_canary = PowerCanary(hub=self)
         self.chargingtracker_entities = self._set_chargingtracker_entities()
         trackerEntities += self.chargingtracker_entities
         async_track_state_change(hass, trackerEntities, self.state_changed)
@@ -125,7 +128,7 @@ class HomeAssistantHub(Hub):
                 self.not_ready_list_old_state = len(not_ready)
                 self.initialized_log_last_logged = time.time()
             if "chargerobject" in not_ready:
-                self.chargertype.charger.getentities()
+                self.chargertype.charger.set_entitiesmodel()
             return False
         return True
 

@@ -6,6 +6,7 @@ from peaqevcore.services.locale.querytypes.const import HOURLY
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
+from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
 
 
 class Object:
@@ -48,4 +49,4 @@ class PeaqUtilitySensor(UtilityMeterSensor):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
+        return {"identifiers": {(DOMAIN, self._hub.hub_id, POWERCONTROLS)}}

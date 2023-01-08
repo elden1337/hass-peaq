@@ -25,6 +25,14 @@ class StateChanges:
                 """tweak to provoke nordpool to update more often"""
                 self.latest_nordpool_update = time.time()
                 await self._hub.nordpool.update_nordpool()
+        if self._hub.sensors.carpowersensor.use_attribute:
+            val = await self._get_sensor_attribute(self._hub.sensors.carpowersensor)
+            if val is not None:
+                self._hub.sensors.carpowersensor.value = val
+                self._hub.sensors.power.update(
+                    carpowersensor_value=self._hub.sensors.carpowersensor.value,
+                    config_sensor_value=None
+                )
         if self._hub.charger.session_active and update_session:
             self._hub.charger.session.session_energy = self._hub.sensors.carpowersensor.value
             if self._hub.options.price.price_aware is True:
@@ -67,14 +75,19 @@ class StateChanges:
                     config_sensor_value=value
                 )
                 update_session = True
+                self._hub.power_canary.total_power = self._hub.sensors.power.total.value
             case self._hub.sensors.carpowersensor.entity:
-                self._hub.sensors.carpowersensor.value = value
-                self._hub.sensors.power.update(
-                    carpowersensor_value=self._hub.sensors.carpowersensor.value,
-                    config_sensor_value=None
-                )
+                if self._hub.sensors.carpowersensor.use_attribute:
+                    pass
+                else:
+                    self._hub.sensors.carpowersensor.value = value
+                    self._hub.sensors.power.update(
+                        carpowersensor_value=self._hub.sensors.carpowersensor.value,
+                        config_sensor_value=None
+                    )
                 update_session = True
                 self._hub.sensors.chargerobject_switch.updatecurrent()
+                self._hub.power_canary.total_power = self._hub.sensors.power.total.value
                 await self._handle_outlet_updates()
             case self._hub.sensors.chargerobject.entity:
                 self._hub.sensors.chargerobject.value = value
@@ -96,6 +109,7 @@ class StateChanges:
             case self._hub.nordpool.nordpool_entity:
                 await self._hub.nordpool.update_nordpool()
                 update_session = True
+
         return update_session
 
     async def _handle_outlet_updates(self):
@@ -110,3 +124,10 @@ class StateChanges:
                 self._hub.sensors.chargerobject.value = "connected"
             if old_state != self._hub.sensors.chargerobject.value:
                 _LOGGER.debug(f"smartoutlet is now {self._hub.sensors.chargerobject.value}")
+
+    async def _get_sensor_attribute(self, entity):
+        try:
+            return self._hub.hass.states.get(entity.entity).attributes.get(entity.attribute)
+        except Exception as e:
+            _LOGGER.debug(f"Unable to get attribute-state for {entity.entity}|{entity.attribute}. {e}")
+            return None

@@ -7,12 +7,12 @@ from homeassistant.const import (
 )
 
 from custom_components.peaqev.peaqservice.util.constants import ALLOWEDCURRENT
-from custom_components.peaqev.sensors.sensorbase import SensorBase
+from custom_components.peaqev.sensors.sensorbase import PowerDevice
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class PeaqAmpSensor(SensorBase):
+class PeaqAmpSensor(PowerDevice):
     device_class = SensorDeviceClass.ENERGY
     unit_of_measurement = ELECTRIC_CURRENT_AMPERE
 
@@ -24,6 +24,7 @@ class PeaqAmpSensor(SensorBase):
         self._attr_icon = "mdi:current-ac"
         self._charger_current = self._hub.sensors.chargerobject_switch.current
         self._charger_phases = self._hub.threshold.phases
+        self._all_currents = list(self._hub.threshold.currents.values())
 
     @property
     def state(self) -> int:
@@ -33,17 +34,19 @@ class PeaqAmpSensor(SensorBase):
         self._state = self._hub.threshold.allowedcurrent
         self._charger_current = self._hub.sensors.chargerobject_switch.current
         self._charger_phases = self._hub.threshold.phases
+        self._all_currents = list(self._hub.threshold.currents.values())
 
     @property
     def extra_state_attributes(self) -> dict:
         curr = self._charger_current if self._charger_current > 0 else "unreachable"
         return {
             "charger_reported_current": curr,
-            "peaqev phase-setting": self._charger_phases
+            "peaqev phase-setting": self._charger_phases,
+            "allowed current-list": self._all_currents
         }
 
 
-class PeaqPowerSensor(SensorBase):
+class PeaqPowerSensor(PowerDevice):
     device_class = SensorDeviceClass.POWER
     unit_of_measurement = POWER_WATT
 
@@ -62,7 +65,7 @@ class PeaqPowerSensor(SensorBase):
         self._state = self._hub.sensors.power.total.value
 
 
-class PeaqHousePowerSensor(SensorBase):
+class PeaqHousePowerSensor(PowerDevice):
     device_class = SensorDeviceClass.POWER
     unit_of_measurement = POWER_WATT
 

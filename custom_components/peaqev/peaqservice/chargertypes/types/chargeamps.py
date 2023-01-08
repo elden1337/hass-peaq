@@ -2,7 +2,6 @@ import logging
 import time
 
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import entity_sources
 from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargerstates import CHARGERSTATES
 from peaqevcore.models.chargertype.calltype import CallType
@@ -11,6 +10,8 @@ from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptio
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
+from custom_components.peaqev.peaqservice.chargertypes.models.chargeamps_types import ChargeAmpsTypes
+from custom_components.peaqev.peaqservice.chargertypes.models.entities_postmodel import EntitiesPostModel
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -19,14 +20,8 @@ from custom_components.peaqev.peaqservice.util.constants import (
 
 _LOGGER = logging.getLogger(__name__)
 
-ENTITYENDINGS = ["_power", "_1", "_2", "_status", "_dimmer", "_downlight", "_current", "_voltage"]
-NATIVE_CHARGERSTATES = ["available", "connected", "charging"]
-DOMAINNAME = "chargeamps"
-UPDATECURRENT = True
-# docs: https://github.com/kirei/hass-chargeamps
 
-HALO = "Halo"
-AURA = "Aura"
+# docs: https://github.com/kirei/hass-chargeamps
 
 
 class ChargeAmps(ChargerBase):
@@ -34,20 +29,17 @@ class ChargeAmps(ChargerBase):
         self._hass = hass
         self._chargeramps_type = ""
         self._chargerid = huboptions.charger.chargerid
-        self._chargeamps_connector = 1
-
-        self.domainname = DOMAINNAME
-        self.entities.imported_entityendings = ENTITYENDINGS
+        self._chargeamps_connector = 1  # fix this later
+        self.entities.imported_entityendings = self.entity_endings
         self.options.powerswitch_controls_charging = True
-        self.native_chargerstates = NATIVE_CHARGERSTATES
         self.chargerstates[CHARGERSTATES.Idle] = ["available"]
         self.chargerstates[CHARGERSTATES.Connected] = ["connected"]
         self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
 
-        entitiesobj = helper.getentities(
+        entitiesobj = helper.set_entitiesmodel(
             self._hass,
-            helper.EntitiesPostModel(
-                self.domainname,
+            EntitiesPostModel(
+                self.domain_name,
                 self.entities.entityschema,
                 self.entities.imported_entityendings
             )
@@ -57,30 +49,74 @@ class ChargeAmps(ChargerBase):
 
         self.set_sensors()
 
-        servicecall_params = {
-            CHARGER: "chargepoint",
-            CHARGERID: self._chargerid,
-            CURRENT: "max_current"
-        }
-
-        _on_off_params = {
-            "chargepoint": self._chargerid,
-            "connector": self._chargeamps_connector
-        }
-
         self._set_servicecalls(
-            domain=DOMAINNAME,
+            domain=self.domain_name,
             model=ServiceCallsDTO(
-                on=CallType("enable", _on_off_params),
-                off=CallType("disable", _on_off_params),
-                update_current=CallType("set_max_current", servicecall_params)
+                on=self.call_on,
+                off=self.call_off,
+                pause=self.call_pause,
+                resume=self.call_resume,
+                update_current=self.call_update_current
             ),
-            options=ServiceCallsOptions(
-                allowupdatecurrent=UPDATECURRENT,
-                update_current_on_termination=True,
-                switch_controls_charger=False
-            )
+            options=self.servicecalls_options
         )
+
+    @property
+    def domain_name(self) -> str:
+        """declare the domain name as stated in HA"""
+        return "chargeamps"
+
+    @property
+    def entity_endings(self) -> list:
+        """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
+        return ["_power", "_1", "_2", "_status", "_dimmer", "_downlight", "_current", "_voltage"]
+
+    @property
+    def native_chargerstates(self) -> list:
+        """declare a list of the native-charger states available for the type."""
+        return ["available", "connected", "charging"]
+
+    @property
+    def call_on(self) -> CallType:
+        return CallType("enable", {
+            "chargepoint": self._chargerid,
+            "connector":   self._chargeamps_connector
+        })
+
+    @property
+    def call_off(self) -> CallType:
+        return CallType("disable", {
+            "chargepoint": self._chargerid,
+            "connector":   self._chargeamps_connector
+        })
+
+    @property
+    def call_resume(self) -> CallType:
+        return self.call_on
+
+    @property
+    def call_pause(self) -> CallType:
+        return self.call_off
+
+    @property
+    def call_update_current(self) -> CallType:
+        return CallType("set_max_current", {
+            CHARGER:   "chargepoint",
+            CHARGERID: self._chargerid,
+            CURRENT:   "max_current"
+        })
+
+    @property
+    def servicecalls_options(self) -> ServiceCallsOptions:
+        return ServiceCallsOptions(
+            allowupdatecurrent=True,
+            update_current_on_termination=True,
+            switch_controls_charger=False
+        )
+
+    def get_allowed_amps(self) -> int:
+        """no such method for chargeamps available right now."""
+        pass
 
     def getentities(self, domain: str = None, endings: list = None):
         if len(self.entities.entityschema) < 1:
@@ -104,29 +140,22 @@ class ChargeAmps(ChargerBase):
                     if len(candidate) > 1:
                         break
 
-                self.entities.entityschema = candidate
-                _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
-                self.entities.imported_entities = entities
+                if candidate == "":
+                    _LOGGER.exception(f"Unable to find valid sensorschema for your {domain}.")
+                else:
+                    self.entities.entityschema = candidate
+                    _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
+                    self.entities.imported_entities = entities
 
-    def _get_entities_from_hass(self, domain_name) -> list:
-        return [
-            entity_id
-            for entity_id, info in entity_sources(self._hass).items()
-            if info["domain"] == domain_name
-                or info["domain"] == domain_name.capitalize()
-                or info["domain"] == domain_name.upper()
-                or info["domain"] == domain_name.lower()
-        ]
-
-    def set_sensors(self):
+    def set_sensors(self) -> None:
         self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"
-        self._set_chargeamps_type(self.entities.chargerentity)
         self.entities.powermeter = f"sensor.{self.entities.entityschema}_1_power"
-        self.entities.powerswitch = self._determine_switch_entity()
         self.entities.ampmeter = "max_current"
         self.options.ampmeter_is_attribute = True
+        self.entities.powerswitch = self._determine_switch_entity()
+        self._chargeramps_type = self._set_chargeamps_type(self.entities.chargerentity)
 
-    def _determine_entities(self):
+    def _determine_entities(self) -> list:
         ret = []
         for e in self.entities.imported_entities:
             entity_state = self._hass.states.get(e)
@@ -134,15 +163,12 @@ class ChargeAmps(ChargerBase):
                 ret.append(e)
         return ret
 
-    def _set_chargeamps_type(self, main_sensor_entity):
+    def _set_chargeamps_type(self, main_sensor_entity) -> ChargeAmpsTypes:
         if self._hass.states.get(main_sensor_entity) is not None:
             chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get("chargepoint_type")
-            if chargeampstype == "HALO":
-                self._chargeramps_type = HALO
-            elif chargeampstype == "AURA":
-                self._chargeramps_type = AURA
+            return ChargeAmpsTypes.get_type(chargeampstype)
 
-    def _determine_switch_entity(self):
+    def _determine_switch_entity(self) -> str:
         ent = self._determine_entities()
         for e in ent:
             if e.startswith("switch."):
