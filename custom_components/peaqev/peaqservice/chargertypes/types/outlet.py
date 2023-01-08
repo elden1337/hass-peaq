@@ -14,8 +14,6 @@ from custom_components.peaqev.peaqservice.util.constants import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-NATIVE_CHARGERSTATES = ["idle", "connected", "charging"]
-UPDATECURRENT = False
 
 
 class SmartOutlet(ChargerBase):
@@ -25,28 +23,48 @@ class SmartOutlet(ChargerBase):
         self.entities.powermeter = huboptions.charger.powermeter
         self.options.charger_is_outlet = True
         self.options.powerswitch_controls_charging = True
-        self.domainname = SMARTOUTLET
-        self.native_chargerstates = NATIVE_CHARGERSTATES
         self.chargerstates[CHARGERSTATES.Idle] = ["idle"]
         self.chargerstates[CHARGERSTATES.Connected] = ["connected"]
         self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
         self._hass.async_add_executor_job(self._validate_setup())
 
         self._set_servicecalls(
-            domain=SMARTOUTLET,
+            domain=self.domain_name,
             model=ServiceCallsDTO(
-                on=CallType(CallTypes.ON, {}),
-                off=CallType(CallTypes.OFF, {})
+                on=self.call_on,
+                off=self.call_off
             ),
-            options=ServiceCallsOptions(
-                allowupdatecurrent=UPDATECURRENT,
-                update_current_on_termination=False,
-                switch_controls_charger = True
-            )
+            options=self.servicecalls_options
+        )
+
+    @property
+    def domain_name(self) -> str:
+        """declare the domain name as stated in HA"""
+        return SMARTOUTLET
+
+    @property
+    def native_chargerstates(self) -> list:
+        """declare a list of the native-charger states available for the type."""
+        return ["idle", "connected", "charging"]
+
+    @property
+    def call_on(self) -> CallType:
+        return CallType(CallTypes.ON.value, {})
+
+    @property
+    def call_off(self) -> CallType:
+        return CallType(CallTypes.OFF.value, {})
+
+    @property
+    def servicecalls_options(self) -> ServiceCallsOptions:
+        return ServiceCallsOptions(
+            allowupdatecurrent=False,
+            update_current_on_termination=False,
+            switch_controls_charger=True
         )
 
     def _validate_setup(self):
-        def check_states(entity:str, type_format: type) -> bool:
+        def check_states(entity: str, type_format: type) -> bool:
             try:
                 s = self._hass.states.get(entity)
                 if s is not None:

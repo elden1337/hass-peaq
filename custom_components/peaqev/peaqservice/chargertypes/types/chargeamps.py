@@ -20,7 +20,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
 
 _LOGGER = logging.getLogger(__name__)
 
-POWERSWITCH_CONTROLS_CHARGING = True
+
 # docs: https://github.com/kirei/hass-chargeamps
 
 
@@ -29,9 +29,9 @@ class ChargeAmps(ChargerBase):
         self._hass = hass
         self._chargeramps_type = ""
         self._chargerid = huboptions.charger.chargerid
-        self._chargeamps_connector = 1 #fix this later
+        self._chargeamps_connector = 1  # fix this later
         self.entities.imported_entityendings = self.entity_endings
-        self.options.powerswitch_controls_charging = POWERSWITCH_CONTROLS_CHARGING
+        self.options.powerswitch_controls_charging = True
         self.chargerstates[CHARGERSTATES.Idle] = ["available"]
         self.chargerstates[CHARGERSTATES.Connected] = ["connected"]
         self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
@@ -80,7 +80,7 @@ class ChargeAmps(ChargerBase):
     def call_on(self) -> CallType:
         return CallType("enable", {
             "chargepoint": self._chargerid,
-            "connector": self._chargeamps_connector
+            "connector":   self._chargeamps_connector
         })
 
     @property
@@ -101,18 +101,22 @@ class ChargeAmps(ChargerBase):
     @property
     def call_update_current(self) -> CallType:
         return CallType("set_max_current", {
-            CHARGER: "chargepoint",
+            CHARGER:   "chargepoint",
             CHARGERID: self._chargerid,
-            CURRENT: "max_current"
+            CURRENT:   "max_current"
         })
 
     @property
     def servicecalls_options(self) -> ServiceCallsOptions:
         return ServiceCallsOptions(
-                allowupdatecurrent=True,
-                update_current_on_termination=True,
-                switch_controls_charger=False
-            )
+            allowupdatecurrent=True,
+            update_current_on_termination=True,
+            switch_controls_charger=False
+        )
+
+    def get_allowed_amps(self) -> int:
+        """no such method for chargeamps available right now."""
+        pass
 
     def getentities(self, domain: str = None, endings: list = None):
         if len(self.entities.entityschema) < 1:

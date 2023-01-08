@@ -14,22 +14,7 @@ from custom_components.peaqev.peaqservice.chargertypes.models.entities_postmodel
 
 _LOGGER = logging.getLogger(__name__)
 
-ENTITYENDINGS = [
-    "_switch"
-]
-
-NATIVE_CHARGERSTATES = [
-"unknown",
-"charging",
-"disconnected",
-"waiting",
-"charge_done"
-]
-
-DOMAINNAME = "zaptec"
-UPDATECURRENT = False
-UPDATECURRENT_ON_TERMINATION = False
-#docs: https://github.com/custom-components/zaptec
+# docs: https://github.com/custom-components/zaptec
 
 
 class Zaptec(ChargerBase):
@@ -38,9 +23,8 @@ class Zaptec(ChargerBase):
         self._hass = hass
         self._chargerid = huboptions.charger.chargerid
         self._auth_required = auth_required
-        self._domainname = DOMAINNAME
-        self.entities.imported_entityendings = ENTITYENDINGS
-        self._native_chargerstates = NATIVE_CHARGERSTATES
+        self.entities.imported_entityendings = self.entity_endings
+
         self.chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
         self.chargerstates[CHARGERSTATES.Connected] = ["waiting"]
         self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
@@ -51,30 +35,73 @@ class Zaptec(ChargerBase):
         entitiesobj = helper.set_entitiesmodel(
             hass=self._hass,
             model=EntitiesPostModel(
-                    self.domainname,
-                    self.entities.entityschema,
-                    self.entities.imported_entityendings
-                    )
+                self.domain_name,
+                self.entities.entityschema,
+                self.entities.imported_entityendings
+            )
         )
         self.entities.imported_entities = entitiesobj.imported_entities
         self.entities.entityschema = entitiesobj.entityschema
 
-        _on_off_params = {"charger_id": self._chargerid}
-
         self._set_servicecalls(
-            domain=DOMAINNAME,
+            domain=self.domain_name,
             model=ServiceCallsDTO(
-                on=CallType("start_charging", _on_off_params),
-                off=CallType("stop_charging", _on_off_params),
-                resume=CallType("resume_charging", _on_off_params),
-                pause=CallType("stop_pause_charging", _on_off_params)
+                on=self.call_on,
+                off=self.call_off,
+                resume=self.call_resume,
+                pause=self.call_pause
             ),
-            options=ServiceCallsOptions(
-                allowupdatecurrent=UPDATECURRENT,
-                update_current_on_termination=UPDATECURRENT_ON_TERMINATION,
+            options=self.servicecalls_options
+        )
+
+    @property
+    def domain_name(self) -> str:
+        """declare the domain name as stated in HA"""
+        return "zaptec"
+
+    @property
+    def entity_endings(self) -> list:
+        """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
+        return ["_switch"]
+
+    @property
+    def native_chargerstates(self) -> list:
+        """declare a list of the native-charger states available for the type."""
+        return [
+            "unknown",
+            "charging",
+            "disconnected",
+            "waiting",
+            "charge_done"
+        ]
+
+    @property
+    def call_on(self) -> CallType:
+        return CallType("start_charging", {"charger_id": self._chargerid})
+
+    @property
+    def call_off(self) -> CallType:
+        return CallType("stop_charging", {"charger_id": self._chargerid})
+
+    @property
+    def call_resume(self) -> CallType:
+        return CallType("resume_charging", {"charger_id": self._chargerid})
+
+    @property
+    def call_pause(self) -> CallType:
+        return CallType("stop_pause_charging", {"charger_id": self._chargerid})
+
+    @property
+    def call_update_current(self) -> CallType:
+        raise NotImplementedError
+
+    @property
+    def servicecalls_options(self) -> ServiceCallsOptions:
+        return ServiceCallsOptions(
+                allowupdatecurrent=False,
+                update_current_on_termination=False,
                 switch_controls_charger=False
             )
-        )
 
     def getentities(self, domain: str = None, endings: list = None):
         if len(self.entities.entityschema) < 1:
