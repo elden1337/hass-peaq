@@ -79,7 +79,7 @@ scheduler_alter_existing_schedule:
           The id of the schedule you wish to pause
         example: 1
 
-  resumee_schedule:
+  resume_schedule:
     name: Alter Peaqev Schedule
     description: Resume a paused schedule by calling this service with the schedule's unique id
     fields:
