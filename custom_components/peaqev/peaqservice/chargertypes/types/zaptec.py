@@ -22,15 +22,14 @@ class Zaptec(ChargerBase):
         super().__init__(hass)
         self._hass = hass
         self._chargerid = huboptions.charger.chargerid
-        self._auth_required = auth_required
         self.entities.imported_entityendings = self.entity_endings
+        self._auth_required = auth_required
+        self.options.powerswitch_controls_charging = True
 
         self.chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
         self.chargerstates[CHARGERSTATES.Connected] = ["waiting"]
         self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
         self.chargerstates[CHARGERSTATES.Done] = ["charge_done"]
-
-        self.set_sensors()
 
         entitiesobj = helper.set_entitiesmodel(
             hass=self._hass,
@@ -43,6 +42,7 @@ class Zaptec(ChargerBase):
         self.entities.imported_entities = entitiesobj.imported_entities
         self.entities.entityschema = entitiesobj.entityschema
 
+        self.set_sensors()
         self._set_servicecalls(
             domain=self.domain_name,
             model=ServiceCallsDTO(
@@ -105,7 +105,7 @@ class Zaptec(ChargerBase):
 
     def getentities(self, domain: str = None, endings: list = None):
         if len(self.entities.entityschema) < 1:
-            domain = self.domainname if domain is None else domain
+            domain = self.domain_name if domain is None else domain
             endings = self.entities.imported_entityendings if endings is None else endings
 
             entities = helper.get_entities_from_hass(
@@ -132,7 +132,7 @@ class Zaptec(ChargerBase):
                     _LOGGER.exception(f"Unable to find valid sensorschema for your {domain}.")
                 else:
                     self.entities.entityschema = candidate
-                    _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
+                    _LOGGER.debug(f"entityschema for Zaptec is: {self.entities.entityschema}")
                     self.entities.imported_entities = entities
 
     def set_sensors(self):
@@ -141,6 +141,7 @@ class Zaptec(ChargerBase):
             self.entities.powermeter = f"{self.entities.chargerentity}|total_charge_power"
             self.options.powermeter_factor = 1
             self.entities.powerswitch = f"switch.zaptec_{self.entities.entityschema}_switch"
+            _LOGGER.debug("Sensors for Zaptec have been set up.")
         except Exception as e:
             _LOGGER.exception(f"Could not set needed sensors for Zaptec. {e}")
 
