@@ -1,23 +1,5 @@
-# from peaqevcore.models.hourselection.const import (
-#     CAUTIONHOURTYPE as core_CAUTIONHOURTYPE
-# )
+
 from peaqevcore.models.hourselection.cautionhourtype import CautionHourType
-
-"""CHARGERTYPES"""
-CHARGERTYPE_CHARGEAMPS = "Chargeamps"
-CHARGERTYPE_EASEE = "Easee"
-CHARGERTYPE_GAROWALLBOX = "Garo Wallbox"
-CHARGERTYPE_OUTLET = "Smart outdoor plug"
-CHARGERTYPE_ZAPTEC = "Zaptec"
-
-"""Lookup types for config flow"""
-CHARGERTYPES = [
-    CHARGERTYPE_CHARGEAMPS,
-    CHARGERTYPE_EASEE,
-    CHARGERTYPE_OUTLET,
-    #CHARGERTYPE_GAROWALLBOX
-    CHARGERTYPE_ZAPTEC
-    ]
 
 """NAMING CONSTANTS"""
 PEAQCONTROLLER = "Peaq controller"
