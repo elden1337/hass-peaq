@@ -63,7 +63,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 self.info = await ConfigFlowValidation.validate_input_first(user_input)
-                # await ConfigFlowValidation.validate_power_sensor(self.hass, user_input["powersensor"])
+                await ConfigFlowValidation.validate_power_sensor(self.hass, user_input["name"])
             except ValueError:
                 errors["base"] = "invalid_powersensor"
             if not errors:
