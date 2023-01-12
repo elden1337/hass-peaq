@@ -137,7 +137,7 @@ class Easee(ChargerBase):
 
     def getentities(self, domain: str = None, endings: list = None):
         if len(self.entities.entityschema) < 1:
-            domain = self.domainname if domain is None else domain
+            domain = self.domain_name if domain is None else domain
             endings = self.entities.imported_entityendings if endings is None else endings
 
             entities = helper.get_entities_from_hass(self._hass, domain)
