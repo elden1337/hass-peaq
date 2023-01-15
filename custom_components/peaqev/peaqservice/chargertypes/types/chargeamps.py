@@ -29,7 +29,7 @@ class ChargeAmps(ChargerBase):
         self._hass = hass
         self._chargeramps_type = ""
         self._chargerid = huboptions.charger.chargerid
-        self._chargeamps_connector = 1  # fix this later
+        self._chargeamps_connector = 1  # fix this later to be able to use aura
         self.entities.imported_entityendings = self.entity_endings
         self.options.powerswitch_controls_charging = True
         self.chargerstates[CHARGERSTATES.Idle] = ["available"]

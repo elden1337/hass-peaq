@@ -35,6 +35,17 @@ class Charger:
     def session_active(self, val):
         self._params.session_active = val
 
+    @property
+    def _charger_is_active(self) -> bool:
+        if self._hub.chargertype.charger.options.powerswitch_controls_charging:
+            return self._hub.sensors.chargerobject_switch.value
+        return all(
+            [
+                self._hub.sensors.chargerobject_switch.value,
+                self._hub.sensors.carpowersensor.value > 0
+            ]
+        )
+
     async def charge(self):
         """Main function to turn charging on or off"""
         if self._params.charger_state_mismatch:
@@ -71,22 +82,7 @@ class Charger:
                 elif self._hub.sensors.charger_enabled.value:
                     _LOGGER.debug("Detected charger running outside of peaqev-session, overtaking command and pausing.")
                     await self._pause_charger()
-                # else:
-                #     _LOGGER.debug(f"I'm here even though i Shouldn't be. Executing Terminate_charger to be sure.")
-                #     await self._terminate_charger()
-
             return
-
-    @property
-    def _charger_is_active(self) -> bool:
-        if self._hub.chargertype.charger.options.powerswitch_controls_charging:
-            return self._hub.sensors.chargerobject_switch.value
-        return all(
-            [
-                self._hub.sensors.chargerobject_switch.value,
-                self._hub.sensors.carpowersensor.value > 0
-            ]
-        )
 
     async def _overtake_charger(self):
         await self._update_charger_state_internal(ChargerStates.Start)
