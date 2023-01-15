@@ -18,6 +18,7 @@ class ChargerTypeData:
             _LOGGER.debug(f"Managed to set up charger-class for chargertype {input_type}")
             self._charger.validatecharger()
         except Exception as e:
+            _LOGGER.debug(f"Exception. Did not manage to set up charge-class for {input_type}: {e}")
             raise Exception
 
     @property

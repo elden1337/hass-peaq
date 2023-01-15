@@ -19,7 +19,6 @@ _LOGGER = logging.getLogger(__name__)
 
 class Zaptec(ChargerBase):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, auth_required: bool = False):
-        super().__init__(hass)
         self._hass = hass
         self._chargerid = huboptions.charger.chargerid
         self.entities.imported_entityendings = self.entity_endings
