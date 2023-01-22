@@ -61,7 +61,7 @@ class Zaptec(ChargerBase):
     @property
     def entity_endings(self) -> list:
         """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
-        return ["_switch"]
+        return ["_switch", ""]
 
     @property
     def native_chargerstates(self) -> list:
@@ -136,7 +136,7 @@ class Zaptec(ChargerBase):
 
     def set_sensors(self):
         try:
-            self.entities.chargerentity = f"sensor.zaptec_charger_{self.entities.entityschema}"
+            self.entities.chargerentity = f"sensor.zaptec_{self.entities.entityschema}"
             self.entities.powermeter = f"{self.entities.chargerentity}|total_charge_power"
             self.options.powermeter_factor = 1
             self.entities.powerswitch = f"switch.zaptec_{self.entities.entityschema}_switch"
