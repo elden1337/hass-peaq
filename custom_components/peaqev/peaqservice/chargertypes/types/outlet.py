@@ -49,11 +49,11 @@ class SmartOutlet(ChargerBase):
 
     @property
     def call_on(self) -> CallType:
-        return CallType(CallTypes.ON.value, {})
+        return CallType(CallTypes.On.value, {})
 
     @property
     def call_off(self) -> CallType:
-        return CallType(CallTypes.OFF.value, {})
+        return CallType(CallTypes.Off.value, {})
 
     @property
     def servicecalls_options(self) -> ServiceCallsOptions:

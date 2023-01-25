@@ -96,10 +96,10 @@ class Charger:
         if time.time() - self._params.latest_charger_call > CALL_WAIT_TIMER and not self._hub.sensors.power.killswitch.is_dead:
             await self._update_charger_state_internal(ChargerStates.Start)
             if not self.session_active:
-                await self._call_charger(CallTypes.ON)
+                await self._call_charger(CallTypes.On)
                 self.session_active = True
             else:
-                await self._call_charger(CallTypes.RESUME)
+                await self._call_charger(CallTypes.Resume)
             self._hub.chargecontroller.update_latestchargerstart()
             if self._hub.chargertype.charger.servicecalls.options.allowupdatecurrent and not self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data):
                 self._hass.async_create_task(self._updatemaxcurrent())
@@ -109,7 +109,7 @@ class Charger:
             await self._hass.async_add_executor_job(self.session.core.terminate)
             await self._update_charger_state_internal(ChargerStates.Stop)
             self.session_active = False
-            await self._call_charger(CallTypes.OFF)
+            await self._call_charger(CallTypes.Off)
             self._hub.sensors.charger_done.value = True
 
     async def _pause_charger(self):
@@ -117,7 +117,7 @@ class Charger:
             if self._hub.sensors.charger_done.value is True or self._hub.chargecontroller.status is ChargeControllerStates.Idle:
                 await self._terminate_charger()
             else:
-                await self._call_charger(CallTypes.PAUSE)
+                await self._call_charger(CallTypes.Pause)
                 await self._update_charger_state_internal(ChargerStates.Pause)
 
     async def _call_charger(self, command: CallTypes):
@@ -131,19 +131,19 @@ class Charger:
 
     async def _updatemaxcurrent(self):
         self._hub.sensors.chargerobject_switch.updatecurrent()
-        calls = self._service_calls.get_call(CallTypes.UPDATECURRENT)
+        calls = self._service_calls.get_call(CallTypes.UpdateCurrent)
         if await self._hass.async_add_executor_job(self.helpers.wait_turn_on):
             #call here to set amp-list
             while self._hub.sensors.chargerobject_switch.value is True and self._params.running is True:
                 if await self._hass.async_add_executor_job(self.helpers.wait_update_current):
                     serviceparams = await self.helpers.setchargerparams(calls)
                     if not self._params.disable_current_updates and self._hub.power_canary.allow_adjustment(new_amps=serviceparams[calls[PARAMS][CURRENT]]):
-                        await self._do_service_call(calls[DOMAIN], calls[CallTypes.UPDATECURRENT], serviceparams)
+                        await self._do_service_call(calls[DOMAIN], calls[CallTypes.UpdateCurrent], serviceparams)
                     await self._hass.async_add_executor_job(self.helpers.wait_loop_cycle)
 
             if self._hub.chargertype.charger.servicecalls.options.update_current_on_termination is True:
                 final_service_params = await self.helpers.setchargerparams(calls, ampoverride=6)
-                await self._do_service_call(calls[DOMAIN], calls[CallTypes.UPDATECURRENT], final_service_params)
+                await self._do_service_call(calls[DOMAIN], calls[CallTypes.UpdateCurrent], final_service_params)
 
     async def _do_service_call(self, domain, command, params):
         _LOGGER.debug(f"Calling charger {command} for domain '{domain}' with parameters: {params}")
