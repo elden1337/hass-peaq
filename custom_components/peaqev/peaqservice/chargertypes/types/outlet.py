@@ -2,7 +2,7 @@ import logging
 
 from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
-from peaqevcore.models.chargerstates import CHARGERSTATES
+from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
@@ -23,9 +23,9 @@ class SmartOutlet(ChargerBase):
         self.entities.powermeter = huboptions.charger.powermeter
         self.options.charger_is_outlet = True
         self.options.powerswitch_controls_charging = True
-        self.chargerstates[CHARGERSTATES.Idle] = ["idle"]
-        self.chargerstates[CHARGERSTATES.Connected] = ["connected"]
-        self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
+        self.chargerstates[ChargeControllerStates.Idle] = ["idle"]
+        self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
+        self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
         self._hass.async_add_executor_job(self._validate_setup())
 
         self._set_servicecalls(

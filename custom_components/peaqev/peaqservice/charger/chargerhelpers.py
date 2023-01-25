@@ -33,7 +33,7 @@ class ChargerHelpers:
         return self._updates_should_continue()
 
     def wait_loop_cycle(self):
-        timer = 180
+        timer = 120
         start_time = time.time()
         self._charger._hub.sensors.chargerobject_switch.updatecurrent()
         while time.time() - start_time < timer:

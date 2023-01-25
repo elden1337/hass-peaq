@@ -3,7 +3,7 @@ import time
 
 from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
-from peaqevcore.models.chargerstates import CHARGERSTATES
+from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
@@ -32,9 +32,9 @@ class ChargeAmps(ChargerBase):
         self._chargeamps_connector = 1  # fix this later to be able to use aura
         self.entities.imported_entityendings = self.entity_endings
         self.options.powerswitch_controls_charging = True
-        self.chargerstates[CHARGERSTATES.Idle] = ["available"]
-        self.chargerstates[CHARGERSTATES.Connected] = ["connected"]
-        self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
+        self.chargerstates[ChargeControllerStates.Idle] = ["available"]
+        self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
+        self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
 
         entitiesobj = helper.set_entitiesmodel(
             self._hass,

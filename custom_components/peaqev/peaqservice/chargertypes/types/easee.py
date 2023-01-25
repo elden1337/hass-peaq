@@ -3,7 +3,7 @@ import time
 
 from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
-from peaqevcore.models.chargerstates import CHARGERSTATES
+from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
@@ -28,10 +28,10 @@ class Easee(ChargerBase):
         self._auth_required = auth_required
         self.options.powerswitch_controls_charging = False
         self.entities.imported_entityendings = self.entity_endings
-        self.chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
-        self.chargerstates[CHARGERSTATES.Connected] = ["awaiting_start", "ready_to_charge"]
-        self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
-        self.chargerstates[CHARGERSTATES.Done] = ["completed"]
+        self.chargerstates[ChargeControllerStates.Idle] = ["disconnected"]
+        self.chargerstates[ChargeControllerStates.Connected] = ["awaiting_start", "ready_to_charge"]
+        self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
+        self.chargerstates[ChargeControllerStates.Done] = ["completed"]
 
         entitiesobj = helper.set_entitiesmodel(
             self._hass,

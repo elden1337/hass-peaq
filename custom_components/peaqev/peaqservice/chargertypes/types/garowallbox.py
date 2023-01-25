@@ -3,7 +3,7 @@ import time
 
 from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
-from peaqevcore.models.chargerstates import CHARGERSTATES
+from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
@@ -60,14 +60,14 @@ class GaroWallbox(ChargerBase):
         self._hass = hass
         self._chargerid = huboptions.charger.chargerid
         self.getentities(DOMAINNAME, ENTITYENDINGS)
-        self.chargerstates[CHARGERSTATES.Idle] = ['NOT_CONNECTED']
-        self.chargerstates[CHARGERSTATES.Connected] = [
+        self.chargerstates[ChargeControllerStates.Idle] = ['NOT_CONNECTED']
+        self.chargerstates[ChargeControllerStates.Connected] = [
             'CONNECTED',
             'CHARGING_PAUSED',
             'CHARGING_CANCELLED'
         ]
-        self.chargerstates[CHARGERSTATES.Done] = ['CHARGING_FINISHED']
-        self.chargerstates[CHARGERSTATES.Charging] = ['CHARGING']
+        self.chargerstates[ChargeControllerStates.Done] = ['CHARGING_FINISHED']
+        self.chargerstates[ChargeControllerStates.Charging] = ['CHARGING']
         self.entities.chargerentity = f"sensor.{self.entities.entityschema}-status"
         self.entities.powermeter = f"sensor.{self.entities.entityschema}-current_charging_power"
         self.options.powermeter_factor = 1

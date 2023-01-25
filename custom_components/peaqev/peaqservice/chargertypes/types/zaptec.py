@@ -3,7 +3,7 @@ import time
 
 from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
-from peaqevcore.models.chargerstates import CHARGERSTATES
+from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
@@ -25,10 +25,10 @@ class Zaptec(ChargerBase):
         self._auth_required = auth_required
         self.options.powerswitch_controls_charging = True
 
-        self.chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
-        self.chargerstates[CHARGERSTATES.Connected] = ["waiting"]
-        self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
-        self.chargerstates[CHARGERSTATES.Done] = ["charge_done"]
+        self.chargerstates[ChargeControllerStates.Idle] = ["disconnected"]
+        self.chargerstates[ChargeControllerStates.Connected] = ["waiting"]
+        self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
+        self.chargerstates[ChargeControllerStates.Done] = ["charge_done"]
 
         entitiesobj = helper.set_entitiesmodel(
             hass=self._hass,
