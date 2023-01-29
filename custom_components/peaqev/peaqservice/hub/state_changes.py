@@ -13,21 +13,6 @@ class StateChanges:
     def __init__(self, hub):
         self._hub = hub
 
-    async def _handle_sensor_attribute(self) -> None:
-        if self._hub.sensors.carpowersensor.use_attribute:
-            entity = self._hub.sensors.carpowersensor
-            try:
-                val = self._hub.hass.states.get(entity.entity).attributes.get(entity.attribute)
-                if val is not None:
-                    self._hub.sensors.carpowersensor.value = val
-                    self._hub.sensors.power.update(
-                        carpowersensor_value=self._hub.sensors.carpowersensor.value,
-                        config_sensor_value=None
-                    )
-                return
-            except Exception as e:
-                _LOGGER.debug(f"Unable to get attribute-state for {entity.entity}|{entity.attribute}. {e}")
-
     async def update_sensor(self, entity, value):
         if self._hub.options.peaqev_lite is True:
             await self._update_sensor_lite(entity, value)
@@ -119,7 +104,6 @@ class StateChanges:
             case self._hub.nordpool.nordpool_entity:
                 await self._hub.nordpool.update_nordpool()
                 update_session = True
-
         return update_session
 
     async def _handle_outlet_updates(self):
@@ -135,3 +119,17 @@ class StateChanges:
             if old_state != self._hub.sensors.chargerobject.value:
                 _LOGGER.debug(f"smartoutlet is now {self._hub.sensors.chargerobject.value}")
 
+    async def _handle_sensor_attribute(self) -> None:
+        if self._hub.sensors.carpowersensor.use_attribute:
+            entity = self._hub.sensors.carpowersensor
+            try:
+                val = self._hub.hass.states.get(entity.entity).attributes.get(entity.attribute)
+                if val is not None:
+                    self._hub.sensors.carpowersensor.value = val
+                    self._hub.sensors.power.update(
+                        carpowersensor_value=self._hub.sensors.carpowersensor.value,
+                        config_sensor_value=None
+                    )
+                return
+            except Exception as e:
+                _LOGGER.debug(f"Unable to get attribute-state for {entity.entity}|{entity.attribute}. {e}")
