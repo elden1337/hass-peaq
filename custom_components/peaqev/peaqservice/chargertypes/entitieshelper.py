@@ -5,32 +5,28 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import entity_sources
 
 from custom_components.peaqev.peaqservice.chargertypes.models.entities_model import EntitiesModel
-from custom_components.peaqev.peaqservice.chargertypes.models.entities_postmodel import EntitiesPostModel
 
 _LOGGER = logging.getLogger(__name__)
 
 
-def set_entitiesmodel(hass: HomeAssistant,
-                      model: EntitiesPostModel,
-                      ) -> EntitiesModel:
-    if len(model.entityschema) < 1:
-        entities = get_entities_from_hass(hass=hass, domain_name=model.domain)
+def set_entitiesmodel(hass: HomeAssistant, domain:str, entity_endings:list, entity_schema:str) -> EntitiesModel:
+    if len(entity_schema) < 1:
+        entities = get_entities_from_hass(hass=hass, domain_name=domain)
 
         if len(entities) < 1:
-            _LOGGER.error(f"no entities found for {model.domain} at {time.time()}")
+            _LOGGER.error(f"no entities found for {domain} at {time.time()}")
         else:
             # _endings = model.endings
             candidate = ""
 
             for e in entities:
                 splitted = e.split(".")
-                for ending in model.endings:
+                for ending in entity_endings:
                     if splitted[1].endswith(ending):
                         candidate = splitted[1].replace(ending, '')
                         break
                 if len(candidate) > 1:
                     break
-
             _LOGGER.debug(f"entityschema is: {candidate} at {time.time()}")
             return EntitiesModel(entityschema=candidate, imported_entities=entities)
 

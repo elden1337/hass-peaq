@@ -1,5 +1,4 @@
 import logging
-import time
 
 from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
@@ -10,7 +9,6 @@ from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptio
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
-from custom_components.peaqev.peaqservice.chargertypes.models.entities_postmodel import EntitiesPostModel
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -33,16 +31,17 @@ class Easee(ChargerBase):
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
         self.chargerstates[ChargeControllerStates.Done] = ["completed"]
 
-        entitiesobj = helper.set_entitiesmodel(
-            self._hass,
-            EntitiesPostModel(
-                self.domain_name,
-                self.entities.entityschema,
-                self.entities.imported_entityendings
+        try:
+            entitiesobj = helper.set_entitiesmodel(
+                hass=self._hass,
+                domain=self.domain_name,
+                entity_endings=self.entity_endings,
+                entity_schema=self.entities.entityschema
             )
-        )
-        self.entities.imported_entities = entitiesobj.imported_entities
-        self.entities.entityschema = entitiesobj.entityschema
+            self.entities.imported_entities = entitiesobj.imported_entities
+            self.entities.entityschema = entitiesobj.entityschema
+        except:
+            _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
 
         self.set_sensors()
         self.max_amps = self.get_allowed_amps()
@@ -134,35 +133,6 @@ class Easee(ChargerBase):
                 update_current_on_termination=False,
                 switch_controls_charger=False
             )
-
-    def getentities(self, domain: str = None, endings: list = None):
-        if len(self.entities.entityschema) < 1:
-            domain = self.domain_name if domain is None else domain
-            endings = self.entities.imported_entityendings if endings is None else endings
-
-            entities = helper.get_entities_from_hass(self._hass, domain)
-
-            if len(entities) < 1:
-                _LOGGER.error(f"no entities found for {domain} at {time.time()}")
-            else:
-                _endings = endings
-                candidate = ""
-
-                for e in entities:
-                    splitted = e.split(".")
-                    for ending in _endings:
-                        if splitted[1].endswith(ending):
-                            candidate = splitted[1].replace(ending, '')
-                            break
-                    if len(candidate) > 1:
-                        break
-
-                if candidate == "":
-                    _LOGGER.exception(f"Unable to find valid sensorschema for your {domain}.")
-                else:
-                    self.entities.entityschema = candidate
-                    _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
-                    self.entities.imported_entities = entities
 
     def set_sensors(self):
         amp_sensor = f"sensor.{self.entities.entityschema}_dynamic_charger_limit"
