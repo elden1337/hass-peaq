@@ -1,5 +1,6 @@
-from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
 from peaqevcore.hub.hub_options import HubOptions
+
+from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
 
 
 def test_chargeamps_halo(hass):
@@ -11,11 +12,4 @@ def test_chargeamps_halo(hass):
             input_type=options.charger.chargertype,
             options=options
         )
-    print(c)
     assert c.type.value == "chargeamps"
-
-def test_easee():
-    pass
-
-def test_zaptec_go():
-    pass
