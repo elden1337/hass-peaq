@@ -88,7 +88,7 @@ class Charger:
     async def _overtake_charger(self):
         await self._update_charger_state_internal(ChargerStates.Start)
         self.session_active = True
-        self._hub.chargecontroller.update_latestchargerstart()
+        self._hub.chargecontroller.latest_charger_start = time.time()
         if self._hub.chargertype.charger.servicecalls.options.allowupdatecurrent and not self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data):
             self._hass.async_create_task(self._updatemaxcurrent())
 
@@ -100,7 +100,7 @@ class Charger:
                 self.session_active = True
             else:
                 await self._call_charger(CallTypes.Resume)
-            self._hub.chargecontroller.update_latestchargerstart()
+            self._hub.chargecontroller.latest_charger_start = time.time()
             if self._hub.chargertype.charger.servicecalls.options.allowupdatecurrent and not self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data):
                 self._hass.async_create_task(self._updatemaxcurrent())
 

@@ -46,18 +46,11 @@ class StateChanges:
             case self._hub.sensors.chargerobject.entity:
                 self._hub.sensors.chargerobject.value = value
             case self._hub.sensors.chargerobject_switch.entity:
-                self._hub.sensors.chargerobject_switch.value = value
-                self._hub.sensors.chargerobject_switch.updatecurrent()
-                await self._handle_outlet_updates()
+                await self._update_chargerobject_switch(value)
             case self._hub.sensors.current_peak.entity:
                 self._hub.sensors.current_peak.value = value
             case self._hub.sensors.totalhourlyenergy.entity:
-                self._hub.sensors.totalhourlyenergy.value = value
-                self._hub.sensors.current_peak.value = self._hub.sensors.locale.data.query_model.observed_peak
-                self._hub.sensors.locale.data.query_model.try_update(
-                    new_val=float(value),
-                    timestamp=datetime.now()
-                )
+                await self._update_total_energy_and_peak(value)
             case self._hub.nordpool.nordpool_entity:
                 await self._hub.nordpool.update_nordpool()
 
@@ -87,16 +80,9 @@ class StateChanges:
             case self._hub.sensors.chargerobject.entity:
                 self._hub.sensors.chargerobject.value = value
             case self._hub.sensors.chargerobject_switch.entity:
-                self._hub.sensors.chargerobject_switch.value = value
-                self._hub.sensors.chargerobject_switch.updatecurrent()
-                await self._handle_outlet_updates()
+                await self._update_chargerobject_switch(value)
             case self._hub.sensors.totalhourlyenergy.entity:
-                self._hub.sensors.totalhourlyenergy.value = value
-                self._hub.sensors.current_peak.value = self._hub.sensors.locale.data.query_model.observed_peak
-                self._hub.sensors.locale.data.query_model.try_update(
-                    new_val=float(value),
-                    timestamp=datetime.now()
-                )
+                await self._update_total_energy_and_peak(value)
             case self._hub.sensors.powersensormovingaverage.entity:
                 self._hub.sensors.powersensormovingaverage.value = value
             case self._hub.sensors.powersensormovingaverage24.entity:
@@ -133,3 +119,16 @@ class StateChanges:
                 return
             except Exception as e:
                 _LOGGER.debug(f"Unable to get attribute-state for {entity.entity}|{entity.attribute}. {e}")
+
+    async def _update_chargerobject_switch(self, value) -> None:
+        self._hub.sensors.chargerobject_switch.value = value
+        self._hub.sensors.chargerobject_switch.updatecurrent()
+        await self._handle_outlet_updates()
+
+    async def _update_total_energy_and_peak(self, value) -> None:
+        self._hub.sensors.totalhourlyenergy.value = value
+        self._hub.sensors.current_peak.value = self._hub.sensors.locale.data.query_model.observed_peak
+        self._hub.sensors.locale.data.query_model.try_update(
+            new_val=float(value),
+            timestamp=datetime.now()
+        )
