@@ -1,3 +1,4 @@
 homeassistant
 peaqevcore
 pytest-homeassistant-custom-component
+pytest-asyncio
