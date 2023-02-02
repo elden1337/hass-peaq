@@ -1,5 +1,5 @@
 from __future__ import annotations
-import datetime
+from datetime import datetime
 import logging
 from statistics import mean
 import homeassistant.helpers.template as template
