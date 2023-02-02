@@ -36,13 +36,6 @@ class NordPoolUpdater:
         return self.model.state
 
     @property
-    def average_data_current_month(self) -> float | None:
-        month_len = datetime.now().day
-        if len(self.model.average_data) >= month_len:
-            return self.model.average_data[month_len*-1:]
-        return None
-
-    @property
     def average_data(self) -> list:
         return self.model.average_data
 
