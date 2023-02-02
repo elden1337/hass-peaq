@@ -9,7 +9,6 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 
-import custom_components.peaqev.peaqservice.util.constants as pk
 from custom_components.peaqev.configflow.config_flow_helpers import set_startpeak_dict
 from custom_components.peaqev.configflow.config_flow_schemas import (
     SENSOR_SCHEMA,
@@ -23,8 +22,9 @@ from custom_components.peaqev.configflow.config_flow_schemas import (
 )
 from custom_components.peaqev.configflow.config_flow_validation import ConfigFlowValidation
 from custom_components.peaqev.peaqservice.power_canary.power_canary import FUSES_LIST
-from custom_components.peaqev.peaqservice.util.constants import CHARGERTYPE_OUTLET
+from custom_components.peaqev.peaqservice.util.constants import CautionHourType, TYPELITE, CAUTIONHOURTYPE_NAMES
 from .const import DOMAIN  # pylint:disable=unused-import
+from .peaqservice.chargertypes.models.chargertypes_enum import Charger_type
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,8 +46,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             self.data = user_input
-            if self.data["peaqevtype"] == pk.TYPELITE:
-                self.info = {"title": pk.TYPELITE}
+            if self.data["peaqevtype"] == TYPELITE:
+                self.info = {"title": TYPELITE}
                 return await self.async_step_charger()
             return await self.async_step_sensor()
 
@@ -63,7 +63,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 self.info = await ConfigFlowValidation.validate_input_first(user_input)
-                # await ConfigFlowValidation.validate_power_sensor(self.hass, user_input["powersensor"])
+                await ConfigFlowValidation.validate_power_sensor(self.hass, user_input["name"])
             except ValueError:
                 errors["base"] = "invalid_powersensor"
             if not errors:
@@ -82,7 +82,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 self.data.update(user_input)
-                if self.data["chargertype"] == CHARGERTYPE_OUTLET:
+                if self.data["chargertype"] == Charger_type.Outlet.value:
                     return await self.async_step_outletdetails()
                 return await self.async_step_chargerdetails()
             except Exception:  # pylint: disable=broad-except
@@ -203,7 +203,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         _priceaware = await self._get_existing_param("priceaware", False)
         _topprice = await self._get_existing_param("absolute_top_price", 0)
         _minprice = await self._get_existing_param("min_priceaware_threshold_price", 0)
-        _hourtype = await self._get_existing_param("cautionhour_type", pk.CAUTIONHOURTYPE_INTERMEDIATE)
+        _hourtype = await self._get_existing_param("cautionhour_type", CautionHourType.INTERMEDIATE.value)
 
         return self.async_show_form(
             step_id="init",
@@ -216,7 +216,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Optional(
                         "cautionhour_type",
                         default=_hourtype,
-                    ): vol.In(pk.CAUTIONHOURTYPE_NAMES),
+                    ): vol.In(CAUTIONHOURTYPE_NAMES),
                 }),
         )
 
@@ -281,7 +281,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_create_entry(title="", data=self.options)
 
         mainsvalue = await self._get_existing_param("mains", "")
-
+        _LOGGER.debug(f"existing mainsvalue is: {mainsvalue}")
         return self.async_show_form(
             step_id="misc",
             last_step=True,

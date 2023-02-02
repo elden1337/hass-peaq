@@ -1,10 +1,8 @@
 import logging
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
 from homeassistant.const import (
-    DEVICE_CLASS_ENERGY,
     ENERGY_KILO_WATT_HOUR,
-    DEVICE_CLASS_MONETARY
 )
 from homeassistant.helpers.restore_state import RestoreEntity
 
@@ -40,7 +38,7 @@ class SessionDevice(SensorEntity):
 
 
 class PeaqSessionSensor(SessionDevice, RestoreEntity):
-    device_class = DEVICE_CLASS_ENERGY
+    device_class = SensorDeviceClass.ENERGY
     unit_of_measurement = ENERGY_KILO_WATT_HOUR
 
     def __init__(self, hub, entry_id):
@@ -87,7 +85,7 @@ class PeaqSessionSensor(SessionDevice, RestoreEntity):
 
 
 class PeaqSessionCostSensor(SessionDevice, RestoreEntity):
-    device_class = DEVICE_CLASS_MONETARY
+    device_class = SensorDeviceClass.MONETARY
 
     def __init__(self, hub, entry_id):
         name = f"{hub.hubname} Session energy cost"

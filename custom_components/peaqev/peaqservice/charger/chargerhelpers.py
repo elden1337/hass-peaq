@@ -22,18 +22,18 @@ class ChargerHelpers:
         return serviceparams
 
     def wait_turn_on(self) -> bool:
-        while not self._charger._charger_is_active and not self._charger._params.stopped:
+        while not self._charger._charger_is_active and self._charger.params.running:
             time.sleep(3)
         return self._updates_should_continue()
 
     def wait_update_current(self) -> bool:
         self._charger._hub.sensors.chargerobject_switch.updatecurrent()
-        while (self._current_is_equal() or self._too_late_to_change()) and not self._charger._params.stopped:
+        while (self._current_is_equal() or self._too_late_to_change()) and self._charger.params.running:
             time.sleep(3)
         return self._updates_should_continue()
 
     def wait_loop_cycle(self):
-        timer = 180
+        timer = 120
         start_time = time.time()
         self._charger._hub.sensors.chargerobject_switch.updatecurrent()
         while time.time() - start_time < timer:
@@ -42,8 +42,8 @@ class ChargerHelpers:
 
     def _updates_should_continue(self) -> bool:
         ret = [
-            self._charger._params.stopped,
-            self._charger._params.disable_current_updates
+            self._charger.params.running is False,
+            self._charger.params.disable_current_updates
         ]
         return not any(ret)
 

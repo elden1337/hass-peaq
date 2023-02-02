@@ -8,11 +8,12 @@ from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
 
 from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
-from custom_components.peaqev.peaqservice.util.constants import TYPELITE, CHARGERTYPE_OUTLET
+from custom_components.peaqev.peaqservice.util.constants import TYPELITE
 from .const import (
     DOMAIN,
     PLATFORMS, LISTENER_FN_CLOSE
 )
+from .peaqservice.chargertypes.models.chargertypes_enum import Charger_type
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     options.powersensor_includes_car = conf.data["powersensorincludescar"] if "powersensorincludescar" in conf.data.keys() else False
     options.locale= conf.data["locale"]
     options.charger.chargertype = conf.data["chargertype"]
-    if options.charger.chargertype == CHARGERTYPE_OUTLET:
+    if options.charger.chargertype == Charger_type.Outlet.value:
         options.charger.powerswitch = conf.data["outletswitch"]
         options.charger.powermeter = conf.data["outletpowermeter"]
     else:

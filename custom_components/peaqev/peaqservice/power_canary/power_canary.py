@@ -118,7 +118,7 @@ class PowerCanary:
             return False
         ret = new_amps <= self.max_current_amp
 
-        if ret is False:
+        if ret is False and self.max_current_amp > -1:
             _LOGGER.warning(f"Power Canary cannot allow amp-increase due to the current power-draw. max-amp is:{self.max_current_amp} ")
         else:
             _LOGGER.debug(f"Power Canary allows charger to set {new_amps}A for {self._hub.threshold.phases}.")

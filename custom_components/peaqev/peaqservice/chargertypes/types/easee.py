@@ -1,9 +1,8 @@
 import logging
-import time
 
 from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
-from peaqevcore.models.chargerstates import CHARGERSTATES
+from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
@@ -17,41 +16,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-ENTITYENDINGS = [
-    "_dimmer",
-    "_downlight",
-    "_current",
-    "_voltage",
-    "_output_limit",
-    "_cost_per_kwh",
-    "_enable_idle_current",
-    "_is_enabled",
-    "_cable_locked_permanently",
-    "_smart_charging",
-    "_max_charger_limit",
-    "_energy_per_hour",
-    "_lifetime_energy",
-    "_session_energy",
-    "_power",
-    "_status",
-    "_online",
-    "_cable_locked"
-]
-
-NATIVE_CHARGERSTATES = [
-    "disconnected",
-    "awaiting_start",
-    "charging",
-    "ready_to_charge",
-    "completed",
-    "error"
-]
-
-DOMAINNAME = "easee"
-UPDATECURRENT = True
-UPDATECURRENT_ON_TERMINATION = False
-#docs: https://github.com/fondberg/easee_hass
+# docs: https://github.com/fondberg/easee_hass
 
 
 class Easee(ChargerBase):
@@ -60,86 +25,114 @@ class Easee(ChargerBase):
         self._chargerid = huboptions.charger.chargerid
         self._auth_required = auth_required
         self.options.powerswitch_controls_charging = False
-        self.domainname = DOMAINNAME
-        self.entities.imported_entityendings = ENTITYENDINGS
-        self.native_chargerstates = NATIVE_CHARGERSTATES
-        self.chargerstates[CHARGERSTATES.Idle] = ["disconnected"]
-        self.chargerstates[CHARGERSTATES.Connected] = ["awaiting_start", "ready_to_charge"]
-        self.chargerstates[CHARGERSTATES.Charging] = ["charging"]
-        self.chargerstates[CHARGERSTATES.Done] = ["completed"]
+        self.entities.imported_entityendings = self.entity_endings
+        self.chargerstates[ChargeControllerStates.Idle] = ["disconnected"]
+        self.chargerstates[ChargeControllerStates.Connected] = ["awaiting_start", "ready_to_charge"]
+        self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
+        self.chargerstates[ChargeControllerStates.Done] = ["completed"]
 
-        entitiesobj = helper.getentities(
-            self._hass,
-            helper.EntitiesPostModel(
-                self.domainname,
-                self.entities.entityschema,
-                self.entities.imported_entityendings
+        try:
+            entitiesobj = helper.set_entitiesmodel(
+                hass=self._hass,
+                domain=self.domain_name,
+                entity_endings=self.entity_endings,
+                entity_schema=self.entities.entityschema
             )
-        )
-        self.entities.imported_entities = entitiesobj.imported_entities
-        self.entities.entityschema = entitiesobj.entityschema
+            self.entities.imported_entities = entitiesobj.imported_entities
+            self.entities.entityschema = entitiesobj.entityschema
+        except:
+            _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
 
         self.set_sensors()
         self.max_amps = self.get_allowed_amps()
 
-        servicecall_params = {
-            CHARGER: "charger_id",
-            CHARGERID: self._chargerid,
-            CURRENT: "current"
-        }
+        self._set_servicecalls(
+            domain=self.domain_name,
+            model=ServiceCallsDTO(
+                on= self.call_on if self._auth_required is True else self.call_resume,
+                off= self.call_off if self._auth_required is True else self.call_pause,
+                pause= self.call_pause,
+                resume=self.call_resume,
+                update_current=self.call_update_current
+            ),
+            options=self.servicecalls_options
+        )
 
-        _on = CallType("action_command", {
+    @property
+    def domain_name(self) -> str:
+        """declare the domain name as stated in HA"""
+        return "easee"
+
+    @property
+    def entity_endings(self) -> list:
+        """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
+        return [
+            "_dimmer", "_downlight",
+            "_current", "_voltage",
+            "_output_limit", "_cost_per_kwh",
+            "_enable_idle_current", "_is_enabled",
+            "_cable_locked_permanently", "_smart_charging",
+            "_max_charger_limit", "_energy_per_hour",
+            "_lifetime_energy", "_session_energy",
+            "_power", "_status",
+            "_online", "_cable_locked"
+        ]
+
+    @property
+    def native_chargerstates(self) -> list:
+        """declare a list of the native-charger states available for the type."""
+        return [
+            "disconnected",
+            "awaiting_start",
+            "charging",
+            "ready_to_charge",
+            "completed",
+            "error"
+        ]
+
+    @property
+    def call_on(self) -> CallType:
+        return CallType("action_command", {
             "charger_id":     self._chargerid,
             "action_command": "start"
         })
-        _off = CallType("action_command", {
+
+    @property
+    def call_off(self) -> CallType:
+        return CallType("action_command", {
             "charger_id":     self._chargerid,
             "action_command": "stop"
         })
-        _resume = CallType("set_charger_dynamic_limit", {"current": "7", "charger_id": self._chargerid})
-        _pause = CallType("set_charger_dynamic_limit", {"current": "0", "charger_id": self._chargerid})
 
-        self._set_servicecalls(
-            domain=DOMAINNAME,
-            model=ServiceCallsDTO(
-                on=_on if self._auth_required is True else _resume,
-                off=_off if self._auth_required is True else _pause,
-                pause=_pause,
-                resume=_resume,
-                update_current=CallType("set_charger_dynamic_limit", servicecall_params)
-            ),
-            options=ServiceCallsOptions(
+    @property
+    def call_resume(self) -> CallType:
+        return CallType("set_charger_dynamic_limit", {
+            "current": "7",
+            "charger_id": self._chargerid
+        })
+
+    @property
+    def call_pause(self) -> CallType:
+        return CallType("set_charger_dynamic_limit", {
+            "current": "0",
+            "charger_id": self._chargerid
+        })
+
+    @property
+    def call_update_current(self) -> CallType:
+        return CallType("set_charger_dynamic_limit", {
+            CHARGER:   "charger_id",
+            CHARGERID: self._chargerid,
+            CURRENT:   "current"
+        })
+
+    @property
+    def servicecalls_options(self) -> ServiceCallsOptions:
+        return ServiceCallsOptions(
                 allowupdatecurrent=True,
                 update_current_on_termination=False,
                 switch_controls_charger=False
             )
-        )
-
-    def getentities(self, domain: str = None, endings: list = None):
-        if len(self.entities.entityschema) < 1:
-            domain = self.domainname if domain is None else domain
-            endings = self.entities.imported_entityendings if endings is None else endings
-
-            entities = helper.get_entities_from_hass(self._hass, domain)
-
-            if len(entities) < 1:
-                _LOGGER.error(f"no entities found for {domain} at {time.time()}")
-            else:
-                _endings = endings
-                candidate = ""
-
-                for e in entities:
-                    splitted = e.split(".")
-                    for ending in _endings:
-                        if splitted[1].endswith(ending):
-                            candidate = splitted[1].replace(ending, '')
-                            break
-                    if len(candidate) > 1:
-                        break
-
-                self.entities.entityschema = candidate
-                _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
-                self.entities.imported_entities = entities
 
     def set_sensors(self):
         amp_sensor = f"sensor.{self.entities.entityschema}_dynamic_charger_limit"

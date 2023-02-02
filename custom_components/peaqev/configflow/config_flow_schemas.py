@@ -3,14 +3,16 @@ import voluptuous as vol
 from homeassistant.const import CONF_NAME
 from peaqevcore.services.locale.Locale import LOCALES
 
-import custom_components.peaqev.peaqservice.util.constants as pk
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import CHARGERTYPES
+from custom_components.peaqev.peaqservice.util.constants import CAUTIONHOURTYPE_NAMES, CautionHourType, \
+    INSTALLATIONTYPES
 
 TYPE_SCHEMA = vol.Schema(
                 {
                     vol.Optional(
                         "peaqevtype",
                         default="",
-                    ): vol.In(pk.INSTALLATIONTYPES)
+                    ): vol.In(INSTALLATIONTYPES)
                 }
             )
 
@@ -26,7 +28,7 @@ CHARGER_SCHEMA = vol.Schema(
                     vol.Optional(
                         "chargertype",
                         default="",
-                        ): vol.In(pk.CHARGERTYPES),
+                        ): vol.In(CHARGERTYPES),
                     vol.Optional(
                         "locale",
                         default="",
@@ -64,8 +66,8 @@ PRICEAWARE_SCHEMA = vol.Schema(
                     vol.Optional("min_priceaware_threshold_price"): cv.positive_float,
                     vol.Optional(
                         "cautionhour_type",
-                        default=pk.CAUTIONHOURTYPE_INTERMEDIATE,
-                    ): vol.In(pk.CAUTIONHOURTYPE_NAMES),
+                        default=CautionHourType.INTERMEDIATE.value,
+                    ): vol.In(CAUTIONHOURTYPE_NAMES),
                 })
 
 MONTHS_SCHEMA = vol.Schema(

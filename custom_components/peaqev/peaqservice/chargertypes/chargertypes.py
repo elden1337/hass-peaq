@@ -3,39 +3,26 @@ import logging
 from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
 
-from custom_components.peaqev.peaqservice.chargertypes.types.chargeamps import ChargeAmps
-from custom_components.peaqev.peaqservice.chargertypes.types.easee import Easee
-from custom_components.peaqev.peaqservice.chargertypes.types.garowallbox import GaroWallbox
-from custom_components.peaqev.peaqservice.chargertypes.types.outlet import SmartOutlet
-from custom_components.peaqev.peaqservice.chargertypes.types.zaptec import Zaptec
-from custom_components.peaqev.peaqservice.util.constants import (
-    CHARGERTYPE_EASEE, CHARGERTYPE_CHARGEAMPS, CHARGERTYPE_OUTLET, CHARGERTYPE_GAROWALLBOX, CHARGERTYPE_ZAPTEC
-)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import Charger_type
 
 _LOGGER = logging.getLogger(__name__)
-
-CHARGERTYPE_DICT = {
-            CHARGERTYPE_CHARGEAMPS: ChargeAmps,
-            CHARGERTYPE_EASEE: Easee,
-            CHARGERTYPE_OUTLET: SmartOutlet,
-            CHARGERTYPE_GAROWALLBOX: GaroWallbox,
-            CHARGERTYPE_ZAPTEC: Zaptec
-        }
 
 
 class ChargerTypeData:
     def __init__(self, hass: HomeAssistant, input_type, options: HubOptions):
         self._charger = None
-        self._type = input_type
+        self._type = Charger_type(input_type)
         self._hass = hass
         try:
-            self._charger = CHARGERTYPE_DICT[input_type](hass=self._hass, huboptions=options)
+            self._charger = Charger_type.get_class(input_type)(hass=self._hass, huboptions=options)
+            _LOGGER.debug(f"Managed to set up charger-class for chargertype {input_type}")
             self._charger.validatecharger()
         except Exception as e:
+            _LOGGER.debug(f"Exception. Did not manage to set up charge-class for {input_type}: {e}")
             raise Exception
 
     @property
-    def type(self) -> str:
+    def type(self) -> Charger_type:
         """type returns the implemented chargertype."""
         return self._type
 
