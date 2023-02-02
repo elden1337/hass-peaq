@@ -1,6 +1,7 @@
+from __future__ import annotations
+import datetime
 import logging
 from statistics import mean
-
 import homeassistant.helpers.template as template
 
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_model import NordPoolModel
@@ -9,7 +10,6 @@ _LOGGER = logging.getLogger(__name__)
 
 NORDPOOL = "nordpool"
 AVERAGE_MAX_LEN = 31
-
 
 class NordPoolUpdater:
     def __init__(self, hass, hub, is_active: bool = True):
@@ -34,6 +34,13 @@ class NordPoolUpdater:
     @property
     def state(self) -> float:
         return self.model.state
+
+    @property
+    def average_data_current_month(self) -> float | None:
+        month_len = datetime.now().day
+        if len(self.model.average_data) >= month_len:
+            return self.model.average_data[month_len*-1:]
+        return None
 
     @property
     def average_data(self) -> list:
@@ -71,13 +78,13 @@ class NordPoolUpdater:
             _LOGGER.error("Could not get nordpool-prices")
 
     async def _update_set_prices(self) -> None:
+        if len(self.model.average_data) >= 7 and self._hub.hours.adjusted_average != self.get_average(7):
+            self._hub.hours.adjusted_average = self.get_average(7)
         if self._hub.hours.prices != self.model.prices:
             self._hub.hours.prices = self.model.prices
         if self._hub.hours.prices_tomorrow != self.model.prices_tomorrow:
             self._hub.hours.prices_tomorrow = self.model.prices_tomorrow
-        if len(self.model.average_data) >= 7 and self._hub.hours.adjusted_average != self.get_average(7):
-            self._hub.hours.adjusted_average = self.get_average(7)
-
+        
     def _setup_nordpool(self):
         try:
             entities = template.integration_entities(self._hass, NORDPOOL)
