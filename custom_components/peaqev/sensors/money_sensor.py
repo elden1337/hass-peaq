@@ -78,11 +78,11 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         if hour in self._nonhours:
             for idx, h in enumerate(self._nonhours):
                 if idx + 1 < len(self._nonhours):
-                    if self._getuneven(self._nonhours[idx + 1], self._nonhours[idx]):
-                        ret = self._get_stopped_string(h)
+                    if PeaqMoneySensor._getuneven(self._nonhours[idx + 1], self._nonhours[idx]):
+                        ret = PeaqMoneySensor._get_stopped_string(h)
                         break
                 elif idx + 1 == len(self._nonhours):
-                    ret = self._get_stopped_string(h)
+                    ret = PeaqMoneySensor._get_stopped_string(h)
                     break
         elif hour in self._dynamic_caution_hours.keys():
             val = self._dynamic_caution_hours[hour]
@@ -90,17 +90,6 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         else:
             ret = "Charging allowed"
         return ret
-
-    def _get_stopped_string(self, h) -> str:
-        val = h + 1 if h + 1 < 24 else h + 1 - 24
-        if len(str(val)) == 1:
-            return f"Charging stopped until 0{val}:00"
-        return f"Charging stopped until {val}:00"
-
-    def _getuneven(self, first, second) -> bool:
-        if second > first:
-            return first - (second - 24) != 1
-        return first - second != 1
 
     def set_non_hours_display_model(self) -> list:
         ret = []
@@ -131,3 +120,16 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
                 ret = int(self._dynamic_caution_hours[hour] * 100)
                 return f"{str(ret)}%"
         return "100%"
+
+    @staticmethod
+    def _get_stopped_string(h) -> str:
+        val = h + 1 if h + 1 < 24 else h + 1 - 24
+        if len(str(val)) == 1:
+            return f"Charging stopped until 0{val}:00"
+        return f"Charging stopped until {val}:00"
+
+    @staticmethod
+    def _getuneven(first, second) -> bool:
+        if second > first:
+            return first - (second - 24) != 1
+        return first - second != 1

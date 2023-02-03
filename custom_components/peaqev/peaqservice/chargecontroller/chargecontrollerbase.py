@@ -43,7 +43,7 @@ class ChargeControllerBase:
             ret = self.__get_status()
         if ret == ChargeControllerStates.Error:
             _LOGGER.error(f"Chargecontroller returned faulty state. Charger reported {self._hub.sensors.chargerobject.value} as state.")
-        return ret.name
+        return ret.value
 
     def __get_status_outlet(self) -> ChargeControllerStates:
         ret = ChargeControllerStates.Error
