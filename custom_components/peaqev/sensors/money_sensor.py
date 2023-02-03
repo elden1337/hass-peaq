@@ -25,6 +25,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._avg_cost = None
         self._max_charge = None
         self._average_nordpool = None
+        self._average_data_current_month = None
         self._average_nordpool_data = []
 
     @property
@@ -45,6 +46,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._avg_cost = f"{self._hub.hours.get_average_kwh_price()} {self._currency}"
         self._max_charge = f"{self._hub.hours.get_total_charge()} kWh"
         self._average_nordpool = f"{self._hub.nordpool.get_average(7)} {self._currency}"
+        self._average_data_current_month = f"{self._hub.nordpool.get_average(datetime.now().day)} {self._currency}"
         self._average_nordpool_data = self._hub.nordpool.average_data
 
     @property
@@ -56,6 +58,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "Avg price per kWh": self._avg_cost,
             "Max charge amount": self._max_charge,
             "Nordpool average 7 days": self._average_nordpool,
+            "Nordpool average this month": self._average_data_current_month,
             "Nordpool average data": self._average_nordpool_data
         }
         return attr_dict
