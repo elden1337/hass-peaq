@@ -15,9 +15,9 @@ class ChargeControllerBase:
 
     def __init__(self, hub):
         self._hub = hub
-        self.name = f"{self._hub.hubname} {CHARGERCONTROLLER}"
-        self._status = ChargeControllerStates.Idle
-        self._chargecontroller_initalized = False
+        self.name: str = f"{self._hub.hubname} {CHARGERCONTROLLER}"
+        self._status: str = ChargeControllerStates.Idle.name
+        self._chargecontroller_initalized: bool = False
         self._latestchargerstart = time.time()
         self._latest_debuglog = 0
 
@@ -31,19 +31,19 @@ class ChargeControllerBase:
 
     @property
     def status(self) -> str:
+        ret = ChargeControllerStates.Error
         if self._hub.is_initialized is False:
             return "Hub not ready. Check logs!"
-        if self._hub.is_initialized is True:
-            if self._chargecontroller_initalized is False:
-                self._chargecontroller_initalized = True
-                self.__debug_log("Chargecontroller is initialized and ready to work!")
+        if self._hub.is_initialized is True and self._chargecontroller_initalized is False:
+            self._chargecontroller_initalized = True
+            self.__debug_log("Chargecontroller is initialized and ready to work!")
         if self._hub.chargertype.charger.options.charger_is_outlet is True:
             ret = self.__get_status_outlet()
         else:
             ret = self.__get_status()
         if ret == ChargeControllerStates.Error:
             _LOGGER.error(f"Chargecontroller returned faulty state. Charger reported {self._hub.sensors.chargerobject.value} as state.")
-        return ret.value
+        return ret.name
 
     def __get_status_outlet(self) -> ChargeControllerStates:
         ret = ChargeControllerStates.Error
@@ -79,7 +79,6 @@ class ChargeControllerBase:
         update_timer = True
         _state = self._hub.sensors.chargerobject.value.lower()
         free_charge = self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data)
-
         if self._hub.sensors.charger_enabled.value is False:
             ret = ChargeControllerStates.Disabled
         elif _state in self._hub.chargertype.charger.chargerstates[ChargeControllerStates.Done]:
@@ -97,22 +96,19 @@ class ChargeControllerBase:
             update_timer = False
         elif datetime.now().hour in self._hub.non_hours and free_charge is False and self._hub.timer.is_override is False:
             ret = ChargeControllerStates.Stop
-
         elif self._hub.svk.should_stop:
             """interim fix for svk peak hours"""
             ret = ChargeControllerStates.Stop
-
         elif _state in self._hub.chargertype.charger.chargerstates[ChargeControllerStates.Connected]:
-            ret = self.__get_status_connected(_state)
+            ret = self._get_status_connected(_state)
             update_timer = (ret == ChargeControllerStates.Stop)
         elif _state in self._hub.chargertype.charger.chargerstates[ChargeControllerStates.Charging]:
-            ret = self.__get_status_charging()
-
+            ret = self._get_status_charging()
         if update_timer is True:
             self.latest_charger_start = time.time()
         return ret
 
-    def __is_done(self, charger_state) -> bool:
+    def _is_done(self, charger_state) -> bool:
         if len(self._hub.chargertype.charger.chargerstates[ChargeControllerStates.Done]) > 0:
             _states_test = charger_state in self._hub.chargertype.charger.chargerstates[ChargeControllerStates.Done]
             if _states_test:
@@ -129,9 +125,9 @@ class ChargeControllerBase:
             self._latest_debuglog = time.time()
 
     @abstractmethod
-    def __get_status_charging(self) -> ChargeControllerStates:
+    def _get_status_charging(self) -> ChargeControllerStates:
         pass
 
     @abstractmethod
-    def __get_status_connected(self, charger_state=None) -> ChargeControllerStates:
+    def _get_status_connected(self, charger_state=None) -> ChargeControllerStates:
         pass
