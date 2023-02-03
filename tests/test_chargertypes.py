@@ -51,115 +51,88 @@ def manager(hass):
     return manager
 
 @pytest.mark.asyncio
-async def test1(hass):
+async def test_remove_entry(hass, manager):
+    """Test that we can remove an entry."""
 
-    
+    async def mock_setup_entry(hass, entry):
+        """Mock setting up entry."""
+        hass.config_entries.async_setup_platforms(entry, ["sensor"])
+        return True
+
+    async def mock_unload_entry(hass, entry):
+        """Mock unloading an entry."""
+        result = await hass.config_entries.async_unload_platforms(entry, ["sensor"])
+        assert result
+        return result
+
+    mock_remove_entry = AsyncMock(return_value=None)
+
+    entity = MockEntity(unique_id="1234", name="hugo")
+
     async def mock_setup_entry_platform(hass, entry, async_add_entities):
         """Mock setting up platform."""
         async_add_entities([entity])
 
-    platform = MockPlatform(
-        async_setup_entry=async_setup_entry
+    mock_integration(
+        hass,
+        MockModule(
+            "magnus",
+            async_setup_entry=mock_setup_entry,
+            async_unload_entry=mock_unload_entry,
+            async_remove_entry=mock_remove_entry,
+        ),
     )
-    config_entry = MockConfigEntry(domain="magnus", entry_id="test1")
-    entity_platform = mock_entity_platform(hass, f"sensor.{config_entry.domain}", platform)
-    assert await entity_platform.async_setup_entry(config_entry)
+    mock_entity_platform(
+        hass, "sensor.magnus", MockPlatform(async_setup_entry=mock_setup_entry_platform)
+    )
+    mock_entity_platform(hass, "config_flow.magnus", None)
 
+    #MockConfigEntry(domain="magnus", entry_id="test1").add_to_manager(manager)
+    entry = MockConfigEntry(domain="magnus", entry_id="test2")
+    entry.add_to_manager(manager)
+    # MockConfigEntry(domain="test_other", entry_id="test3").add_to_manager(manager)
 
-# @pytest.mark.asyncio
-# async def test_remove_entry(hass, manager):
-#     """Test that we can remove an entry."""
+    # Check all config entries exist
+    assert [item.entry_id for item in manager.async_entries()] == [
+        #"test1",
+        "test2",
+        #"test3",
+    ]
 
-#     async def mock_setup_entry(hass, entry):
-#         """Mock setting up entry."""
-#         hass.config_entries.async_setup_platforms(entry, ["sensor"])
-#         return True
+    # Setup entry
+    await entry.async_setup(hass)
+    await hass.async_block_till_done()
 
-#     async def mock_unload_entry(hass, entry):
-#         """Mock unloading an entry."""
-#         result = await hass.config_entries.async_unload_platforms(entry, ["sensor"])
-#         assert result
-#         return result
+    # Check entity state got added
+    #assert hass.states.get("sensor.hugo") is not None    
+    #assert len(hass.states.async_all()) == 1
 
-#     mock_remove_entry = AsyncMock(return_value=None)
+    # Check entity got added to entity registry
+    ent_reg = er.async_get(hass)
+    assert len(ent_reg.entities) == 1
+    #entity_entry = list(ent_reg.entities.values())[0]
+    #assert entity_entry.config_entry_id == entry.entry_id
 
-#     entity = MockEntity(unique_id="1234", name="hugo")
+    # Remove entry
+    #result = await manager.async_remove("test2")
+    #await hass.async_block_till_done()
 
-#     async def mock_setup_entry_platform(hass, entry, async_add_entities):
-#         """Mock setting up platform."""
-#         async_add_entities([entity])
+    # Check that unload went well and so no need to restart
+    #assert result == {"require_restart": False}
 
-#     mock_integration(
-#         hass,
-#         MockModule(
-#             "magnus",
-#             async_setup_entry=mock_setup_entry,
-#             async_unload_entry=mock_unload_entry,
-#             async_remove_entry=mock_remove_entry,
-#         ),
-#     )
-#     mock_entity_platform(
-#         hass, "sensor.magnus", MockPlatform(async_setup_entry=mock_setup_entry_platform)
-#     )
-#     mock_entity_platform(hass, "config_flow.magnus", None)
+    # Check the remove callback was invoked.
+    #assert mock_remove_entry.call_count == 1
 
-#     #MockConfigEntry(domain="magnus", entry_id="test1").add_to_manager(manager)
-#     entry = MockConfigEntry(domain="magnus", entry_id="test2")
-#     entry.add_to_manager(manager)
-#     # MockConfigEntry(domain="test_other", entry_id="test3").add_to_manager(manager)
+    # Check that config entry was removed.
+    #assert [item.entry_id for item in manager.async_entries()] == ["test1", "test3"]
 
-#     # Check all config entries exist
-#     assert [item.entry_id for item in manager.async_entries()] == [
-#         #"test1",
-#         "test2",
-#         #"test3",
-#     ]
+    # Check that entity state has been removed
+    #assert hass.states.get("light.test_entity") is None
+    #assert len(hass.states.async_all()) == 0
 
-#     # Setup entry
-#     await entry.async_setup(hass)
-#     await hass.async_block_till_done()
-
-#     # Check entity state got added
-#     #assert hass.states.get("sensor.hugo") is not None    
-#     #assert len(hass.states.async_all()) == 1
-
-#     # Check entity got added to entity registry
-#     ent_reg = er.async_get(hass)
-#     assert len(ent_reg.entities) == 1
-#     #entity_entry = list(ent_reg.entities.values())[0]
-#     #assert entity_entry.config_entry_id == entry.entry_id
-
-#     # Remove entry
-#     #result = await manager.async_remove("test2")
-#     #await hass.async_block_till_done()
-
-#     # Check that unload went well and so no need to restart
-#     #assert result == {"require_restart": False}
-
-#     # Check the remove callback was invoked.
-#     #assert mock_remove_entry.call_count == 1
-
-#     # Check that config entry was removed.
-#     #assert [item.entry_id for item in manager.async_entries()] == ["test1", "test3"]
-
-#     # Check that entity state has been removed
-#     #assert hass.states.get("light.test_entity") is None
-#     #assert len(hass.states.async_all()) == 0
-
-#     # Check that entity registry entry has been removed
-#     #entity_entry_list = list(ent_reg.entities.values())
-#     #assert not entity_entry_list
-
-# @pytest.mark.asyncio
-# async def test_setup_entry(hass) -> None:
-#     config_entry = MockConfigEntry(domain=DOMAIN, data=MOCK_CONFIG, entry_id="test")
-
-#     assert await async_setup_component(hass, "sensor", CHARGEAMPS_CONFIG)
-#     entity_reg = er.async_get(hass)
-#     assert await entity_reg.async_get("sensor.chargeamps_123456M_1_power")
-#     config_entry
-#     assert await async_setup_entry(hass, config_entry)
-#     assert DOMAIN in hass.data and config_entry.entry_id in hass.data[DOMAIN]
+    # Check that entity registry entry has been removed
+    #entity_entry_list = list(ent_reg.entities.values())
+    #assert not entity_entry_list
 
 # def test_chargeamps_halo(hass):
 #     options = HubOptions()
@@ -185,12 +158,12 @@ async def test1(hass):
 #     print(entity_reg)
 #     assert await entity_reg.async_get("sensor.peaqev_chargecontroller").unique_id == "Testing123"
 
-# @pytest.mark.asyncio
-# async def test_new_config(hass: HomeAssistant) -> None:
-#     """Testing a default setup of an energyscore sensor"""
-#     assert await async_setup_component(hass, "sensor", VALID_CONFIG)
-#     await hass.async_block_till_done()
+@pytest.mark.asyncio
+async def test_new_config(hass: HomeAssistant) -> None:
+    """Testing a default setup of an energyscore sensor"""
+    assert await async_setup_component(hass, "sensor", VALID_CONFIG)
+    await hass.async_block_till_done()
 
-#     state = hass.states.get("sensor.peaqev_chargecontroller")
-#     assert state.attributes.get("unit_of_measurement") == "%"
-#     # assert state.attributes.get("state_class") == sensor.SensorStateClass.MEASUREMENT
+    state = hass.states.get("sensor.peaqev_chargecontroller")
+    assert state.attributes.get("unit_of_measurement") == "%"
+    # assert state.attributes.get("state_class") == sensor.SensorStateClass.MEASUREMENT
