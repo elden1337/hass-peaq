@@ -5,12 +5,12 @@
     "documentation": "https://github.com/elden1337/hass-peaq",
     "issue_tracker": "https://github.com/elden1337/hass-peaq/issues",
     "requirements": [
-      "peaqevcore==11.0.4"
+      "peaqevcore==11.1.2"
     ],
     "codeowners": [
       "@elden1337"
     ],
-    "version": "2.6.1",
+    "version": "2.7.0-alpha",
     "iot_class": "calculated",
     "dependencies": [
       "recorder",
