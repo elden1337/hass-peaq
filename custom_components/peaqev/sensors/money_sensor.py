@@ -26,6 +26,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._max_charge = None
         self._average_nordpool = None
         self._average_data_current_month = None
+        self._offsets = {}
         self._average_nordpool_data = []
 
     @property
@@ -42,6 +43,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._currency = self._hub.nordpool.currency
         self._prices = self._hub.hours.prices if self._hub.hours.prices is not None else []
         self._prices_tomorrow = self._hub.hours.prices_tomorrow if self._hub.hours.prices_tomorrow is not None else []
+        self._offsets = self._hub.hours.offsets if self._hub.hours.offsets is not None else {}
         self._current_peak = self._hub.sensors.current_peak.value
         self._avg_cost = f"{self._hub.hours.get_average_kwh_price()} {self._currency}"
         self._max_charge = f"{self._hub.hours.get_total_charge()} kWh"
@@ -59,7 +61,10 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "Max charge amount": self._max_charge,
             "Nordpool average 7 days": self._average_nordpool,
             "Nordpool average this month": self._average_data_current_month,
-            "Nordpool average data": self._average_nordpool_data
+            "Nordpool average data": self._average_nordpool_data,
+            "prices": self._prices,
+            "prices_tomorrow": self._prices_tomorrow,
+            "offsets": self._offsets
         }
         return attr_dict
 

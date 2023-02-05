@@ -17,20 +17,22 @@ from .peaqservice.chargertypes.models.chargertypes_enum import Charger_type
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
-    """Set up Peaq"""
+    """Set up Peaqev"""
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][conf.entry_id] = conf.data
 
     if "peaqevtype" in conf.data.keys():
-        peaqtype_is_lite = bool(conf.data["peaqevtype"] == TYPELITE)
+        peaqev_lite = bool(conf.data["peaqevtype"] == TYPELITE)
     else:
-        peaqtype_is_lite = False
+        peaqev_lite = False
 
     options = HubOptions()
-    options.peaqev_lite = peaqtype_is_lite
-    options.powersensor_includes_car = conf.data["powersensorincludescar"] if "powersensorincludescar" in conf.data.keys() else False
-    options.locale= conf.data["locale"]
+    options.peaqev_lite = peaqev_lite
+    options.powersensor_includes_car = conf.data[
+        "powersensorincludescar"] if "powersensorincludescar" in conf.data.keys() else False
+    options.locale = conf.data["locale"]
     options.charger.chargertype = conf.data["chargertype"]
     if options.charger.chargertype == Charger_type.Outlet.value:
         options.charger.powerswitch = conf.data["outletswitch"]
@@ -38,16 +40,16 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     else:
         options.charger.chargerid = conf.data["chargerid"]
     options.startpeaks = conf.options["startpeaks"] if "startpeaks" in conf.options.keys() else conf.data["startpeaks"]
-    options.cautionhours = conf.options["cautionhours"] if "cautionhours" in conf.options.keys() else conf.data["cautionhours"] if "cautionhours" in conf.data.keys() else []
-    options.nonhours = conf.options["nonhours"] if "nonhours" in conf.options.keys() else conf.data["nonhours"] if "nonhours" in conf.data.keys() else []
+    options.cautionhours = await _get_existing_param(conf, "cautionhours", [])
+    options.nonhours = await _get_existing_param(conf, "nonhours", [])
     options.price.price_aware = await _get_existing_param(conf, "priceaware", False)
     options.price.min_price = await _get_existing_param(conf, "min_priceaware_threshold_price", 0)
     options.price.top_price = await _get_existing_param(conf, "absolute_top_price", 0)
-    options.price.cautionhour_type = conf.options["cautionhour_type"] if "cautionhour_type" in conf.options.keys() else conf.data["cautionhour_type"]
+    options.price.cautionhour_type = await _get_existing_param(conf, "cautionhour_type", "intermediate")
     options.fuse_type = await _get_existing_param(conf, "mains", "")
     ci = {}
 
-    if peaqtype_is_lite is True:
+    if peaqev_lite is True:
         hub = HomeAssistantHub(hass, options, DOMAIN, ci)
     else:
         ci["powersensor"] = conf.data["name"]
@@ -94,9 +96,11 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
 
     return True
 
+
 async def options_update_listener(hass: HomeAssistant, config_entry: ConfigEntry):
     """Handle options update."""
     await hass.config_entries.async_reload(config_entry.entry_id)
+
 
 async def async_unload_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     """Unload a config entry."""
@@ -112,7 +116,6 @@ async def _get_existing_param(conf, parameter: str, default_val: any):
     if parameter in conf.data.keys():
         return conf.data.get(parameter)
     return default_val
-
 
 # async def _set_configuration_model(self, conf) -> ConfigModel:
 #     if "peaqevtype" in conf.data.keys():

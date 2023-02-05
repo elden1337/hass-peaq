@@ -118,6 +118,7 @@ class HomeAssistantHub(Hub):
             if all(ret.values()):
                 self._is_initialized = True
                 _LOGGER.info(f"Chargecontroller is ready to use.")
+                _LOGGER.debug(f"Hub is initialized with {self.options.price.cautionhour_type} as cautionhourtype.")
                 return True
             not_ready = []
             for r in ret:
