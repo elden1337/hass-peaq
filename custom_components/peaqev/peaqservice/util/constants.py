@@ -24,9 +24,9 @@ DOMAIN = "domain"
 NAME = "name"
 
 CAUTIONHOURTYPE_NAMES =[
-    CautionHourType.SUAVE.value,
-    CautionHourType.INTERMEDIATE.value,
-    CautionHourType.AGGRESSIVE.value
+    str(CautionHourType.SUAVE.value).capitalize(),
+    str(CautionHourType.INTERMEDIATE.value).capitalize(),
+    str(CautionHourType.AGGRESSIVE.value).capitalize()
 ]
 
 TYPEREGULAR = "Regular (requires power sensor)"
