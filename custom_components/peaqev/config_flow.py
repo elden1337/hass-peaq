@@ -22,9 +22,9 @@ from custom_components.peaqev.configflow.config_flow_schemas import (
 )
 from custom_components.peaqev.configflow.config_flow_validation import ConfigFlowValidation
 from custom_components.peaqev.peaqservice.power_canary.power_canary import FUSES_LIST
-from custom_components.peaqev.peaqservice.util.constants import CHARGERTYPE_OUTLET, CautionHourType, TYPELITE, \
-    CAUTIONHOURTYPE_NAMES
+from custom_components.peaqev.peaqservice.util.constants import CautionHourType, TYPELITE, CAUTIONHOURTYPE_NAMES
 from .const import DOMAIN  # pylint:disable=unused-import
+from .peaqservice.chargertypes.models.chargertypes_enum import Charger_type
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 self.info = await ConfigFlowValidation.validate_input_first(user_input)
-                # await ConfigFlowValidation.validate_power_sensor(self.hass, user_input["powersensor"])
+                await ConfigFlowValidation.validate_power_sensor(self.hass, user_input["name"])
             except ValueError:
                 errors["base"] = "invalid_powersensor"
             if not errors:
@@ -82,7 +82,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 self.data.update(user_input)
-                if self.data["chargertype"] == CHARGERTYPE_OUTLET:
+                if self.data["chargertype"] == Charger_type.Outlet.value:
                     return await self.async_step_outletdetails()
                 return await self.async_step_chargerdetails()
             except Exception:  # pylint: disable=broad-except

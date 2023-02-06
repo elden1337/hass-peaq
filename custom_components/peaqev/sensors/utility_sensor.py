@@ -2,7 +2,7 @@
 from homeassistant.components.utility_meter.sensor import (
     UtilityMeterSensor
 )
-from peaqevcore.services.locale.querytypes.const import HOURLY
+from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
@@ -17,14 +17,14 @@ METER_OFFSET.seconds = 0 # pylint:disable=attribute-defined-outside-init
 METER_OFFSET.minutes = 0 # pylint:disable=attribute-defined-outside-init
 METER_OFFSET.days = 0 # pylint:disable=attribute-defined-outside-init
 
-PERIODS = [HOURLY]
+PERIODS = ["hourly"]
 
 
 class PeaqUtilitySensor(UtilityMeterSensor):
-    def __init__(self, hub, sensor, meter_type, meter_offset, entry_id):
+    def __init__(self, hub, sensor: any, meter_type: TimePeriods, meter_offset: str, entry_id: any):
         self._entry_id = entry_id
         self._hub = hub
-        self._attr_name = f"{self._hub.hubname} {sensor} {meter_type.lower()}"
+        self._attr_name = f"{self._hub.hubname} {sensor} {meter_type.value.lower()}"
         self._unit_of_measurement = "kWh"
         entity = f"sensor.{DOMAIN.lower()}_{sensor}"
 
@@ -32,7 +32,7 @@ class PeaqUtilitySensor(UtilityMeterSensor):
             cron_pattern="{minute} * * * *",
             delta_values=0,
             meter_offset=meter_offset,
-            meter_type=meter_type,
+            meter_type=meter_type.value,
             name=self._attr_name,
             net_consumption=True,
             parent_meter=entity,

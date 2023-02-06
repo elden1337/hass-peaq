@@ -74,7 +74,8 @@ class PowerCanaryPercentageSensor(PowerCanaryDevice):
         return PERCENTAGE
 
     def update(self) -> None:
-        self._state = round(self._hub.power_canary.current_percentage * 100, 2)
+        if int(self._hub.power_canary.current_percentage * 100) != self._state:
+            self._state = int(self._hub.power_canary.current_percentage * 100)
         self._warning = round(self._hub.power_canary.model.warning_threshold * 100, 2)
         self._cutoff = round(self._hub.power_canary.model.cutoff_threshold * 100, 2)
 

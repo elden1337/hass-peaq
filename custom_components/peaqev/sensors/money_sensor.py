@@ -25,6 +25,8 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._avg_cost = None
         self._max_charge = None
         self._average_nordpool = None
+        self._average_data_current_month = None
+        self._offsets = {}
         self._average_nordpool_data = []
 
     @property
@@ -41,10 +43,12 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._currency = self._hub.nordpool.currency
         self._prices = self._hub.hours.prices if self._hub.hours.prices is not None else []
         self._prices_tomorrow = self._hub.hours.prices_tomorrow if self._hub.hours.prices_tomorrow is not None else []
+        self._offsets = self._hub.hours.offsets if self._hub.hours.offsets is not None else {}
         self._current_peak = self._hub.sensors.current_peak.value
         self._avg_cost = f"{self._hub.hours.get_average_kwh_price()} {self._currency}"
         self._max_charge = f"{self._hub.hours.get_total_charge()} kWh"
         self._average_nordpool = f"{self._hub.nordpool.get_average(7)} {self._currency}"
+        self._average_data_current_month = f"{self._hub.nordpool.get_average(datetime.now().day)} {self._currency}"
         self._average_nordpool_data = self._hub.nordpool.average_data
 
     @property
@@ -56,7 +60,11 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "Avg price per kWh": self._avg_cost,
             "Max charge amount": self._max_charge,
             "Nordpool average 7 days": self._average_nordpool,
-            "Nordpool average data": self._average_nordpool_data
+            "Nordpool average this month": self._average_data_current_month,
+            "Nordpool average data": self._average_nordpool_data,
+            "prices": self._prices,
+            "prices_tomorrow": self._prices_tomorrow,
+            "offsets": self._offsets
         }
         return attr_dict
 
@@ -78,11 +86,11 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         if hour in self._nonhours:
             for idx, h in enumerate(self._nonhours):
                 if idx + 1 < len(self._nonhours):
-                    if self._getuneven(self._nonhours[idx + 1], self._nonhours[idx]):
-                        ret = self._get_stopped_string(h)
+                    if PeaqMoneySensor._getuneven(self._nonhours[idx + 1], self._nonhours[idx]):
+                        ret = PeaqMoneySensor._get_stopped_string(h)
                         break
                 elif idx + 1 == len(self._nonhours):
-                    ret = self._get_stopped_string(h)
+                    ret = PeaqMoneySensor._get_stopped_string(h)
                     break
         elif hour in self._dynamic_caution_hours.keys():
             val = self._dynamic_caution_hours[hour]
@@ -90,17 +98,6 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         else:
             ret = "Charging allowed"
         return ret
-
-    def _get_stopped_string(self, h) -> str:
-        val = h + 1 if h + 1 < 24 else h + 1 - 24
-        if len(str(val)) == 1:
-            return f"Charging stopped until 0{val}:00"
-        return f"Charging stopped until {val}:00"
-
-    def _getuneven(self, first, second) -> bool:
-        if second > first:
-            return first - (second - 24) != 1
-        return first - second != 1
 
     def set_non_hours_display_model(self) -> list:
         ret = []
@@ -131,3 +128,16 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
                 ret = int(self._dynamic_caution_hours[hour] * 100)
                 return f"{str(ret)}%"
         return "100%"
+
+    @staticmethod
+    def _get_stopped_string(h) -> str:
+        val = h + 1 if h + 1 < 24 else h + 1 - 24
+        if len(str(val)) == 1:
+            return f"Charging stopped until 0{val}:00"
+        return f"Charging stopped until {val}:00"
+
+    @staticmethod
+    def _getuneven(first, second) -> bool:
+        if second > first:
+            return first - (second - 24) != 1
+        return first - second != 1

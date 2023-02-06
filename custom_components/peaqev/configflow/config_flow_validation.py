@@ -1,35 +1,30 @@
 import logging
+from typing import Any
 
 from homeassistant import exceptions
 from homeassistant.core import HomeAssistant
-from typing import Any
-
-import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 
 _LOGGER = logging.getLogger(__name__)
 
 class ConfigFlowValidation:
 
     @staticmethod
-    async def validate_power_sensor(hass: HomeAssistant, powersensor: str) -> bool:
-        val_state = hass.states.get(powersensor)
-        ret = ex.try_parse(val_state.state, float)
-        if ret is False:
+    async def validate_power_sensor(hass: HomeAssistant, powersensor: str):
+        _powersensor = f"sensor.{powersensor}" if not powersensor.startswith("sensor.") else powersensor
+        val_state = hass.states.get(_powersensor)
+        if val_state is None:
+            _LOGGER.error(f"Could not validate chosen powersensor {_powersensor}. It returned None as state.")
             raise FaultyPowerSensor
-
-        return True
+        elif not isinstance(float(val_state.state), float):
+            _LOGGER.error(f"Could not validate chosen powersensor {_powersensor}. The value of its state is not a number. {val_state.state}")
+            raise FaultyPowerSensor
 
     @staticmethod
     async def validate_input_first(data: dict) -> dict[str, Any]:
-        """ Validate the data can be used to set up a connection."""
-
         if len(data["name"]) < 3:
             raise ValueError
         if not data["name"].startswith("sensor."):
             data["name"] = f"sensor.{data['name']}"
-        #if await _check_power_sensor(hass, data["name"]) is False:
-        #    raise ValueError
-
         return {"title": data["name"]}
 
     @staticmethod
