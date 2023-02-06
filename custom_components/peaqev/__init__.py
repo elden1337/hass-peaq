@@ -57,7 +57,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
 
         unsub_options_update_listener = conf.add_update_listener(options_update_listener)
         ci["unsub_options_update_listener"] = unsub_options_update_listener
-
+        hass.data[DOMAIN][conf.entry_id] = ci
         hub = HomeAssistantHub(hass, options, DOMAIN, ci)
 
     hass.data[DOMAIN]["hub"] = hub
@@ -97,14 +97,14 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     return True
 
 
-async def options_update_listener(hass: HomeAssistant, config_entry: ConfigEntry):
+async def options_update_listener(hass: HomeAssistant, conf: ConfigEntry):
     """Handle options update."""
-    await hass.config_entries.async_reload(config_entry.entry_id)
+    await hass.config_entries.async_reload(conf.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     """Unload a config entry."""
-    unload_ok = hass.config_entries.async_unload_platforms(conf, PLATFORMS)
+    unload_ok = await hass.config_entries.async_unload_platforms(conf, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop(conf.entry_id)
     return unload_ok
