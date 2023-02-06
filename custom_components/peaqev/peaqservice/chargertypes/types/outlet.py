@@ -26,7 +26,7 @@ class SmartOutlet(ChargerBase):
         self.chargerstates[ChargeControllerStates.Idle] = ["idle"]
         self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
-        self._hass.async_add_executor_job(self._validate_setup())
+        self._hass.async_add_executor_job(self._validate_setup)
 
         self._set_servicecalls(
             domain=self.domain_name,
