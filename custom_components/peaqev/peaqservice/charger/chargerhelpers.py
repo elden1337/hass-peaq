@@ -11,10 +11,10 @@ from custom_components.peaqev.peaqservice.util.constants import (
 
 class ChargerHelpers:
     def __init__(self, charger):
-        self._charger = charger
+        self.c = charger
 
     async def setchargerparams(self, calls, ampoverride:int = 0) -> dict:
-        amps = ampoverride if ampoverride >= 6 else self._charger._hub.threshold.allowedcurrent
+        amps = ampoverride if ampoverride >= 6 else self.c.hub.threshold.allowedcurrent
         serviceparams = {}
         if await self._checkchargerparams(calls) is True:
             serviceparams[calls[PARAMS][CHARGER]] = calls[PARAMS][CHARGERID]
@@ -22,36 +22,36 @@ class ChargerHelpers:
         return serviceparams
 
     def wait_turn_on(self) -> bool:
-        while not self._charger._charger_is_active and self._charger.params.running:
+        while not self.c.charger_active and self.c.params.running:
             time.sleep(3)
         return self._updates_should_continue()
 
     def wait_update_current(self) -> bool:
-        self._charger._hub.sensors.chargerobject_switch.updatecurrent()
-        while (self._current_is_equal() or self._too_late_to_change()) and self._charger.params.running:
+        self.c.hub.sensors.chargerobject_switch.updatecurrent()
+        while (self._currents_match() or self._too_late_to_change()) and self.c.params.running:
             time.sleep(3)
         return self._updates_should_continue()
 
     def wait_loop_cycle(self):
         timer = 120
         start_time = time.time()
-        self._charger._hub.sensors.chargerobject_switch.updatecurrent()
+        self.c.hub.sensors.chargerobject_switch.updatecurrent()
         while time.time() - start_time < timer:
             time.sleep(3)
-        self._charger._hub.sensors.chargerobject_switch.updatecurrent()
+        self.c.hub.sensors.chargerobject_switch.updatecurrent()
 
     def _updates_should_continue(self) -> bool:
         ret = [
-            self._charger.params.running is False,
-            self._charger.params.disable_current_updates
+            self.c.params.running is False,
+            self.c.params.disable_current_updates
         ]
         return not any(ret)
 
     async def _checkchargerparams(self, calls) -> bool:
         return len(calls[PARAMS][CHARGER]) > 0 and len(calls[PARAMS][CHARGERID]) > 0
 
-    def _current_is_equal(self) -> bool:
-        return self._charger._hub.sensors.chargerobject_switch.current == self._charger._hub.threshold.allowedcurrent
+    def _currents_match(self) -> bool:
+        return self.c.hub.sensors.chargerobject_switch.current == self.c.hub.threshold.allowedcurrent
 
     def _too_late_to_change(self) -> bool:
-        return datetime.now().minute >= 55 and self._charger._hub.threshold.allowedcurrent > self._charger._hub.sensors.chargerobject_switch.current
+        return datetime.now().minute >= 55 and self.c.hub.threshold.allowedcurrent > self.c.hub.sensors.chargerobject_switch.current
