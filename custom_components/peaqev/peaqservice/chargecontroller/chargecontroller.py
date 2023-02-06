@@ -11,7 +11,6 @@ _LOGGER = logging.getLogger(__name__)
 class ChargeController(ChargeControllerBase):
     def __init__(self, hub):
         super().__init__(hub)
-        self._hub = hub
         self._core = _core(charger_state_translation=self._hub.chargertype.charger.chargerstates)
 
     @property
@@ -42,7 +41,8 @@ class ChargeController(ChargeControllerBase):
             ret = ChargeControllerStates.Done
         else:
             if (self.below_startthreshold and self._hub.sensors.totalhourlyenergy.value != 0) or self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data) is True:
-                ret = ChargeControllerStates.Start
+                ret = ChargeControllerStates.Start if not self._defer_start(self._hub.hours.non_hours) else ChargeControllerStates.Stop
             else:
                 ret = ChargeControllerStates.Stop
         return ret
+

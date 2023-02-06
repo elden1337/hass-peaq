@@ -1,7 +1,7 @@
 import logging
 import time
 from abc import abstractmethod
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
@@ -123,6 +123,13 @@ class ChargeControllerBase:
         if time.time() - self._latest_debuglog > self.DEBUGLOG_TIMEOUT:
             _LOGGER.debug(message)
             self._latest_debuglog = time.time()
+
+    @staticmethod
+    def _defer_start(non_hours: list) -> bool:
+        """Defer starting if next hour is a non-hour and minute is 50 or greater, to avoid short running times."""
+        if (datetime.now() + timedelta(hours=1)).hour in non_hours:
+            return datetime.now().minute >= 50
+        return False
 
     @abstractmethod
     def _get_status_charging(self) -> ChargeControllerStates:
