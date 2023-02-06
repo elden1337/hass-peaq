@@ -1,5 +1,4 @@
 import logging
-import time
 from datetime import datetime
 
 from homeassistant.core import (
@@ -11,10 +10,10 @@ from peaqevcore.hub.hub import Hub
 from peaqevcore.hub.hub_options import HubOptions
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller import ChargeController
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_lite import ChargeControllerLite
+from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_factory import ChargeControllerFactory
 from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.chargertypes import ChargerTypeData
+from custom_components.peaqev.peaqservice.hub.hub_initializer import HubInitializer
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import NordPoolUpdater
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.hub.state_changes import StateChanges
@@ -27,29 +26,18 @@ _LOGGER = logging.getLogger(__name__)
 
 class HomeAssistantHub(Hub):
     hub_id = 1337
-    initialized_log_last_logged = 0
-    not_ready_list_old_state = 0
 
     def __init__(
-        self,
-        hass: HomeAssistant,
-        options: HubOptions,
-        domain: str,
-        config_inputs: dict
-        ):
-        self._is_initialized = False
+            self,
+            hass: HomeAssistant,
+            options: HubOptions,
+            domain: str,
+            config_inputs: dict
+    ):
 
         self.hubname = domain.capitalize()
-        self.chargertype = ChargerTypeData(
-            hass=hass,
-            input_type=options.charger.chargertype,
-            options=options
-        )
-        self.charger = Charger(
-            self,
-            hass,
-            self.chargertype.charger.servicecalls
-        )
+        self.chargertype = ChargerTypeData(hass=hass,input_type=options.charger.chargertype,options=options)
+        self.charger = Charger(hub=self, hass=hass, servicecalls=self.chargertype.charger.servicecalls)
 
         Hub.__init__(
             self,
@@ -58,31 +46,25 @@ class HomeAssistantHub(Hub):
             domain=domain,
             chargerobj=self.chargertype
         )
+        tracker_entities = [self.sensors.totalhourlyenergy.entity]
 
         self.servicecalls = ServiceCalls(self)
         self.states = StateChanges(self)
         self.svk = svk(self)  # interim solution for svk peak hours
+        self.chargecontroller = ChargeControllerFactory.create(self)
 
-        trackerEntities = [
-            self.sensors.totalhourlyenergy.entity
-        ]
-
-        if options.peaqev_lite:
-            self.chargecontroller = ChargeControllerLite(self)
-        else:
+        if not options.peaqev_lite:
             self.configpower_entity = config_inputs["powersensor"]
-            self.chargecontroller = ChargeController(self) #move to core
-            trackerEntities.append(self.configpower_entity)
+            tracker_entities.append(self.configpower_entity)
 
-        if self.hours.price_aware is True:
-            self.nordpool = NordPoolUpdater(hass=self.state_machine, hub=self)
-        else:
-            self.nordpool = NordPoolUpdater(hass=self.state_machine, hub=self, is_active=False)
-
+        self.nordpool = NordPoolUpdater(hass=self.state_machine, hub=self, is_active=self.hours.price_aware)
         self.power_canary = PowerCanary(hub=self)
+        self._is_initialized = False
+        self.initializer = HubInitializer(self)
+
         self.chargingtracker_entities = self._set_chargingtracker_entities()
-        trackerEntities += self.chargingtracker_entities
-        async_track_state_change(hass, trackerEntities, self.state_changed)
+        tracker_entities += self.chargingtracker_entities
+        async_track_state_change(hass, tracker_entities, self.state_changed)
 
     @property
     def non_hours(self) -> list:
@@ -98,40 +80,22 @@ class HomeAssistantHub(Hub):
 
     @property
     def current_peak_dynamic(self):
-        if self.options.price.price_aware is True and len(self.dynamic_caution_hours) > 0:
-            if datetime.now().hour in self.dynamic_caution_hours.keys() and self.timer.is_override is False:
+        """Dynamically calculated peak to adhere to caution-hours"""
+        if self.options.price.price_aware and len(self.dynamic_caution_hours) > 0:
+            if datetime.now().hour in self.dynamic_caution_hours.keys() and not self.timer.is_override:
                 return self.sensors.current_peak.value * self.dynamic_caution_hours[datetime.now().hour]
         return self.sensors.current_peak.value
 
     @property
     def is_initialized(self) -> bool:
-        return self._check_initialized()
-
-    def _check_initialized(self):
-        if self._is_initialized is False:
-            ret = {"hours":                self.hours.is_initialized,
-                   "carpowersensor":       self.sensors.carpowersensor.is_initialized,
-                   "chargerobject_switch": self.sensors.chargerobject_switch.is_initialized,
-                   "power":                self.sensors.power.is_initialized,
-                   "chargerobject":        self.sensors.chargerobject.is_initialized
-                   }
-            if all(ret.values()):
-                self._is_initialized = True
-                _LOGGER.info(f"Chargecontroller is ready to use.")
-                _LOGGER.debug(f"Hub is initialized with {self.options.price.cautionhour_type} as cautionhourtype.")
-                return True
-            not_ready = []
-            for r in ret:
-                if ret[r] is False:
-                    not_ready.append(r)
-            if len(not_ready) != self.not_ready_list_old_state or self.initialized_log_last_logged - time.time() > 30:
-                _LOGGER.info(f"Chargecontroller is awaiting {not_ready} before being ready to use.")
-                self.not_ready_list_old_state = len(not_ready)
-                self.initialized_log_last_logged = time.time()
-            if "chargerobject" in not_ready:
-                self.chargertype.charger.helper.set_entitiesmodel()
-            return False
-        return True
+        return self.initializer.check()
+        # if self._is_initialized:
+        #     return True
+        # if self.initializer.check():
+        #     self._is_initialized = True
+        #     del self.initializer
+        #     return True
+        # return False
 
     def _set_chargingtracker_entities(self) -> list:
         ret = [
@@ -142,9 +106,9 @@ class HomeAssistantHub(Hub):
             f"sensor.{self.domain}_{ex.nametoid(CHARGERCONTROLLER)}",
         ]
 
-        if self.chargertype.charger.domainname != SMARTOUTLET:
+        if self.chargertype.charger.domain_name != SMARTOUTLET:
             ret.append(self.sensors.chargerobject.entity)
-        if self.options.peaqev_lite is False:
+        if not self.options.peaqev_lite:
             ret.append(self.sensors.powersensormovingaverage.entity)
             ret.append(self.sensors.powersensormovingaverage24.entity)
         if self.hours.nordpool_entity is not None:
