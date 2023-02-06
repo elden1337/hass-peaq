@@ -17,8 +17,6 @@ from custom_components.peaqev.peaqservice.util.constants import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-
 # docs: https://github.com/kirei/hass-chargeamps
 
 
