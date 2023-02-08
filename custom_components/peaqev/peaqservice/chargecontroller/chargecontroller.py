@@ -11,7 +11,7 @@ _LOGGER = logging.getLogger(__name__)
 class ChargeController(ChargeControllerBase):
     def __init__(self, hub):
         super().__init__(hub)
-        self._core = _core(charger_state_translation=self._hub.chargertype.charger.chargerstates)
+        self._core = _core(charger_state_translation=self._hub.chargertype.chargerstates)
 
     @property
     def below_startthreshold(self) -> bool:
@@ -32,7 +32,11 @@ class ChargeController(ChargeControllerBase):
     def _get_status_charging(self) -> ChargeControllerStates:
         if not self._hub.power_canary.alive:
             return ChargeControllerStates.Stop
-        if self.above_stopthreshold and self._hub.sensors.totalhourlyenergy.value > 0 and self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data) is False:
+        if all([
+            self.above_stopthreshold,
+            self._hub.sensors.totalhourlyenergy.value > 0,
+            not self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data)
+        ]):
             return ChargeControllerStates.Stop
         return ChargeControllerStates.Start
 
@@ -40,8 +44,14 @@ class ChargeController(ChargeControllerBase):
         if charger_state is not None and self._hub.sensors.carpowersensor.value < 1 and self._is_done(charger_state):
             ret = ChargeControllerStates.Done
         else:
-            if (self.below_startthreshold and self._hub.sensors.totalhourlyenergy.value != 0) or self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data) is True:
-                ret = ChargeControllerStates.Start if not self._defer_start(self._hub.hours.non_hours) else ChargeControllerStates.Stop
+            if all([
+                any([
+                    (self.below_startthreshold and self._hub.sensors.totalhourlyenergy.value != 0),
+                    self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data) is True
+                ]),
+                not self._defer_start(self._hub.hours.non_hours)
+            ]):
+                ret = ChargeControllerStates.Start
             else:
                 ret = ChargeControllerStates.Stop
         return ret

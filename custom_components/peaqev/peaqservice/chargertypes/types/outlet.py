@@ -9,6 +9,7 @@ from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import Charger_type
 from custom_components.peaqev.peaqservice.util.constants import (
     SMARTOUTLET
 )
@@ -17,8 +18,9 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class SmartOutlet(ChargerBase):
-    def __init__(self, hass: HomeAssistant, huboptions: HubOptions):
+    def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
         self._hass = hass
+        self._type = chargertype
         self.entities.powerswitch = huboptions.charger.powerswitch
         self.entities.powermeter = huboptions.charger.powermeter
         self.options.charger_is_outlet = True
@@ -36,6 +38,11 @@ class SmartOutlet(ChargerBase):
             ),
             options=self.servicecalls_options
         )
+
+    @property
+    def type(self) -> Charger_type:
+        """type returns the implemented chargertype."""
+        return self._type
 
     @property
     def domain_name(self) -> str:

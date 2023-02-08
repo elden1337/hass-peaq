@@ -47,5 +47,5 @@ class HubInitializer:
             self.not_ready_list_old_state = len(not_ready)
             self.initialized_log_last_logged = time.time()
         if InitializerTypes.ChargerObject in not_ready:
-            self.parent.chargertype.charger.helper.set_entitiesmodel()
+            self.parent.chargertype.helper.set_entitiesmodel()
         return False

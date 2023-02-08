@@ -36,8 +36,8 @@ class HomeAssistantHub(Hub):
     ):
 
         self.hubname = domain.capitalize()
-        self.chargertype = ChargerTypeData(hass=hass,input_type=options.charger.chargertype,options=options)
-        self.charger = Charger(hub=self, hass=hass, servicecalls=self.chargertype.charger.servicecalls)
+        self.chargertype = ChargerTypeData.create(hass=hass,input_type=options.charger.chargertype,options=options)
+        self.charger = Charger(hub=self, hass=hass, servicecalls=self.chargertype.servicecalls)
 
         Hub.__init__(
             self,
@@ -89,13 +89,6 @@ class HomeAssistantHub(Hub):
     @property
     def is_initialized(self) -> bool:
         return self.initializer.check()
-        # if self._is_initialized:
-        #     return True
-        # if self.initializer.check():
-        #     self._is_initialized = True
-        #     del self.initializer
-        #     return True
-        # return False
 
     def _set_chargingtracker_entities(self) -> list:
         ret = [
@@ -106,7 +99,7 @@ class HomeAssistantHub(Hub):
             f"sensor.{self.domain}_{ex.nametoid(CHARGERCONTROLLER)}",
         ]
 
-        if self.chargertype.charger.domain_name != SMARTOUTLET:
+        if self.chargertype.domain_name != SMARTOUTLET:
             ret.append(self.sensors.chargerobject.entity)
         if not self.options.peaqev_lite:
             ret.append(self.sensors.powersensormovingaverage.entity)

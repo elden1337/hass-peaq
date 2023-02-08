@@ -33,7 +33,7 @@ class PowerCanary:
             warning_threshold=WARNING_THRESHOLD,
             cutoff_threshold=CUTOFF_THRESHOLD,
             fuse=Fuses.parse_from_config(hub.options.fuse_type),
-            allow_amp_adjustment=self._hub.chargertype.charger.servicecalls.options.allowupdatecurrent
+            allow_amp_adjustment=self._hub.chargertype.servicecalls.options.allowupdatecurrent
         )
         self._total_power = SmoothAverage(max_age=60, max_samples=30, ignore=0)
         self._validate()

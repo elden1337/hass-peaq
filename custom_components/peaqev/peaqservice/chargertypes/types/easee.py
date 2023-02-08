@@ -9,6 +9,7 @@ from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptio
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import Charger_type
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -20,8 +21,9 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class Easee(ChargerBase):
-    def __init__(self, hass: HomeAssistant, huboptions: HubOptions, auth_required: bool = False):
+    def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype, auth_required: bool = False):
         self._hass = hass
+        self._type = chargertype
         self._chargerid = huboptions.charger.chargerid
         self._auth_required = auth_required
         self.options.powerswitch_controls_charging = False
@@ -57,6 +59,11 @@ class Easee(ChargerBase):
             ),
             options=self.servicecalls_options
         )
+
+    @property
+    def type(self) -> Charger_type:
+        """type returns the implemented chargertype."""
+        return self._type
 
     @property
     def domain_name(self) -> str:

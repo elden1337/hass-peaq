@@ -94,7 +94,7 @@ class StateChanges:
 
     async def _handle_outlet_updates(self):
         old_state = self._hub.sensors.chargerobject.value
-        if self._hub.chargertype.charger.domainname == SMARTOUTLET:
+        if self._hub.chargertype.domainname == SMARTOUTLET:
             if time.time() - self.latest_outlet_update < 10:
                 return
             self.latest_outlet_update = time.time()

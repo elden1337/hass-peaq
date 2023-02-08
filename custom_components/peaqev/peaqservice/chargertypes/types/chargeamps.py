@@ -10,6 +10,7 @@ from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
 from custom_components.peaqev.peaqservice.chargertypes.models.chargeamps_types import ChargeAmpsTypes
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import Charger_type
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -21,8 +22,9 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class ChargeAmps(ChargerBase):
-    def __init__(self, hass: HomeAssistant, huboptions: HubOptions):
+    def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
         self._hass = hass
+        self._type = chargertype
         self._chargeramps_type = ""
         self._chargerid = huboptions.charger.chargerid
         self._chargeamps_connector = 1  # fix this later to be able to use aura
@@ -57,6 +59,11 @@ class ChargeAmps(ChargerBase):
             ),
             options=self.servicecalls_options
         )
+
+    @property
+    def type(self) -> Charger_type:
+        """type returns the implemented chargertype."""
+        return self._type
 
     @property
     def domain_name(self) -> str:
