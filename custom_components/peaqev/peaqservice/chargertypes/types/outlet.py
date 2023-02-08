@@ -9,7 +9,7 @@ from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import Charger_type
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import (
     SMARTOUTLET
 )
@@ -40,7 +40,7 @@ class SmartOutlet(ChargerBase):
         )
 
     @property
-    def type(self) -> Charger_type:
+    def type(self) -> ChargerType:
         """type returns the implemented chargertype."""
         return self._type
 

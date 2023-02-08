@@ -10,7 +10,7 @@ from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
 from custom_components.peaqev.peaqservice.chargertypes.models.chargeamps_types import ChargeAmpsTypes
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import Charger_type
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import (
     CHARGER,
     CHARGERID,
@@ -61,7 +61,7 @@ class ChargeAmps(ChargerBase):
         )
 
     @property
-    def type(self) -> Charger_type:
+    def type(self) -> ChargerType:
         """type returns the implemented chargertype."""
         return self._type
 

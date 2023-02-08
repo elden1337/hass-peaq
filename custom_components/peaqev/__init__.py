@@ -13,7 +13,7 @@ from .const import (
     DOMAIN,
     PLATFORMS, LISTENER_FN_CLOSE
 )
-from .peaqservice.chargertypes.models.chargertypes_enum import Charger_type
+from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
         "powersensorincludescar"] if "powersensorincludescar" in conf.data.keys() else False
     options.locale = conf.data["locale"]
     options.charger.chargertype = conf.data["chargertype"]
-    if options.charger.chargertype == Charger_type.Outlet.value:
+    if options.charger.chargertype == ChargerType.Outlet.value:
         options.charger.powerswitch = conf.data["outletswitch"]
         options.charger.powermeter = conf.data["outletpowermeter"]
     else:

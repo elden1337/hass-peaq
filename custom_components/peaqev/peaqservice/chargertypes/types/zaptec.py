@@ -9,7 +9,7 @@ from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptio
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import Charger_type
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class Zaptec(ChargerBase):
         )
 
     @property
-    def type(self) -> Charger_type:
+    def type(self) -> ChargerType:
         """type returns the implemented chargertype."""
         return self._type
 
