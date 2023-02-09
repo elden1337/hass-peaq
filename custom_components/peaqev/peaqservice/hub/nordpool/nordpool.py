@@ -98,7 +98,7 @@ class NordPoolUpdater:
     def import_average_data(self, incoming: list):
         if isinstance(incoming, list):
             rounded_vals = [round(h, 3) for h in incoming]
-            if len(incoming) > 0:
+            if len(incoming):
                 self.model.average_data = rounded_vals
         self._cap_average_data_length()
 
