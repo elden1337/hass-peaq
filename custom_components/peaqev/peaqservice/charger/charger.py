@@ -59,8 +59,10 @@ class Charger:
                             debugmessage="Detected charger running outside of peaqev-session, overtaking command.")
                 case ChargeControllerStates.Stop | ChargeControllerStates.Idle:
                     if self.charger_active:
-                        await self._pause_charger(
-                            debugmessage="Detected charger running outside of peaqev-session, overtaking command and pausing.") if not self.params.running and not self.session_active else None
+                        debugmsg = None
+                        if not self.params.running and not self.session_active:
+                            debugmsg = "Detected charger running outside of peaqev-session, overtaking command and pausing."
+                        await self._pause_charger(debugmsg)
                 case ChargeControllerStates.Done:
                     if not self.hub.sensors.charger_done.value:
                         await self._terminate_charger(debugmessage="Going to terminate since the charger is done.")
