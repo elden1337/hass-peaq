@@ -117,34 +117,3 @@ async def _get_existing_param(conf, parameter: str, default_val: any):
         return conf.data.get(parameter)
     return default_val
 
-# async def _set_configuration_model(self, conf) -> ConfigModel:
-#     if "peaqevtype" in conf.data.keys():
-#         peaqtype_is_lite = bool(conf.data["peaqevtype"] == TYPELITE)
-#     else:
-#         peaqtype_is_lite = False
-#
-#     model = ConfigModel()
-#     model.locale = conf.data["locale"]
-#     model.chargertype = conf.data["chargertype"]
-#     model.chargerid = conf.data["chargerid"]
-#     model.startpeaks = conf.options["startpeaks"] if "startpeaks" in conf.options.keys() else conf.data["startpeaks"]
-#     model.hours.priceaware = await _get_existing_param(conf, "priceaware", False)
-#     model.lite = peaqtype_is_lite
-#
-#     if model.priceaware is False:
-#         model.hours.cautionhours = conf.options["cautionhours"] if "cautionhours" in conf.options.keys() else conf.data["cautionhours"] if "cautionhours" in conf.data.keys() else []
-#         model.hours.nonhours = conf.options["nonhours"] if "nonhours" in conf.options.keys() else conf.data["nonhours"] if "nonhours" in conf.data.keys() else []
-#     else:
-#         model.hours.absolute_top_price = await _get_existing_param(conf, "absolute_top_price", 0)
-#         model.hours.min_price = await _get_existing_param(conf, "min_priceaware_threshold_price", 0)
-#         model.hours.cautionhour_type = conf.options["cautionhour_type"] if "cautionhour_type" in conf.options.keys() else conf.data["cautionhour_type"]
-#         model.hours.allow_top_up = await _get_existing_param(conf, "allow_top_up", False)
-#
-#     if peaqtype_is_lite is True:
-#         return model
-#     else:
-#         model.powersensor = conf.data["name"]
-#         model.powersensorincludescar = conf.data["powersensorincludescar"]
-#
-#
-#     return model
