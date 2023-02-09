@@ -67,6 +67,8 @@ class Charger:
                 case ChargeControllerStates.Idle:
                     self.hub.sensors.charger_done.value = False
                     await self._terminate_charger() if self.charger_active else None
+                case _:
+                    _LOGGER.debug("Could not match any chargecontroller-state.")
         else:
             if self.charger_active and self.params.running:
                 debugmsg = None
@@ -128,7 +130,7 @@ class Charger:
         if self.hub.chargertype.servicecalls.options.switch_controls_charger:
             await self.hub.state_machine.states.async_set(self.hub.chargertype.entities.powerswitch,
                                                           calls[command])
-            _LOGGER.debug(f"Calling charger-outlet")
+            await self._debug_log(f"Calling charger-outlet")
         else:
             await self._do_service_call(calls[DOMAIN], calls[command], calls["params"])
         self.params.latest_charger_call = time.time()
@@ -151,7 +153,7 @@ class Charger:
                 await self._do_service_call(calls[DOMAIN], calls[CallTypes.UpdateCurrent], final_service_params)
 
     async def _do_service_call(self, domain, command, params):
-        _LOGGER.debug(f"Calling charger {command} for domain '{domain}' with parameters: {params}")
+        await self._debug_log(f"Calling charger {command} for domain '{domain}' with parameters: {params}")
         await self.hub.state_machine.services.async_call(
             domain,
             command,
@@ -176,5 +178,6 @@ class Charger:
                 _LOGGER.debug(
                     f"Tried to stop connected charger, but it's reporting: {charger_state} as state. Retrying stop-attempt.")
 
-    async def _debug_log(self, debugmessage) -> None:
-        _LOGGER.debug(debugmessage)
+    async def _debug_log(self, debugmessage:str = None) -> None:
+        if debugmessage is not None:
+            _LOGGER.debug(debugmessage)

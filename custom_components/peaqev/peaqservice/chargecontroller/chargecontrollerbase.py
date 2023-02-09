@@ -58,7 +58,7 @@ class ChargeControllerBase(Callback):
         if ret == ChargeControllerStates.Error:
             _LOGGER.error(
                 f"Chargecontroller returned faulty state. Charger reported {self._hub.sensors.chargerobject.value} as state.")
-        self._status = ret
+        self._status_type = ret
         return ret.name
 
     @property
