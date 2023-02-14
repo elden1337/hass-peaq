@@ -7,6 +7,7 @@ from peaqevcore.services.session.session import Session
 
 from custom_components.peaqev.peaqservice.charger.charger_states import ChargerStates
 from custom_components.peaqev.peaqservice.charger.chargerhelpers import ChargerHelpers
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.charger.chargerparams import ChargerParams
 from custom_components.peaqev.peaqservice.util.constants import (
     DOMAIN,
@@ -48,6 +49,8 @@ class Charger:
 
     async def charge(self) -> None:
         """Main function to turn charging on or off"""
+        if self.hub.chargertype.type == ChargerType.NoCharger:
+            return
         if self.params.charger_state_mismatch:
             await self._update_charger_state_internal(ChargerStates.Pause)
         if self.hub.sensors.charger_enabled.value and not self.hub.sensors.power.killswitch.is_dead:
