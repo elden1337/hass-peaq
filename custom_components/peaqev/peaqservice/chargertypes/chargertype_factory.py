@@ -10,6 +10,7 @@ from custom_components.peaqev.peaqservice.chargertypes.types.easee import Easee
 from custom_components.peaqev.peaqservice.chargertypes.types.garowallbox import GaroWallbox
 from custom_components.peaqev.peaqservice.chargertypes.types.outlet import SmartOutlet
 from custom_components.peaqev.peaqservice.chargertypes.types.zaptec import Zaptec
+from custom_components.peaqev.peaqservice.chargertypes.types.no_charger import NoCharger
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,7 +24,8 @@ class ChargerTypeFactory:
             ChargerType.Easee:       Easee,
             ChargerType.Outlet:      SmartOutlet,
             ChargerType.GaroWallbox: GaroWallbox,
-            ChargerType.Zaptec:      Zaptec
+            ChargerType.Zaptec:      Zaptec, 
+            ChargerType.NoCharger: NoCharger
         }
 
         try:
@@ -35,10 +37,12 @@ class ChargerTypeFactory:
     @staticmethod
     def create(hass: HomeAssistant, input_type, options: HubOptions) -> ChargerBase:
         try:
-            charger = ChargerTypeFactory.get_class(input_type)(hass=hass, huboptions=options, chargertype=ChargerType(input_type))
-            _LOGGER.debug(f"Managed to set up charger-class for chargertype {input_type}")
-            charger.validatecharger()
-            return charger
+            if not ChargerType(input_type) == ChargerType.NoCharger:
+                charger = ChargerTypeFactory.get_class(input_type)(hass=hass, huboptions=options, chargertype=ChargerType(input_type))
+                _LOGGER.debug(f"Managed to set up charger-class for chargertype {input_type}")
+                charger.validatecharger()
+                return charger
+            return None
         except Exception as e:
             _LOGGER.debug(f"Exception. Did not manage to set up charge-class for {input_type}: {e}")
             raise Exception
