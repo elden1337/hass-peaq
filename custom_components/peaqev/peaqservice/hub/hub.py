@@ -16,6 +16,7 @@ from custom_components.peaqev.peaqservice.chargertypes.chargertype_factory impor
 from custom_components.peaqev.peaqservice.hub.hub_initializer import HubInitializer
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import NordPoolUpdater
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.hub.state_changes import StateChanges
 from custom_components.peaqev.peaqservice.hub.svk import svk
 from custom_components.peaqev.peaqservice.power_canary.power_canary import PowerCanary
@@ -62,8 +63,10 @@ class HomeAssistantHub(Hub):
         self._is_initialized = False
         self.initializer = HubInitializer(self)
 
-        self.chargingtracker_entities = self._set_chargingtracker_entities()
-        tracker_entities += self.chargingtracker_entities
+        if self.chargertype.type != ChargerType.NoCharger:
+            self.chargingtracker_entities = self._set_chargingtracker_entities()
+            tracker_entities += self.chargingtracker_entities
+
         async_track_state_change(hass, tracker_entities, self.state_changed)
 
     @property
@@ -99,7 +102,7 @@ class HomeAssistantHub(Hub):
             f"sensor.{self.domain}_{ex.nametoid(CHARGERCONTROLLER)}",
         ]
 
-        if self.chargertype.domain_name != SMARTOUTLET:
+        if self.chargertype.type not in [ChargerType.Outlet, ChargerType.NoCharger]:
             ret.append(self.sensors.chargerobject.entity)
         if not self.options.peaqev_lite:
             ret.append(self.sensors.powersensormovingaverage.entity)

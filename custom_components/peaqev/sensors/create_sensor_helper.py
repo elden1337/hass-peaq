@@ -20,6 +20,7 @@ from custom_components.peaqev.sensors.powercanary_sensor import PowerCanaryStatu
 from custom_components.peaqev.sensors.prediction_sensor import PeaqPredictionSensor
 from custom_components.peaqev.sensors.session_sensor import PeaqSessionSensor, PeaqSessionCostSensor
 from custom_components.peaqev.sensors.threshold_sensor import PeaqThresholdSensor
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,9 +30,11 @@ async def gather_sensors(hub, config) -> list:
     ret.append(PeaqAmpSensor(hub, config.entry_id))
     ret.append(PeaqSensor(hub, config.entry_id))
     ret.append(PeaqThresholdSensor(hub, config.entry_id))
-    ret.append(PeaqSessionSensor(hub, config.entry_id))
 
-    if hub.options.powersensor_includes_car is True:
+    if hub.chargertype.type != ChargerType.NoCharger:
+        ret.append(PeaqSessionSensor(hub, config.entry_id))
+
+    if hub.options.powersensor_includes_car is True or hub.chargertype.type == ChargerType.NoCharger:
         ret.append(PeaqHousePowerSensor(hub, config.entry_id))
     else:
         ret.append(PeaqPowerSensor(hub, config.entry_id))
@@ -56,7 +59,7 @@ async def gather_sensors(hub, config) -> list:
 async def gather_integration_sensors(hub, entry_id):
     ret = []
 
-    if hub.options.powersensor_includes_car is True:
+    if hub.options.powersensor_includes_car is True or hub.chargertype.type == ChargerType.NoCharger:
         ret.append(
             PeaqIntegrationSensor(
                 hub,
