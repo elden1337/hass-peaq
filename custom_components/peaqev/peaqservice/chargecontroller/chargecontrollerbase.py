@@ -2,16 +2,14 @@ import logging
 import time
 from abc import abstractmethod
 from datetime import datetime, timedelta
-
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
-from custom_components.peaqev.peaqservice.hub.callback import Callback
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class ChargeControllerBase(Callback):
+class ChargeControllerBase():
     DONETIMEOUT = 180
     DEBUGLOG_TIMEOUT = 60
 
@@ -32,8 +30,6 @@ class ChargeControllerBase(Callback):
     def status_type(self, val) -> None:
         if val != self._status_type:
             self._status_type = val
-            for o in self._observers:
-                o()
 
     @property
     def latest_charger_start(self) -> float:
@@ -57,7 +53,7 @@ class ChargeControllerBase(Callback):
             case ChargerType.NoCharger:
                 ret = self._get_status_chargerless()
             case _:
-                ret = self._get_status()            
+                ret = self._get_status()
         self._status_type = ret
         return ret.name
 

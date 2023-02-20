@@ -85,7 +85,7 @@ class Charger:
 
     async def _reset_session(self) -> None:
         if not self.session_active and self.hub.chargecontroller.status_type is not ChargeControllerStates.Done:
-            _LOGGER.debug("There was no session active, so I created one.")
+            #_LOGGER.debug("There was no session active, so I created one.")
             self.session.core.reset()
             self.session_active = True
 
@@ -145,7 +145,10 @@ class Charger:
         calls = self._service_calls.get_call(CallTypes.UpdateCurrent)
         if await self._hass.async_add_executor_job(self.helpers.wait_turn_on):
             # call here to set amp-list
-            while self.hub.sensors.chargerobject_switch.value is True and self.params.running is True:
+            while all([
+                self.hub.sensors.chargerobject_switch.value,
+                self.params.running
+            ]):
                 if await self._hass.async_add_executor_job(self.helpers.wait_update_current):
                     serviceparams = await self.helpers.setchargerparams(calls)
                     if not self.params.disable_current_updates and self.hub.power_canary.allow_adjustment(
