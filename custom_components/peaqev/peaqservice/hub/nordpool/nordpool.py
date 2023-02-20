@@ -27,13 +27,31 @@ class NordPoolUpdater:
     def prices(self) -> list:
         return self.model.prices
 
+    @prices.setter
+    def prices(self, val) -> None:
+        if self.model.prices != val:
+            self._hub.observer.broadcast("prices changed")
+        self.model.prices = val
+
     @property
     def prices_tomorrow(self) -> list:
         return self.model.prices_tomorrow
 
+    @prices_tomorrow.setter
+    def prices_tomorrow(self, val) -> None:
+        if self.model.prices_tomorrow != val:
+            self._hub.observer.broadcast("prices changed")
+        self.model.prices_tomorrow = val
+
     @property
     def state(self) -> float:
         return self.model.state
+
+    @state.setter
+    def state(self, val) -> None:
+        if self.model.state != val:
+            self._hub.observer.broadcast("prices changed")
+        self.model.state = val
 
     @property
     def average_data(self) -> list:
@@ -48,19 +66,19 @@ class NordPoolUpdater:
         if ret is not None:
             try:
                 ret_attr = list(ret.attributes.get("today"))
-                self.model.prices = ret_attr
+                self.prices = ret_attr
             except Exception as e:
                 _LOGGER.exception(f"Could not parse today's prices from Nordpool. Unsolveable error. {e}")
                 return
             try:
                 ret_attr_tomorrow = list(ret.attributes.get("tomorrow"))
-                self.model.prices_tomorrow = ret_attr_tomorrow
+                self.prices_tomorrow = ret_attr_tomorrow
             except Exception as e:
                 _LOGGER.warning(f"Couldn't parse tomorrow's prices from Nordpool. Array will be empty. {e}")
-                self.model.prices_tomorrow = []
+                self.prices_tomorrow = []
             ret_attr_currency = str(ret.attributes.get("currency"))
             self.model.currency = ret_attr_currency
-            self.model.state = ret.state
+            self.state = ret.state
             try:
                 _avg_data = str(ret.attributes.get("average"))
                 self.add_average_data(float(_avg_data))
@@ -81,9 +99,9 @@ class NordPoolUpdater:
     def _setup_nordpool(self):
         try:
             entities = template.integration_entities(self._hass, NORDPOOL)
-            if len(entities) < 1:
+            if len(list(entities)) < 1:
                 raise Exception("no entities found for Nordpool.")
-            if len(entities) == 1:
+            if len(list(entities)) == 1:
                 self.nordpool_entity = entities[0]
                 _LOGGER.debug(f"Nordpool has been set up and is ready to be used with {self.nordpool_entity}")
                 self.update_nordpool()
@@ -105,9 +123,10 @@ class NordPoolUpdater:
     def add_average_data(self, new_val):
         if isinstance(new_val, float):
             rounded = round(new_val, 3)
-            if len(self.model.average_data) == 0:
-                self.model.average_data.append(rounded)
-            elif self.model.average_data[-1] != rounded:
+            if any([
+                len(self.model.average_data) == 0,
+                self.model.average_data[-1] != rounded
+            ]):
                 self.model.average_data.append(rounded)
             self._cap_average_data_length()
 
