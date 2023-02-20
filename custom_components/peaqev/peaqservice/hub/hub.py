@@ -15,6 +15,7 @@ from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.chargertype_factory import ChargerTypeFactory
 from custom_components.peaqev.peaqservice.hub.hub_initializer import HubInitializer
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import NordPoolUpdater
+from custom_components.peaqev.peaqservice.hub.observer import Observer
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.hub.state_changes import StateChanges
 from custom_components.peaqev.peaqservice.hub.svk import svk
@@ -34,7 +35,7 @@ class HomeAssistantHub(Hub):
             domain: str,
             config_inputs: dict
     ):
-
+        self.observer = Observer()
         self.hubname = domain.capitalize()
         self.chargertype = ChargerTypeFactory.create(hass=hass, input_type=options.charger.chargertype, options=options)
         self.charger = Charger(hub=self, hass=hass, servicecalls=self.chargertype.servicecalls)

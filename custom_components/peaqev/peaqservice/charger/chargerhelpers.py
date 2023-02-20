@@ -16,7 +16,7 @@ class ChargerHelpers:
     async def setchargerparams(self, calls, ampoverride:int = 0) -> dict:
         amps = ampoverride if ampoverride >= 6 else self.c.hub.threshold.allowedcurrent
         serviceparams = {}
-        if await self._checkchargerparams(calls) is True:
+        if await self._checkchargerparams(calls):
             serviceparams[calls[PARAMS][CHARGER]] = calls[PARAMS][CHARGERID]
         serviceparams[calls[PARAMS][CURRENT]] = amps
         return serviceparams
@@ -28,7 +28,7 @@ class ChargerHelpers:
 
     def wait_update_current(self) -> bool:
         self.c.hub.sensors.chargerobject_switch.updatecurrent()
-        while (self._currents_match() or self._too_late_to_change()) and self.c.params.running:
+        while (self._currents_match() or self._too_late_to_increase()) and self.c.params.running:
             time.sleep(3)
         return self._updates_should_continue()
 
@@ -53,5 +53,5 @@ class ChargerHelpers:
     def _currents_match(self) -> bool:
         return self.c.hub.sensors.chargerobject_switch.current == self.c.hub.threshold.allowedcurrent
 
-    def _too_late_to_change(self) -> bool:
+    def _too_late_to_increase(self) -> bool:
         return datetime.now().minute >= 55 and self.c.hub.threshold.allowedcurrent > self.c.hub.sensors.chargerobject_switch.current
