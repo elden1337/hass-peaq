@@ -92,12 +92,9 @@ class PowerCanary:
 
     def check_current_percentage(self):
         if not self.alive:
-            # turn_off
-            pass
+            self._hub.observer.broadcast(command="power canary dead", timeout=10)
         if self.current_percentage >= self.model.warning_threshold:
-            # lower or turn_off
-            #self._hub.charger._updatemaxcurrent()
-            pass
+            self._hub.observer.broadcast(command="power canary warning", timeout=10)
 
     @property
     def max_current_amp(self) -> int:
@@ -120,8 +117,8 @@ class PowerCanary:
 
         if ret is False and self.max_current_amp > -1:
             _LOGGER.warning(f"Power Canary cannot allow amp-increase due to the current power-draw. max-amp is:{self.max_current_amp} ")
-        else:
-            _LOGGER.debug(f"Power Canary allows charger to set {new_amps}A for {self._hub.threshold.phases}.")
+        #else:
+            #_LOGGER.debug(f"Power Canary allows charger to set {new_amps}A for {self._hub.threshold.phases}.")
         return ret
 
     def _get_currently_allowed_amps(self, amps) -> dict:
