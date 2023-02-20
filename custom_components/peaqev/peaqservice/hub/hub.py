@@ -35,7 +35,8 @@ class HomeAssistantHub(Hub):
             domain: str,
             config_inputs: dict
     ):
-        self.observer = Observer()
+        self._is_initialized = False
+        self.observer = Observer(self)
         self.hubname = domain.capitalize()
         self.chargertype = ChargerTypeFactory.create(hass=hass, input_type=options.charger.chargertype, options=options)
         self.charger = Charger(hub=self, hass=hass, servicecalls=self.chargertype.servicecalls)
@@ -60,9 +61,7 @@ class HomeAssistantHub(Hub):
 
         self.nordpool = NordPoolUpdater(hass=self.state_machine, hub=self, is_active=self.hours.price_aware)
         self.power_canary = PowerCanary(hub=self)
-        self._is_initialized = False
         self.initializer = HubInitializer(self)
-
         self.chargingtracker_entities = self._set_chargingtracker_entities()
         tracker_entities += self.chargingtracker_entities
         async_track_state_change(hass, tracker_entities, self.state_changed)

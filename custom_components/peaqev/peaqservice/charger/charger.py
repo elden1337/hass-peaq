@@ -26,6 +26,7 @@ class Charger:
         self.params = ChargerParams()
         self.session = Session(self)
         self.helpers = ChargerHelpers(self)
+        self.hub.observer.add("power canary dead", self._pause_charger)
 
     @property
     def session_active(self) -> bool:
