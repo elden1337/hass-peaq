@@ -204,6 +204,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         _topprice = await self._get_existing_param("absolute_top_price", 0)
         _minprice = await self._get_existing_param("min_priceaware_threshold_price", 0)
         _hourtype = await self._get_existing_param("cautionhour_type", CautionHourType.INTERMEDIATE.value)
+        _dynamic_top_price = await self._get_existing_param("dynamic_top_price", False)
 
         return self.async_show_form(
             step_id="init",
@@ -211,6 +212,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema(
                 {
                     vol.Optional("priceaware", default=_priceaware): cv.boolean,
+                    vol.Optional("dynamic_top_price", default=_dynamic_top_price): cv.boolean,
                     vol.Optional("absolute_top_price", default=_topprice): cv.positive_float,
                     vol.Optional("min_priceaware_threshold_price", default=_minprice): cv.positive_float,
                     vol.Optional(
