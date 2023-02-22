@@ -63,6 +63,7 @@ PRICEAWARE_SCHEMA = vol.Schema(
                 {
                     vol.Optional("priceaware", default=False): cv.boolean,
                     vol.Optional("absolute_top_price"): cv.positive_float,
+                    vol.Optional("dynamic_top_price", default=False): cv.boolean,
                     vol.Optional("min_priceaware_threshold_price"): cv.positive_float,
                     vol.Optional(
                         "cautionhour_type",

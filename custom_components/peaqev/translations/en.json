@@ -4,7 +4,8 @@
       "init": {
         "data": {
           "priceaware": "Price aware charging",
-          "absolute_top_price": "Max price to allow charging (same currency as your Nordpool sensor)",
+          "absolute_top_price": "Max price to allow charging",
+          "dynamic_top_price": "Top price based on current month average price (ignores set max-price)",
           "min_priceaware_threshold_price": "(Optional), all hours below this price will be permitted to charge",
           "cautionhour_type": "Caution-hour type"
         },
@@ -76,7 +77,8 @@
       "priceaware": {
         "data": {
           "priceaware": "Price aware charging (requires Nordpool)",
-          "absolute_top_price": "Max price to allow charging (same currency as your Nordpool sensor)",
+          "absolute_top_price": "Max price to allow charging",
+          "dynamic_top_price": "Top price based on current month average price (ignores set max-price)",
           "min_priceaware_threshold_price": "(Optional), all hours below this price will be permitted to charge",
           "cautionhour_type": "Caution-hour type"
         }

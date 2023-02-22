@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 
 from homeassistant.helpers.restore_state import RestoreEntity
 
@@ -44,7 +43,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._avg_cost = f"{self._hub.hours.get_average_kwh_price()} {self._currency}"
         self._max_charge = f"{self._hub.hours.get_total_charge()} kWh"
         self._average_nordpool = f"{self._hub.nordpool.get_average(7)} {self._currency}"
-        self._average_data_current_month = f"{self._hub.nordpool.get_average(datetime.now().day)} {self._currency}"
+        self._average_data_current_month = f"{self._hub.nordpool.average_month} {self._currency}"
         self._average_nordpool_data = self._hub.nordpool.average_data
 
     @property

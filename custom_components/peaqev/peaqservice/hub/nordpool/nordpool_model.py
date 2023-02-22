@@ -8,3 +8,4 @@ class NordPoolModel:
     state: float = 0
     nordpool_entity: str = ""
     average_data: list = field(default_factory=lambda: [])
+    average_month: float = 0

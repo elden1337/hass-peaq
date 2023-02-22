@@ -45,6 +45,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     options.price.price_aware = await _get_existing_param(conf, "priceaware", False)
     options.price.min_price = await _get_existing_param(conf, "min_priceaware_threshold_price", 0)
     options.price.top_price = await _get_existing_param(conf, "absolute_top_price", 0)
+    options.price.dynamic_top_price = await _get_existing_param(conf, "dynamic_top_price", False)
     options.price.cautionhour_type = await _get_existing_param(conf, "cautionhour_type", "intermediate")
     options.fuse_type = await _get_existing_param(conf, "mains", "")
     ci = {}
