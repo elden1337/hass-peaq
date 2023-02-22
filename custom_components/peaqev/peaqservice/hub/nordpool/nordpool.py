@@ -137,10 +137,9 @@ class NordPoolUpdater:
     def add_average_data(self, new_val):
         if isinstance(new_val, float):
             rounded = round(new_val, 3)
-            if any([
-                len(self.model.average_data) == 0,
-                self.model.average_data[-1] != rounded
-            ]):
+            if len(self.model.average_data) == 0:
+                self.model.average_data.append(rounded)
+            elif self.model.average_data[-1] != rounded:
                 self.model.average_data.append(rounded)
             self._cap_average_data_length()
 
