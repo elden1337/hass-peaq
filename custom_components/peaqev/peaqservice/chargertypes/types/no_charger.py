@@ -3,8 +3,6 @@ import logging
 from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
-
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -13,7 +11,7 @@ class NoCharger(ChargerBase):
         self._type = chargertype
 
     @property
-    def type(self) -> ChargerType:
+    def type(self):
         """type returns the implemented chargertype."""
         return self._type
 

@@ -13,15 +13,15 @@ import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_factory import ChargeControllerFactory
 from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.chargertype_factory import ChargerTypeFactory
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.hub.hub_initializer import HubInitializer
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import NordPoolUpdater
 from custom_components.peaqev.peaqservice.hub.observer import Observer
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
-from custom_components.peaqev.peaqservice.hub.state_changes import StateChangesFactory
+from custom_components.peaqev.peaqservice.hub.state_changes import StateChanges
 from custom_components.peaqev.peaqservice.hub.svk import svk
 from custom_components.peaqev.peaqservice.power_canary.power_canary import PowerCanary
-from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER, SMARTOUTLET
+from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -52,7 +52,7 @@ class HomeAssistantHub(Hub):
         tracker_entities = [self.sensors.totalhourlyenergy.entity]
 
         self.servicecalls = ServiceCalls(self)
-        self.states = StateChangesFactory.create(self)
+        self.states = StateChanges(self)
         self.svk = svk(self)  # interim solution for svk peak hours
         self.chargecontroller = ChargeControllerFactory.create(self)
 
@@ -63,10 +63,8 @@ class HomeAssistantHub(Hub):
         self.nordpool = NordPoolUpdater(hass=self.state_machine, hub=self, is_active=self.hours.price_aware)
         self.power_canary = PowerCanary(hub=self)
         self.initializer = HubInitializer(self)
-
-        if self.chargertype.type != ChargerType.NoCharger:
-            self.chargingtracker_entities = self._set_chargingtracker_entities()
-            tracker_entities += self.chargingtracker_entities
+        self.chargingtracker_entities = self._set_chargingtracker_entities()
+        tracker_entities += self.chargingtracker_entities
 
         async_track_state_change(hass, tracker_entities, self.state_changed)
 
@@ -95,6 +93,8 @@ class HomeAssistantHub(Hub):
         return self.initializer.check()
 
     def _set_chargingtracker_entities(self) -> list:
+        if self.chargertype.type is ChargerType.NoCharger:
+            return []
         ret = [
             self.sensors.chargerobject_switch.entity,
             self.sensors.carpowersensor.entity,
@@ -103,7 +103,7 @@ class HomeAssistantHub(Hub):
             f"sensor.{self.domain}_{ex.nametoid(CHARGERCONTROLLER)}",
         ]
 
-        if self.chargertype.type not in [ChargerType.Outlet, ChargerType.NoCharger]:
+        if self.chargertype.type is not ChargerType.Outlet:
             ret.append(self.sensors.chargerobject.entity)
         if not self.options.peaqev_lite:
             ret.append(self.sensors.powersensormovingaverage.entity)
