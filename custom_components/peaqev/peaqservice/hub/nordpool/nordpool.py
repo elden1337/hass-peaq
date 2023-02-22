@@ -62,6 +62,8 @@ class NordPoolUpdater:
         _new = self.get_average(datetime.now().day)
         if self.model.average_month != _new:
             self.model.average_month = _new
+            _LOGGER.debug(f"Monthly average is updated. the new price is {self.model.average_month}")
+            _LOGGER.debug(f"The options for dynamic top price is currently: {self._hub.options.price.dynamic_top_price}")
             self._hub.hours.update_top_price(self.model.average_month)
 
     @property
@@ -95,7 +97,7 @@ class NordPoolUpdater:
                 self.add_average_data(float(_avg_data))
                 self._update_average_month()
             except Exception as ee:
-                _LOGGER.warning(f"Could not parse today's average from Nordpool. {ee}")
+                _LOGGER.warning(f"Could not parse today's average from Nordpool. data: {_avg_data} exception: {ee}")
             await self._update_set_prices()
         elif self._hub.is_initialized:
             _LOGGER.error("Could not get nordpool-prices")
