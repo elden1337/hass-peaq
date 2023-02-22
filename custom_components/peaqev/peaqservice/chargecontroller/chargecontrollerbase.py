@@ -2,7 +2,9 @@ import logging
 import time
 from abc import abstractmethod
 from datetime import datetime, timedelta
+
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
+
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
@@ -51,7 +53,7 @@ class ChargeControllerBase():
             case ChargerType.Outlet:
                 ret = self._get_status_outlet()
             case ChargerType.NoCharger:
-                ret = self._get_status_chargerless()
+                ret = self._get_status_no_charger()
             case _:
                 ret = self._get_status()
         self._status_type = ret
@@ -168,19 +170,21 @@ class ChargeControllerBase():
             _LOGGER.error(f"Chargecontroller returned faulty state. Charger reported {self._hub.sensors.chargerobject.value} as state.")
         return ret
 
-    def _get_status_chargerless(self) -> ChargeControllerStates:
+    def _get_status_no_charger(self) -> ChargeControllerStates:
         ret = ChargeControllerStates.Error
         update_timer = True
         free_charge = self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data)
         if self._hub.sensors.charger_enabled.value is False:
             ret = ChargeControllerStates.Disabled
-        elif self._hub.sensors.power.killswitch.is_dead:
-            ret = ChargeControllerStates.Error
+        # elif self._hub.sensors.power.killswitch.is_dead:
+        #     ret = ChargeControllerStates.Error
         elif datetime.now().hour in self._hub.non_hours and free_charge is False and self._hub.timer.is_override is False:
             ret = ChargeControllerStates.Stop
         elif self._hub.svk.should_stop:
             """interim fix for svk peak hours"""
             ret = ChargeControllerStates.Stop
+        else:
+            ret = self._get_status_connected()
         if update_timer is True:
             self.latest_charger_start = time.time()
         return ret

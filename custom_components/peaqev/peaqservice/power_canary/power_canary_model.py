@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 
 from peaqevcore.models.const import CURRENTS_THREEPHASE_1_32, CURRENTS_THREEPHASE_1_16, CURRENTS_ONEPHASE_1_16, \
@@ -10,7 +12,7 @@ class PowerCanaryModel:
     warning_threshold: float
     cutoff_threshold: float
     fuse: Fuses
-    allow_amp_adjustment: bool
+    allow_amp_adjustment: bool | None
     threephase_amps: dict = field(init=False)
     onephase_amps: dict = field(init=False)
     fuse_max: int = field(init=False)
@@ -31,7 +33,11 @@ class PowerCanaryModel:
         if self.fuse_max == 0:
             return True
         else:
-            return self.fuse_max == self.FUSES_DICT[self.fuse]
+            return all(
+                [
+                    self.fuse_max == self.FUSES_DICT[self.fuse],
+                    self.allow_amp_adjustment is not None
+                 ])
 
     FUSES_DICT = {
         Fuses.FUSE_3_16: 11000,

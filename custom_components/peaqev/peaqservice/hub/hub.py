@@ -95,13 +95,15 @@ class HomeAssistantHub(Hub):
     def _set_chargingtracker_entities(self) -> list:
         if self.chargertype.type is ChargerType.NoCharger:
             return []
-        ret = [
-            self.sensors.chargerobject_switch.entity,
-            self.sensors.carpowersensor.entity,
-            self.sensors.charger_enabled.entity,
-            self.sensors.charger_done.entity,
-            f"sensor.{self.domain}_{ex.nametoid(CHARGERCONTROLLER)}",
-        ]
+        ret = [f"sensor.{self.domain}_{ex.nametoid(CHARGERCONTROLLER)}"]
+        if hasattr(self.sensors, "chargerobject_switch"):
+            ret.append(self.sensors.chargerobject_switch.entity)
+        if hasattr(self.sensors, "carpowersensor"):
+            ret.append(self.sensors.carpowersensor.entity)
+        if hasattr(self.sensors, "charger_enabled"):
+            ret.append(self.sensors.charger_enabled.entity)
+        if hasattr(self.sensors, "charger_done"):
+            ret.append(self.sensors.charger_done.entity)
 
         if self.chargertype.type is not ChargerType.Outlet:
             ret.append(self.sensors.chargerobject.entity)

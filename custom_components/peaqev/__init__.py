@@ -30,8 +30,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
 
     options = HubOptions()
     options.peaqev_lite = peaqev_lite
-    options.powersensor_includes_car = conf.data[
-        "powersensorincludescar"] if "powersensorincludescar" in conf.data.keys() else False
+    options.powersensor_includes_car = conf.data["powersensorincludescar"] if "powersensorincludescar" in conf.data.keys() else False
     options.locale = conf.data["locale"]
     options.charger.chargertype = conf.data["chargertype"]
     if options.charger.chargertype == ChargerType.Outlet.value:
@@ -39,6 +38,8 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
         options.charger.powermeter = conf.data["outletpowermeter"]
     else:
         options.charger.chargerid = conf.data["chargerid"]
+    if options.charger.chargertype == ChargerType.NoCharger.value:
+        options.powersensor_includes_car = True
     options.startpeaks = conf.options["startpeaks"] if "startpeaks" in conf.options.keys() else conf.data["startpeaks"]
     options.cautionhours = await _get_existing_param(conf, "cautionhours", [])
     options.nonhours = await _get_existing_param(conf, "nonhours", [])
