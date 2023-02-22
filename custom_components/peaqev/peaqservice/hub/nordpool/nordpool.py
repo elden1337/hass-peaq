@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from statistics import mean
 
 import homeassistant.helpers.template as template
@@ -54,6 +55,16 @@ class NordPoolUpdater:
         self.model.state = val
 
     @property
+    def average_month(self) -> float:
+        return self.model.average_month
+
+    def _update_average_month(self) -> None:
+        _new = self.get_average(datetime.now().day)
+        if self.model.average_month != _new:
+            self.model.average_month = _new
+            self._hub.hours.update_top_price(self.model.average_month)
+
+    @property
     def average_data(self) -> list:
         return self.model.average_data
 
@@ -82,6 +93,7 @@ class NordPoolUpdater:
             try:
                 _avg_data = str(ret.attributes.get("average"))
                 self.add_average_data(float(_avg_data))
+                self._update_average_month()
             except Exception as ee:
                 _LOGGER.warning(f"Could not parse today's average from Nordpool. {ee}")
             await self._update_set_prices()
