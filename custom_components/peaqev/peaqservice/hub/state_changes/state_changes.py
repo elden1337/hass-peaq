@@ -1,5 +1,8 @@
 import logging
+import time
 from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import IStateChanges
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -45,6 +48,19 @@ class StateChanges(IStateChanges):
                 await self._hub.nordpool.update_nordpool()
                 update_session = True
         return update_session
+    
+    async def _handle_outlet_updates(self):
+        if self._hub.chargertype.domainname is ChargerType.Outlet:
+            old_state = self._hub.sensors.chargerobject.value
+            if time.time() - self.latest_outlet_update < 10:
+                return
+            self.latest_outlet_update = time.time()
+            if self._hub.sensors.carpowersensor.value > 0:
+                self._hub.sensors.chargerobject.value = "charging"
+            else:
+                self._hub.sensors.chargerobject.value = "connected"
+            if old_state != self._hub.sensors.chargerobject.value:
+                _LOGGER.debug(f"smartoutlet is now {self._hub.sensors.chargerobject.value}")
 
 
 class StateChangesLite(IStateChanges):
@@ -72,6 +88,19 @@ class StateChangesLite(IStateChanges):
             case self._hub.nordpool.nordpool_entity:
                 await self._hub.nordpool.update_nordpool()
         return False
+    
+    async def _handle_outlet_updates(self):
+        if self._hub.chargertype.domainname is ChargerType.Outlet:
+            old_state = self._hub.sensors.chargerobject.value
+            if time.time() - self.latest_outlet_update < 10:
+                return
+            self.latest_outlet_update = time.time()
+            if self._hub.sensors.carpowersensor.value > 0:
+                self._hub.sensors.chargerobject.value = "charging"
+            else:
+                self._hub.sensors.chargerobject.value = "connected"
+            if old_state != self._hub.sensors.chargerobject.value:
+                _LOGGER.debug(f"smartoutlet is now {self._hub.sensors.chargerobject.value}")
 
 
 class StateChangesNoCharger(IStateChanges):
@@ -79,7 +108,7 @@ class StateChangesNoCharger(IStateChanges):
         self._hub = hub
         super().__init__(hub)
 
-    async def _update_sensor_no_charger(self, entity, value) -> bool:
+    async def _update_sensor(self, entity, value) -> bool:
         update_session = False
         match entity:
             case self._hub.configpower_entity:

@@ -2,7 +2,6 @@ import logging
 import time
 from datetime import datetime
 from abc import abstractmethod
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,18 +34,9 @@ class IStateChanges:
     async def _update_sensor(self, entity, value) -> bool:
         pass
 
+    @abstractmethod
     async def _handle_outlet_updates(self):
-        if self._hub.chargertype.domainname is ChargerType.Outlet:
-            old_state = self._hub.sensors.chargerobject.value
-            if time.time() - self.latest_outlet_update < 10:
-                return
-            self.latest_outlet_update = time.time()
-            if self._hub.sensors.carpowersensor.value > 0:
-                self._hub.sensors.chargerobject.value = "charging"
-            else:
-                self._hub.sensors.chargerobject.value = "connected"
-            if old_state != self._hub.sensors.chargerobject.value:
-                _LOGGER.debug(f"smartoutlet is now {self._hub.sensors.chargerobject.value}")
+        pass
 
     async def _handle_sensor_attribute(self) -> None:
         if hasattr(self._hub.sensors, "carpowersensor"):
