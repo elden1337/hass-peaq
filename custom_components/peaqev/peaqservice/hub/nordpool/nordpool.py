@@ -31,8 +31,7 @@ class NordPoolUpdater:
     @prices.setter
     def prices(self, val) -> None:
         if self.model.prices != val:
-            self._hub.observer.broadcast("prices changed")
-        self.model.prices = val
+            self.model.prices = val
 
     @property
     def prices_tomorrow(self) -> list:
@@ -41,8 +40,7 @@ class NordPoolUpdater:
     @prices_tomorrow.setter
     def prices_tomorrow(self, val) -> None:
         if self.model.prices_tomorrow != val:
-            self._hub.observer.broadcast("prices changed")
-        self.model.prices_tomorrow = val
+            self.model.prices_tomorrow = val
 
     @property
     def state(self) -> float:
@@ -51,20 +49,11 @@ class NordPoolUpdater:
     @state.setter
     def state(self, val) -> None:
         if self.model.state != val:
-            self._hub.observer.broadcast("prices changed")
-        self.model.state = val
+            self.model.state = val
 
     @property
     def average_month(self) -> float:
         return self.model.average_month
-
-    def _update_average_month(self) -> None:
-        _new = self.get_average(datetime.now().day)
-        if self.model.average_month != _new:
-            self.model.average_month = _new
-            _LOGGER.debug(f"Monthly average is updated. the new price is {self.model.average_month}")
-            _LOGGER.debug(f"The options for dynamic top price is currently: {self._hub.options.price.dynamic_top_price}")
-            self._hub.hours.update_top_price(self.model.average_month)
 
     @property
     def average_data(self) -> list:
@@ -98,17 +87,29 @@ class NordPoolUpdater:
                 self._update_average_month()
             except Exception as ee:
                 _LOGGER.warning(f"Could not parse today's average from Nordpool. data: {_avg_data} exception: {ee}")
-            await self._update_set_prices()
+            if await self._update_set_prices():
+                self._hub.observer.broadcast("prices changed")
         elif self._hub.is_initialized:
             _LOGGER.error("Could not get nordpool-prices")
 
-    async def _update_set_prices(self) -> None:
+    def _update_average_month(self) -> None:
+        _new = self.get_average(datetime.now().day)
+        if self.model.average_month != _new:
+            self.model.average_month = _new
+            _LOGGER.debug(f"The options for dynamic top price is currently: {self._hub.options.price.dynamic_top_price} with avg-month price: {self.model.average_month}")
+            self._hub.hours.update_top_price(self.model.average_month)
+
+    async def _update_set_prices(self) -> bool:
+        ret = False
         if self._hub.hours.prices != self.model.prices:
             self._hub.hours.prices = self.model.prices
+            ret = True
         if self._hub.hours.prices_tomorrow != self.model.prices_tomorrow:
             self._hub.hours.prices_tomorrow = self.model.prices_tomorrow
+            ret = True
         if len(self.model.average_data) >= 7 and self._hub.hours.adjusted_average != self.get_average(7):
             self._hub.hours.adjusted_average = self.get_average(7)
+        return ret
 
     def _setup_nordpool(self):
         try:
