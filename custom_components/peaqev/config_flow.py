@@ -252,7 +252,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self.options["startpeaks"] = months_dict
             return await self.async_step_misc()
 
-        _defaultvalues = self.config_entry.options.get("startpeaks") if "startpeaks" in self.config_entry.options.keys() else self.config_entry.data.get("startpeaks")
+        _defaultvalues = self.config_entry.options.get("startpeaks", self.config_entry.data.get("startpeaks"))
         defaultvalues = {float(k): v for (k, v) in _defaultvalues.items()}
 
         return self.async_show_form(
