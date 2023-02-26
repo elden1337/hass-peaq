@@ -28,7 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 async def gather_binary_sensors(hub) -> list:
 
     ret = []
-    if hub.chargertype.type != ChargerType.NoCharger.value:
+    if hub.chargertype.type != ChargerType.NoCharger:
         ret.append(PeaqBinarySensorDone(hub))
     return ret
 
