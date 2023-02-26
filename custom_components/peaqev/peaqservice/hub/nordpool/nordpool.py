@@ -87,7 +87,8 @@ class NordPoolUpdater:
                 self._update_average_month()
             except Exception as ee:
                 _LOGGER.warning(f"Could not parse today's average from Nordpool. data: {_avg_data} exception: {ee}")
-            if await self._update_set_prices():
+            _LOGGER.debug(f"prices ready. proceeding to check against hours-model")
+            if self._update_set_prices():
                 self._hub.observer.broadcast("prices changed")
         elif self._hub.is_initialized:
             _LOGGER.error("Could not get nordpool-prices")
@@ -99,8 +100,9 @@ class NordPoolUpdater:
             _LOGGER.debug(f"The options for dynamic top price is currently: {self._hub.options.price.dynamic_top_price} with avg-month price: {self.model.average_month}")
             self._hub.hours.update_top_price(self.model.average_month)
 
-    async def _update_set_prices(self) -> bool:
+    def _update_set_prices(self) -> bool:
         ret = False
+        _LOGGER.debug(f"today: hoursp: {self._hub.hours.prices}, model: {self.model.prices}")
         if self._hub.hours.prices != self.model.prices:
             self._hub.hours.prices = self.model.prices
             ret = True
@@ -125,8 +127,7 @@ class NordPoolUpdater:
                 _LOGGER.error(f"more than one Nordpool entity found. Disabling Priceawareness until reboot of HA.")
         except Exception as e:
             self._hub.options.price.price_aware = False
-            _LOGGER.error(
-                f"Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness until reboot of HA: {e}")
+            _LOGGER.error(f"Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness until reboot of HA: {e}")
 
     def import_average_data(self, incoming: list):
         if isinstance(incoming, list):

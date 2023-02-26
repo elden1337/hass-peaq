@@ -139,19 +139,8 @@ class StateChangesLiteNoCharger(IStateChanges):
     async def _update_sensor(self, entity, value) -> bool:
 
         match entity:
-            # case self._hub.configpower_entity:
-                # self._hub.sensors.power.update(
-                #     carpowersensor_value=0,
-                #     config_sensor_value=value
-                # )
-                # self._hub.power_canary.total_power = self._hub.sensors.power.total.value
             case self._hub.sensors.totalhourlyenergy.entity:
                 await self._update_total_energy_and_peak(value)
-            # case self._hub.sensors.powersensormovingaverage.entity:
-            #     _LOGGER.debug(f"trying to update powersensormovingaverage with {value}")
-            #     self._hub.sensors.powersensormovingaverage.value = value
-            # case self._hub.sensors.powersensormovingaverage24.entity:
-            #     self._hub.sensors.powersensormovingaverage24.value = value
             case self._hub.nordpool.nordpool_entity:
                 await self._hub.nordpool.update_nordpool()
         return False
