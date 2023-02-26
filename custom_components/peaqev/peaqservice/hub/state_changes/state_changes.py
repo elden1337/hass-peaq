@@ -1,7 +1,8 @@
 import logging
 import time
-from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import IStateChanges
+
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
+from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import IStateChanges
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -121,6 +122,7 @@ class StateChangesNoCharger(IStateChanges):
             case self._hub.sensors.totalhourlyenergy.entity:
                 await self._update_total_energy_and_peak(value)
             case self._hub.sensors.powersensormovingaverage.entity:
+                _LOGGER.debug(f"trying to update powersensormovingaverage with {value}")
                 self._hub.sensors.powersensormovingaverage.value = value
             case self._hub.sensors.powersensormovingaverage24.entity:
                 self._hub.sensors.powersensormovingaverage24.value = value

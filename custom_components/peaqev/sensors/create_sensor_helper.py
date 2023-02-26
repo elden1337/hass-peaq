@@ -35,14 +35,14 @@ async def gather_binary_sensors(hub) -> list:
 async def gather_sensors(hub, config) -> list:
     ret = []
 
-    ret.append(PeaqAmpSensor(hub, config.entry_id))
     ret.append(PeaqSensor(hub, config.entry_id))
     ret.append(PeaqThresholdSensor(hub, config.entry_id))
 
-    if hub.chargertype.type != ChargerType.NoCharger:
+    if hub.chargertype.type is not ChargerType.NoCharger:
         ret.append(PeaqSessionSensor(hub, config.entry_id))
+        ret.append(PeaqAmpSensor(hub, config.entry_id))
 
-    if hub.options.powersensor_includes_car is True or hub.chargertype.type == ChargerType.NoCharger:
+    if hub.options.powersensor_includes_car is True or hub.chargertype.type is ChargerType.NoCharger:
         ret.append(PeaqHousePowerSensor(hub, config.entry_id))
     else:
         ret.append(PeaqPowerSensor(hub, config.entry_id))

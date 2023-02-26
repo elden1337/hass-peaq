@@ -65,7 +65,6 @@ class HomeAssistantHub(Hub):
         self.initializer = HubInitializer(self)
         self.chargingtracker_entities = self._set_chargingtracker_entities()
         tracker_entities += self.chargingtracker_entities
-
         async_track_state_change(hass, tracker_entities, self.state_changed)
 
     @property
@@ -93,8 +92,6 @@ class HomeAssistantHub(Hub):
         return self.initializer.check()
 
     def _set_chargingtracker_entities(self) -> list:
-        if self.chargertype.type is ChargerType.NoCharger:
-            return []
         ret = [f"sensor.{self.domain}_{ex.nametoid(CHARGERCONTROLLER)}"]
         if hasattr(self.sensors, "chargerobject_switch"):
             ret.append(self.sensors.chargerobject_switch.entity)
@@ -105,7 +102,7 @@ class HomeAssistantHub(Hub):
         if hasattr(self.sensors, "charger_done"):
             ret.append(self.sensors.charger_done.entity)
 
-        if self.chargertype.type is not ChargerType.Outlet:
+        if self.chargertype.type not in [ChargerType.Outlet, ChargerType.NoCharger]:
             ret.append(self.sensors.chargerobject.entity)
         if not self.options.peaqev_lite:
             ret.append(self.sensors.powersensormovingaverage.entity)

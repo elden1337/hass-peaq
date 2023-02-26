@@ -48,5 +48,6 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
 
     async_add_entities(peaqutilitysensors, update_before_add=True)
 
-    peaksensor = [PeaqPeakSensor(hub, config.entry_id)]
-    async_add_entities(peaksensor, update_before_add=True)
+    if hub.chargertype.type is not ChargerType.NoCharger:
+        peaksensor = [PeaqPeakSensor(hub, config.entry_id)]
+        async_add_entities(peaksensor, update_before_add=True)
