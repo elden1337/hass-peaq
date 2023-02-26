@@ -109,7 +109,6 @@ class ChargeControllerBase():
     def _get_status_outlet(self) -> ChargeControllerStates:
         ret = ChargeControllerStates.Error
         update_timer = False
-        free_charge = self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data)
 
         if self._hub.svk.should_stop:
             """interim fix for svk peak hours"""
@@ -120,7 +119,7 @@ class ChargeControllerBase():
             ret = ChargeControllerStates.Disabled
         elif self._hub.sensors.charger_done.value is True:
             ret = ChargeControllerStates.Done
-        elif datetime.now().hour in self._hub.non_hours and free_charge is False and self._hub.timer.is_override is False:
+        elif datetime.now().hour in self._hub.non_hours and self._hub.timer.is_override is False:
             update_timer = True
             ret = ChargeControllerStates.Stop
         elif self._hub.chargertype.entities.powerswitch == "on" and self._hub.chargertype.entities.powermeter < 1:
@@ -137,7 +136,7 @@ class ChargeControllerBase():
         ret = ChargeControllerStates.Error
         update_timer = True
         _state = self._hub.sensors.chargerobject.value.lower()
-        free_charge = self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data)
+
         if self._hub.sensors.charger_enabled.value is False:
             ret = ChargeControllerStates.Disabled
         elif _state in self._hub.chargertype.chargerstates[ChargeControllerStates.Done]:
@@ -154,7 +153,7 @@ class ChargeControllerBase():
             ChargeControllerStates.Idle] and self._hub.sensors.charger_done.value is True:
             ret = ChargeControllerStates.Done
             update_timer = False
-        elif datetime.now().hour in self._hub.non_hours and free_charge is False and self._hub.timer.is_override is False:
+        elif datetime.now().hour in self._hub.non_hours and self._hub.timer.is_override is False:
             ret = ChargeControllerStates.Stop
         elif self._hub.svk.should_stop:
             """interim fix for svk peak hours"""
@@ -173,12 +172,10 @@ class ChargeControllerBase():
     def _get_status_no_charger(self) -> ChargeControllerStates:
         ret = ChargeControllerStates.Error
         update_timer = True
-        free_charge = self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data)
+
         if self._hub.sensors.charger_enabled.value is False:
             ret = ChargeControllerStates.Disabled
-        # elif self._hub.sensors.power.killswitch.is_dead:
-        #     ret = ChargeControllerStates.Error
-        elif datetime.now().hour in self._hub.non_hours and free_charge is False and self._hub.timer.is_override is False:
+        elif datetime.now().hour in self._hub.non_hours and self._hub.timer.is_override is False:
             ret = ChargeControllerStates.Stop
         elif self._hub.svk.should_stop:
             """interim fix for svk peak hours"""
