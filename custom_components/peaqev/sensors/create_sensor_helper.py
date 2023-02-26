@@ -36,16 +36,16 @@ async def gather_sensors(hub, config) -> list:
     ret = []
 
     ret.append(PeaqSensor(hub, config.entry_id))
-    ret.append(PeaqThresholdSensor(hub, config.entry_id))
 
     if hub.chargertype.type is not ChargerType.NoCharger:
         ret.append(PeaqSessionSensor(hub, config.entry_id))
         ret.append(PeaqAmpSensor(hub, config.entry_id))
 
-    if hub.options.powersensor_includes_car is True or hub.chargertype.type is ChargerType.NoCharger:
-        ret.append(PeaqHousePowerSensor(hub, config.entry_id))
-    else:
-        ret.append(PeaqPowerSensor(hub, config.entry_id))
+    if hub.options.peaqev_lite is False:
+        if hub.options.powersensor_includes_car is True or hub.chargertype.type is ChargerType.NoCharger:
+            ret.append(PeaqHousePowerSensor(hub, config.entry_id))
+        else:
+            ret.append(PeaqPowerSensor(hub, config.entry_id))
 
     if hub.power_canary.enabled:
         ret.append(PowerCanaryStatusSensor(hub, config.entry_id))
@@ -58,6 +58,7 @@ async def gather_sensors(hub, config) -> list:
         ret.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION, timedelta(minutes=average_delta)))
         ret.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION_24H, timedelta(hours=24)))
         ret.append(PeaqPredictionSensor(hub, config.entry_id))
+        ret.append(PeaqThresholdSensor(hub, config.entry_id))
 
     if hub.options.price.price_aware is True:
         ret.append(PeaqMoneySensor(hub, config.entry_id))

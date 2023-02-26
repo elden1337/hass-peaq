@@ -2,12 +2,12 @@ import logging
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontrollerbase import ChargeControllerBase
+from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class ChargeControllerLite(ChargeControllerBase):
+class ChargeControllerLite(IChargeController):
     def __init__(self, hub):
         super().__init__(hub)
 

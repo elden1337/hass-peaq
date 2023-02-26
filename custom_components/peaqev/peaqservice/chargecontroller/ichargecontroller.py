@@ -11,7 +11,7 @@ from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLE
 _LOGGER = logging.getLogger(__name__)
 
 
-class ChargeControllerBase():
+class IChargeController():
     DONETIMEOUT = 180
     DEBUGLOG_TIMEOUT = 60
 
@@ -236,10 +236,10 @@ class ChargeControllerBase():
         ret = ""
         for idx, h in enumerate(nonhours):
             if idx + 1 < len(nonhours):
-                if ChargeControllerBase._getuneven(nonhours[idx + 1], nonhours[idx]):
-                    ret = ChargeControllerBase._get_stopped_string(h)
+                if IChargeController._getuneven(nonhours[idx + 1], nonhours[idx]):
+                    ret = IChargeController._get_stopped_string(h)
                     break
             elif idx + 1 == len(nonhours):
-                ret = ChargeControllerBase._get_stopped_string(h)
+                ret = IChargeController._get_stopped_string(h)
                 break
         return ret

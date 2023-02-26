@@ -1,7 +1,6 @@
 import logging
-import time
-from datetime import datetime
 from abc import abstractmethod
+from datetime import datetime
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -67,6 +66,7 @@ class IStateChanges:
             timestamp=datetime.now()
         )
 
+
 import logging
 import time
 from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import IStateChanges
@@ -91,45 +91,20 @@ class StateChanges(IStateChanges):
                 update_session = True
                 self._hub.power_canary.total_power = self._hub.sensors.power.total.value
             case self._hub.sensors.carpowersensor.entity:
-                if self._hub.sensors.carpowersensor.use_attribute:
-                    pass
-                else:
-                    self._hub.sensors.carpowersensor.value = value
-                    self._hub.sensors.power.update(
-                        carpowersensor_value=self._hub.sensors.carpowersensor.value,
-                        config_sensor_value=None
-                    )
+                # if self._hub.sensors.carpowersensor.use_attribute:
+                #     pass
+                # else:
+                #     self._hub.sensors.carpowersensor.value = value
+                #     self._hub.sensors.power.update(
+                #         carpowersensor_value=self._hub.sensors.carpowersensor.value,
+                #         config_sensor_value=None
+                #     )
                 update_session = True
-                self._hub.sensors.chargerobject_switch.updatecurrent()
-                self._hub.power_canary.total_power = self._hub.sensors.power.total.value
-                await self._handle_outlet_updates()
-            case self._hub.sensors.chargerobject.entity:
-                self._hub.sensors.chargerobject.value = value
-            case self._hub.sensors.chargerobject_switch.entity:
-                await self._update_chargerobject_switch(value)
-            case self._hub.sensors.totalhourlyenergy.entity:
-                await self._update_total_energy_and_peak(value)
-            case self._hub.sensors.powersensormovingaverage.entity:
-                self._hub.sensors.powersensormovingaverage.value = value
-            case self._hub.sensors.powersensormovingaverage24.entity:
-                self._hub.sensors.powersensormovingaverage24.value = value
-            case self._hub.nordpool.nordpool_entity:
-                await self._hub.nordpool.update_nordpool()
-                update_session = True
+                # self._hub.sensors.chargerobject_switch.updatecurrent()
+                # self._hub.power_canary.total_power = self._hub.sensors.power.total.value
+                #await self._handle_outlet_updates()
+
         return update_session
-    
-    async def _handle_outlet_updates(self):
-        if self._hub.chargertype.domainname is ChargerType.Outlet:
-            old_state = self._hub.sensors.chargerobject.value
-            if time.time() - self.latest_outlet_update < 10:
-                return
-            self.latest_outlet_update = time.time()
-            if self._hub.sensors.carpowersensor.value > 0:
-                self._hub.sensors.chargerobject.value = "charging"
-            else:
-                self._hub.sensors.chargerobject.value = "connected"
-            if old_state != self._hub.sensors.chargerobject.value:
-                _LOGGER.debug(f"smartoutlet is now {self._hub.sensors.chargerobject.value}")
 
 
 class StateChangesLite(IStateChanges):
@@ -144,33 +119,8 @@ class StateChangesLite(IStateChanges):
                     pass
                 else:
                     self._hub.sensors.carpowersensor.value = value
-                    await self._handle_outlet_updates()
-                    self._hub.sensors.chargerobject_switch.updatecurrent()
-            case self._hub.sensors.chargerobject.entity:
-                self._hub.sensors.chargerobject.value = value
-            case self._hub.sensors.chargerobject_switch.entity:
-                await self._update_chargerobject_switch(value)
-            case self._hub.sensors.current_peak.entity:
-                self._hub.sensors.current_peak.value = value
-            case self._hub.sensors.totalhourlyenergy.entity:
-                await self._update_total_energy_and_peak(value)
-            case self._hub.nordpool.nordpool_entity:
-                await self._hub.nordpool.update_nordpool()
+                self._hub.sensors.chargerobject_switch.updatecurrent()
         return False
-    
-    async def _handle_outlet_updates(self):
-        if self._hub.chargertype.domainname is ChargerType.Outlet:
-            old_state = self._hub.sensors.chargerobject.value
-            if time.time() - self.latest_outlet_update < 10:
-                return
-            self.latest_outlet_update = time.time()
-            if self._hub.sensors.carpowersensor.value > 0:
-                self._hub.sensors.chargerobject.value = "charging"
-            else:
-                self._hub.sensors.chargerobject.value = "connected"
-            if old_state != self._hub.sensors.chargerobject.value:
-                _LOGGER.debug(f"smartoutlet is now {self._hub.sensors.chargerobject.value}")
-
 
 class StateChangesNoCharger(IStateChanges):
     def __init__(self, hub):
@@ -187,32 +137,92 @@ class StateChangesNoCharger(IStateChanges):
                 )
                 update_session = True
                 self._hub.power_canary.total_power = self._hub.sensors.power.total.value
-            case self._hub.sensors.totalhourlyenergy.entity:
-                await self._update_total_energy_and_peak(value)
-            case self._hub.sensors.powersensormovingaverage.entity:
-                self._hub.sensors.powersensormovingaverage.value = value
-            case self._hub.sensors.powersensormovingaverage24.entity:
-                self._hub.sensors.powersensormovingaverage24.value = value
-            case self._hub.nordpool.nordpool_entity:
-                await self._hub.nordpool.update_nordpool()
                 update_session = True
         return update_session
 
 
-class StateChanges2:
+class StateChanges2(IStateChanges):
     def __init__(self, hub):
         self._hub = hub
         self._funcs = {}
 
-    def _set_value(func, val) -> None:
+    def _execute(self, entity, value) -> None:
+        try:
+            self._funcs.get(entity)(value)
+        except KeyError:
+            pass
+
+    def _set_value(self, func, val) -> None:
         func = val
 
-    def _set_powersensor_moving_average(self) -> None:
+    def _setup_powersensor_moving_average(self) -> None:
         self._funcs[self._hub.sensors.powersensormovingaverage.entity] = lambda x: self._set_value(self._hub.sensors.powersensormovingaverage.value, x)
         self._funcs[self._hub.sensors.powersensormovingaverage24.entity] = lambda x: self._set_value(self._hub.sensors.powersensormovingaverage24.value, x)
-    
-    def _set_total_hourly_energy(self) -> None:
+
+    def _setup_total_hourly_energy(self) -> None:
         self._funcs[self._hub.sensors.totalhourlyenergy.entity] = lambda x: self._update_total_energy_and_peak(x)
 
-    def _set_nordpool(self) -> None:
-        self._funcs[self._hub.nordpool.nordpool_entity] = lambda : self._hub.nordpool.update_nordpool()
+    def _setup_nordpool(self) -> None:
+        self._funcs[self._hub.nordpool.nordpool_entity] = lambda x: self._hub.nordpool.update_nordpool()
+
+    def _setup_chargerobject(self) -> None:
+        self._funcs[self._hub.sensors.chargerobject.entity] = lambda x: self._set_value(self._hub.sensors.chargerobject.value, x)
+        self._funcs[self._hub.sensors.chargerobject_switch.entity] = lambda x: self._update_chargerobject_switch(x)
+
+    def _setup_carpowersensor(self) -> None:
+        self._funcs[self._hub.sensors.carpowersensor.entity] = lambda x: self._set_carpowersensor_value(x)
+
+    def _setup_carpowersensor_lite(self) -> None:
+        self._funcs[self._hub.sensors.carpowersensor.entity] = lambda x: self._set_carpowersensor_value_lite(x)
+
+    def _setup_carpowersensor_outlet(self) -> None:
+        self._funcs[self._hub.sensors.carpowersensor.entity] = lambda x: self._handle_outlet_updates()
+
+    def _setup_update_current(self) -> None:
+        self._funcs[self._hub.sensors.carpowersensor.entity] = lambda x: self._hub.sensors.chargerobject_switch.updatecurrent()
+
+    #not constructor methods
+    def _set_carpowersensor_value(self, value) -> None:
+        if self._hub.sensors.carpowersensor.use_attribute:
+            pass
+        else:
+            self._hub.sensors.carpowersensor.value = value
+            self._hub.sensors.power.update(
+                carpowersensor_value=self._hub.sensors.carpowersensor.value,
+                config_sensor_value=None
+            )
+            #self._hub.power_canary.total_power = self._hub.sensors.power.total.value
+
+    def _set_carpowersensor_value_lite(self, value) -> None:
+        if self._hub.sensors.carpowersensor.use_attribute:
+            pass
+        else:
+            self._hub.sensors.carpowersensor.value = value
+            #self._hub.power_canary.total_power = self._hub.sensors.power.total.value
+
+    async def _handle_outlet_updates(self):
+        if self._hub.chargertype.domainname is ChargerType.Outlet:
+            old_state = self._hub.sensors.chargerobject.value
+            if time.time() - self.latest_outlet_update < 10:
+                return
+            self.latest_outlet_update = time.time()
+            if self._hub.sensors.carpowersensor.value > 0:
+                self._hub.sensors.chargerobject.value = "charging"
+            else:
+                self._hub.sensors.chargerobject.value = "connected"
+            if old_state != self._hub.sensors.chargerobject.value:
+                _LOGGER.debug(f"smartoutlet is now {self._hub.sensors.chargerobject.value}")
+
+    def construct(self) -> None:
+        if hasattr(self._hub.sensors, "carpowersensor"):
+            if self._hub.chargertype.domainname is ChargerType.Outlet:
+                self._setup_carpowersensor_outlet()
+            elif self._hub.options.peaqev_lite:
+                self._setup_carpowersensor_lite()
+            else:
+                self._setup_carpowersensor()
+        if self._hub.options.price.price_aware:
+            self._setup_nordpool()
+        if not self._hub.options.peaqev_lite:
+            self._setup_powersensor_moving_average()
+        #if self._hub.chargertype.
