@@ -68,40 +68,46 @@ async def gather_sensors(hub, config) -> list:
 
 async def gather_integration_sensors(hub, entry_id):
     ret = []
+    if hub.options.peaqev_lite:
+        return ret
 
-    if hub.options.powersensor_includes_car is True or hub.chargertype.type is ChargerType.NoCharger:
+    if any(
+            [
+                hub.options.powersensor_includes_car is True,
+                hub.chargertype.type is ChargerType.NoCharger,
+            ]):
         if hub.chargertype.type is not ChargerType.NoCharger:
             ret.append(
                 PeaqIntegrationSensor(
-                    hub,
-                    f"sensor.{DOMAIN}_{hub.sensors.power.house.id}",
-                    f"{ex.nametoid(CONSUMPTION_INTEGRAL_NAME)}",
-                    entry_id
+                    hub=hub,
+                    sensor=f"sensor.{DOMAIN}_{hub.sensors.power.house.id}",
+                    name=f"{ex.nametoid(CONSUMPTION_INTEGRAL_NAME)}",
+                    entry_id=entry_id
                 )
             )
         ret.append(
             PeaqIntegrationSensor(
-                hub,
-                hub.sensors.power.total.entity,
-                f"{ex.nametoid(CONSUMPTION_TOTAL_NAME)}",
-                entry_id
+                hub=hub,
+                sensor=hub.sensors.power.total.entity,
+                name=f"{ex.nametoid(CONSUMPTION_TOTAL_NAME)}",
+                entry_id=entry_id
             )
         )
     else:
         ret.append(
             PeaqIntegrationSensor(
-                hub,
-                hub.sensors.power.house.entity,
-                f"{ex.nametoid(CONSUMPTION_INTEGRAL_NAME)}",
-                entry_id
+                hub=hub,
+                sensor=hub.sensors.power.house.entity,
+                name=f"{ex.nametoid(CONSUMPTION_INTEGRAL_NAME)}",
+                entry_id=entry_id
             )
         )
         ret.append(
             PeaqIntegrationSensor(
-                hub,
-                f"sensor.{DOMAIN}_{hub.sensors.power.total.id}",
-                f"{ex.nametoid(CONSUMPTION_TOTAL_NAME)}",
-                entry_id
+                hub=hub,
+                sensor=f"sensor.{DOMAIN}_{hub.sensors.power.total.id}",
+                name=f"{ex.nametoid(CONSUMPTION_TOTAL_NAME)}",
+                entry_id=entry_id
             )
         )
     return ret

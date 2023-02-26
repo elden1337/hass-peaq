@@ -49,7 +49,7 @@ class HomeAssistantHub(Hub):
             domain=domain,
             chargerobj=self.chargertype
         )
-        tracker_entities = [self.sensors.totalhourlyenergy.entity]
+        tracker_entities = []
 
         self.servicecalls = ServiceCalls(self)
         self.states = StateChangesFactory.create(self)
@@ -59,6 +59,7 @@ class HomeAssistantHub(Hub):
         if not options.peaqev_lite:
             self.configpower_entity = config_inputs["powersensor"]
             tracker_entities.append(self.configpower_entity)
+            tracker_entities.append(self.sensors.totalhourlyenergy.entity)
 
         self.nordpool = NordPoolUpdater(hass=self.state_machine, hub=self, is_active=self.hours.price_aware)
         self.power_canary = PowerCanary(hub=self)

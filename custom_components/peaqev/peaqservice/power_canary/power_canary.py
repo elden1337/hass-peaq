@@ -128,11 +128,12 @@ class PowerCanary:
 
     def _validate(self):
         if self.model.fuse_max == 0:
-            pass
-        else:
-            if self.model.is_valid:
-                self._enabled = True
-                self._active = True
+            return
+        if self._hub.options.peaqev_lite:
+            return
+        if self.model.is_valid:
+            self._enabled = True
+            self._active = True
 
     """
     1 if trying to raise amps and they would hit mains-treshold, dont raise

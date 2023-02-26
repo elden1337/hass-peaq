@@ -181,7 +181,7 @@ class IChargeController():
             """interim fix for svk peak hours"""
             ret = ChargeControllerStates.Stop
         else:
-            ret = self._get_status_connected()
+            ret = ChargeControllerStates.Start
         if update_timer is True:
             self.latest_charger_start = time.time()
         return ret

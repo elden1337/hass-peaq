@@ -39,7 +39,8 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
 
     async_add_entities(peaqintegrationsensors, update_before_add=True)
 
-    integrationsensors = [ex.nametoid(CONSUMPTION_TOTAL_NAME)]
+    integrationsensors = []
+    if not hub.options.peaqev_lite: integrationsensors.append(ex.nametoid(CONSUMPTION_TOTAL_NAME))
     if hub.chargertype.type is not ChargerType.NoCharger: integrationsensors.append(ex.nametoid(CONSUMPTION_INTEGRAL_NAME))
     peaqutilitysensors = []
 
@@ -51,3 +52,4 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
     if hub.chargertype.type is not ChargerType.NoCharger:
         peaksensor = [PeaqPeakSensor(hub, config.entry_id)]
         async_add_entities(peaksensor, update_before_add=True)
+
