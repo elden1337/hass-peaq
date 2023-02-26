@@ -20,6 +20,7 @@ from custom_components.peaqev.sensors.utility_sensor import (
 )
 from .const import (
     DOMAIN)
+from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,7 +39,8 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
 
     async_add_entities(peaqintegrationsensors, update_before_add=True)
 
-    integrationsensors = [ex.nametoid(CONSUMPTION_TOTAL_NAME), ex.nametoid(CONSUMPTION_INTEGRAL_NAME)]
+    integrationsensors = [ex.nametoid(CONSUMPTION_TOTAL_NAME)]
+    if hub.chargertype.type is not ChargerType.NoCharger: integrationsensors.append(ex.nametoid(CONSUMPTION_INTEGRAL_NAME))
     peaqutilitysensors = []
 
     for i in integrationsensors:
