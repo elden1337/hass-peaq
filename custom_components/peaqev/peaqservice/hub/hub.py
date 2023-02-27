@@ -9,24 +9,24 @@ from homeassistant.core import (
 )
 from homeassistant.helpers.event import async_track_state_change
 from peaqevcore.hub.hub_options import HubOptions
-from peaqevcore.hub.hub_sensors import HubSensorsFactory
 from peaqevcore.services.hourselection.initializers.hoursbase import Hours
-from peaqevcore.services.hourselection.initializers.hourselectionfactory import HourselectionFactory
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.scheduler.scheduler import SchedulerFacade
-from peaqevcore.services.threshold.thresholdfactory import ThresholdFactory
 from peaqevcore.services.timer.timer import Timer
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_factory import ChargeControllerFactory
 from custom_components.peaqev.peaqservice.charger.charger import Charger
-from custom_components.peaqev.peaqservice.chargertypes.chargertype_factory import ChargerTypeFactory
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
+from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import ChargeControllerFactory
+from custom_components.peaqev.peaqservice.hub.factories.chargertype_factory import ChargerTypeFactory
+from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import HourselectionFactory
+from custom_components.peaqev.peaqservice.hub.factories.hubsensors_factory import HubSensorsFactory
+from custom_components.peaqev.peaqservice.hub.factories.state_changes_factory import StateChangesFactory
+from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import ThresholdFactory
 from custom_components.peaqev.peaqservice.hub.hub_initializer import HubInitializer
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import NordPoolUpdater
 from custom_components.peaqev.peaqservice.hub.observer import Observer
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
-from custom_components.peaqev.peaqservice.hub.state_changes.state_changes_factory import StateChangesFactory
 from custom_components.peaqev.peaqservice.hub.svk import svk
 from custom_components.peaqev.peaqservice.power_canary.power_canary import PowerCanary
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
@@ -49,8 +49,11 @@ class HomeAssistantHub:
         self._is_initialized = False
         self.observer = Observer(self)
         self.hubname = domain.capitalize()
-        self.chargertype = ChargerTypeFactory.create(hass=hass, input_type=self.options.charger.chargertype,
-                                                     options=self.options)
+        self.chargertype = ChargerTypeFactory.create(
+            hass=hass,
+            input_type=self.options.charger.chargertype,
+            options=self.options
+        )
         self.charger = Charger(hub=self, hass=hass, chargertype=self.chargertype)
         self.sensors = HubSensorsFactory.create(self.options)
         self.timer: Timer = Timer()
