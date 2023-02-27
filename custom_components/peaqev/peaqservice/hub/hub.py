@@ -76,6 +76,9 @@ class HomeAssistantHub:
             tracker_entities.append(self.options.powersensor)
             tracker_entities.append(self.sensors.totalhourlyenergy.entity)
 
+        self.observer.add("prices changed", self._update_prices)
+        self.observer.add("monthly average price changed", self._update_average_monthly_price)
+        self.observer.add("weekly average price changed", self._update_average_weekly_price)
         self.chargingtracker_entities = self._set_chargingtracker_entities()
         tracker_entities += self.chargingtracker_entities
         async_track_state_change(hass, tracker_entities, self.state_changed)
@@ -165,6 +168,10 @@ class HomeAssistantHub:
             return self.hours.prices_tomorrow
         return []
 
+    def _update_prices(self) -> None:
+        self.prices = self.nordpool.prices
+        self.prices_tomorrow = self.nordpool.prices_tomorrow
+
     @prices_tomorrow.setter
     def prices_tomorrow(self, val) -> None:
         if hasattr(self, "hours") and self.options.price.price_aware:
@@ -175,6 +182,14 @@ class HomeAssistantHub:
         if hasattr(self.sensors, "locale"):
             return self.sensors.locale.data.free_charge(self.sensors.locale.data)
         return False
+
+    def _update_average_monthly_price(self) -> None:
+        if hasattr(self, "hours") and self.options.price.price_aware:
+            self.hours.update_top_price(self.nordpool.average_month)
+
+    def _update_average_weekly_price(self) -> None:
+        if hasattr(self, "hours") and self.options.price.price_aware:
+            self.hours.adjusted_average = self.nordpool.average_weekly
 
     def get_data(self, *args):
         pass

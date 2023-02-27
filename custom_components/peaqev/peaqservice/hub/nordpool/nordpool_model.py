@@ -9,3 +9,4 @@ class NordPoolModel:
     nordpool_entity: str = ""
     average_data: list = field(default_factory=lambda: [])
     average_month: float = 0
+    average_weekly: float = 0
