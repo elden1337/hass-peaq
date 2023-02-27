@@ -65,7 +65,7 @@ class HomeAssistantHub:
         self.servicecalls = ServiceCalls(self)
         self.states = StateChangesFactory.create(self)
         self.svk = svk(self)  # interim solution for svk peak hours
-        self.chargecontroller = ChargeControllerFactory.create(self, chargerstates=self.chargertype.chargerstates)
+        self.chargecontroller = ChargeControllerFactory.create(self, charger_states=self.chargertype.chargerstates)
         self.nordpool = NordPoolUpdater(hass=hass, hub=self, is_active=self.hours.price_aware)
         self.power_canary = PowerCanary(hub=self)
         self.initializer = HubInitializer(self)
@@ -140,8 +140,37 @@ class HomeAssistantHub:
                 _LOGGER.error(msg)
 
     """Composition below here"""
-
-    def get_chargerobject(self) -> str:
+    def get_chargerobject_value(self) -> str:
         ret = getattr(self.sensors.chargerobject, "value", "unknown")
         return ret.lower()
+
+    def set_chargerobject_value(self, value) -> None:
+        if hasattr(self.sensors, "chargerobject"):
+            self.sensors.chargerobject.value = value
+
+    @property
+    def prices(self) -> list:
+        if hasattr(self, "hours") and self.options.price.price_aware:
+            return self.hours.prices
+        return []
+
+    @prices.setter
+    def prices(self, val) -> None:
+        if hasattr(self, "hours") and self.options.price.price_aware:
+            self.hours.prices = val
+
+    @property
+    def prices_tomorrow(self) -> list:
+        if hasattr(self, "hours") and self.options.price.price_aware:
+            return self.hours.prices_tomorrow
+        return []
+
+    @prices_tomorrow.setter
+    def prices_tomorrow(self, val) -> None:
+        if hasattr(self, "hours") and self.options.price.price_aware:
+            self.hours.prices_tomorrow = val
+
+
+    def get_data(self, *args):
+        pass
 

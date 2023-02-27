@@ -102,15 +102,14 @@ class NordPoolUpdater:
 
     def _update_set_prices(self) -> bool:
         ret = False
-        _LOGGER.debug(f"today: hoursp: {self._hub.hours.prices}, model: {self.model.prices}")
-        if self._hub.hours.prices != self.model.prices:
-            self._hub.hours.prices = self.model.prices
+        if self._hub.prices != self.model.prices:
+            self._hub.prices = self.model.prices
             ret = True
-        if self._hub.hours.prices_tomorrow != self.model.prices_tomorrow:
-            self._hub.hours.prices_tomorrow = self.model.prices_tomorrow
+        if self._hub.prices_tomorrow != self.model.prices_tomorrow:
+            self._hub.prices_tomorrow = self.model.prices_tomorrow
             ret = True
         if len(self.model.average_data) >= 7 and self._hub.hours.adjusted_average != self.get_average(7):
-            self._hub.hours.adjusted_average = self.get_average(7)
+            self._hub.hours.adjusted_average = self.get_average(7) #todo: composition
         return ret
 
     def _setup_nordpool(self):
@@ -123,10 +122,10 @@ class NordPoolUpdater:
                 _LOGGER.debug(f"Nordpool has been set up and is ready to be used with {self.nordpool_entity}")
                 self.update_nordpool()
             else:
-                self._hub.options.price.price_aware = False
+                self._hub.options.price.price_aware = False  #todo: composition
                 _LOGGER.error(f"more than one Nordpool entity found. Disabling Priceawareness until reboot of HA.")
         except Exception as e:
-            self._hub.options.price.price_aware = False
+            self._hub.options.price.price_aware = False  #todo: composition
             _LOGGER.error(f"Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness until reboot of HA: {e}")
 
     def import_average_data(self, incoming: list):
