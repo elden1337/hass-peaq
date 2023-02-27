@@ -88,7 +88,7 @@ class NordPoolUpdater:
                 _result["avg_data"] = _avg_data
             except Exception as ee:
                 _LOGGER.warning(f"Could not parse today's average from Nordpool. exception: {ee}")
-            if self._update_set_prices(_result):
+            if await self._update_set_prices(_result):
                 self._hub.observer.broadcast("prices changed")
         elif self._hub.is_initialized:
             _LOGGER.error("Could not get nordpool-prices")
@@ -99,7 +99,7 @@ class NordPoolUpdater:
             self.model.average_month = _new
             self._hub.observer.broadcast("monthly average price changed")
 
-    def _update_set_prices(self, result: dict) -> bool:
+    async def _update_set_prices(self, result: dict) -> bool:
         ret = False
         if self.model.prices != result.get("today"):
             self.model.prices = result.get("today")
