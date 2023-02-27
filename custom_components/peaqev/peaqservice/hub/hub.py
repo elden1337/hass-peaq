@@ -51,7 +51,7 @@ class HomeAssistantHub:
         self.hubname = domain.capitalize()
         self.chargertype = ChargerTypeFactory.create(hass=hass, input_type=self.options.charger.chargertype,
                                                      options=self.options)
-        self.charger = Charger(hub=self, hass=hass, servicecalls=self.chargertype.servicecalls)
+        self.charger = Charger(hub=self, hass=hass, chargertype=self.chargertype)
         self.sensors = HubSensorsFactory.create(self.options)
         self.timer: Timer = Timer()
         self.hours: Hours = HourselectionFactory.create(self)

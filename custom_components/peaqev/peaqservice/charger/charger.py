@@ -20,10 +20,10 @@ CALL_WAIT_TIMER = 60
 
 
 class Charger:
-    def __init__(self, hub, hass, servicecalls):
+    def __init__(self, hub, hass, chargertype):
         self._hass = hass
         self.hub = hub
-        self._service_calls = servicecalls
+        self._charger = chargertype
         self.params = ChargerParams()
         self.session = Session(self)
         self.helpers = ChargerHelpers(self)
@@ -39,7 +39,7 @@ class Charger:
 
     @property
     def charger_active(self) -> bool:
-        if self.hub.chargertype.options.powerswitch_controls_charging:
+        if self._charger.options.powerswitch_controls_charging:
             return self.hub.sensors.chargerobject_switch.value
         return all(
             [
@@ -50,7 +50,7 @@ class Charger:
 
     async def charge(self) -> None:
         """Main function to turn charging on or off"""
-        if self.hub.chargertype.type == ChargerType.NoCharger:
+        if self._charger.type == ChargerType.NoCharger:
             return
         if self.params.charger_state_mismatch:
             await self._update_charger_state_internal(ChargerStates.Pause)
@@ -95,7 +95,7 @@ class Charger:
         await self._update_charger_state_internal(ChargerStates.Start)
         self.session_active = True
         self.hub.chargecontroller.latest_charger_start = time.time()  #todo: composition
-        if self.hub.chargertype.servicecalls.options.allowupdatecurrent and not self.hub.is_free_charge:  #todo: composition
+        if self._charger.servicecalls.options.allowupdatecurrent and not self.hub.is_free_charge:  #todo: composition
             self._hass.async_create_task(self._updatemaxcurrent())
 
     async def _start_charger(self, debugmessage: str = None):
@@ -108,7 +108,7 @@ class Charger:
             else:
                 await self._call_charger(CallTypes.Resume)
             self.hub.chargecontroller.latest_charger_start = time.time()
-            if self.hub.chargertype.servicecalls.options.allowupdatecurrent and not self.hub.is_free_charge:
+            if self._charger.servicecalls.options.allowupdatecurrent and not self.hub.is_free_charge:
                 self._hass.async_create_task(self._updatemaxcurrent())
 
     async def _terminate_charger(self, debugmessage: str = None):
@@ -130,9 +130,9 @@ class Charger:
                 await self._call_charger(CallTypes.Pause)
 
     async def _call_charger(self, command: CallTypes):
-        calls = self._service_calls.get_call(command)
-        if self.hub.chargertype.servicecalls.options.switch_controls_charger:  #todo: composition
-            await self.hub.state_machine.states.async_set(self.hub.chargertype.entities.powerswitch, calls[command]) #todo: composition
+        calls = self._charger.servicecalls.get_call(command)
+        if self._charger.servicecalls.options.switch_controls_charger:  #todo: composition
+            await self.hub.state_machine.states.async_set(self._charger.entities.powerswitch, calls[command]) #todo: composition
             await self._debug_log(f"Calling charger-outlet")
         else:
             await self._do_service_call(calls[DOMAIN], calls[command], calls["params"])
@@ -140,7 +140,7 @@ class Charger:
 
     async def _updatemaxcurrent(self):
         self.hub.sensors.chargerobject_switch.updatecurrent()
-        calls = self._service_calls.get_call(CallTypes.UpdateCurrent)
+        calls = self._charger.servicecalls.get_call(CallTypes.UpdateCurrent)
         if await self._hass.async_add_executor_job(self.helpers.wait_turn_on):
             # call here to set amp-list
             while all([
@@ -154,7 +154,7 @@ class Charger:
                         await self._do_service_call(calls[DOMAIN], calls[CallTypes.UpdateCurrent], serviceparams)
                     await self._hass.async_add_executor_job(self.helpers.wait_loop_cycle)
 
-            if self.hub.chargertype.servicecalls.options.update_current_on_termination is True:
+            if self._charger.servicecalls.options.update_current_on_termination is True:
                 final_service_params = await self.helpers.setchargerparams(calls, ampoverride=6)
                 await self._do_service_call(calls[DOMAIN], calls[CallTypes.UpdateCurrent], final_service_params)
 
@@ -174,7 +174,7 @@ class Charger:
         elif state in [ChargerStates.Stop, ChargerStates.Pause]:
             self.params.disable_current_updates = True
             charger_state = self.hub.get_chargerobject_value() #todo: composition
-            chargingstates = self.hub.chargertype.chargerstates[ChargeControllerStates.Charging] #todo: composition
+            chargingstates = self._charger.chargerstates.get(ChargeControllerStates.Charging)
             if charger_state not in chargingstates or len(charger_state) < 1:
                 self.params.running = False
                 self.params.charger_state_mismatch = False
