@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from datetime import datetime
 
@@ -6,8 +8,14 @@ from homeassistant.core import (
     callback
 )
 from homeassistant.helpers.event import async_track_state_change
-from peaqevcore.hub.hub import Hub
 from peaqevcore.hub.hub_options import HubOptions
+from peaqevcore.hub.hub_sensors import HubSensorsFactory
+from peaqevcore.services.hourselection.initializers.hoursbase import Hours
+from peaqevcore.services.hourselection.initializers.hourselectionfactory import HourselectionFactory
+from peaqevcore.services.prediction.prediction import Prediction
+from peaqevcore.services.scheduler.scheduler import SchedulerFacade
+from peaqevcore.services.threshold.thresholdfactory import ThresholdFactory
+from peaqevcore.services.timer.timer import Timer
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_factory import ChargeControllerFactory
@@ -26,44 +34,48 @@ from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLE
 _LOGGER = logging.getLogger(__name__)
 
 
-class HomeAssistantHub(Hub):
+class HomeAssistantHub:
     hub_id = 1337
 
     def __init__(
             self,
             hass: HomeAssistant,
             options: HubOptions,
-            domain: str,
-            config_inputs: dict
+            domain: str
     ):
+        self.state_machine = hass
+        self.domain = domain
+        self.options: HubOptions = options
         self._is_initialized = False
         self.observer = Observer(self)
         self.hubname = domain.capitalize()
-        self.chargertype = ChargerTypeFactory.create(hass=hass, input_type=options.charger.chargertype, options=options)
+        self.chargertype = ChargerTypeFactory.create(hass=hass, input_type=self.options.charger.chargertype,
+                                                     options=self.options)
         self.charger = Charger(hub=self, hass=hass, servicecalls=self.chargertype.servicecalls)
+        self.sensors = HubSensorsFactory.create(self.options)
+        self.timer: Timer = Timer()
+        self.hours: Hours = HourselectionFactory.create(self)
+        self.threshold = ThresholdFactory.create(self)
+        self.prediction = Prediction(self)
+        self.scheduler = SchedulerFacade(hub=self, options=self.hours.options)
 
-        Hub.__init__(
-            self,
-            state_machine=hass,
-            options=options,
-            domain=domain,
-            chargerobj=self.chargertype
-        )
-        tracker_entities = []
+        self.sensors.setup(state_machine=hass, options=options, domain=domain, chargerobject=self.chargertype)
+        self.sensors.init_hub_values()
 
         self.servicecalls = ServiceCalls(self)
         self.states = StateChangesFactory.create(self)
         self.svk = svk(self)  # interim solution for svk peak hours
-        self.chargecontroller = ChargeControllerFactory.create(self)
-
-        if not options.peaqev_lite:
-            self.configpower_entity = config_inputs["powersensor"]
-            tracker_entities.append(self.configpower_entity)
-            tracker_entities.append(self.sensors.totalhourlyenergy.entity)
-
-        self.nordpool = NordPoolUpdater(hass=self.state_machine, hub=self, is_active=self.hours.price_aware)
+        self.chargecontroller = ChargeControllerFactory.create(self, chargerstates=self.chargertype.chargerstates)
+        self.nordpool = NordPoolUpdater(hass=hass, hub=self, is_active=self.hours.price_aware)
         self.power_canary = PowerCanary(hub=self)
         self.initializer = HubInitializer(self)
+
+        tracker_entities = []
+
+        if not options.peaqev_lite:
+            tracker_entities.append(self.options.powersensor)
+            tracker_entities.append(self.sensors.totalhourlyenergy.entity)
+
         self.chargingtracker_entities = self._set_chargingtracker_entities()
         tracker_entities += self.chargingtracker_entities
         async_track_state_change(hass, tracker_entities, self.state_changed)
@@ -90,7 +102,12 @@ class HomeAssistantHub(Hub):
 
     @property
     def is_initialized(self) -> bool:
-        return self.initializer.check()
+        if hasattr(self, "initializer"):
+            if self.initializer.check():
+                del self.initializer
+                return True
+            return False
+        return True
 
     def _set_chargingtracker_entities(self) -> list:
         ret = [f"sensor.{self.domain}_{ex.nametoid(CHARGERCONTROLLER)}"]
@@ -119,5 +136,12 @@ class HomeAssistantHub(Hub):
                 if old_state is None or old_state != new_state:
                     await self.states.update_sensor(entity_id, new_state.state)
             except Exception as e:
-                msg = f"Unable to handle data: {entity_id} ({e}) {old_state}|{new_state}"
+                msg = f"Unable to handle data-update: {entity_id} {old_state}|{new_state}. Exception: {e}"
                 _LOGGER.error(msg)
+
+    """Composition below here"""
+
+    def get_chargerobject(self) -> str:
+        ret = getattr(self.sensors.chargerobject, "value", "unknown")
+        return ret.lower()
+

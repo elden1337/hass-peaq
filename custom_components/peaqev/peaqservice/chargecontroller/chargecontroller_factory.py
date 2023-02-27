@@ -5,7 +5,7 @@ from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller imp
 
 class ChargeControllerFactory:
     @staticmethod
-    def create(hub) -> IChargeController:
+    def create(hub, charger_states) -> IChargeController:
         if hub.options.peaqev_lite:
-            return ChargeControllerLite(hub)
-        return ChargeController(hub)
+            return ChargeControllerLite(hub, charger_states)
+        return ChargeController(hub, charger_states)

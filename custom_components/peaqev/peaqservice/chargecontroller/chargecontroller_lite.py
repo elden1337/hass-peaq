@@ -8,8 +8,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class ChargeControllerLite(IChargeController):
-    def __init__(self, hub):
-        super().__init__(hub)
+    def __init__(self, hub, charger_states):
+        super().__init__(hub, charger_states)
 
     def _get_status_charging(self) -> ChargeControllerStates:
         if self._hub.sensors.totalhourlyenergy.value >= self._hub.current_peak_dynamic and self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data) is False:

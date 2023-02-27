@@ -9,9 +9,9 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class ChargeController(IChargeController):
-    def __init__(self, hub):
-        super().__init__(hub)
-        self._core = _core(charger_state_translation=self._hub.chargertype.chargerstates)
+    def __init__(self, hub, charger_states):
+        super().__init__(hub, charger_states)
+        self._core = _core(charger_state_translation=charger_states)
 
     @property
     def below_startthreshold(self) -> bool:
