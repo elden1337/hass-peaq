@@ -35,7 +35,7 @@ class ChargeController(IChargeController):
         if all([
             self.above_stopthreshold,
             self._hub.sensors.totalhourlyenergy.value > 0,
-            not self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data)
+            not self._hub.is_free_charge
         ]):
             return ChargeControllerStates.Stop
         return ChargeControllerStates.Start
@@ -47,7 +47,7 @@ class ChargeController(IChargeController):
             if all([
                 any([
                     (self.below_startthreshold and self._hub.sensors.totalhourlyenergy.value != 0),
-                    self._hub.sensors.locale.data.free_charge(self._hub.sensors.locale.data) is True
+                    self._hub.is_free_charge
                 ]),
                 not self._defer_start(self._hub.hours.non_hours)
             ]):

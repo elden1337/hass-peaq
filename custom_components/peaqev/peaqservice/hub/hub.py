@@ -170,6 +170,11 @@ class HomeAssistantHub:
         if hasattr(self, "hours") and self.options.price.price_aware:
             self.hours.prices_tomorrow = val
 
+    @property
+    def is_free_charge(self) -> bool:
+        if hasattr(self.sensors, "locale"):
+            return self.sensors.locale.data.free_charge(self.sensors.locale.data)
+        return False
 
     def get_data(self, *args):
         pass

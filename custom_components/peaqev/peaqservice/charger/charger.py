@@ -95,7 +95,7 @@ class Charger:
         await self._update_charger_state_internal(ChargerStates.Start)
         self.session_active = True
         self.hub.chargecontroller.latest_charger_start = time.time()  #todo: composition
-        if self.hub.chargertype.servicecalls.options.allowupdatecurrent and not self.hub.sensors.locale.data.free_charge(self.hub.sensors.locale.data):  #todo: composition
+        if self.hub.chargertype.servicecalls.options.allowupdatecurrent and not self.hub.is_free_charge:  #todo: composition
             self._hass.async_create_task(self._updatemaxcurrent())
 
     async def _start_charger(self, debugmessage: str = None):
@@ -108,8 +108,7 @@ class Charger:
             else:
                 await self._call_charger(CallTypes.Resume)
             self.hub.chargecontroller.latest_charger_start = time.time()
-            if self.hub.chargertype.servicecalls.options.allowupdatecurrent and not self.hub.sensors.locale.data.free_charge(
-                    self.hub.sensors.locale.data):
+            if self.hub.chargertype.servicecalls.options.allowupdatecurrent and not self.hub.is_free_charge:
                 self._hass.async_create_task(self._updatemaxcurrent())
 
     async def _terminate_charger(self, debugmessage: str = None):

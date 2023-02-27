@@ -86,10 +86,10 @@ class IChargeController:
     def current_charge_permittance_display_model(self) -> str:
         ret = 100
         hour = datetime.now().hour
-        if hour in self._hub.non_hours:  #todo: composition
+        if hour in self._hub.non_hours:
             ret = 0
-        elif hour in self._hub.dynamic_caution_hours.keys():  #todo: composition
-            ret = int(self._hub.dynamic_caution_hours[hour] * 100)  #todo: composition
+        elif hour in self._hub.dynamic_caution_hours.keys():
+            ret = int(self._hub.dynamic_caution_hours.get(hour) * 100)
         return f"{str(ret)}%"
 
     @property
@@ -100,10 +100,10 @@ class IChargeController:
             return self._hub.svk.stopped_string  #todo: composition
         if self._hub.timer.is_override:  #todo: composition
             return self._hub.timer.override_string  #todo: composition
-        if hour in self._hub.non_hours:  #todo: composition
-            ret = self._calculate_stop_len(self._hub.non_hours)  #todo: composition
-        elif hour in self._hub.dynamic_caution_hours.keys():  #todo: composition
-            val = self._hub.dynamic_caution_hours[hour]  #todo: composition
+        if hour in self._hub.non_hours:
+            ret = self._calculate_stop_len(self._hub.non_hours)
+        elif hour in self._hub.dynamic_caution_hours.keys():
+            val = self._hub.dynamic_caution_hours.get(hour)
             ret = f"Charging allowed at {int(val * 100)}% of peak"
         return ret
 
