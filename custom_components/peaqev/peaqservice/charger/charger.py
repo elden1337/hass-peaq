@@ -28,6 +28,7 @@ class Charger:
         self.session = Session(self)
         self.helpers = ChargerHelpers(self)
         self.hub.observer.add("power canary dead", self._pause_charger)
+        self.hub.observer.add("chargecontroller status changed", self.charge)
 
     @property
     def session_active(self) -> bool:
@@ -40,11 +41,11 @@ class Charger:
     @property
     def charger_active(self) -> bool:
         if self._charger.options.powerswitch_controls_charging:
-            return self.hub.sensors.chargerobject_switch.value
+            return self.hub.sensors.chargerobject_switch.value   #todo: composition
         return all(
             [
-                self.hub.sensors.chargerobject_switch.value,
-                self.hub.sensors.carpowersensor.value > 0
+                self.hub.sensors.chargerobject_switch.value,  #todo: composition
+                self.hub.sensors.carpowersensor.value > 0  #todo: composition
             ]
         )
 
@@ -59,8 +60,7 @@ class Charger:
             match self.hub.chargecontroller.status_type:  #todo: composition
                 case ChargeControllerStates.Start:
                     if not self.params.running:
-                        await self._start_charger() if not self.charger_active else await self._overtake_charger(
-                            debugmessage="Detected charger running outside of peaqev-session, overtaking command.")
+                        await self._start_charger() if not self.charger_active else await self._overtake_charger(debugmessage="Detected charger running outside of peaqev-session, overtaking command.")
                 case ChargeControllerStates.Stop | ChargeControllerStates.Idle:
                     if self.charger_active:
                         debugmsg = None
@@ -71,7 +71,6 @@ class Charger:
                     if not self.hub.sensors.charger_done.value:
                         await self._terminate_charger(debugmessage="Going to terminate since the charger is done.")
                 case ChargeControllerStates.Idle:
-                    self.hub.sensors.charger_done.value = False
                     await self._terminate_charger() if self.charger_active else None
                 case _:
                     _LOGGER.debug("Could not match any chargecontroller-state.")

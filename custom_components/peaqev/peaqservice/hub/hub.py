@@ -192,6 +192,14 @@ class HomeAssistantHub:
         if hasattr(self, "hours") and self.options.price.price_aware:
             self.hours.adjusted_average = self.nordpool.average_weekly
 
-    def get_data(self, *args):
-        pass
+    @property
+    def charger_done(self) -> bool:
+        if hasattr(self.sensors, "charger_done"):
+            return self.sensors.charger_done.value
+        return False
+
+    @charger_done.setter
+    def charger_done(self, val) -> None:
+        if hasattr(self.sensors, "charger_done"):
+            self.sensors.charger_done.value = bool(val)
 

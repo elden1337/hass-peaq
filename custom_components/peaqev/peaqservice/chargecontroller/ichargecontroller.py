@@ -113,7 +113,7 @@ class IChargeController:
         if self._hub.sensors.charger_enabled.value is False:  #todo: composition
             update_timer = True
             ret = ChargeControllerStates.Disabled
-        elif self._hub.sensors.charger_done.value is True:  #todo: composition
+        elif self._hub.charger_done:
             ret = ChargeControllerStates.Done
         elif datetime.now().hour in self._hub.non_hours and self._hub.timer.is_override is False:  #todo: composition
             update_timer = True
@@ -133,29 +133,29 @@ class IChargeController:
         ret = ChargeControllerStates.Error
         update_timer = True
 
-        if self._hub.sensors.charger_enabled.value is False:  #todo: composition
+        if not self._hub.sensors.charger_enabled.value:  #todo: composition
             ret = ChargeControllerStates.Disabled
         elif _state in self._charger_states.get(ChargeControllerStates.Done):  #todo: composition
-            self._hub.sensors.charger_done.value = True
+            self._hub.charger_done = True
             ret = ChargeControllerStates.Done
             update_timer = False
         elif _state in self._charger_states.get(ChargeControllerStates.Idle):  #todo: composition
             ret = ChargeControllerStates.Idle
-            if self._hub.sensors.charger_done.value is True:  #todo: composition
-                self._hub.sensors.charger_done.value = False  #todo: composition
+            if self._hub.charger_done:
+                self._hub.charger_done = False
         elif self._hub.sensors.power.killswitch.is_dead:  #todo: composition
             ret = ChargeControllerStates.Error
-        elif _state not in self._charger_states.get(ChargeControllerStates.Idle) and self._hub.sensors.charger_done.value is True:  #todo: composition
+        elif _state not in self._charger_states.get(ChargeControllerStates.Idle) and self._hub.charger_done:  #todo: composition
             ret = ChargeControllerStates.Done
             update_timer = False
-        elif datetime.now().hour in self._hub.non_hours and self._hub.timer.is_override is False:  #todo: composition
+        elif datetime.now().hour in self._hub.non_hours and not self._hub.timer.is_override:  #todo: composition
             ret = ChargeControllerStates.Stop
         elif _state in self._charger_states.get(ChargeControllerStates.Connected):
             ret = self._get_status_connected(_state)
             update_timer = (ret == ChargeControllerStates.Stop)
         elif _state in self._charger_states.get(ChargeControllerStates.Charging):
             ret = self._get_status_charging()
-        if update_timer is True:
+        if update_timer:
             self.latest_charger_start = time.time()
         if ret == ChargeControllerStates.Error:
             _LOGGER.error(f"Chargecontroller returned faulty state. Charger reported {self._hub.get_chargerobject_value()} as state.")
@@ -165,13 +165,13 @@ class IChargeController:
         ret = ChargeControllerStates.Error
         update_timer = True
 
-        if self._hub.sensors.charger_enabled.value is False:
+        if not self._hub.sensors.charger_enabled.value:
             ret = ChargeControllerStates.Disabled
-        elif datetime.now().hour in self._hub.non_hours and self._hub.timer.is_override is False:
+        elif datetime.now().hour in self._hub.non_hours and not self._hub.timer.is_override:
             ret = ChargeControllerStates.Stop
         else:
             ret = ChargeControllerStates.Start
-        if update_timer is True:
+        if update_timer:
             self.latest_charger_start = time.time()
         return ret
 
@@ -183,8 +183,7 @@ class IChargeController:
             return _states_test
         _regular_test = time.time() - self.latest_charger_start > self.DONETIMEOUT
         if _regular_test:
-            self.__debug_log(
-                f"'is_done' reported that charger is Done because of idle-charging for more than {self.DONETIMEOUT} seconds.")
+            self.__debug_log(f"'is_done' reported that charger is Done because of idle-charging for more than {self.DONETIMEOUT} seconds.")
         return _regular_test
 
     def __debug_log(self, message: str):
