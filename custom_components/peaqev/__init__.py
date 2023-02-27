@@ -48,7 +48,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     ci = {}
 
     if options.peaqev_lite:
-        hub = HomeAssistantHub(hass, options, DOMAIN, ci)
+        hub = HomeAssistantHub(hass, options, DOMAIN)
     else:
         ci["powersensor"] = conf.data["name"]
         options.powersensor = conf.data["name"]
@@ -56,7 +56,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
         unsub_options_update_listener = conf.add_update_listener(options_update_listener)
         ci["unsub_options_update_listener"] = unsub_options_update_listener
         hass.data[DOMAIN][conf.entry_id] = ci
-        hub = HomeAssistantHub(hass, options, DOMAIN, ci)
+        hub = HomeAssistantHub(hass, options, DOMAIN)
 
     hass.data[DOMAIN]["hub"] = hub
 

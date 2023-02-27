@@ -7,8 +7,8 @@ from peaqevcore.services.session.session import Session
 
 from custom_components.peaqev.peaqservice.charger.charger_states import ChargerStates
 from custom_components.peaqev.peaqservice.charger.chargerhelpers import ChargerHelpers
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.charger.chargerparams import ChargerParams
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import (
     DOMAIN,
     PARAMS,
@@ -54,9 +54,9 @@ class Charger:
             return
         if self.params.charger_state_mismatch:
             await self._update_charger_state_internal(ChargerStates.Pause)
-        if self.hub.sensors.charger_enabled.value and not self.hub.sensors.power.killswitch.is_dead:
+        if self.hub.sensors.charger_enabled.value and not self.hub.sensors.power.killswitch.is_dead:  #todo: composition
             await self._reset_session()
-            match self.hub.chargecontroller.status_type:
+            match self.hub.chargecontroller.status_type:  #todo: composition
                 case ChargeControllerStates.Start:
                     if not self.params.running:
                         await self._start_charger() if not self.charger_active else await self._overtake_charger(
@@ -78,9 +78,9 @@ class Charger:
         else:
             if self.charger_active and self.params.running:
                 debugmsg = None
-                if self.hub.sensors.power.killswitch.is_dead:
+                if self.hub.sensors.power.killswitch.is_dead: #todo: composition
                     debugmsg = f"Your powersensor has failed to update peaqev for more than {self.hub.sensors.power.killswitch.total_timer} seconds. Therefore charging is paused until it comes alive again."
-                elif self.hub.sensors.charger_enabled.value:
+                elif self.hub.sensors.charger_enabled.value: #todo: composition
                     debugmsg = "Detected charger running outside of peaqev-session, overtaking command and pausing."
                 await self._pause_charger(debugmessage=debugmsg)
 
@@ -94,9 +94,8 @@ class Charger:
         await self._debug_log(debugmessage)
         await self._update_charger_state_internal(ChargerStates.Start)
         self.session_active = True
-        self.hub.chargecontroller.latest_charger_start = time.time()
-        if self.hub.chargertype.servicecalls.options.allowupdatecurrent and not self.hub.sensors.locale.data.free_charge(
-                self.hub.sensors.locale.data):
+        self.hub.chargecontroller.latest_charger_start = time.time()  #todo: composition
+        if self.hub.chargertype.servicecalls.options.allowupdatecurrent and not self.hub.sensors.locale.data.free_charge(self.hub.sensors.locale.data):  #todo: composition
             self._hass.async_create_task(self._updatemaxcurrent())
 
     async def _start_charger(self, debugmessage: str = None):
@@ -125,7 +124,7 @@ class Charger:
     async def _pause_charger(self, debugmessage: str = None):
         await self._debug_log(debugmessage)
         if time.time() - self.params.latest_charger_call > CALL_WAIT_TIMER:
-            if self.hub.sensors.charger_done.value is True or self.hub.chargecontroller.status_type is ChargeControllerStates.Idle:
+            if self.hub.sensors.charger_done.value is True or self.hub.chargecontroller.status_type is ChargeControllerStates.Idle:  #todo: composition
                 await self._terminate_charger()
             else:
                 await self._update_charger_state_internal(ChargerStates.Pause)
@@ -133,9 +132,8 @@ class Charger:
 
     async def _call_charger(self, command: CallTypes):
         calls = self._service_calls.get_call(command)
-        if self.hub.chargertype.servicecalls.options.switch_controls_charger:
-            await self.hub.state_machine.states.async_set(self.hub.chargertype.entities.powerswitch,
-                                                          calls[command])
+        if self.hub.chargertype.servicecalls.options.switch_controls_charger:  #todo: composition
+            await self.hub.state_machine.states.async_set(self.hub.chargertype.entities.powerswitch, calls[command]) #todo: composition
             await self._debug_log(f"Calling charger-outlet")
         else:
             await self._do_service_call(calls[DOMAIN], calls[command], calls["params"])
@@ -176,8 +174,8 @@ class Charger:
             _LOGGER.debug("Peaqev internal charger has been started")
         elif state in [ChargerStates.Stop, ChargerStates.Pause]:
             self.params.disable_current_updates = True
-            charger_state = self.hub.sensors.chargerobject.value.lower()
-            chargingstates = self.hub.chargertype.chargerstates[ChargeControllerStates.Charging]
+            charger_state = self.hub.get_chargerobject_value() #todo: composition
+            chargingstates = self.hub.chargertype.chargerstates[ChargeControllerStates.Charging] #todo: composition
             if charger_state not in chargingstates or len(charger_state) < 1:
                 self.params.running = False
                 self.params.charger_state_mismatch = False

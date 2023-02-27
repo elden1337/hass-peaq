@@ -11,18 +11,19 @@ from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLE
 _LOGGER = logging.getLogger(__name__)
 
 
-class IChargeController():
+class IChargeController:
     DONETIMEOUT = 180
     DEBUGLOG_TIMEOUT = 60
 
-    def __init__(self, hub):
+    def __init__(self, hub, charger_states):
         super().__init__()
         self._hub = hub
         self.name: str = f"{self._hub.hubname} {CHARGERCONTROLLER}"
         self._status_type: ChargeControllerStates = ChargeControllerStates.Idle
         self._initalized: bool = False
-        self._latestchargerstart = time.time()
+        self._latest_charger_start = time.time()
         self._latest_debuglog = 0
+        self._charger_states: dict = charger_states
 
     @property
     def status_type(self) -> ChargeControllerStates:
@@ -35,11 +36,11 @@ class IChargeController():
 
     @property
     def latest_charger_start(self) -> float:
-        return self._latestchargerstart
+        return self._latest_charger_start
 
     @latest_charger_start.setter
     def latest_charger_start(self, val):
-        self._latestchargerstart = val
+        self._latest_charger_start = val
 
     @property
     def status(self) -> str:
@@ -63,7 +64,7 @@ class IChargeController():
     def non_hours_display_model(self) -> list:
         ret = []
         for i in self._hub.non_hours:
-            if i < datetime.now().hour and len(self._hub.hours.prices_tomorrow) > 0:
+            if i < datetime.now().hour and len(self._hub.prices_tomorrow) > 0:
                 ret.append(f"{str(i)}⁺¹")
             elif i >= datetime.now().hour:
                 ret.append(str(i))
@@ -85,24 +86,24 @@ class IChargeController():
     def current_charge_permittance_display_model(self) -> str:
         ret = 100
         hour = datetime.now().hour
-        if hour in self._hub.non_hours:
+        if hour in self._hub.non_hours:  #todo: composition
             ret = 0
-        elif hour in self._hub.dynamic_caution_hours.keys():
-            ret = int(self._hub.dynamic_caution_hours[hour] * 100)
+        elif hour in self._hub.dynamic_caution_hours.keys():  #todo: composition
+            ret = int(self._hub.dynamic_caution_hours[hour] * 100)  #todo: composition
         return f"{str(ret)}%"
 
     @property
     def state_display_model(self) -> str:
         hour = datetime.now().hour
         ret = "Charging allowed"
-        if self._hub.svk.should_stop:
-            return self._hub.svk.stopped_string
-        if self._hub.timer.is_override:
-            return self._hub.timer.override_string
-        if hour in self._hub.non_hours:
-            ret = self._calculate_stop_len(self._hub.non_hours)
-        elif hour in self._hub.dynamic_caution_hours.keys():
-            val = self._hub.dynamic_caution_hours[hour]
+        if self._hub.svk.should_stop:  #todo: composition
+            return self._hub.svk.stopped_string  #todo: composition
+        if self._hub.timer.is_override:  #todo: composition
+            return self._hub.timer.override_string  #todo: composition
+        if hour in self._hub.non_hours:  #todo: composition
+            ret = self._calculate_stop_len(self._hub.non_hours)  #todo: composition
+        elif hour in self._hub.dynamic_caution_hours.keys():  #todo: composition
+            val = self._hub.dynamic_caution_hours[hour]  #todo: composition
             ret = f"Charging allowed at {int(val * 100)}% of peak"
         return ret
 
@@ -110,19 +111,19 @@ class IChargeController():
         ret = ChargeControllerStates.Error
         update_timer = False
 
-        if self._hub.svk.should_stop:
+        if self._hub.svk.should_stop:  #todo: composition
             """interim fix for svk peak hours"""
             update_timer = True
             ret = ChargeControllerStates.Stop
-        elif self._hub.sensors.charger_enabled.value is False:
+        elif self._hub.sensors.charger_enabled.value is False:  #todo: composition
             update_timer = True
             ret = ChargeControllerStates.Disabled
-        elif self._hub.sensors.charger_done.value is True:
+        elif self._hub.sensors.charger_done.value is True:  #todo: composition
             ret = ChargeControllerStates.Done
-        elif datetime.now().hour in self._hub.non_hours and self._hub.timer.is_override is False:
+        elif datetime.now().hour in self._hub.non_hours and self._hub.timer.is_override is False:  #todo: composition
             update_timer = True
             ret = ChargeControllerStates.Stop
-        elif self._hub.chargertype.entities.powerswitch == "on" and self._hub.chargertype.entities.powermeter < 1:
+        elif self._hub.chargertype.entities.powerswitch == "on" and self._hub.chargertype.entities.powermeter < 1:  #todo: composition
             ret = self._get_status_connected()
             update_timer = (ret == ChargeControllerStates.Stop)
         else:
@@ -133,40 +134,39 @@ class IChargeController():
         return ret
 
     def _get_status(self) -> ChargeControllerStates:
+        _state = self._hub.get_chargerobject_value()
         ret = ChargeControllerStates.Error
         update_timer = True
-        _state = self._hub.sensors.chargerobject.value.lower()
 
-        if self._hub.sensors.charger_enabled.value is False:
+        if self._hub.sensors.charger_enabled.value is False:  #todo: composition
             ret = ChargeControllerStates.Disabled
-        elif _state in self._hub.chargertype.chargerstates[ChargeControllerStates.Done]:
+        elif _state in self._charger_states.get(ChargeControllerStates.Done):  #todo: composition
             self._hub.sensors.charger_done.value = True
             ret = ChargeControllerStates.Done
             update_timer = False
-        elif _state in self._hub.chargertype.chargerstates[ChargeControllerStates.Idle]:
+        elif _state in self._charger_states.get(ChargeControllerStates.Idle):  #todo: composition
             ret = ChargeControllerStates.Idle
-            if self._hub.sensors.charger_done.value is True:
-                self._hub.sensors.charger_done.value = False
-        elif self._hub.sensors.power.killswitch.is_dead:
+            if self._hub.sensors.charger_done.value is True:  #todo: composition
+                self._hub.sensors.charger_done.value = False  #todo: composition
+        elif self._hub.sensors.power.killswitch.is_dead:  #todo: composition
             ret = ChargeControllerStates.Error
-        elif _state not in self._hub.chargertype.chargerstates[
-            ChargeControllerStates.Idle] and self._hub.sensors.charger_done.value is True:
+        elif _state not in self._charger_states.get(ChargeControllerStates.Idle) and self._hub.sensors.charger_done.value is True:  #todo: composition
             ret = ChargeControllerStates.Done
             update_timer = False
-        elif datetime.now().hour in self._hub.non_hours and self._hub.timer.is_override is False:
+        elif datetime.now().hour in self._hub.non_hours and self._hub.timer.is_override is False:  #todo: composition
             ret = ChargeControllerStates.Stop
-        elif self._hub.svk.should_stop:
+        elif self._hub.svk.should_stop:  #todo: composition
             """interim fix for svk peak hours"""
             ret = ChargeControllerStates.Stop
-        elif _state in self._hub.chargertype.chargerstates[ChargeControllerStates.Connected]:
+        elif _state in self._charger_states.get(ChargeControllerStates.Connected):
             ret = self._get_status_connected(_state)
             update_timer = (ret == ChargeControllerStates.Stop)
-        elif _state in self._hub.chargertype.chargerstates[ChargeControllerStates.Charging]:
+        elif _state in self._charger_states.get(ChargeControllerStates.Charging):
             ret = self._get_status_charging()
         if update_timer is True:
             self.latest_charger_start = time.time()
         if ret == ChargeControllerStates.Error:
-            _LOGGER.error(f"Chargecontroller returned faulty state. Charger reported {self._hub.sensors.chargerobject.value} as state.")
+            _LOGGER.error(f"Chargecontroller returned faulty state. Charger reported {self._hub.get_chargerobject_value()} as state.")
         return ret
 
     def _get_status_no_charger(self) -> ChargeControllerStates:
@@ -187,8 +187,8 @@ class IChargeController():
         return ret
 
     def _is_done(self, charger_state) -> bool:
-        if len(self._hub.chargertype.chargerstates[ChargeControllerStates.Done]) > 0:
-            _states_test = charger_state in self._hub.chargertype.chargerstates[ChargeControllerStates.Done]
+        if len(self._charger_states.get(ChargeControllerStates.Done)) > 0:
+            _states_test = charger_state in self._charger_states.get(ChargeControllerStates.Done)
             if _states_test:
                 self.__debug_log(f"'is_done' reported that charger is Done based on current charger state")
             return _states_test

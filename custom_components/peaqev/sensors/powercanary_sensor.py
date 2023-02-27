@@ -28,7 +28,7 @@ class PowerCanaryDevice(SensorEntity):
             "identifiers":  {(DOMAIN, self._hub.hub_id, POWERCANARY)},
             "name":         f"{DOMAIN} {POWERCANARY}",
             "sw_version":   1,
-            "model":        f"{self._hub.power_canary.fuse}",
+            "model":        f"{self._hub.power_canary.fuse}",  #todo: composition
             "manufacturer": "Peaq systems",
         }
 
@@ -43,7 +43,7 @@ class PowerCanaryStatusSensor(PowerCanaryDevice):
         name = f"{hub.hubname} {POWERCANARY} status"
         super().__init__(hub, name, entry_id)
         self._hub = hub
-        self._state = self._hub.power_canary.state_string
+        self._state = self._hub.power_canary.state_string  #todo: composition
         self._attr_icon = "mdi:bird"
 
     @property
@@ -51,7 +51,7 @@ class PowerCanaryStatusSensor(PowerCanaryDevice):
         return self._state
 
     def update(self) -> None:
-        self._state = self._hub.power_canary.state_string
+        self._state = self._hub.power_canary.state_string  #todo: composition
 
 
 class PowerCanaryPercentageSensor(PowerCanaryDevice):
@@ -74,10 +74,10 @@ class PowerCanaryPercentageSensor(PowerCanaryDevice):
         return PERCENTAGE
 
     def update(self) -> None:
-        if int(self._hub.power_canary.current_percentage * 100) != self._state:
-            self._state = int(self._hub.power_canary.current_percentage * 100)
-        self._warning = round(self._hub.power_canary.model.warning_threshold * 100, 2)
-        self._cutoff = round(self._hub.power_canary.model.cutoff_threshold * 100, 2)
+        if int(self._hub.power_canary.current_percentage * 100) != self._state:  #todo: composition
+            self._state = int(self._hub.power_canary.current_percentage * 100)  #todo: composition
+        self._warning = round(self._hub.power_canary.model.warning_threshold * 100, 2)  #todo: composition
+        self._cutoff = round(self._hub.power_canary.model.cutoff_threshold * 100, 2)  #todo: composition
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -106,6 +106,6 @@ class PowerCanaryMaxAmpSensor(PowerCanaryDevice):
 
     def update(self) -> None:
         if self.phases == 1:
-            self._state = max(self._hub.power_canary.onephase_amps.values())
+            self._state = max(self._hub.power_canary.onephase_amps.values())  #todo: composition
         if self.phases == 3:
-            self._state = max(self._hub.power_canary.threephase_amps.values())
+            self._state = max(self._hub.power_canary.threephase_amps.values())  #todo: composition

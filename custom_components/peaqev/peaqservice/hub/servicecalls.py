@@ -18,17 +18,17 @@ class ServiceCalls:
         self._hub.sensors.charger_enabled.value = False
         self._hub.sensors.charger_done.value = False
 
-    async def call_override_nonhours(self, hours:int=1):
+    async def call_override_nonhours(self, hours: int = 1):
         """peaqev.override_nonhours"""
         self._hub.timer.update(hours)
 
     async def call_schedule_needed_charge(
             self,
-            charge_amount:float,
-            departure_time:str,
-            schedule_starttime:str = None,
-            override_settings:bool = False
-        ):
+            charge_amount: float,
+            departure_time: str,
+            schedule_starttime: str = None,
+            override_settings: bool = False
+    ):
         dep_time = datetime.strptime(departure_time, '%y-%m-%d %H:%M')
         if schedule_starttime is not None:
             start_time = datetime.strptime(schedule_starttime, '%y-%m-%d %H:%M')

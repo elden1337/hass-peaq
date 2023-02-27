@@ -23,35 +23,37 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._max_charge = None
         self._average_nordpool = None
         self._average_data_current_month = None
+        self._charge_permittance = None
         self._offsets = {}
         self._average_nordpool_data = []
 
     @property
     def state(self):
-        return self._hub.chargecontroller.state_display_model
+        return self._hub.chargecontroller.state_display_model  #todo: composition
 
     @property
     def icon(self) -> str:
         return "mdi:car-clock"
 
     def update(self) -> None:
-        self._nonhours = self._hub.chargecontroller.non_hours_display_model
-        self._dynamic_caution_hours = self._hub.chargecontroller.caution_hours_display_model
-        self._currency = self._hub.nordpool.currency
-        self._offsets = self._hub.hours.offsets if self._hub.hours.offsets is not None else {}
-        self._current_peak = self._hub.sensors.current_peak.value
-        self._avg_cost = f"{self._hub.hours.get_average_kwh_price()} {self._currency}"
-        self._max_charge = f"{self._hub.hours.get_total_charge()} kWh"
-        self._average_nordpool = f"{self._hub.nordpool.get_average(7)} {self._currency}"
-        self._average_data_current_month = f"{self._hub.nordpool.average_month} {self._currency}"
-        self._average_nordpool_data = self._hub.nordpool.average_data
+        self._nonhours = self._hub.chargecontroller.non_hours_display_model  #todo: composition
+        self._dynamic_caution_hours = self._hub.chargecontroller.caution_hours_display_model  #todo: composition
+        self._currency = self._hub.nordpool.currency  #todo: composition
+        self._offsets = self._hub.hours.offsets if self._hub.hours.offsets is not None else {}  #todo: composition
+        self._current_peak = self._hub.sensors.current_peak.value  #todo: composition
+        self._avg_cost = f"{self._hub.hours.get_average_kwh_price()} {self._currency}"  #todo: composition
+        self._max_charge = f"{self._hub.hours.get_total_charge()} kWh"  #todo: composition
+        self._average_nordpool = f"{self._hub.nordpool.get_average(7)} {self._currency}"  #todo: composition
+        self._average_data_current_month = f"{self._hub.nordpool.average_month} {self._currency}"  #todo: composition
+        self._average_nordpool_data = self._hub.nordpool.average_data  #todo: composition
+        self._charge_permittance = self._hub.chargecontroller.current_charge_permittance_display_model  #todo: composition
 
     @property
     def extra_state_attributes(self) -> dict:
         attr_dict = {
             "Non hours": self._nonhours,
             "Caution hours": self._dynamic_caution_hours,
-            "Current hour charge permittance": self._hub.chargecontroller.current_charge_permittance_display_model,
+            "Current hour charge permittance": self._charge_permittance,
             "Avg price per kWh": self._avg_cost,
             "Max charge amount": self._max_charge,
             "Nordpool average 7 days": self._average_nordpool,

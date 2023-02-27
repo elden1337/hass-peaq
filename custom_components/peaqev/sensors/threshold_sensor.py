@@ -11,7 +11,7 @@ class PeaqThresholdSensor(PowerDevice):
         super().__init__(hub, name, entry_id)
 
         self._attr_name = name
-        self._state = self._hub.prediction.predictedpercentageofpeak
+        self._state = self._hub.prediction.predictedpercentageofpeak  #todo: composition
         self._start_threshold = None
         self._stop_threshold = None
 
@@ -28,9 +28,9 @@ class PeaqThresholdSensor(PowerDevice):
         return "mdi:chart-bell-curve"
 
     def update(self) -> None:
-        self._start_threshold = self._hub.threshold.start
-        self._stop_threshold = self._hub.threshold.stop
-        self._state = self._hub.prediction.predictedpercentageofpeak
+        self._start_threshold = self._hub.threshold.start  #todo: composition
+        self._stop_threshold = self._hub.threshold.stop  #todo: composition
+        self._state = self._hub.prediction.predictedpercentageofpeak  #todo: composition
 
     @property
     def extra_state_attributes(self) -> dict:

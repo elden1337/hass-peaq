@@ -15,7 +15,7 @@ class StateChanges(IStateChanges):
     async def _update_sensor(self, entity, value) -> bool:
         update_session = False
         match entity:
-            case self._hub.configpower_entity:
+            case self._hub.options.powersensor:
                 self._hub.sensors.power.update(
                     carpowersensor_value=self._hub.sensors.carpowersensor.value,
                     config_sensor_value=value
@@ -36,7 +36,7 @@ class StateChanges(IStateChanges):
                 self._hub.power_canary.total_power = self._hub.sensors.power.total.value
                 await self._handle_outlet_updates()
             case self._hub.sensors.chargerobject.entity:
-                self._hub.sensors.chargerobject.value = value
+                self._hub.set_chargerobject_value(value)
             case self._hub.sensors.chargerobject_switch.entity:
                 await self._update_chargerobject_switch(value)
             case self._hub.sensors.totalhourlyenergy.entity:
@@ -52,16 +52,16 @@ class StateChanges(IStateChanges):
     
     async def _handle_outlet_updates(self):
         if self._hub.chargertype.domainname is ChargerType.Outlet:
-            old_state = self._hub.sensors.chargerobject.value
+            old_state = self._hub.get_chargerobject_value()
             if time.time() - self.latest_outlet_update < 10:
                 return
             self.latest_outlet_update = time.time()
             if self._hub.sensors.carpowersensor.value > 0:
-                self._hub.sensors.chargerobject.value = "charging"
+                self._hub.set_chargerobject_value("charging")
             else:
-                self._hub.sensors.chargerobject.value = "connected"
-            if old_state != self._hub.sensors.chargerobject.value:
-                _LOGGER.debug(f"smartoutlet is now {self._hub.sensors.chargerobject.value}")
+                self._hub.set_chargerobject_value("connected")
+            if old_state != self._hub.get_chargerobject_value():
+                _LOGGER.debug(f"smartoutlet is now {self._hub.get_chargerobject_value()}")
 
 
 class StateChangesLite(IStateChanges):
@@ -79,7 +79,7 @@ class StateChangesLite(IStateChanges):
                     await self._handle_outlet_updates()
                     self._hub.sensors.chargerobject_switch.updatecurrent()
             case self._hub.sensors.chargerobject.entity:
-                self._hub.sensors.chargerobject.value = value
+                self._hub.set_chargerobject_value(value)
             case self._hub.sensors.chargerobject_switch.entity:
                 await self._update_chargerobject_switch(value)
             case self._hub.sensors.current_peak.entity:
@@ -92,16 +92,16 @@ class StateChangesLite(IStateChanges):
     
     async def _handle_outlet_updates(self):
         if self._hub.chargertype.domainname is ChargerType.Outlet:
-            old_state = self._hub.sensors.chargerobject.value
+            old_state = self._hub.get_chargerobject_value()
             if time.time() - self.latest_outlet_update < 10:
                 return
             self.latest_outlet_update = time.time()
             if self._hub.sensors.carpowersensor.value > 0:
-                self._hub.sensors.chargerobject.value = "charging"
+                self._hub.set_chargerobject_value("charging")
             else:
-                self._hub.sensors.chargerobject.value = "connected"
-            if old_state != self._hub.sensors.chargerobject.value:
-                _LOGGER.debug(f"smartoutlet is now {self._hub.sensors.chargerobject.value}")
+                self._hub.set_chargerobject_value("connected")
+            if old_state != self._hub.get_chargerobject_value():
+                _LOGGER.debug(f"smartoutlet is now {self._hub.get_chargerobject_value()}")
 
 
 class StateChangesNoCharger(IStateChanges):
@@ -112,7 +112,7 @@ class StateChangesNoCharger(IStateChanges):
     async def _update_sensor(self, entity, value) -> bool:
         update_session = False
         match entity:
-            case self._hub.configpower_entity:
+            case self._hub.options.powersensor:
                 self._hub.sensors.power.update(
                     carpowersensor_value=0,
                     config_sensor_value=value

@@ -45,7 +45,7 @@ class SensorBase(SensorEntity):
             "identifiers": {(DOMAIN, self._hub.hub_id)},
             "name": f"{DOMAIN} {HUB}",
             "sw_version": 1,
-            "model": f"{self._hub.sensors.locale.type} ({self._hub.chargertype.type.value})",
+            "model": f"{self._hub.sensors.locale.type} ({self._hub.chargertype.type.value})",  #todo: composition
             "manufacturer": "Peaq systems",
         }
 
