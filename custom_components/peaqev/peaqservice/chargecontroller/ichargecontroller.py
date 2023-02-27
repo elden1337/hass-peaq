@@ -32,6 +32,7 @@ class IChargeController:
     @status_type.setter
     def status_type(self, val) -> None:
         if val != self._status_type:
+            self._hub.observer.broadcast("chargecontroller status changed")
             self._status_type = val
 
     @property

@@ -27,10 +27,9 @@ class Observer:
             _expiration = time.time() + timeout
         if (command, _expiration) not in self._broadcast_queue:
             self._broadcast_queue.append((command, _expiration))
-        if self.hub.is_initialized:
-            for q in self._broadcast_queue:
-                if q[0] in self._subscribers.keys():
-                    self._dequeue_and_broadcast(q)
+        for q in self._broadcast_queue:
+            if q[0] in self._subscribers.keys():
+                self._dequeue_and_broadcast(q)
 
     def _ok_to_broadcast(self, command) -> bool:
         if command not in self._wait_queue.keys():
