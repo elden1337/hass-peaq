@@ -8,9 +8,9 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
 from custom_components.peaqev.peaqservice.chargertypes.types.chargeamps import ChargeAmps
 from custom_components.peaqev.peaqservice.chargertypes.types.easee import Easee
 from custom_components.peaqev.peaqservice.chargertypes.types.garowallbox import GaroWallbox
+from custom_components.peaqev.peaqservice.chargertypes.types.no_charger import NoCharger
 from custom_components.peaqev.peaqservice.chargertypes.types.outlet import SmartOutlet
 from custom_components.peaqev.peaqservice.chargertypes.types.zaptec import Zaptec
-from custom_components.peaqev.peaqservice.chargertypes.types.no_charger import NoCharger
 
 _LOGGER = logging.getLogger(__name__)
 
