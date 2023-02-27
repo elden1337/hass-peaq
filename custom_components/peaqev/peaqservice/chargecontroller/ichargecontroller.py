@@ -97,8 +97,6 @@ class IChargeController:
     def state_display_model(self) -> str:
         hour = datetime.now().hour
         ret = "Charging allowed"
-        if self._hub.svk.should_stop:  #todo: composition
-            return self._hub.svk.stopped_string  #todo: composition
         if self._hub.timer.is_override:  #todo: composition
             return self._hub.timer.override_string  #todo: composition
         if hour in self._hub.non_hours:
@@ -112,11 +110,7 @@ class IChargeController:
         ret = ChargeControllerStates.Error
         update_timer = False
 
-        if self._hub.svk.should_stop:  #todo: composition
-            """interim fix for svk peak hours"""
-            update_timer = True
-            ret = ChargeControllerStates.Stop
-        elif self._hub.sensors.charger_enabled.value is False:  #todo: composition
+        if self._hub.sensors.charger_enabled.value is False:  #todo: composition
             update_timer = True
             ret = ChargeControllerStates.Disabled
         elif self._hub.sensors.charger_done.value is True:  #todo: composition
@@ -156,9 +150,6 @@ class IChargeController:
             update_timer = False
         elif datetime.now().hour in self._hub.non_hours and self._hub.timer.is_override is False:  #todo: composition
             ret = ChargeControllerStates.Stop
-        elif self._hub.svk.should_stop:  #todo: composition
-            """interim fix for svk peak hours"""
-            ret = ChargeControllerStates.Stop
         elif _state in self._charger_states.get(ChargeControllerStates.Connected):
             ret = self._get_status_connected(_state)
             update_timer = (ret == ChargeControllerStates.Stop)
@@ -177,9 +168,6 @@ class IChargeController:
         if self._hub.sensors.charger_enabled.value is False:
             ret = ChargeControllerStates.Disabled
         elif datetime.now().hour in self._hub.non_hours and self._hub.timer.is_override is False:
-            ret = ChargeControllerStates.Stop
-        elif self._hub.svk.should_stop:
-            """interim fix for svk peak hours"""
             ret = ChargeControllerStates.Stop
         else:
             ret = ChargeControllerStates.Start

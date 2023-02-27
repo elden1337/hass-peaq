@@ -27,7 +27,6 @@ from custom_components.peaqev.peaqservice.hub.hub_initializer import HubInitiali
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import NordPoolUpdater
 from custom_components.peaqev.peaqservice.hub.observer import Observer
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
-from custom_components.peaqev.peaqservice.hub.svk import svk
 from custom_components.peaqev.peaqservice.power_canary.power_canary import PowerCanary
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
@@ -67,7 +66,6 @@ class HomeAssistantHub:
 
         self.servicecalls = ServiceCalls(self)
         self.states = StateChangesFactory.create(self)
-        self.svk = svk(self)  # interim solution for svk peak hours
         self.chargecontroller = ChargeControllerFactory.create(self, charger_states=self.chargertype.chargerstates)
         self.nordpool = NordPoolUpdater(hass=hass, hub=self, is_active=self.hours.price_aware)
         self.power_canary = PowerCanary(hub=self)
