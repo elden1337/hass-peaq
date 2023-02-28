@@ -66,10 +66,12 @@ Chargeamps| [hass-chargeamps](https://github.com/kirei/hass-chargeamps) | Yes | 
 Easee| [easee-hass](https://github.com/fondberg/easee_hass/)       | Yes | Robot | _Turn off all smart charging before using peaqev_
 Zaptec| [zaptec](https://github.com/custom-components/zaptec)       | No | Go | _Currently in beta and may not work_
 Smart outlet| -                                                           | No | | _Stability depends on the outlet used_
+No charger| - | No | | _For using the sensors and logic_
 
 
 #### Price-aware:
 - `Price-aware charging` - Check this to calculate the cheapest hours from Nordpool (requires [Nordpool](https://github.com/custom-components/nordpool)). Non- and Caution hours below here will be ignored
+- `Dynamic top price` - If checked, the absolute top price for charging will be calculated by the monthly average from Nordpool (current month)
 - `Absolute top price` - The limit (if any) where your charger should be stopped, regardless of the hour algorithm
 - `Min price` - The lower limit (if any) where charging will always be permitted (must be lower than top price if set)
 - `Caution hour type` - Choose to what extent you would like Peaqev to hold back during caution hours. *Suave > Aggressive* 
@@ -81,6 +83,8 @@ Smart outlet| -                                                           | No |
 #### Months:
 - `Monthly allowed peak` - Needs to be set in order to determine a minimum allowed peak. In the beginning of each month this is necessary to be able to charge at all. *Format is in kW. See examples below*
 
+#### Experimental and extra options:
+- `Main fuse` - (optional) Pick your main fuse setup to allow peaqev to detect and stop charging if consumption is about to breach the limit
 
 Examples for hourly peak-shaving. A tip is to look at your current peaks and set it to about 50-70% of those.
 
