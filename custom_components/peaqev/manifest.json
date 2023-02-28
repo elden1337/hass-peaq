@@ -26,5 +26,5 @@
     "requirements": [
       "peaqevcore==12.2.1"
     ],
-    "version": "2.7.0b2"
+    "version": "2.7.0"
 }
