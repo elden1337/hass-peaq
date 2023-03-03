@@ -34,9 +34,10 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
 
     @property
     def extra_state_attributes(self) -> dict:
-        attr_dict = {}
-        attr_dict["observed_peak"] = float(self._observed_peak)
-        attr_dict["peaks_dictionary"] = self.set_peaksdict()
+        attr_dict = {
+            "observed_peak": float(self._observed_peak),
+            "peaks_dictionary": self.set_peaksdict()
+        }
         return attr_dict
 
     @property

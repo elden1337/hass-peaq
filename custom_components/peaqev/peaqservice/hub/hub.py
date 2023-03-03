@@ -154,28 +154,26 @@ class HomeAssistantHub:
 
     @property
     def prices(self) -> list:
-        if hasattr(self, "hours") and self.options.price.price_aware:
+        if self.options.price.price_aware:
             return self.hours.prices
         return []
 
     @prices.setter
     def prices(self, val) -> None:
-        if hasattr(self, "hours") and self.options.price.price_aware:
+        if self.options.price.price_aware:
+            _LOGGER.debug(f"setting today's prices with: {val}")
             self.hours.prices = val
 
     @property
     def prices_tomorrow(self) -> list:
-        if hasattr(self, "hours") and self.options.price.price_aware:
+        if self.options.price.price_aware:
             return self.hours.prices_tomorrow
         return []
 
-    def _update_prices(self) -> None:
-        self.prices = self.nordpool.prices
-        self.prices_tomorrow = self.nordpool.prices_tomorrow
-
     @prices_tomorrow.setter
     def prices_tomorrow(self, val) -> None:
-        if hasattr(self, "hours") and self.options.price.price_aware:
+        if self.options.price.price_aware:
+            _LOGGER.debug(f"setting tomorrow's prices with: {val}")
             self.hours.prices_tomorrow = val
 
     @property
@@ -183,6 +181,10 @@ class HomeAssistantHub:
         if hasattr(self.sensors, "locale"):
             return self.sensors.locale.data.free_charge(self.sensors.locale.data)
         return False
+
+    def _update_prices(self) -> None:
+        self.prices = self.nordpool.prices
+        self.prices_tomorrow = self.nordpool.prices_tomorrow
 
     def _update_average_monthly_price(self) -> None:
         if hasattr(self, "hours") and self.options.price.price_aware:

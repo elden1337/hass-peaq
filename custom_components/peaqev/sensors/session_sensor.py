@@ -72,6 +72,7 @@ class PeaqSessionSensor(SessionDevice, RestoreEntity):
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
         if state:
+            _LOGGER.debug("last state of %s = %s", self._attr_name, state)
             self._state = state.state
             self._hub.charger.session.core.average_data.unpack(state.attributes.get('average_weekly', 50))
         else:

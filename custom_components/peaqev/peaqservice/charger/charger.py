@@ -73,7 +73,7 @@ class Charger:
                 case ChargeControllerStates.Idle:
                     await self._terminate_charger() if self.charger_active else None
                 case _:
-                    _LOGGER.debug("Could not match any chargecontroller-state.")
+                    _LOGGER.debug(f"Could not match any chargecontroller-state. chargecontroller reports: {self.hub.chargecontroller.status_type}")
         else:
             if self.charger_active and self.params.running:
                 debugmsg = None
