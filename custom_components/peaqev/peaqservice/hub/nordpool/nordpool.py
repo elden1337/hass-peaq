@@ -102,7 +102,6 @@ class NordPoolUpdater:
 
     def _update_set_prices(self) -> bool:
         ret = False
-        _LOGGER.debug(f"today: hoursp: {self._hub.hours.prices}, model: {self.model.prices}")
         if self._hub.hours.prices != self.model.prices:
             self._hub.hours.prices = self.model.prices
             ret = True
@@ -111,6 +110,8 @@ class NordPoolUpdater:
             ret = True
         if len(self.model.average_data) >= 7 and self._hub.hours.adjusted_average != self.get_average(7):
             self._hub.hours.adjusted_average = self.get_average(7)
+        if self._hub.options.price.dynamic_top_price:
+            self._hub.hours.update_top_price(self.model.average_month)
         return ret
 
     def _setup_nordpool(self):
