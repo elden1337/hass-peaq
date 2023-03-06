@@ -187,7 +187,7 @@ class HomeAssistantHub:
         self.prices_tomorrow = self.nordpool.prices_tomorrow
 
     def _update_average_monthly_price(self) -> None:
-        if hasattr(self, "hours") and self.options.price.price_aware:
+        if self.options.price.price_aware:
             self.hours.update_top_price(self.nordpool.average_month)
 
     def _update_average_weekly_price(self) -> None:
