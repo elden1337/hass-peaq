@@ -73,6 +73,9 @@ class Charger:
                 case ChargeControllerStates.Idle:
                     self.hub.sensors.charger_done.value = False
                     await self._terminate_charger() if self.charger_active else None
+                case ChargeControllerStates.Disabled:
+                    if self.charger_active:
+                        await self._terminate_charger()
                 case _:
                     _LOGGER.debug("Could not match any chargecontroller-state.")
         else:
