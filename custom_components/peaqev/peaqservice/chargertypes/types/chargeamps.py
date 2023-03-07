@@ -20,6 +20,9 @@ from custom_components.peaqev.peaqservice.util.constants import (
 _LOGGER = logging.getLogger(__name__)
 # docs: https://github.com/kirei/hass-chargeamps
 
+CHARGEPOINT = "chargepoint"
+CONNECTOR = "connector"
+
 
 class ChargeAmps(ChargerBase):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
@@ -83,15 +86,15 @@ class ChargeAmps(ChargerBase):
     @property
     def call_on(self) -> CallType:
         return CallType("enable", {
-            "chargepoint": self._chargerid,
-            "connector":   self._chargeamps_connector
+            CHARGEPOINT: self._chargerid,
+            CONNECTOR:   self._chargeamps_connector
         })
 
     @property
     def call_off(self) -> CallType:
         return CallType("disable", {
-            "chargepoint": self._chargerid,
-            "connector":   self._chargeamps_connector
+            CHARGEPOINT: self._chargerid,
+            CONNECTOR:   self._chargeamps_connector
         })
 
     @property
@@ -105,7 +108,7 @@ class ChargeAmps(ChargerBase):
     @property
     def call_update_current(self) -> CallType:
         return CallType("set_max_current", {
-            CHARGER:   "chargepoint",
+            CHARGER:   CHARGEPOINT,
             CHARGERID: self._chargerid,
             CURRENT:   "max_current"
         })

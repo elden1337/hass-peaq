@@ -9,6 +9,10 @@ from custom_components.peaqev.peaqservice.util.constants import (
 )
 
 
+async def _checkchargerparams(calls) -> bool:
+    return len(calls[PARAMS][CHARGER]) > 0 and len(calls[PARAMS][CHARGERID]) > 0
+
+
 class ChargerHelpers:
     def __init__(self, charger):
         self.c = charger
@@ -16,7 +20,7 @@ class ChargerHelpers:
     async def setchargerparams(self, calls, ampoverride: int = 0) -> dict:
         amps = ampoverride if ampoverride >= 6 else self.c.hub.threshold.allowedcurrent  # todo: composition
         serviceparams = {}
-        if await self._checkchargerparams(calls):
+        if await _checkchargerparams(calls):
             serviceparams[calls[PARAMS][CHARGER]] = calls[PARAMS][CHARGERID]
         serviceparams[calls[PARAMS][CURRENT]] = amps
         return serviceparams
@@ -49,9 +53,6 @@ class ChargerHelpers:
             self.c.params.disable_current_updates
         ]
         return not any(ret)
-
-    async def _checkchargerparams(self, calls) -> bool:
-        return len(calls[PARAMS][CHARGER]) > 0 and len(calls[PARAMS][CHARGERID]) > 0
 
     def _currents_match(self) -> bool:
         return self.c.hub.sensors.chargerobject_switch.current == self.c.hub.threshold.allowedcurrent  # todo: composition

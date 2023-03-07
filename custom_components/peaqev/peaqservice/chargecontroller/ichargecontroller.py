@@ -20,7 +20,7 @@ class IChargeController:
         self._hub = hub
         self.name: str = f"{self._hub.hubname} {CHARGERCONTROLLER}"
         self._status_type: ChargeControllerStates = ChargeControllerStates.Idle
-        self._initalized: bool = False
+        self._is_initalized: bool = False
         self._latest_charger_start = time.time()
         self._latest_debuglog = 0
         self._charger_states: dict = charger_states
@@ -46,11 +46,8 @@ class IChargeController:
     @property
     def status(self) -> str:
         ret = ChargeControllerStates.Error
-        if not self._hub.is_initialized:
+        if not self.is_initialized:
             return "Hub not ready. Check logs!"
-        if self._hub.is_initialized and not self._initalized:
-            self._initalized = True
-            self.__debug_log("Chargecontroller is initialized and ready to work!")
         match self._hub.chargertype.type:
             case ChargerType.Outlet:
                 ret = self._get_status_outlet()
@@ -60,6 +57,15 @@ class IChargeController:
                 ret = self._get_status()
         self._status_type = ret
         return ret.name
+
+    @property
+    def is_initialized(self) -> bool:
+        if not self._hub.is_initialized:
+            return False
+        if self._hub.is_initialized and not self._is_initalized:
+            self._is_initalized = True
+            self.__debug_log("Chargecontroller is initialized and ready to work!")
+        return True
 
     @property
     def non_hours_display_model(self) -> list:
@@ -135,17 +141,17 @@ class IChargeController:
 
         if not self._hub.sensors.charger_enabled.value:  #todo: composition
             ret = ChargeControllerStates.Disabled
-        elif _state in self._charger_states.get(ChargeControllerStates.Done):  #todo: composition
+        elif _state in self._charger_states.get(ChargeControllerStates.Done):
             self._hub.charger_done = True
             ret = ChargeControllerStates.Done
             update_timer = False
-        elif _state in self._charger_states.get(ChargeControllerStates.Idle):  #todo: composition
+        elif _state in self._charger_states.get(ChargeControllerStates.Idle):
             ret = ChargeControllerStates.Idle
             if self._hub.charger_done:
                 self._hub.charger_done = False
         elif self._hub.sensors.power.killswitch.is_dead:  #todo: composition
             ret = ChargeControllerStates.Error
-        elif _state not in self._charger_states.get(ChargeControllerStates.Idle) and self._hub.charger_done:  #todo: composition
+        elif _state not in self._charger_states.get(ChargeControllerStates.Idle) and self._hub.charger_done:
             ret = ChargeControllerStates.Done
             update_timer = False
         elif datetime.now().hour in self._hub.non_hours and not self._hub.timer.is_override:  #todo: composition
@@ -181,13 +187,13 @@ class IChargeController:
             if _states_test:
                 self.__debug_log(f"'is_done' reported that charger is Done based on current charger state")
             return _states_test
-        _regular_test = time.time() - self.latest_charger_start > self.DONETIMEOUT
+        _regular_test = time.time() - self.latest_charger_start > DONETIMEOUT
         if _regular_test:
-            self.__debug_log(f"'is_done' reported that charger is Done because of idle-charging for more than {self.DONETIMEOUT} seconds.")
+            self.__debug_log(f"'is_done' reported that charger is Done because of idle-charging for more than {DONETIMEOUT} seconds.")
         return _regular_test
 
     def __debug_log(self, message: str):
-        if time.time() - self._latest_debuglog > self.DEBUGLOG_TIMEOUT:
+        if time.time() - self._latest_debuglog > DEBUGLOG_TIMEOUT:
             _LOGGER.debug(message)
             self._latest_debuglog = time.time()
 
