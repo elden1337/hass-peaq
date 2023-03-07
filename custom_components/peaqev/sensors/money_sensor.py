@@ -57,7 +57,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "Avg price per kWh": self._avg_cost,
             "Max charge amount": self._max_charge,
             "Nordpool average 7 days": self._average_nordpool,
-            "Nordpool average this month": self._average_data_current_month,
+            "nordpool_average_this_month": self._average_data_current_month,
             "Nordpool average data": self._average_nordpool_data,
             "offsets": self._offsets
         }
