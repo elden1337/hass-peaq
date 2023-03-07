@@ -138,30 +138,38 @@ class IChargeController():
         _state = self._hub.sensors.chargerobject.value.lower()
 
         if self._hub.sensors.charger_enabled.value is False:
+            _LOGGER.debug("first case")
             ret = ChargeControllerStates.Disabled
         elif _state in self._hub.chargertype.chargerstates[ChargeControllerStates.Done]:
+            _LOGGER.debug("second case")
             self._hub.sensors.charger_done.value = True
             ret = ChargeControllerStates.Done
             update_timer = False
         elif _state in self._hub.chargertype.chargerstates[ChargeControllerStates.Idle]:
+            _LOGGER.debug("third case")
             ret = ChargeControllerStates.Idle
             if self._hub.sensors.charger_done.value is True:
                 self._hub.sensors.charger_done.value = False
         elif self._hub.sensors.power.killswitch.is_dead:
+            _LOGGER.debug("fourth case")
             ret = ChargeControllerStates.Error
-        elif _state not in self._hub.chargertype.chargerstates[
-            ChargeControllerStates.Idle] and self._hub.sensors.charger_done.value is True:
+        elif _state not in self._hub.chargertype.chargerstates[ChargeControllerStates.Idle] and self._hub.sensors.charger_done.value is True:
+            _LOGGER.debug("fifth case")
             ret = ChargeControllerStates.Done
             update_timer = False
         elif datetime.now().hour in self._hub.non_hours and self._hub.timer.is_override is False:
+            _LOGGER.debug("sixth case")
             ret = ChargeControllerStates.Stop
         elif self._hub.svk.should_stop:
+            _LOGGER.debug("seventh case")
             """interim fix for svk peak hours"""
             ret = ChargeControllerStates.Stop
         elif _state in self._hub.chargertype.chargerstates[ChargeControllerStates.Connected]:
+            _LOGGER.debug("eigth case")
             ret = self._get_status_connected(_state)
             update_timer = (ret == ChargeControllerStates.Stop)
         elif _state in self._hub.chargertype.chargerstates[ChargeControllerStates.Charging]:
+            _LOGGER.debug("ninth case")
             ret = self._get_status_charging()
         if update_timer is True:
             self.latest_charger_start = time.time()
