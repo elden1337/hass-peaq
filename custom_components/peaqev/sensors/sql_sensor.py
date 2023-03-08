@@ -28,9 +28,9 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
         return float(self._charged_peak)
 
     def update(self) -> None:
-        self._charged_peak = self._hub.sensors.locale.data.query_model.charged_peak  #todo: composition
-        self._peaks_dict = self._hub.sensors.locale.data.query_model.peaks.export_peaks  #todo: composition
-        self._observed_peak = self._hub.sensors.locale.data.query_model.observed_peak  #todo: composition
+        self._charged_peak = self.hub.sensors.locale.data.query_model.charged_peak  #todo: composition
+        self._peaks_dict = self.hub.sensors.locale.data.query_model.peaks.export_peaks  #todo: composition
+        self._observed_peak = self.hub.sensors.locale.data.query_model.observed_peak  #todo: composition
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -51,7 +51,7 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
+        return {"identifiers": {(DOMAIN, self.hub.hub_id)}}
 
     def set_peaksdict(self) -> dict:
         ret = {}
@@ -66,7 +66,7 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
             _LOGGER.debug("last state of %s = %s", self._name, state)
             self._charged_peak = state.state
             self._peaks_dict = state.attributes.get('peaks_dictionary', 50)
-            self._hub.sensors.locale.data.query_model.peaks.set_init_dict(self._peaks_dict)  #todo: composition
+            self.hub.sensors.locale.data.query_model.peaks.set_init_dict(self._peaks_dict)  #todo: composition
             self._observed_peak = state.attributes.get('observed_peak', 50)
         else:
             self._charged_peak = 0

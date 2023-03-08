@@ -23,8 +23,8 @@ PERIODS = ["hourly"]
 class PeaqUtilitySensor(UtilityMeterSensor):
     def __init__(self, hub, sensor: any, meter_type: TimePeriods, meter_offset: str, entry_id: any):
         self._entry_id = entry_id
-        self._hub = hub
-        self._attr_name = f"{self._hub.hubname} {sensor} {meter_type.value.lower()}"
+        self.hub = hub
+        self._attr_name = f"{self.hub.hubname} {sensor} {meter_type.value.lower()}"
         self._unit_of_measurement = "kWh"
         entity = f"sensor.{DOMAIN.lower()}_{sensor}"
 
@@ -49,4 +49,4 @@ class PeaqUtilitySensor(UtilityMeterSensor):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._hub.hub_id, POWERCONTROLS)}}
+        return {"identifiers": {(DOMAIN, self.hub.hub_id, POWERCONTROLS)}}

@@ -53,7 +53,7 @@ class HomeAssistantHub:
             input_type=self.options.charger.chargertype,
             options=self.options
         )
-        self.charger = Charger(hub=self, hass=hass, chargertype=self.chargertype)
+        self.charger = Charger(hub=self, chargertype=self.chargertype)
         self.sensors = HubSensorsFactory.create(self.options)
         self.timer: Timer = Timer()
         self.hours: Hours = HourselectionFactory.create(self)
@@ -67,7 +67,7 @@ class HomeAssistantHub:
         self.servicecalls = ServiceCalls(self)
         self.states = StateChangesFactory.create(self)
         self.chargecontroller = ChargeControllerFactory.create(self, charger_states=self.chargertype.chargerstates)
-        self.nordpool = NordPoolUpdater(hass=hass, hub=self, is_active=self.hours.price_aware)
+        self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)
         self.power_canary = PowerCanary(hub=self)
         self.initializer = HubInitializer(self)
 

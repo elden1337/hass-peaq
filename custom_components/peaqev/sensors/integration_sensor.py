@@ -17,9 +17,9 @@ class PeaqIntegrationSensor(IntegrationSensor):
     device_class = SensorDeviceClass.ENERGY
     def __init__(self, hub, sensor, name, entry_id):
         self._entry_id = entry_id
-        self._hub = hub
-        self._attr_name = f"{self._hub.hubname} {name}"
-        self._attr_unique_id = f"{DOMAIN}_{self._hub.hub_id}_{self._attr_name}"
+        self.hub = hub
+        self._attr_name = f"{self.hub.hubname} {name}"
+        self._attr_unique_id = f"{DOMAIN}_{self.hub.hub_id}_{self._attr_name}"
         self._unit_of_measurement = "kWh"
 
         super().__init__(
@@ -40,4 +40,4 @@ class PeaqIntegrationSensor(IntegrationSensor):
     @property
     def device_info(self):
         """Return information to link this entity with the correct device."""
-        return {"identifiers": {(DOMAIN, self._hub.hub_id, POWERCONTROLS)}}
+        return {"identifiers": {(DOMAIN, self.hub.hub_id, POWERCONTROLS)}}

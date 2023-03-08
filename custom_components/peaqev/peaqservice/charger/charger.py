@@ -25,8 +25,7 @@ async def _debug_log(debugmessage: str = None) -> None:
 
 
 class Charger:
-    def __init__(self, hub, hass, chargertype):
-        self._hass = hass
+    def __init__(self, hub, chargertype):
         self.hub = hub
         self._charger = chargertype
         self.params = ChargerParams()
@@ -76,7 +75,7 @@ class Charger:
                             debugmsg = "Detected charger running outside of peaqev-session, overtaking command and pausing."
                         await self._pause_charger(debugmsg)
                 case ChargeControllerStates.Done:
-                    if not self.hub.sensors.charger_done.value:
+                    if not self.hub.charger_done:
                         await self._terminate_charger(debugmessage="Going to terminate since the charger is done.")
                 case ChargeControllerStates.Idle:
                     await self._terminate_charger() if self.charger_active else None
@@ -120,22 +119,21 @@ class Charger:
         #is this call really needed?
         self.hub.chargecontroller.latest_charger_start = time.time()  # todo: composition
         if self._charger.servicecalls.options.allowupdatecurrent and not self.hub.is_free_charge:
-            self._hass.async_create_task(self._updatemaxcurrent())
+            self.hub.state_machine.async_create_task(self._updatemaxcurrent())
 
     async def _terminate_charger(self, debugmessage: str = None) -> None:
         await _debug_log(debugmessage)
         if self._call_ok():
-            await self._hass.async_add_executor_job(self.session.core.terminate)
+            await self.hub.state_machine.async_add_executor_job(self.session.core.terminate)
             await self._update_internal_state(ChargerStates.Stop)
             self.session_active = False
             await self._call_charger(CallTypes.Off)
-            self._hub.observer.broadcast("update charger done", True)
-            #self.hub.sensors.charger_done.value = True
+            self.hub.observer.broadcast("update charger done", True)
 
     async def _pause_charger(self, debugmessage: str = None) -> None:
         await _debug_log(debugmessage)
         if self._call_ok():
-            if self.hub.sensors.charger_done.value is True or self.hub.chargecontroller.status_type is ChargeControllerStates.Idle:  # todo: composition
+            if self.hub.charger_done or self.hub.chargecontroller.status_type is ChargeControllerStates.Idle:  # todo: composition
                 await self._terminate_charger()
             else:
                 await self._update_internal_state(ChargerStates.Pause)
@@ -152,18 +150,18 @@ class Charger:
     async def _updatemaxcurrent(self) -> None:
         self.hub.sensors.chargerobject_switch.updatecurrent()
         calls = self._charger.servicecalls.get_call(CallTypes.UpdateCurrent)
-        if await self._hass.async_add_executor_job(self.helpers.wait_turn_on):
+        if await self.hub.state_machine.async_add_executor_job(self.helpers.wait_turn_on):
             # call here to set amp-list
             while all([
                 self.hub.sensors.chargerobject_switch.value,
                 self.params.running
             ]):
-                if await self._hass.async_add_executor_job(self.helpers.wait_update_current):
+                if await self.hub.state_machine.async_add_executor_job(self.helpers.wait_update_current):
                     serviceparams = await self.helpers.setchargerparams(calls)
                     if not self.params.disable_current_updates and self.hub.power_canary.allow_adjustment(
                             new_amps=serviceparams[calls[PARAMS][CURRENT]]):
                         await self._do_service_call(calls[DOMAIN], calls[CallTypes.UpdateCurrent], serviceparams)
-                    await self._hass.async_add_executor_job(self.helpers.wait_loop_cycle)
+                    await self.hub.state_machine.async_add_executor_job(self.helpers.wait_loop_cycle)
 
             if self._charger.servicecalls.options.update_current_on_termination is True:
                 final_service_params = await self.helpers.setchargerparams(calls, ampoverride=6)

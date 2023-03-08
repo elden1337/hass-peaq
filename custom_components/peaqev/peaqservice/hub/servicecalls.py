@@ -6,21 +6,21 @@ _LOGGER = logging.getLogger(__name__)
 
 class ServiceCalls:
     def __init__(self, hub):
-        self._hub = hub
+        self.hub = hub
 
     async def call_enable_peaq(self):
         """peaqev.enable"""
-        self._hub.observer.broadcast("update charger enabled", True)
-        self._hub.observer.broadcast("update charger done", False)
+        self.hub.observer.broadcast("update charger enabled", True)
+        self.hub.observer.broadcast("update charger done", False)
 
     async def call_disable_peaq(self):
         """peaqev.disable"""
-        self._hub.observer.broadcast("update charger enabled", False)
-        self._hub.observer.broadcast("update charger done", False)
+        self.hub.observer.broadcast("update charger enabled", False)
+        self.hub.observer.broadcast("update charger done", False)
 
     async def call_override_nonhours(self, hours: int = 1):
         """peaqev.override_nonhours"""
-        self._hub.timer.update(hours)
+        self.hub.timer.update(hours)
 
     async def call_schedule_needed_charge(
             self,
@@ -35,8 +35,8 @@ class ServiceCalls:
         else:
             start_time = datetime.now()
         _LOGGER.debug(f"scheduler params. charge: {charge_amount}, dep-time: {dep_time}, start_time: {start_time}")
-        self._hub.scheduler.create_schedule(charge_amount, dep_time, start_time, override_settings)
-        self._hub.scheduler.update()
+        self.hub.scheduler.create_schedule(charge_amount, dep_time, start_time, override_settings)
+        self.hub.scheduler.update()
 
     async def call_scheduler_cancel(self):
-        self._hub.scheduler.cancel()
+        self.hub.scheduler.cancel()

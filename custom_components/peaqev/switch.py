@@ -27,7 +27,7 @@ class PeaqSwitch(SwitchEntity, RestoreEntity):
         """Initialize a PeaqSwitch."""
         self._switch = switch
         self._attr_name = f"{hub.hubname} {self._switch['name']}"
-        self._hub = hub
+        self.hub = hub
         self._attr_device_class = "none"
         self._state = None
 
@@ -38,7 +38,7 @@ class PeaqSwitch(SwitchEntity, RestoreEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._hub.hub_id)}}
+        return {"identifiers": {(DOMAIN, self.hub.hub_id)}}
 
     @property
     def is_on(self) -> bool:
@@ -53,19 +53,19 @@ class PeaqSwitch(SwitchEntity, RestoreEntity):
         self._state = value
 
     def turn_on(self):
-        self._hub.observer.broadcast("update charger enabled", True)
+        self.hub.observer.broadcast("update charger enabled", True)
 
     def turn_off(self):
-        self._hub.observer.broadcast("update charger enabled", False)
+        self.hub.observer.broadcast("update charger enabled", False)
 
     def update(self):
-        new_state = self._hub.enabled
+        new_state = self.hub.enabled
         self.state = "on" if new_state is True else "off"
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
         if state:
             self._state = state.state
-            self._hub.observer.broadcast("update charger enabled", self._state)
+            self.hub.observer.broadcast("update charger enabled", self._state)
         else:
-            self._state = self._hub.enabled
+            self._state = self.hub.enabled

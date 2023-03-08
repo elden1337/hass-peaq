@@ -19,22 +19,22 @@ class PeaqAmpSensor(PowerDevice):
     def __init__(self, hub, entry_id):
         name = f"{hub.hubname} {ALLOWEDCURRENT}"
         super().__init__(hub, name, entry_id)
-        self._hub = hub
-        self._state = self._hub.threshold.allowedcurrent  #todo: composition
+        self.hub = hub
+        self._state = self.hub.threshold.allowedcurrent  #todo: composition
         self._attr_icon = "mdi:current-ac"
         self._charger_current = 0
-        self._charger_phases = self._hub.threshold.phases  #todo: composition
-        self._all_currents = list(self._hub.threshold.currents.values())  #todo: composition
+        self._charger_phases = self.hub.threshold.phases  #todo: composition
+        self._all_currents = list(self.hub.threshold.currents.values())  #todo: composition
 
     @property
     def state(self) -> int:
         return self._state
 
     def update(self) -> None:
-        self._state = self._hub.threshold.allowedcurrent  #todo: composition
-        self._charger_current = self._hub.sensors.chargerobject_switch.current if hasattr(self._hub.sensors, "chargerobject_switch") else 0  #todo: composition
-        self._charger_phases = self._hub.threshold.phases  #todo: composition
-        self._all_currents = list(self._hub.threshold.currents.values())  #todo: composition
+        self._state = self.hub.threshold.allowedcurrent  #todo: composition
+        self._charger_current = self.hub.sensors.chargerobject_switch.current if hasattr(self.hub.sensors, "chargerobject_switch") else 0  #todo: composition
+        self._charger_phases = self.hub.threshold.phases  #todo: composition
+        self._all_currents = list(self.hub.threshold.currents.values())  #todo: composition
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -53,8 +53,8 @@ class PeaqPowerSensor(PowerDevice):
     def __init__(self, hub, entry_id):
         name = f"{hub.hubname} {hub.sensors.power.total.name}"  #todo: composition
         super().__init__(hub, name, entry_id)
-        self._hub = hub
-        self._state = self._hub.sensors.power.total.value  #todo: composition
+        self.hub = hub
+        self._state = self.hub.sensors.power.total.value  #todo: composition
         self._attr_icon = "mdi:flash"
 
     @property
@@ -62,7 +62,7 @@ class PeaqPowerSensor(PowerDevice):
         return self._state
 
     def update(self) -> None:
-        self._state = self._hub.sensors.power.total.value  #todo: composition
+        self._state = self.hub.sensors.power.total.value  #todo: composition
 
 
 class PeaqHousePowerSensor(PowerDevice):
@@ -72,8 +72,8 @@ class PeaqHousePowerSensor(PowerDevice):
     def __init__(self, hub, entry_id):
         name = f"{hub.hubname} {hub.sensors.power.house.name}"  #todo: composition
         super().__init__(hub, name, entry_id)
-        self._hub = hub
-        self._state = self._hub.sensors.power.house.value  #todo: composition
+        self.hub = hub
+        self._state = self.hub.sensors.power.house.value  #todo: composition
         self._attr_icon = "mdi:home-lightning-bolt"
 
     @property
@@ -81,4 +81,4 @@ class PeaqHousePowerSensor(PowerDevice):
         return self._state
 
     def update(self) -> None:
-        self._state = self._hub.sensors.power.house.value  #todo: composition
+        self._state = self.hub.sensors.power.house.value  #todo: composition
