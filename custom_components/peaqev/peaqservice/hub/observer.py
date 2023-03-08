@@ -6,14 +6,14 @@ from typing import Tuple
 
 _LOGGER = logging.getLogger(__name__)
 COMMAND_WAIT = 3
+TIMEOUT = 60
 
 
 class Observer:
-    def __init__(self, hub):
+    def __init__(self):
         self._subscribers: dict = {}
         self._broadcast_queue = []
         self._wait_queue = {}
-        self.hub = hub
 
     def add(self, command: str, func):
         if command in self._subscribers.keys():
@@ -21,15 +21,21 @@ class Observer:
         else:
             self._subscribers[command] = [func]
 
-    def broadcast(self, command: str, timeout: int = None):
-        _expiration = None
-        if timeout is not None:
-            _expiration = time.time() + timeout
+    def broadcast(self, command: str, argument=None):
+        _expiration = time.time() + TIMEOUT
         if (command, _expiration) not in self._broadcast_queue:
-            self._broadcast_queue.append((command, _expiration))
+            self._broadcast_queue.append((command, _expiration, argument))
         for q in self._broadcast_queue:
             if q[0] in self._subscribers.keys():
                 self._dequeue_and_broadcast(q)
+
+    def _dequeue_and_broadcast(self, command: Tuple[str, int, any]):
+        _LOGGER.debug(f"ready to broadcast: {command[0]}")
+        if self._ok_to_broadcast(command[0]):
+            if command[1] > time.time():
+                for func in self._subscribers[command[0]]:
+                    func(command[2])
+            self._broadcast_queue.remove(command)
 
     def _ok_to_broadcast(self, command) -> bool:
         if command not in self._wait_queue.keys():
@@ -39,11 +45,3 @@ class Observer:
             self._wait_queue[command] = time.time()
             return True
         return False
-
-    def _dequeue_and_broadcast(self, command: Tuple[str, int | None]):
-        _LOGGER.debug(f"ready to broadcast: {command[0]}")
-        if command[1] is None or command[1] > time.time():
-            if self._ok_to_broadcast(command[0]):
-                for func in self._subscribers[command[0]]:
-                    func()
-                self._broadcast_queue.remove(command)

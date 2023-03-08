@@ -10,11 +10,11 @@ from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLE
 
 _LOGGER = logging.getLogger(__name__)
 
+DONETIMEOUT = 180
+DEBUGLOG_TIMEOUT = 60
+
 
 class IChargeController:
-    DONETIMEOUT = 180
-    DEBUGLOG_TIMEOUT = 60
-
     def __init__(self, hub, charger_states):
         super().__init__()
         self._hub = hub
@@ -116,7 +116,7 @@ class IChargeController:
         ret = ChargeControllerStates.Error
         update_timer = False
 
-        if self._hub.sensors.charger_enabled.value is False:  #todo: composition
+        if not self._hub.enabled:
             update_timer = True
             ret = ChargeControllerStates.Disabled
         elif self._hub.charger_done:
@@ -139,16 +139,16 @@ class IChargeController:
         ret = ChargeControllerStates.Error
         update_timer = True
 
-        if not self._hub.sensors.charger_enabled.value:  #todo: composition
+        if not self._hub.enabled:
             ret = ChargeControllerStates.Disabled
         elif _state in self._charger_states.get(ChargeControllerStates.Done):
-            self._hub.charger_done = True
+            self._hub.observer.broadcast("update charger done", True)
             ret = ChargeControllerStates.Done
             update_timer = False
         elif _state in self._charger_states.get(ChargeControllerStates.Idle):
             ret = ChargeControllerStates.Idle
             if self._hub.charger_done:
-                self._hub.charger_done = False
+                self._hub.observer.broadcast("update charger done", False)
         elif self._hub.sensors.power.killswitch.is_dead:  #todo: composition
             ret = ChargeControllerStates.Error
         elif _state not in self._charger_states.get(ChargeControllerStates.Idle) and self._hub.charger_done:
@@ -171,7 +171,7 @@ class IChargeController:
         ret = ChargeControllerStates.Error
         update_timer = True
 
-        if not self._hub.sensors.charger_enabled.value:
+        if not self._hub.enabled:
             ret = ChargeControllerStates.Disabled
         elif datetime.now().hour in self._hub.non_hours and not self._hub.timer.is_override:
             ret = ChargeControllerStates.Stop

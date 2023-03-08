@@ -60,7 +60,7 @@ class Charger:
             return
         if self.params.charger_state_mismatch:
             await self._update_internal_state(ChargerStates.Pause)
-        if self.hub.sensors.charger_enabled.value and not self.hub.sensors.power.killswitch.is_dead:  # todo: composition
+        if self.hub.enabled and not self.hub.sensors.power.killswitch.is_dead:  # todo: composition
             await self._reset_session()
             match self.hub.chargecontroller.status_type:  # todo: composition
                 case ChargeControllerStates.Start:
@@ -87,7 +87,7 @@ class Charger:
                 debugmsg = None
                 if self.hub.sensors.power.killswitch.is_dead:  # todo: composition
                     debugmsg = f"Your powersensor has failed to update peaqev for more than {self.hub.sensors.power.killswitch.total_timer} seconds. Therefore charging is paused until it comes alive again."
-                elif self.hub.sensors.charger_enabled.value:  # todo: composition
+                elif self.hub.enabled:
                     debugmsg = "Detected charger running outside of peaqev-session, overtaking command and pausing."
                 await self._pause_charger(debugmessage=debugmsg)
 
@@ -129,7 +129,8 @@ class Charger:
             await self._update_internal_state(ChargerStates.Stop)
             self.session_active = False
             await self._call_charger(CallTypes.Off)
-            self.hub.sensors.charger_done.value = True
+            self._hub.observer.broadcast("update charger done", True)
+            #self.hub.sensors.charger_done.value = True
 
     async def _pause_charger(self, debugmessage: str = None) -> None:
         await _debug_log(debugmessage)

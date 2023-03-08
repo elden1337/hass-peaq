@@ -92,9 +92,9 @@ class PowerCanary:
 
     def check_current_percentage(self):
         if not self.alive:
-            self._hub.observer.broadcast(command="power canary dead", timeout=10)
+            self._hub.observer.broadcast(command="power canary dead")
         if self.current_percentage >= self.model.warning_threshold:
-            self._hub.observer.broadcast(command="power canary warning", timeout=10)
+            self._hub.observer.broadcast(command="power canary warning")
 
     @property
     def max_current_amp(self) -> int:

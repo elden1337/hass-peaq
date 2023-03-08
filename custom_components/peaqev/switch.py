@@ -53,19 +53,19 @@ class PeaqSwitch(SwitchEntity, RestoreEntity):
         self._state = value
 
     def turn_on(self):
-        self._hub.sensors.charger_enabled.value = True  #todo: composition
+        self._hub.observer.broadcast("update charger enabled", True)
 
     def turn_off(self):
-        self._hub.sensors.charger_enabled.value = False  #todo: composition
+        self._hub.observer.broadcast("update charger enabled", False)
 
     def update(self):
-        new_state = self._hub.sensors.charger_enabled.value  #todo: composition
+        new_state = self._hub.enabled
         self.state = "on" if new_state is True else "off"
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
         if state:
             self._state = state.state
-            self._hub.sensors.charger_enabled.value = self._state  #todo: composition
+            self._hub.observer.broadcast("update charger enabled", self._state)
         else:
-            self._state = self._hub.sensors.charger_enabled.value  #todo: composition
+            self._state = self._hub.enabled

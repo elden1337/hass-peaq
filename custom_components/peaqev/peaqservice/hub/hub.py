@@ -80,9 +80,16 @@ class HomeAssistantHub:
         self.observer.add("prices changed", self._update_prices)
         self.observer.add("monthly average price changed", self._update_average_monthly_price)
         self.observer.add("weekly average price changed", self._update_average_weekly_price)
+        self.observer.add("update charger done", self._update_charger_done)
+        self.observer.add("update charger enabled", self._update_charger_enabled)
+
         self.chargingtracker_entities = self._set_chargingtracker_entities()
         tracker_entities += self.chargingtracker_entities
         async_track_state_change(hass, tracker_entities, self.state_changed)
+
+    @property
+    def enabled(self) -> bool:
+        return self.sensors.charger_enabled.value
 
     @property
     def non_hours(self) -> list:
@@ -200,8 +207,13 @@ class HomeAssistantHub:
             return self.sensors.charger_done.value
         return False
 
-    @charger_done.setter
-    def charger_done(self, val) -> None:
+    def _update_charger_done(self, val):
         if hasattr(self.sensors, "charger_done"):
             self.sensors.charger_done.value = bool(val)
+
+    def _update_charger_enabled(self, val):
+        if hasattr(self.sensors, "charger_enabled"):
+            self.sensors.charger_enabled.value = bool(val)
+        else:
+            raise Exception("Peaqev cannot function without a charger_enabled entity")
 
