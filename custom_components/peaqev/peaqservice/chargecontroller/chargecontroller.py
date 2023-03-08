@@ -3,6 +3,7 @@ import logging
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.services.chargecontroller.chargecontrollerbase import ChargeControllerBase as _core
 
+from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import defer_start
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
 
 _LOGGER = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ class ChargeController(IChargeController):
                     (self.below_startthreshold and self.hub.sensors.totalhourlyenergy.value != 0),
                     self.hub.is_free_charge
                 ]),
-                not self._defer_start(self.hub.hours.non_hours)
+                not defer_start(self.hub.hours.non_hours)
             ]):
                 ret = ChargeControllerStates.Start
             else:

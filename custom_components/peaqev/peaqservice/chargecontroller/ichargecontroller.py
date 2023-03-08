@@ -1,10 +1,11 @@
 import logging
 import time
 from abc import abstractmethod
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
+from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import calculate_stop_len
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
@@ -31,8 +32,8 @@ class IChargeController:
     @status_type.setter
     def status_type(self, val) -> None:
         if val != self._status_type:
-            self.hub.observer.broadcast("chargecontroller status changed")
             self._status_type = val
+            self.hub.observer.broadcast("chargecontroller status changed")
 
     @property
     def latest_charger_start(self) -> float:
@@ -43,7 +44,7 @@ class IChargeController:
         self._latest_charger_start = val
 
     @property
-    def status(self) -> str:
+    def status_string(self) -> str:
         ret = ChargeControllerStates.Error
         if not self.is_initialized:
             return "Hub not ready. Check logs!"
@@ -105,7 +106,7 @@ class IChargeController:
         if self.hub.timer.is_override:  #todo: composition
             return self.hub.timer.override_string  #todo: composition
         if hour in self.hub.non_hours:
-            ret = self._calculate_stop_len(self.hub.non_hours)
+            ret = calculate_stop_len(self.hub.non_hours)
         elif hour in self.hub.dynamic_caution_hours.keys():
             val = self.hub.dynamic_caution_hours.get(hour)
             ret = f"Charging allowed at {int(val * 100)}% of peak"
@@ -196,13 +197,6 @@ class IChargeController:
             _LOGGER.debug(message)
             self._latest_debuglog = time.time()
 
-    @staticmethod
-    def _defer_start(non_hours: list) -> bool:
-        """Defer starting if next hour is a non-hour and minute is 50 or greater, to avoid short running times."""
-        if (datetime.now() + timedelta(hours=1)).hour in non_hours:
-            return datetime.now().minute >= 50
-        return False
-
     @abstractmethod
     def _get_status_charging(self) -> ChargeControllerStates:
         pass
@@ -211,28 +205,36 @@ class IChargeController:
     def _get_status_connected(self, charger_state=None) -> ChargeControllerStates:
         pass
 
-    @staticmethod
-    def _get_stopped_string(h) -> str:
-        val = h + 1 if h + 1 < 24 else h + 1 - 24
-        if len(str(val)) == 1:
-            return f"Charging stopped until 0{val}:00"
-        return f"Charging stopped until {val}:00"
 
-    @staticmethod
-    def _getuneven(first, second) -> bool:
-        if second > first:
-            return first - (second - 24) != 1
-        return first - second != 1
-
-    @staticmethod
-    def _calculate_stop_len(nonhours) -> str:
-        ret = ""
-        for idx, h in enumerate(nonhours):
-            if idx + 1 < len(nonhours):
-                if IChargeController._getuneven(nonhours[idx + 1], nonhours[idx]):
-                    ret = IChargeController._get_stopped_string(h)
-                    break
-            elif idx + 1 == len(nonhours):
-                ret = IChargeController._get_stopped_string(h)
-                break
-        return ret
+    # @staticmethod
+    # def _defer_start(non_hours: list) -> bool:
+    #     """Defer starting if next hour is a non-hour and minute is 50 or greater, to avoid short running times."""
+    #     if (datetime.now() + timedelta(hours=1)).hour in non_hours:
+    #         return datetime.now().minute >= 50
+    #     return False
+    #
+    # @staticmethod
+    # def _calculate_stop_len(nonhours) -> str:
+    #     ret = ""
+    #     for idx, h in enumerate(nonhours):
+    #         if idx + 1 < len(nonhours):
+    #             if IChargeController._getuneven(nonhours[idx + 1], nonhours[idx]):
+    #                 ret = IChargeController._get_stopped_string(h)
+    #                 break
+    #         elif idx + 1 == len(nonhours):
+    #             ret = IChargeController._get_stopped_string(h)
+    #             break
+    #     return ret
+    #
+    # @staticmethod
+    # def _get_stopped_string(h) -> str:
+    #     val = h + 1 if h + 1 < 24 else h + 1 - 24
+    #     if len(str(val)) == 1:
+    #         return f"Charging stopped until 0{val}:00"
+    #     return f"Charging stopped until {val}:00"
+    #
+    # @staticmethod
+    # def _getuneven(first, second) -> bool:
+    #     if second > first:
+    #         return first - (second - 24) != 1
+    #     return first - second != 1
