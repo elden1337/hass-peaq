@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import datetime
 
@@ -77,11 +78,8 @@ class HomeAssistantHub:
             tracker_entities.append(self.options.powersensor)
             tracker_entities.append(self.sensors.totalhourlyenergy.entity)
 
-        self.observer.add("prices changed", self._update_prices)
-        self.observer.add("monthly average price changed", self._update_average_monthly_price)
-        self.observer.add("weekly average price changed", self._update_average_weekly_price)
-        self.observer.add("update charger done", self._update_charger_done)
-        self.observer.add("update charger enabled", self._update_charger_enabled)
+        self.coordinator = self._set_coordinator()
+        self._set_observers()
 
         self.chargingtracker_entities = self._set_chargingtracker_entities()
         tracker_entities += self.chargingtracker_entities
@@ -116,6 +114,7 @@ class HomeAssistantHub:
         if hasattr(self, "initializer"):
             if self.initializer.check():
                 del self.initializer
+                self.observer.activate()
                 return True
             return False
         return True
@@ -217,8 +216,34 @@ class HomeAssistantHub:
         else:
             raise Exception("Peaqev cannot function without a charger_enabled entity")
 
-    async def get_states_async(self) -> dict:
-        pass
+    async def get_states_async(self, module) -> dict:
+        if module in self.coordinator.keys():
+            return self.coordinator.get(module)
+        return {}
 
-    def get_states(self) -> dict:
-        pass
+    def get_states(self, module) -> dict:
+        return asyncio.run_coroutine_threadsafe(
+            self.get_states_async(module), self.state_machine.loop
+        ).result()
+
+    def _set_coordinator(self) -> dict:
+        ret = {}
+        chargecontroller = {
+            "status": self.chargecontroller.status_type,
+            "status_string": self.chargecontroller.status_string,
+            "latest_charger_start": self.chargecontroller.latest_charger_start,
+            "is_initialized": self.chargecontroller.is_initialized}
+        ret["chargecontroller"] = chargecontroller
+        killswitch = {
+            "is_dead": self.sensors.power.killswitch.is_dead,
+            "total_timer": self.sensors.power.killswitch.total_timer
+        }
+        ret["killswitch"] = killswitch
+        return ret
+
+    def _set_observers(self) -> None:
+        self.observer.add("prices changed", self._update_prices)
+        self.observer.add("monthly average price changed", self._update_average_monthly_price)
+        self.observer.add("weekly average price changed", self._update_average_weekly_price)
+        self.observer.add("update charger done", self._update_charger_done)
+        self.observer.add("update charger enabled", self._update_charger_enabled)

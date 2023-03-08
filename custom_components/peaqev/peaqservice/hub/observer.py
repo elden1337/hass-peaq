@@ -10,10 +10,15 @@ TIMEOUT = 60
 
 
 class Observer:
-    def __init__(self):
+    def __init__(self, hub):
         self._subscribers: dict = {}
         self._broadcast_queue = []
         self._wait_queue = {}
+        self._active = False
+        self.hub = hub
+
+    def activate(self) -> None:
+        self._active = True
 
     def add(self, command: str, func):
         if command in self._subscribers.keys():
@@ -25,9 +30,17 @@ class Observer:
         _expiration = time.time() + TIMEOUT
         if (command, _expiration) not in self._broadcast_queue:
             self._broadcast_queue.append((command, _expiration, argument))
-        for q in self._broadcast_queue:
-            if q[0] in self._subscribers.keys():
-                self._dequeue_and_broadcast(q)
+        self._prepare_dequeue()
+
+    def _prepare_dequeue(self, attempt:int = 0) -> None:
+        if self._active:
+            for q in self._broadcast_queue:
+                if q[0] in self._subscribers.keys():
+                    self._dequeue_and_broadcast(q)
+        elif attempt < 5:
+            _ = self.hub.is_initialized
+            attempt += 1
+            return self._prepare_dequeue(attempt)
 
     def _dequeue_and_broadcast(self, command: Tuple[str, int, any]):
         _LOGGER.debug(f"ready to broadcast: {command[0]}")
