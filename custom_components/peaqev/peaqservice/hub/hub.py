@@ -217,3 +217,8 @@ class HomeAssistantHub:
         else:
             raise Exception("Peaqev cannot function without a charger_enabled entity")
 
+    async def get_states_async(self) -> dict:
+        pass
+
+    def get_states(self) -> dict:
+        pass

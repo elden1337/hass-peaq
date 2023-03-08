@@ -30,7 +30,7 @@ class PeaqSensor(SensorBase):
         return ret
 
     def update(self) -> None:
-        self._state = self.hub.chargecontroller.status  #todo: composition
+        self._state = self.hub.chargecontroller.status_string  #todo: composition
         self._nonhours = self.hub.hours.non_hours  #todo: composition
         self._cautionhours = self.hub.hours.caution_hours  #todo: composition
         self._current_hour = self.hub.hours.state  #todo: composition
