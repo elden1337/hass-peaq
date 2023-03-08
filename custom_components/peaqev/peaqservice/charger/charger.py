@@ -19,11 +19,6 @@ _LOGGER = logging.getLogger(__name__)
 CALL_WAIT_TIMER = 60
 
 
-async def _debug_log(debugmessage: str = None) -> None:
-    if debugmessage is not None:
-        _LOGGER.debug(debugmessage)
-
-
 class Charger:
     def __init__(self, hub, chargertype):
         self.hub = hub
@@ -68,47 +63,48 @@ class Charger:
                     case ChargeControllerStates.Start:
                         await self._start_case()
                     case ChargeControllerStates.Stop:
-                        await self._stop_case()
-                    case ChargeControllerStates.Done:
-                        await self._done_case()
-                    case ChargeControllerStates.Idle:
-                        await self._terminate_charger() if self.charger_active else None
+                        await self._stop_case(_controller)
+                    case ChargeControllerStates.Done | ChargeControllerStates.Idle:
+                        await self._done_idle_case(_controller)
                     case _:
                         _LOGGER.debug(f"Could not match any chargecontroller-state. chargecontroller reports: {_controller.get('status_type')}")
         else:
             if self.charger_active and self.params.running:
-                debugmsg = None
                 if _killswitch.get('is_dead'):
-                    debugmsg = f"Your powersensor has failed to update peaqev for more than {_killswitch.get('total_timer')} seconds. Therefore charging is paused until it comes alive again."
+                    _LOGGER.debug("Your powersensor has failed to update peaqev for more than {_killswitch.get('total_timer')} seconds. Therefore charging is paused until it comes alive again.")
                 elif self.hub.enabled:
-                    debugmsg = "Detected charger running outside of peaqev-session, overtaking command and pausing."
-                await self._pause_charger(_controller=_controller, debugmessage=debugmsg)
+                    _LOGGER.debug("Detected charger running outside of peaqev-session, overtaking command and pausing.")
+                await self._pause_charger(_controller=_controller)
 
-    async def _done_case(self) -> None:
-        if not self.hub.charger_done:
-            await self._terminate_charger(debugmessage="Going to terminate since the charger is done.")
+    async def _done_idle_case(self, _controller) -> None:
+        _state = _controller.get('status_type')
+        if not self.hub.charger_done and _state is ChargeControllerStates.Done:
+            _LOGGER.debug("Going to terminate since the charger is done.")
+            await self._terminate_charger()
+        elif self.charger_active and _state is ChargeControllerStates.Idle:
+            _LOGGER.debug("Going to terminate since the car has been disconnected.")
+            await self._terminate_charger()
 
-    async def _stop_case(self) -> None:
+    async def _stop_case(self, _controller) -> None:
         if self.charger_active:
-            debugmsg = None
             if not self.params.running and not self.session_active:
-                debugmsg = "Detected charger running outside of peaqev-session, overtaking command and pausing."
-            await self._pause_charger(debugmsg)
+                _LOGGER.debug("Detected charger running outside of peaqev-session, overtaking command and pausing.")
+            await self._pause_charger(_controller=_controller)
 
     async def _start_case(self) -> None:
         if not self.params.running:
             if not self.charger_active:
                 await self._start_charger()
             else:
-                await self._overtake_charger(debugmessage="Detected charger running outside of peaqev-session, overtaking command.")
+                _LOGGER.debug("Detected charger running outside of peaqev-session, overtaking command.")
+                await self._overtake_charger()
 
     async def _reset_session(self, _controller) -> None:
         if not self.session_active and _controller.get('status_type') is not ChargeControllerStates.Done:
             self.session.core.reset()
             self.session_active = True
 
-    async def _overtake_charger(self, debugmessage: str = None) -> None:
-        await _debug_log(debugmessage)
+    async def _overtake_charger(self) -> None:
         await self._update_internal_state(ChargerStates.Start)
         self.session_active = True
         await self._post_start_charger()
@@ -116,8 +112,7 @@ class Charger:
     def _call_ok(self) -> bool:
         return time.time() - self.params.latest_charger_call > CALL_WAIT_TIMER
 
-    async def _start_charger(self, debugmessage: str = None) -> None:
-        await _debug_log(debugmessage)
+    async def _start_charger(self) -> None:
         if self._call_ok():
             await self._update_internal_state(ChargerStates.Start)
             if not self.session_active:
@@ -134,7 +129,7 @@ class Charger:
             self.hub.state_machine.async_create_task(self._updatemaxcurrent())
 
     async def _terminate_charger(self, debugmessage: str = None) -> None:
-        await _debug_log(debugmessage)
+        _LOGGER.debug(debugmessage)
         if self._call_ok():
             await self.hub.state_machine.async_add_executor_job(self.session.core.terminate)
             await self._update_internal_state(ChargerStates.Stop)
@@ -143,7 +138,7 @@ class Charger:
             self.hub.observer.broadcast("update charger done", True)
 
     async def _pause_charger(self, _controller, debugmessage: str = None) -> None:
-        await _debug_log(debugmessage)
+        _LOGGER.debug(debugmessage)
         if self._call_ok():
             if self.hub.charger_done or _controller.get('status_type') is ChargeControllerStates.Idle:
                 await self._terminate_charger()
@@ -184,11 +179,11 @@ class Charger:
                 )
 
     async def _do_outlet_update(self, call):
-        await _debug_log(f"Calling charger-outlet")
+        _LOGGER.debug("Calling charger-outlet")
         await self.hub.state_machine.states.async_set(self._charger.entities.powerswitch, call)  # todo: composition
 
     async def _do_service_call(self, domain, command, params) -> None:
-        await _debug_log(f"Calling charger {command} for domain '{domain}' with parameters: {params}")
+        _LOGGER.debug(f"Calling charger {command} for domain '{domain}' with parameters: {params}")
         await self.hub.state_machine.services.async_call(
             domain,
             command,
@@ -204,7 +199,7 @@ class Charger:
     async def _update_internal_state_on(self):
         self.params.running = True
         self.params.disable_current_updates = False
-        await _debug_log("Internal charger has been started")
+        _LOGGER.debug("Internal charger has been started")
 
     async def _update_internal_state_off(self):
         self.params.disable_current_updates = True
@@ -215,9 +210,9 @@ class Charger:
         ]):
             self.params.running = False
             self.params.charger_state_mismatch = False
-            await _debug_log("Internal charger has been stopped")
+            _LOGGER.debug("Internal charger has been stopped")
         else:
             self.params.charger_state_mismatch = True
-            await _debug_log(f"Fail when trying to stop connected charger. Retrying stop-attempt...")
+            _LOGGER.debug(f"Fail when trying to stop connected charger. Retrying stop-attempt...")
 
 
