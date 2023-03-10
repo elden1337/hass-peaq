@@ -46,6 +46,24 @@ class PeaqAmpSensor(PowerDevice):
         }
 
 
+class PeaqPowerCostSensor(PowerDevice):
+    device_class = SensorDeviceClass.POWER
+
+    def __init__(self, hub, entry_id):
+        name = f"{hub.hubname} wattage_cost"
+        super().__init__(hub, name, entry_id)
+        self.hub = hub
+        self._state = self.hub.watt_cost
+        self._attr_icon = "mdi:cash"
+
+    @property
+    def state(self) -> int:
+        return self._state
+
+    def update(self) -> None:
+        self._state = self.hub.watt_cost
+ 
+
 class PeaqPowerSensor(PowerDevice):
     device_class = SensorDeviceClass.POWER
     unit_of_measurement = POWER_WATT
