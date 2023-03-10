@@ -149,6 +149,12 @@ class HomeAssistantHub:
                 msg = f"Unable to handle data-update: {entity_id} {old_state}|{new_state}. Exception: {e}"
                 _LOGGER.error(msg)
 
+    @property
+    def watt_cost(self) -> float:
+        if self.options.price.price_aware:
+            return self.sensors.power.total.value * self.nordpool.state
+        return 0
+
     """Composition below here"""
     def get_chargerobject_value(self) -> str:
         ret = getattr(self.sensors.chargerobject, "value", "unknown")
