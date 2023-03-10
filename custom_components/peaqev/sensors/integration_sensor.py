@@ -27,7 +27,7 @@ class PeaqIntegrationCostSensor(IntegrationSensor):
             round_digits=5,
             source_entity=f"sensor.{hub.hubname}_wattage_cost",
             unique_id=self.unique_id,
-            unit_prefix="",
+            unit_prefix="k",
             unit_time=TIME_HOURS
         )
 

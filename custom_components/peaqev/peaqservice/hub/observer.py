@@ -30,7 +30,10 @@ class Observer:
         _expiration = time.time() + TIMEOUT
         if (command, _expiration) not in self._broadcast_queue:
             self._broadcast_queue.append((command, _expiration, argument))
-        self._prepare_dequeue()
+        for q in self._broadcast_queue:
+            if q[0] in self._subscribers.keys():
+                self._dequeue_and_broadcast(q)
+        #self._prepare_dequeue()
 
     def _prepare_dequeue(self, attempt:int = 0) -> None:
         if self._active:
@@ -47,7 +50,11 @@ class Observer:
         if self._ok_to_broadcast(command[0]):
             if command[1] > time.time():
                 for func in self._subscribers[command[0]]:
-                    func(command[2])
+                    if command[2]:
+                        if len(command[2]):
+                            func(command[2])
+                    else:
+                        func()
             self._broadcast_queue.remove(command)
 
     def _ok_to_broadcast(self, command) -> bool:

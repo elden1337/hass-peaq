@@ -20,6 +20,36 @@ METER_OFFSET.days = 0 # pylint:disable=attribute-defined-outside-init
 PERIODS = ["hourly"]
 
 
+class PeaqUtilityCostSensor(UtilityMeterSensor):
+    def __init__(self, hub, sensor: any, meter_type: str, meter_offset: str, entry_id: any):
+        self._entry_id = entry_id
+        self.hub = hub
+        self._attr_name = f"{self.hub.hubname} {sensor} {meter_type}"
+        entity = f"sensor.{DOMAIN.lower()}_{sensor}"
+
+        super().__init__(
+            cron_pattern="{minute} * * * *",
+            delta_values=0,
+            meter_offset=meter_offset,
+            meter_type=meter_type,
+            name=self._attr_name,
+            net_consumption=False,
+            parent_meter=entity,
+            source_entity=entity,
+            tariff_entity=None,
+            tariff=None,
+            unique_id = self.unique_id
+        )
+
+    @property
+    def unique_id(self):
+        """Return a unique ID to use for this sensor."""
+        return f"{DOMAIN}_{self._entry_id}_{ex.nametoid(self._attr_name)}"
+
+    @property
+    def device_info(self):
+        return {"identifiers": {(DOMAIN, self.hub.hub_id, POWERCONTROLS)}}
+
 class PeaqUtilitySensor(UtilityMeterSensor):
     def __init__(self, hub, sensor: any, meter_type: TimePeriods, meter_offset: str, entry_id: any):
         self._entry_id = entry_id
