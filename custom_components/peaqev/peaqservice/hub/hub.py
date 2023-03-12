@@ -152,7 +152,7 @@ class HomeAssistantHub:
     @property
     def watt_cost(self) -> float:
         if self.options.price.price_aware:
-            return self.sensors.power.total.value * self.nordpool.state
+            return float(self.sensors.power.total.value) * float(self.nordpool.state)
         return 0
 
     """Composition below here"""
@@ -194,9 +194,9 @@ class HomeAssistantHub:
             return self.sensors.locale.data.free_charge(self.sensors.locale.data)
         return False
 
-    def _update_prices(self) -> None:
-        self.prices = self.nordpool.prices
-        self.prices_tomorrow = self.nordpool.prices_tomorrow
+    def _update_prices(self, prices: list) -> None:
+        self.prices = prices[0]
+        self.prices_tomorrow = prices[1]
 
     def _update_average_monthly_price(self) -> None:
         if self.options.price.price_aware:
@@ -235,16 +235,15 @@ class HomeAssistantHub:
     def _set_coordinator(self) -> dict:
         ret = {}
         chargecontroller = {
-            "status": lambda: self.chargecontroller.status_type,
-            "status_string": lambda: self.chargecontroller.status_string,
-            "latest_charger_start": lambda: self.chargecontroller.latest_charger_start,
-            "is_initialized": lambda: self.chargecontroller.is_initialized}
+            "status": self.chargecontroller.status_type,
+            "status_string": self.chargecontroller.status_string,
+            "is_initialized": self.chargecontroller.is_initialized}
         ret["chargecontroller"] = chargecontroller
-        killswitch = {
-            "is_dead": lambda: self.sensors.power.killswitch.is_dead,
-            "total_timer": lambda: self.sensors.power.killswitch.total_timer
-        }
-        ret["killswitch"] = killswitch
+        # killswitch = {
+        #     "is_dead": self.sensors.power.killswitch.is_dead,
+        #     "total_timer": self.sensors.power.killswitch.total_timer
+        # }
+        # ret["killswitch"] = killswitch
         return ret
     def _set_observers(self) -> None:
         self.observer.add("prices changed", self._update_prices)

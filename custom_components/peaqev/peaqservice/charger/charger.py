@@ -27,7 +27,7 @@ class Charger:
         self.session = Session(self)
         self.helpers = ChargerHelpers(self)
         self.hub.observer.add("power canary dead", self._pause_charger)
-        self.hub.observer.add("chargecontroller status changed", self.charge)
+        self.hub.observer.add("chargecontroller status changed", self._set_chargecontroller_status)
 
     @property
     def session_active(self) -> bool:
@@ -48,36 +48,42 @@ class Charger:
             ]
         )
 
+    def _set_chargecontroller_status(self, val):
+        if isinstance(val, ChargeControllerStates):
+            if val is not self.params.chargecontroller_state:
+                self.params.chargecontroller_state = val
+                self.charge()
+
+    # "status_string": self.chargecontroller.status_string,
+    # "is_initialized": self.chargecontroller.is_initialized}
+
     async def charge(self) -> None:
         """Main function to turn charging on or off"""
         if self._charger.type is ChargerType.NoCharger:
             return
         if self.params.charger_state_mismatch:
             await self._update_internal_state(ChargerStates.Pause)
-        _controller = await self.hub.get_states_async("chargecontroller")
-        _killswitch = await self.hub.get_states_async("killswitch")
-        if self.hub.enabled and not _killswitch.get('is_dead'):
-            await self._reset_session(_controller)
-            if _controller:
-                match _controller.get('status_type'):
-                    case ChargeControllerStates.Start:
-                        await self._start_case()
-                    case ChargeControllerStates.Stop:
-                        await self._stop_case(_controller)
-                    case ChargeControllerStates.Done | ChargeControllerStates.Idle:
-                        await self._done_idle_case(_controller)
-                    case _:
-                        _LOGGER.debug(f"Could not match any chargecontroller-state. chargecontroller reports: {_controller.get('status_type')}")
+        if self.hub.enabled and not self.hub.sensors.power.killswitch.is_dead:
+            await self._reset_session()
+            match self.params.chargecontroller_state:
+                case ChargeControllerStates.Start:
+                    await self._start_case()
+                case ChargeControllerStates.Stop:
+                    await self._stop_case()
+                case ChargeControllerStates.Done | ChargeControllerStates.Idle:
+                    await self._done_idle_case()
+                case _:
+                    _LOGGER.debug(f"Could not match any chargecontroller-state. chargecontroller reports: {self.params.chargecontroller_state}")
         else:
             if self.charger_active and self.params.running:
-                if _killswitch.get('is_dead'):
+                if self.hub.sensors.power.killswitch.is_dead:
                     _LOGGER.debug("Your powersensor has failed to update peaqev for more than {_killswitch.get('total_timer')} seconds. Therefore charging is paused until it comes alive again.")
                 elif self.hub.enabled:
                     _LOGGER.debug("Detected charger running outside of peaqev-session, overtaking command and pausing.")
-                await self._pause_charger(_controller=_controller)
+                await self._pause_charger()
 
-    async def _done_idle_case(self, _controller) -> None:
-        _state = _controller.get('status_type')
+    async def _done_idle_case(self) -> None:
+        _state = self.params.chargecontroller_state
         if not self.hub.charger_done and _state is ChargeControllerStates.Done:
             _LOGGER.debug("Going to terminate since the charger is done.")
             await self._terminate_charger()
@@ -85,11 +91,11 @@ class Charger:
             _LOGGER.debug("Going to terminate since the car has been disconnected.")
             await self._terminate_charger()
 
-    async def _stop_case(self, _controller) -> None:
+    async def _stop_case(self) -> None:
         if self.charger_active:
             if not self.params.running and not self.session_active:
                 _LOGGER.debug("Detected charger running outside of peaqev-session, overtaking command and pausing.")
-            await self._pause_charger(_controller=_controller)
+            await self._pause_charger()
 
     async def _start_case(self) -> None:
         if not self.params.running:
@@ -99,8 +105,8 @@ class Charger:
                 _LOGGER.debug("Detected charger running outside of peaqev-session, overtaking command.")
                 await self._overtake_charger()
 
-    async def _reset_session(self, _controller) -> None:
-        if not self.session_active and _controller.get('status_type') is not ChargeControllerStates.Done:
+    async def _reset_session(self) -> None:
+        if not self.session_active and self.params.chargecontroller_state is not ChargeControllerStates.Done:
             self.session.core.reset()
             self.session_active = True
 
@@ -123,8 +129,7 @@ class Charger:
             await self._post_start_charger()
 
     async def _post_start_charger(self) -> None:
-        #is this call really needed?
-        self.hub.chargecontroller.latest_charger_start = time.time()  # todo: composition
+        self.hub.observer.broadcast("update latest charger start", time.time())
         if self._charger.servicecalls.options.allowupdatecurrent and not self.hub.is_free_charge:
             self.hub.state_machine.async_create_task(self._updatemaxcurrent())
 
@@ -137,10 +142,10 @@ class Charger:
             await self._call_charger(CallTypes.Off)
             self.hub.observer.broadcast("update charger done", True)
 
-    async def _pause_charger(self, _controller, debugmessage: str = None) -> None:
+    async def _pause_charger(self, debugmessage: str = None) -> None:
         _LOGGER.debug(debugmessage)
         if self._call_ok():
-            if self.hub.charger_done or _controller.get('status_type') is ChargeControllerStates.Idle:
+            if self.hub.charger_done or self.params.chargecontroller_state is ChargeControllerStates.Idle:
                 await self._terminate_charger()
             else:
                 await self._update_internal_state(ChargerStates.Pause)

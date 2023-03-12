@@ -23,23 +23,23 @@ class NordPoolUpdater:
     def currency(self) -> str:
         return self.model.currency
 
-    @property
-    def prices(self) -> list:
-        return self.model.prices
+    # @property
+    # def prices(self) -> list:
+    #     return self.model.prices
+    #
+    # @prices.setter
+    # def prices(self, val) -> None:
+    #     if self.model.prices != val:
+    #         self.model.prices = val
 
-    @prices.setter
-    def prices(self, val) -> None:
-        if self.model.prices != val:
-            self.model.prices = val
+    # @property
+    # def prices_tomorrow(self) -> list:
+    #     return self.model.prices_tomorrow
 
-    @property
-    def prices_tomorrow(self) -> list:
-        return self.model.prices_tomorrow
-
-    @prices_tomorrow.setter
-    def prices_tomorrow(self, val) -> None:
-        if self.model.prices_tomorrow != val:
-            self.model.prices_tomorrow = val
+    # @prices_tomorrow.setter
+    # def prices_tomorrow(self, val) -> None:
+    #     if self.model.prices_tomorrow != val:
+    #         self.model.prices_tomorrow = val
 
     @property
     def state(self) -> float:
@@ -88,7 +88,7 @@ class NordPoolUpdater:
             except Exception as ee:
                 _LOGGER.warning(f"Could not parse today's average from Nordpool. exception: {ee}")
             if await self._update_set_prices(_result):
-                self.hub.observer.broadcast("prices changed")
+                self.hub.observer.broadcast("prices changed", [self.model.prices, self.model.prices_tomorrow])
         elif self.hub.is_initialized:
             _LOGGER.error("Could not get nordpool-prices")
 

@@ -24,6 +24,7 @@ class IChargeController:
         self._latest_charger_start = time.time()
         self._latest_debuglog = 0
         self._charger_states: dict = charger_states
+        self.hub.observer.add("update latest charger start", self._update_latest_charger_start)
 
     @property
     def status_type(self) -> ChargeControllerStates:
@@ -33,14 +34,9 @@ class IChargeController:
     def status_type(self, val) -> None:
         if val != self._status_type:
             self._status_type = val
-            self.hub.observer.broadcast("chargecontroller status changed")
+            self.hub.observer.broadcast("chargecontroller status changed", self._status_type)
 
-    @property
-    def latest_charger_start(self) -> float:
-        return self._latest_charger_start
-
-    @latest_charger_start.setter
-    def latest_charger_start(self, val):
+    def _update_latest_charger_start(self, val):
         self._latest_charger_start = val
 
     @property
@@ -131,7 +127,7 @@ class IChargeController:
             ret = self._get_status_charging()
             update_timer = True
         if update_timer is True:
-            self.latest_charger_start = time.time()
+            self._latest_charger_start = time.time()
         return ret
 
     def _get_status(self) -> ChargeControllerStates:
@@ -162,7 +158,7 @@ class IChargeController:
         elif _state in self._charger_states.get(ChargeControllerStates.Charging):
             ret = self._get_status_charging()
         if update_timer:
-            self.latest_charger_start = time.time()
+            self._latest_charger_start = time.time()
         if ret == ChargeControllerStates.Error:
             _LOGGER.error(f"Chargecontroller returned faulty state. Charger reported {self.hub.get_chargerobject_value()} as state.")
         return ret
@@ -178,7 +174,7 @@ class IChargeController:
         else:
             ret = ChargeControllerStates.Start
         if update_timer:
-            self.latest_charger_start = time.time()
+            self._latest_charger_start = time.time()
         return ret
 
     def _is_done(self, charger_state) -> bool:
@@ -187,7 +183,7 @@ class IChargeController:
             if _states_test:
                 self.__debug_log(f"'is_done' reported that charger is Done based on current charger state")
             return _states_test
-        _regular_test = time.time() - self.latest_charger_start > DONETIMEOUT
+        _regular_test = time.time() - self._latest_charger_start > DONETIMEOUT
         if _regular_test:
             self.__debug_log(f"'is_done' reported that charger is Done because of idle-charging for more than {DONETIMEOUT} seconds.")
         return _regular_test
