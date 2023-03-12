@@ -10,6 +10,12 @@ TIMEOUT = 60
 
 
 class Observer:
+    """
+    Observer class handles updates throughout peaqev.
+    Attach to hub-class and subscribe to updates (string matches) in other classes connected to the hub.
+    When broadcasting, you may use one argument that the of-course needs to correspond to your receiving function.
+    Should you need to use multiple arguments, you may push them to the observer as a list or dict and use the helper-method parse_args from your receiving end.
+    """
     def __init__(self, hub):
         self._subscribers: dict = {}
         self._broadcast_queue = []
@@ -51,7 +57,10 @@ class Observer:
             if command[1] > time.time():
                 for func in self._subscribers[command[0]]:
                     if command[2] is not None:
-                        func(command[2])
+                        if isinstance(command[2], dict):
+                            func(**command[2])
+                        else:
+                            func(command[2])
                     else:
                         func()
             self._broadcast_queue.remove(command)
