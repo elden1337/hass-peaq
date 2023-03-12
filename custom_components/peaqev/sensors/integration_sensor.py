@@ -14,18 +14,19 @@ from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
 
 
 class PeaqIntegrationCostSensor(IntegrationSensor):
+    device_class = SensorDeviceClass.ENERGY
     def __init__(self, hub, name, entry_id):
         self._entry_id = entry_id
         self.hub = hub
         self._attr_name = f"{self.hub.hubname} {name}"
         self._attr_unique_id = f"{DOMAIN}_{self.hub.hub_id}_{self._attr_name}"
-        self._unit_of_measurement = "kWhCost"
+        self._unit_of_measurement = "kWh"
 
         super().__init__(
             integration_method=METHOD_TRAPEZOIDAL,
             name=self._attr_name,
             round_digits=5,
-            source_entity=f"sensor.{hub.hubname}_wattage_cost",
+            source_entity=f"sensor.{hub.hubname.lower()}_wattage_cost",
             unique_id=self.unique_id,
             unit_prefix="k",
             unit_time=TIME_HOURS

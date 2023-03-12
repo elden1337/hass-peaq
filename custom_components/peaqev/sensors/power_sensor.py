@@ -48,6 +48,7 @@ class PeaqAmpSensor(PowerDevice):
 
 class PeaqPowerCostSensor(PowerDevice):
     device_class = SensorDeviceClass.POWER
+    unit_of_measurement = POWER_WATT
 
     def __init__(self, hub, entry_id):
         name = f"{hub.hubname} wattage_cost"

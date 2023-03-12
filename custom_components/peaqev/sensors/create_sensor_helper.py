@@ -12,11 +12,12 @@ from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_INTEGRAL_NAME
 )
 from custom_components.peaqev.sensors.average_sensor import PeaqAverageSensor
-from custom_components.peaqev.sensors.integration_sensor import PeaqIntegrationSensor
+from custom_components.peaqev.sensors.integration_sensor import PeaqIntegrationSensor, PeaqIntegrationCostSensor
 from custom_components.peaqev.sensors.money_sensor import PeaqMoneySensor
 from custom_components.peaqev.sensors.peaq_binary_sensor import PeaqBinarySensorDone
 from custom_components.peaqev.sensors.peaq_sensor import PeaqSensor
-from custom_components.peaqev.sensors.power_sensor import (PeaqPowerSensor, PeaqAmpSensor, PeaqHousePowerSensor)
+from custom_components.peaqev.sensors.power_sensor import PeaqPowerSensor, PeaqAmpSensor, PeaqHousePowerSensor, \
+    PeaqPowerCostSensor
 from custom_components.peaqev.sensors.powercanary_sensor import PowerCanaryStatusSensor, PowerCanaryPercentageSensor, \
     PowerCanaryMaxAmpSensor
 from custom_components.peaqev.sensors.prediction_sensor import PeaqPredictionSensor
@@ -40,11 +41,10 @@ async def gather_sensors(hub, config) -> list:
         ret.append(PeaqAmpSensor(hub, config.entry_id))
 
     if hub.options.peaqev_lite is False:
-        if hub.options.powersensor_includes_car is True or hub.chargertype.type is ChargerType.NoCharger:
+        if hub.options.powersensor_includes_car or hub.chargertype.type is ChargerType.NoCharger:
             ret.append(PeaqHousePowerSensor(hub, config.entry_id))
         else:
             ret.append(PeaqPowerSensor(hub, config.entry_id))
-        #ret.append(PeaqPowerCostSensor(hub, config.entry_id))
         average_delta = 2 if hub.sensors.locale.data.is_quarterly(hub.sensors.locale.data) else 5
         ret.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION, timedelta(minutes=average_delta)))
         ret.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION_24H, timedelta(hours=24)))
@@ -57,8 +57,9 @@ async def gather_sensors(hub, config) -> list:
         ret.append(PowerCanaryMaxAmpSensor(hub, config.entry_id, 1))
         ret.append(PowerCanaryMaxAmpSensor(hub, config.entry_id, 3))
 
-    if hub.options.price.price_aware is True:
+    if hub.options.price.price_aware:
         ret.append(PeaqMoneySensor(hub, config.entry_id))
+        ret.append(PeaqPowerCostSensor(hub, config.entry_id))
         if hub.chargertype.type != ChargerType.NoCharger:
             ret.append(PeaqSessionCostSensor(hub, config.entry_id))
     return ret
@@ -70,7 +71,7 @@ async def gather_integration_sensors(hub, entry_id):
 
     if any(
             [
-                hub.options.powersensor_includes_car is True,
+                hub.options.powersensor_includes_car,
                 hub.chargertype.type is ChargerType.NoCharger,
             ]):
         if hub.chargertype.type is not ChargerType.NoCharger:
@@ -107,11 +108,12 @@ async def gather_integration_sensors(hub, entry_id):
                 entry_id=entry_id
             )
         )
-    # ret.append(
-    #     PeaqIntegrationCostSensor(
-    #             hub=hub,
-    #             name="energy_cost",
-    #             entry_id=entry_id
-    #         )
-    # )
+    if hub.options.price.price_aware:
+        ret.append(
+            PeaqIntegrationCostSensor(
+                    hub=hub,
+                    name="energy_cost_integral",
+                    entry_id=entry_id
+                )
+        )
     return ret

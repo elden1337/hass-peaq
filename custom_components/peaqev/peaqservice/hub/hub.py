@@ -150,9 +150,12 @@ class HomeAssistantHub:
                 _LOGGER.error(msg)
 
     @property
-    def watt_cost(self) -> float:
+    def watt_cost(self) -> int:
         if self.options.price.price_aware:
-            return float(self.sensors.power.total.value) * float(self.nordpool.state)
+            try:
+                return int(round(float(self.sensors.power.total.value) * float(self.nordpool.state), 0))
+            except:
+                return 0
         return 0
 
     """Composition below here"""
@@ -235,8 +238,8 @@ class HomeAssistantHub:
     def _set_coordinator(self) -> dict:
         ret = {}
         chargecontroller = {
-            "status": self.chargecontroller.status_type,
-            "status_string": self.chargecontroller.status_string,
+            "status":         self.chargecontroller.status_type,
+            "status_string":  self.chargecontroller.status_string,
             "is_initialized": self.chargecontroller.is_initialized}
         ret["chargecontroller"] = chargecontroller
         # killswitch = {
@@ -245,6 +248,7 @@ class HomeAssistantHub:
         # }
         # ret["killswitch"] = killswitch
         return ret
+
     def _set_observers(self) -> None:
         self.observer.add("prices changed", self._update_prices)
         self.observer.add("monthly average price changed", self._update_average_monthly_price)

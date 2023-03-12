@@ -42,9 +42,12 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
 
     for i in integrationsensors:
         peaqutilitysensors.append(PeaqUtilitySensor(hub, i, hub.sensors.locale.data.peak_cycle, METER_OFFSET, config.entry_id))
-    # if not hub.options.peaqev_lite:
-    #     peaqutilitysensors.append(PeaqUtilityCostSensor(hub, f"sensor.{DOMAIN}_wattage_cost", "daily", METER_OFFSET, config.entry_id))
-    #     peaqutilitysensors.append(PeaqUtilityCostSensor(hub, f"sensor.{DOMAIN}_wattage_cost", "monthly", METER_OFFSET, config.entry_id))
+    # if not hub.options.peaqev_lite and hub.options.price.price_aware:
+    #     energy_cost = "energy_cost_integral"
+    #     peaqutilitysensors.append(PeaqUtilitySensor(hub, ex.nametoid(CONSUMPTION_TOTAL_NAME), TimePeriods.Daily, METER_OFFSET, config.entry_id))
+    #     peaqutilitysensors.append(PeaqUtilitySensor(hub, ex.nametoid(CONSUMPTION_TOTAL_NAME), TimePeriods.Monthly, METER_OFFSET, config.entry_id))
+    #     peaqutilitysensors.append(PeaqUtilityCostSensor(hub, energy_cost, TimePeriods.Daily, METER_OFFSET, config.entry_id))
+    #     peaqutilitysensors.append(PeaqUtilityCostSensor(hub, energy_cost, TimePeriods.Monthly, METER_OFFSET, config.entry_id))
 
     async_add_entities(peaqutilitysensors, update_before_add=True)
 
