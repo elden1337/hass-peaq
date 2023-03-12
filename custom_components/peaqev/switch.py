@@ -66,6 +66,7 @@ class PeaqSwitch(SwitchEntity, RestoreEntity):
         state = await super().async_get_last_state()
         if state:
             self._state = state.state
-            self.hub.observer.broadcast("update charger enabled", self._state)
+            _state = True if state.state == "on" else False
+            self.hub.observer.broadcast("update charger enabled", _state)
         else:
             self._state = self.hub.enabled
