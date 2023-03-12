@@ -50,9 +50,8 @@ class Observer:
         if self._ok_to_broadcast(command[0]):
             if command[1] > time.time():
                 for func in self._subscribers[command[0]]:
-                    if command[2]:
-                        if len(command[2]):
-                            func(command[2])
+                    if len(command) == 3:
+                        func(command[2])
                     else:
                         func()
             self._broadcast_queue.remove(command)
