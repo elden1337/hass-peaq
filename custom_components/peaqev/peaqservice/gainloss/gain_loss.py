@@ -55,7 +55,7 @@ class GainLoss:
         return ret.get(time_period)
 
     @staticmethod
-    def _get_entity(self, time_period: TimePeriods, resulttype: str):
+    def _get_entity(time_period: TimePeriods, resulttype: str):
         ret = {
             TimePeriods.Daily:   {
                 CONSUMPTION: "sensor.peaqev_energy_including_car_daily",

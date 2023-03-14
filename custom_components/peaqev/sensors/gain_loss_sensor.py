@@ -16,7 +16,7 @@ class GainLossSensor(SensorEntity):
         self._attr_name = f"{self._hub.hubname} gain/loss {timeperiod.value.lower()}"
         self._state = None
         self._timeperiod = timeperiod
-        self._attr_icon = "mdi:elevation-decline"
+        self._attr_icon = "mdi:cash-clock"
         self._attr_available = True
         self.update()
 
