@@ -96,7 +96,7 @@ class NordPoolUpdater:
         _new = self.get_average(datetime.now().day)
         if self.model.average_month != _new:
             self.model.average_month = _new
-            self.hub.observer.broadcast("monthly average price changed")
+            self.hub.observer.broadcast("monthly average price changed", self.model.average_month)
 
     async def _update_set_prices(self, result: dict) -> bool:
         ret = False
@@ -108,7 +108,7 @@ class NordPoolUpdater:
             ret = True
         if len(self.model.average_data) >= 7 and self.model.average_weekly != self.get_average(7):
             self.model.average_weekly = self.get_average(7)
-            self.hub.observer.broadcast("weekly average price changed")
+            self.hub.observer.broadcast("weekly average price changed", self.model.average_weekly)
         self.model.currency = result.get("currency")
         self.state = result.get("state")
         if "avg_data" in result.keys():

@@ -18,6 +18,7 @@ from peaqevcore.services.timer.timer import Timer
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
+from custom_components.peaqev.peaqservice.gainloss.gain_loss import GainLoss
 from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import ChargeControllerFactory
 from custom_components.peaqev.peaqservice.hub.factories.chargertype_factory import ChargerTypeFactory
 from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import HourselectionFactory
@@ -71,6 +72,7 @@ class HomeAssistantHub:
         self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)
         self.power_canary = PowerCanary(hub=self)
         self.initializer = HubInitializer(self)
+        self.gainloss = GainLoss(self)
 
         tracker_entities = []
 
@@ -201,13 +203,13 @@ class HomeAssistantHub:
         self.prices = prices[0]
         self.prices_tomorrow = prices[1]
 
-    def _update_average_monthly_price(self) -> None:
-        if self.options.price.price_aware:
-            self.hours.update_top_price(self.nordpool.average_month)
+    def _update_average_monthly_price(self, val) -> None:
+        if self.options.price.price_aware and isinstance(val, float):
+            self.hours.update_top_price(val)
 
-    def _update_average_weekly_price(self) -> None:
-        if hasattr(self, "hours") and self.options.price.price_aware:
-            self.hours.adjusted_average = self.nordpool.average_weekly
+    def _update_average_weekly_price(self, val) -> None:
+        if self.options.price.price_aware and isinstance(val, float):
+            self.hours.adjusted_average = val
 
     @property
     def charger_done(self) -> bool:
