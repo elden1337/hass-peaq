@@ -47,16 +47,14 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     options.fuse_type = await _get_existing_param(conf, "mains", "")
     ci = {}
 
-    if options.peaqev_lite:
-        hub = HomeAssistantHub(hass, options, DOMAIN)
-    else:
+    if options.peaqev_lite is False:
         ci["powersensor"] = conf.data["name"]
         options.powersensor = conf.data["name"]
 
-        unsub_options_update_listener = conf.add_update_listener(options_update_listener)
-        ci["unsub_options_update_listener"] = unsub_options_update_listener
-        hass.data[DOMAIN][conf.entry_id] = ci
-        hub = HomeAssistantHub(hass, options, DOMAIN)
+    unsub_options_update_listener = conf.add_update_listener(options_update_listener)
+    ci["unsub_options_update_listener"] = unsub_options_update_listener
+    hass.data[DOMAIN][conf.entry_id] = ci
+    hub = HomeAssistantHub(hass, options, DOMAIN)
 
     hass.data[DOMAIN]["hub"] = hub
 
@@ -90,7 +88,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     hass.services.async_register(DOMAIN, "override_nonhours", servicehandler_override_nonhours)
     hass.services.async_register(DOMAIN, "scheduler_set", servicehandler_scheduler_set)
     hass.services.async_register(DOMAIN, "scheduler_cancel", servicehandler_scheduler_cancel)
-    #hass.config_entries.async_setup_platforms(conf, PLATFORMS)
+
     await hass.config_entries.async_forward_entry_setups(conf, PLATFORMS)
 
     return True
