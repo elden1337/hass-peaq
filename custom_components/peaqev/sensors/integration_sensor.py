@@ -3,9 +3,13 @@ from homeassistant.components.integration.const import METHOD_TRAPEZOIDAL
 from homeassistant.components.integration.sensor import (
     IntegrationSensor
 )
-from homeassistant.components.sensor import SensorDeviceClass
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorStateClass
+)
 from homeassistant.const import (
-    TIME_HOURS
+    TIME_HOURS,
+    ENERGY_KILO_WATT_HOUR
 )
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
@@ -20,7 +24,7 @@ class PeaqIntegrationCostSensor(IntegrationSensor):
         self.hub = hub
         self._attr_name = f"{self.hub.hubname} {name}"
         self._attr_unique_id = f"{DOMAIN}_{self.hub.hub_id}_{self._attr_name}"
-        self._unit_of_measurement = "kWh"
+        self._attr_unit_of_measurement = ENERGY_KILO_WATT_HOUR
 
         super().__init__(
             integration_method=METHOD_TRAPEZOIDAL,
@@ -31,6 +35,11 @@ class PeaqIntegrationCostSensor(IntegrationSensor):
             unit_prefix="k",
             unit_time=TIME_HOURS
         )
+
+    @property
+    def state_class(self):
+        """Return state class of unit."""
+        return SensorStateClass.TOTAL_INCREASING
 
     @property
     def unique_id(self):
@@ -50,7 +59,7 @@ class PeaqIntegrationSensor(IntegrationSensor):
         self.hub = hub
         self._attr_name = f"{self.hub.hubname} {name}"
         self._attr_unique_id = f"{DOMAIN}_{self.hub.hub_id}_{self._attr_name}"
-        self._unit_of_measurement = "kWh"
+        self._attr_unit_of_measurement = ENERGY_KILO_WATT_HOUR
 
         super().__init__(
             integration_method=METHOD_TRAPEZOIDAL,
@@ -61,6 +70,11 @@ class PeaqIntegrationSensor(IntegrationSensor):
             unit_prefix="k",
             unit_time=TIME_HOURS
         )
+
+    @property
+    def state_class(self):
+        """Return state class of unit."""
+        return SensorStateClass.TOTAL_INCREASING
 
     @property
     def unique_id(self):

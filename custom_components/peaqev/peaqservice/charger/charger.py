@@ -54,9 +54,6 @@ class Charger:
                 self.params.chargecontroller_state = val
                 self.charge()
 
-    # "status_string": self.chargecontroller.status_string,
-    # "is_initialized": self.chargecontroller.is_initialized}
-
     async def charge(self) -> None:
         """Main function to turn charging on or off"""
         if self._charger.type is ChargerType.NoCharger:
@@ -77,7 +74,7 @@ class Charger:
         else:
             if self.charger_active and self.params.running:
                 if self.hub.sensors.power.killswitch.is_dead:
-                    _LOGGER.debug("Your powersensor has failed to update peaqev for more than {_killswitch.get('total_timer')} seconds. Therefore charging is paused until it comes alive again.")
+                    _LOGGER.debug(f"Your powersensor has failed to update peaqev for more than {self.hub.sensors.power.killswitch.total_timer} seconds. Therefore charging is paused until it comes alive again.")
                 elif self.hub.enabled:
                     _LOGGER.debug("Detected charger running outside of peaqev-session, overtaking command and pausing.")
                 await self._pause_charger()
