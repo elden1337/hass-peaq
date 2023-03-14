@@ -1,7 +1,7 @@
 
 from homeassistant.components.utility_meter.sensor import UtilityMeterSensor
 from peaqevcore.models.locale.enums.time_periods import TimePeriods
-import custom_components.peaqev.peaqservice.util.extensionmethods as ex
+
 from custom_components.peaqev.const import DOMAIN
 from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
