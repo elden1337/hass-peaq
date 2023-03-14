@@ -49,6 +49,27 @@ class PeaqUtilityCostSensor(UtilityMeterSensor):
     def device_info(self):
         return {"identifiers": {(DOMAIN, self.hub.hub_id, POWERCONTROLS)}}
 
+def create_utility_sensor(hub, sensor: any, meter_type: str, meter_offset: str, entry_id: any):
+    name = f"{hub.hubname} {sensor} {meter_type.lower()}"
+    unique_id = f"{DOMAIN}_{entry_id}_{nametoid(name)}"
+    entity = f"sensor.{DOMAIN.lower()}_{sensor}"
+    return _utility_sensor(meter_offset, meter_type, name, entity, unique_id)
+
+def _utility_sensor(meter_offset, meter_type, name, entity, unique_id):
+    return UtilityMeterSensor(
+        cron_pattern="{minute} * * * *",
+            delta_values=0,
+            meter_offset=meter_offset,
+            meter_type=meter_type,
+            name=name,   
+            net_consumption=True,
+            parent_meter=entity,
+            source_entity=entity,
+            tariff_entity=None,
+            tariff=None,
+            unique_id = unique_id
+    )
+
 class PeaqUtilitySensor(UtilityMeterSensor):
     def __init__(self, hub, sensor: any, meter_type: TimePeriods, meter_offset: str, entry_id: any):
         self._entry_id = entry_id
