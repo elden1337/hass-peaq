@@ -1,5 +1,6 @@
-from peaqevcore.models.locale.enums.time_periods import TimePeriods
 import logging
+
+from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
 CONSUMPTION = "consumption"
 COST = "cost"
@@ -21,18 +22,17 @@ class GainLoss:
         if consumption is not None and cost is not None:
             if any([
                 consumption.state == "unknown",
-                cost.state == "unknown"
+                consumption.state == "unavailable",
+                cost.state == "unknown",
+                cost.state == "unavailable"
             ]):
                 return ret
             average = self._get_average(time_period)
-            cost_divided = float(cost.state)# / 1000
+            cost_divided = float(cost.state)
             consumptionf = float(consumption.state)
             if consumptionf > 0 and cost_divided > 0 and average is not None:
                 net = cost_divided / consumptionf
                 ret = round((net / average) - 1,4)
-                #_LOGGER.debug(f"calculating ret-{time_period.value} {ret} for consumption: {consumptionf}, cost: {cost_divided}, average: {average}")
-            # else:
-            #     _LOGGER.debug(f"consumption: {consumptionf}, cost: {cost_divided}, average: {average}")
         return ret
 
     def _update_monthly_average(self, val):
