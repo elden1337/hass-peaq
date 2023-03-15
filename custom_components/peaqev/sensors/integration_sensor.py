@@ -37,6 +37,10 @@ class PeaqIntegrationCostSensor(IntegrationSensor):
         )
 
     @property
+    def entity_registry_visible_default(self) -> bool:
+        return False
+
+    @property
     def state_class(self):
         """Return state class of unit."""
         return SensorStateClass.TOTAL_INCREASING
