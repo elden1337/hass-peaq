@@ -51,7 +51,7 @@ class IChargeController:
                 ret = self._get_status_no_charger()
             case _:
                 ret = self._get_status()
-        self._status_type = ret
+        self.status_type = ret
         return ret.name
 
     @property
