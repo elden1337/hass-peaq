@@ -80,7 +80,6 @@ async def _setup_extra_utilities(hub, config):
     ret = []
     if not hub.options.peaqev_lite and hub.options.price.price_aware:
         energy_cost = "energy_cost_integral"
-        ret.append(PeaqUtilityCostSensor(hub, energy_cost, QUARTER_HOURLY, METER_OFFSET, config.entry_id))
         ret.append(PeaqUtilityCostSensor(hub, energy_cost, DAILY, METER_OFFSET, config.entry_id))
         ret.append(PeaqUtilityCostSensor(hub, energy_cost, MONTHLY, METER_OFFSET, config.entry_id))
     return ret

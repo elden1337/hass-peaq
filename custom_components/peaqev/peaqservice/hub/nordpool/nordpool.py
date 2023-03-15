@@ -112,7 +112,9 @@ class NordPoolUpdater:
         self.model.currency = result.get("currency")
         self.state = result.get("state")
         if "avg_data" in result.keys():
-            self.add_average_data(result.get("avg_data"))
+            daily_avg = result.get("avg_data")
+            self.add_average_data(daily_avg)
+            self.hub.observer.broadcast("daily average price changed", daily_avg)
             self._update_average_month()
         return ret
 
