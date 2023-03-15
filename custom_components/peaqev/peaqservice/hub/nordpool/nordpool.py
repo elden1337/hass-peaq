@@ -23,24 +23,6 @@ class NordPoolUpdater:
     def currency(self) -> str:
         return self.model.currency
 
-    # @property
-    # def prices(self) -> list:
-    #     return self.model.prices
-    #
-    # @prices.setter
-    # def prices(self, val) -> None:
-    #     if self.model.prices != val:
-    #         self.model.prices = val
-
-    # @property
-    # def prices_tomorrow(self) -> list:
-    #     return self.model.prices_tomorrow
-
-    # @prices_tomorrow.setter
-    # def prices_tomorrow(self, val) -> None:
-    #     if self.model.prices_tomorrow != val:
-    #         self.model.prices_tomorrow = val
-
     @property
     def state(self) -> float:
         return self.model.state
@@ -113,9 +95,11 @@ class NordPoolUpdater:
         self.state = result.get("state")
         if "avg_data" in result.keys():
             daily_avg = result.get("avg_data")
-            self.add_average_data(daily_avg)
-            self.hub.observer.broadcast("daily average price changed", daily_avg)
-            self._update_average_month()
+            if daily_avg != self.model.daily_average:
+                self.model.daily_average = daily_avg
+                self.add_average_data(daily_avg)
+                self.hub.observer.broadcast("daily average price changed", daily_avg)
+                self._update_average_month()
         return ret
 
     def _setup_nordpool(self):
