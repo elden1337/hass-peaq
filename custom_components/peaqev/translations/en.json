@@ -38,7 +38,7 @@
       "misc": {
         "data": {
           "mains": "(Optional), pick your main fuses to allow peaqev to act as an ampguard.",
-          "blocknocturnal": "Block easee between 23-06 due to safety concerns."
+          "blocknocturnal": "Block charging between 23-06 due to safety concerns."
         },
         "description": "Experimental and extra options."
       }
@@ -109,7 +109,7 @@
       "misc": {
         "data": {
           "mains": "(Optional), pick your main fuses to allow peaqev to act as an ampguard.",
-          "blocknocturnal": "Block easee between 23-06 due to safety concerns."
+          "blocknocturnal": "Block charging between 23-06 due to safety concerns."
         },
         "description": "Experimental and extra options."
       }
