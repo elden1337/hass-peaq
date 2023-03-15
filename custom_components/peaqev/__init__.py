@@ -1,6 +1,7 @@
 """The peaqev integration."""
 from __future__ import annotations
 
+import asyncio
 import logging
 
 from homeassistant.config_entries import ConfigEntry
@@ -23,29 +24,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][conf.entry_id] = conf.data
 
-    options = HubOptions()
-    options.peaqev_lite = bool(conf.data.get("peaqevtype") == TYPELITE)
-    options.locale = conf.data.get("locale", "")
-    options.charger.chargertype = conf.data.get("chargertype", "")
-    if options.charger.chargertype == ChargerType.Outlet.value:
-        options.charger.powerswitch = conf.data.get("outletswitch", "")
-        options.charger.powermeter = conf.data.get("outletpowermeter", "")
-    elif options.charger.chargertype != ChargerType.NoCharger.value:
-        options.charger.chargerid = conf.data.get("chargerid", "")
-    if options.charger.chargertype == ChargerType.NoCharger.value:
-        options.powersensor_includes_car = True
-    else:
-        options.powersensor_includes_car = conf.data.get("powersensorincludescar", False)
-    options.startpeaks = conf.options.get("startpeaks", conf.data.get("startpeaks"))
-    options.cautionhours = await _get_existing_param(conf, "cautionhours", [])
-    options.nonhours = await _get_existing_param(conf, "nonhours", [])
-    options.price.price_aware = await _get_existing_param(conf, "priceaware", False)
-    options.price.min_price = await _get_existing_param(conf, "min_priceaware_threshold_price", 0)
-    options.price.top_price = await _get_existing_param(conf, "absolute_top_price", 0)
-    options.price.dynamic_top_price = await _get_existing_param(conf, "dynamic_top_price", False)
-    options.price.cautionhour_type = await _get_existing_param(conf, "cautionhour_type", "intermediate")
-    options.fuse_type = await _get_existing_param(conf, "mains", "")
-    options.blocknocturnal = await _get_existing_param(conf, "blocknocturnal", False)
+    options = await _set_options(conf)
     ci = {}
 
     if options.peaqev_lite is False:
@@ -102,10 +81,44 @@ async def options_update_listener(hass: HomeAssistant, conf: ConfigEntry):
 
 async def async_unload_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     """Unload a config entry."""
-    unload_ok = await hass.config_entries.async_unload_platforms(conf, PLATFORMS)
+    unload_ok = all(
+        await asyncio.gather(
+            *[
+                hass.config_entries.async_forward_entry_unload(conf, component)
+                for component in PLATFORMS
+            ]
+        )
+    )
     if unload_ok:
         hass.data[DOMAIN].pop(conf.entry_id)
     return unload_ok
+
+
+async def _set_options(conf) -> HubOptions:
+    options = HubOptions()
+    options.peaqev_lite = bool(conf.data.get("peaqevtype") == TYPELITE)
+    options.locale = conf.data.get("locale", "")
+    options.charger.chargertype = conf.data.get("chargertype", "")
+    if options.charger.chargertype == ChargerType.Outlet.value:
+        options.charger.powerswitch = conf.data.get("outletswitch", "")
+        options.charger.powermeter = conf.data.get("outletpowermeter", "")
+    elif options.charger.chargertype != ChargerType.NoCharger.value:
+        options.charger.chargerid = conf.data.get("chargerid", "")
+    if options.charger.chargertype == ChargerType.NoCharger.value:
+        options.powersensor_includes_car = True
+    else:
+        options.powersensor_includes_car = conf.data.get("powersensorincludescar", False)
+    options.startpeaks = conf.options.get("startpeaks", conf.data.get("startpeaks"))
+    options.cautionhours = await _get_existing_param(conf, "cautionhours", [])
+    options.nonhours = await _get_existing_param(conf, "nonhours", [])
+    options.price.price_aware = await _get_existing_param(conf, "priceaware", False)
+    options.price.min_price = await _get_existing_param(conf, "min_priceaware_threshold_price", 0)
+    options.price.top_price = await _get_existing_param(conf, "absolute_top_price", 0)
+    options.price.dynamic_top_price = await _get_existing_param(conf, "dynamic_top_price", False)
+    options.price.cautionhour_type = await _get_existing_param(conf, "cautionhour_type", "intermediate")
+    options.fuse_type = await _get_existing_param(conf, "mains", "")
+    options.blocknocturnal = await _get_existing_param(conf, "blocknocturnal", False)
+    return options
 
 
 async def _get_existing_param(conf, parameter: str, default_val: any):
