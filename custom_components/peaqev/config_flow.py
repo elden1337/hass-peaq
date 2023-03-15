@@ -166,18 +166,33 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.data["mains"] = user_input["mains"]
             return self.async_create_entry(title=self.info["title"], data=self.data)
 
+        schema = await set_misc_options()
+
         return self.async_show_form(
             step_id="misc",
             last_step=True,
-            data_schema=vol.Schema(
+            data_schema=schema
+        )
+
+
+async def set_misc_options(data):
+    if data["chargertype"] == ChargerType.Easee.value:
+        return vol.Schema(
+                {
+                    vol.Optional(
+                        "mains",
+                        default="",
+                    ): vol.In(FUSES_LIST),
+                    vol.Optional("blocknocturnal", default=False): cv.boolean,
+                })
+    else:
+        return vol.Schema(
                 {
                     vol.Optional(
                         "mains",
                         default="",
                     ): vol.In(FUSES_LIST)
                 })
-        )
-
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry):

@@ -45,6 +45,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     options.price.dynamic_top_price = await _get_existing_param(conf, "dynamic_top_price", False)
     options.price.cautionhour_type = await _get_existing_param(conf, "cautionhour_type", "intermediate")
     options.fuse_type = await _get_existing_param(conf, "mains", "")
+    options.blocknocturnal = await _get_existing_param(conf, "blocknocturnal", False)
     ci = {}
 
     if options.peaqev_lite is False:
