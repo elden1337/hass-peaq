@@ -164,18 +164,22 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Misc options"""
         if user_input is not None:
             self.data["mains"] = user_input["mains"]
+            self.data["blocknocturnal"] = user_input["blocknocturnal"]
             return self.async_create_entry(title=self.info["title"], data=self.data)
 
-        return self.async_show_form(
-            step_id="misc",
-            last_step=True,
-            data_schema=vol.Schema(
+        schema = vol.Schema(
                 {
                     vol.Optional(
                         "mains",
                         default="",
-                    ): vol.In(FUSES_LIST)
+                    ): vol.In(FUSES_LIST),
+                    vol.Optional("blocknocturnal", default=False): cv.boolean,
                 })
+
+        return self.async_show_form(
+            step_id="misc",
+            last_step=True,
+            data_schema=schema
         )
 
 
@@ -279,19 +283,23 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Misc options"""
         if user_input is not None:
             self.options["mains"] = user_input["mains"]
+            self.options["blocknocturnal"] = user_input["blocknocturnal"]
             return self.async_create_entry(title="", data=self.options)
 
         mainsvalue = await self._get_existing_param("mains", "")
-        _LOGGER.debug(f"existing mainsvalue is: {mainsvalue}")
+        blocknocturnal = await self._get_existing_param("blocknocturnal", False)
+
+        schema = vol.Schema(
+            {
+                vol.Optional(
+                    "mains",
+                    default=mainsvalue,
+                ): vol.In(FUSES_LIST),
+                vol.Optional("blocknocturnal", default=blocknocturnal): cv.boolean,
+            })
+
         return self.async_show_form(
             step_id="misc",
             last_step=True,
-            data_schema=vol.Schema(
-                {
-                    vol.Optional(
-                        "mains",
-                        default=mainsvalue,
-                    ): vol.In(FUSES_LIST)
-                })
-
+            data_schema=schema
         )

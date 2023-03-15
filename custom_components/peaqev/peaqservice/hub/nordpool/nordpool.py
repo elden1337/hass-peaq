@@ -13,34 +13,15 @@ AVERAGE_MAX_LEN = 31
 
 
 class NordPoolUpdater:
-    def __init__(self, hass, hub, is_active: bool = True):
+    def __init__(self, hub, is_active: bool = True):
         self.model = NordPoolModel()
-        self._hass = hass
-        self._hub = hub
+        self.hub = hub
         if is_active:
             self._setup_nordpool()
 
     @property
     def currency(self) -> str:
         return self.model.currency
-
-    @property
-    def prices(self) -> list:
-        return self.model.prices
-
-    @prices.setter
-    def prices(self, val) -> None:
-        if self.model.prices != val:
-            self.model.prices = val
-
-    @property
-    def prices_tomorrow(self) -> list:
-        return self.model.prices_tomorrow
-
-    @prices_tomorrow.setter
-    def prices_tomorrow(self, val) -> None:
-        if self.model.prices_tomorrow != val:
-            self.model.prices_tomorrow = val
 
     @property
     def state(self) -> float:
@@ -56,6 +37,10 @@ class NordPoolUpdater:
         return self.model.average_month
 
     @property
+    def average_weekly(self) -> float:
+        return self.model.average_weekly
+
+    @property
     def average_data(self) -> list:
         return self.model.average_data
 
@@ -64,59 +49,62 @@ class NordPoolUpdater:
         return len(self.model.average_data) >= AVERAGE_MAX_LEN
 
     async def update_nordpool(self):
-        ret = self._hass.states.get(self.nordpool_entity)
+        ret = self.hub.state_machine.states.get(self.nordpool_entity)
+        _result = {}
         if ret is not None:
             try:
-                ret_attr = list(ret.attributes.get("today"))
-                self.prices = ret_attr
+                _result["today"] = list(ret.attributes.get("today"))
             except Exception as e:
                 _LOGGER.exception(f"Could not parse today's prices from Nordpool. Unsolveable error. {e}")
                 return
             try:
-                ret_attr_tomorrow = list(ret.attributes.get("tomorrow"))
-                self.prices_tomorrow = ret_attr_tomorrow
+                _result["tomorrow"] = list(ret.attributes.get("tomorrow"))
             except Exception as e:
                 _LOGGER.warning(f"Couldn't parse tomorrow's prices from Nordpool. Array will be empty. {e}")
-                self.prices_tomorrow = []
-            ret_attr_currency = str(ret.attributes.get("currency"))
-            self.model.currency = ret_attr_currency
-            self.state = ret.state
+                _result["tomorrow"] = []
+            _result["currency"] = str(ret.attributes.get("currency"))
+            _result["state"] = ret.state
             try:
-                _avg_data = str(ret.attributes.get("average"))
-                self.add_average_data(float(_avg_data))
-                self._update_average_month()
+                _avg_data = float(str(ret.attributes.get("average")))
+                _result["avg_data"] = _avg_data
             except Exception as ee:
-                _LOGGER.warning(f"Could not parse today's average from Nordpool. data: {_avg_data} exception: {ee}")
-            _LOGGER.debug(f"prices ready. proceeding to check against hours-model")
-            if self._update_set_prices():
-                self._hub.observer.broadcast("prices changed")
-        elif self._hub.is_initialized:
+                _LOGGER.warning(f"Could not parse today's average from Nordpool. exception: {ee}")
+            if await self._update_set_prices(_result):
+                self.hub.observer.broadcast("prices changed", [self.model.prices, self.model.prices_tomorrow])
+        elif self.hub.is_initialized:
             _LOGGER.error("Could not get nordpool-prices")
 
     def _update_average_month(self) -> None:
         _new = self.get_average(datetime.now().day)
         if self.model.average_month != _new:
             self.model.average_month = _new
-            _LOGGER.debug(f"The options for dynamic top price is currently: {self._hub.options.price.dynamic_top_price} with avg-month price: {self.model.average_month}")
-            self._hub.hours.update_top_price(self.model.average_month)
+            self.hub.observer.broadcast("monthly average price changed", self.model.average_month)
 
-    def _update_set_prices(self) -> bool:
+    async def _update_set_prices(self, result: dict) -> bool:
         ret = False
-        if self._hub.hours.prices != self.model.prices:
-            self._hub.hours.prices = self.model.prices
+        if self.model.prices != result.get("today"):
+            self.model.prices = result.get("today")
             ret = True
-        if self._hub.hours.prices_tomorrow != self.model.prices_tomorrow:
-            self._hub.hours.prices_tomorrow = self.model.prices_tomorrow
+        if self.model.prices_tomorrow != result.get("tomorrow"):
+            self.model.prices_tomorrow = result.get("tomorrow")
             ret = True
-        if len(self.model.average_data) >= 7 and self._hub.hours.adjusted_average != self.get_average(7):
-            self._hub.hours.adjusted_average = self.get_average(7)
-        if self._hub.options.price.dynamic_top_price:
-            self._hub.hours.update_top_price(self.model.average_month)
+        if len(self.model.average_data) >= 7 and self.model.average_weekly != self.get_average(7):
+            self.model.average_weekly = self.get_average(7)
+            self.hub.observer.broadcast("weekly average price changed", self.model.average_weekly)
+        self.model.currency = result.get("currency")
+        self.state = result.get("state")
+        if "avg_data" in result.keys():
+            daily_avg = result.get("avg_data")
+            if daily_avg != self.model.daily_average:
+                self.model.daily_average = daily_avg
+                self.add_average_data(daily_avg)
+                self.hub.observer.broadcast("daily average price changed", daily_avg)
+                self._update_average_month()
         return ret
 
     def _setup_nordpool(self):
         try:
-            entities = template.integration_entities(self._hass, NORDPOOL)
+            entities = template.integration_entities(self.hub.state_machine, NORDPOOL)
             if len(list(entities)) < 1:
                 raise Exception("no entities found for Nordpool.")
             if len(list(entities)) == 1:
@@ -124,10 +112,10 @@ class NordPoolUpdater:
                 _LOGGER.debug(f"Nordpool has been set up and is ready to be used with {self.nordpool_entity}")
                 self.update_nordpool()
             else:
-                self._hub.options.price.price_aware = False
+                self.hub.options.price.price_aware = False  # todo: composition
                 _LOGGER.error(f"more than one Nordpool entity found. Disabling Priceawareness until reboot of HA.")
         except Exception as e:
-            self._hub.options.price.price_aware = False
+            self.hub.options.price.price_aware = False  # todo: composition
             _LOGGER.error(f"Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness until reboot of HA: {e}")
 
     def import_average_data(self, incoming: list):

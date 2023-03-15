@@ -28,12 +28,12 @@ WARNING_THRESHOLD = 0.75
 class PowerCanary:
     def __init__(self, hub):
         self._enabled: bool = False
-        self._hub = hub
+        self.hub = hub
         self.model = PowerCanaryModel(
             warning_threshold=WARNING_THRESHOLD,
             cutoff_threshold=CUTOFF_THRESHOLD,
             fuse=Fuses.parse_from_config(hub.options.fuse_type),
-            allow_amp_adjustment=self._hub.chargertype.servicecalls.options.allowupdatecurrent
+            allow_amp_adjustment=self.hub.chargertype.servicecalls.options.allowupdatecurrent
         )
         self._total_power = SmoothAverage(max_age=60, max_samples=30, ignore=0)
         self._validate()
@@ -47,7 +47,7 @@ class PowerCanary:
         """if returns false no charging can be conducted"""
         if self._enabled is False:
             return True
-        return self._hub.sensors.power.total.value < self.model.fuse_max * self.model.cutoff_threshold
+        return self.hub.sensors.power.total.value < self.model.fuse_max * self.model.cutoff_threshold
 
     @property
     def fuse(self) -> str:
@@ -92,15 +92,15 @@ class PowerCanary:
 
     def check_current_percentage(self):
         if not self.alive:
-            self._hub.observer.broadcast(command="power canary dead", timeout=10)
+            self.hub.observer.broadcast(command="power canary dead")
         if self.current_percentage >= self.model.warning_threshold:
-            self._hub.observer.broadcast(command="power canary warning", timeout=10)
+            self.hub.observer.broadcast(command="power canary warning")
 
     @property
     def max_current_amp(self) -> int:
         if not self.enabled:
             return -1
-        match self._hub.threshold.phases:
+        match self.hub.threshold.phases:
             case Phases.OnePhase.name:
                 return max(self.onephase_amps.values())
             case Phases.ThreePhase.name:
@@ -117,19 +117,17 @@ class PowerCanary:
 
         if ret is False and self.max_current_amp > -1:
             _LOGGER.warning(f"Power Canary cannot allow amp-increase due to the current power-draw. max-amp is:{self.max_current_amp} ")
-        #else:
-            #_LOGGER.debug(f"Power Canary allows charger to set {new_amps}A for {self._hub.threshold.phases}.")
         return ret
 
     def _get_currently_allowed_amps(self, amps) -> dict:
         """get the currently allowed amps based on the current power draw"""
         _max = (self.model.fuse_max * self.model.cutoff_threshold)
-        return {k: v for (k, v) in amps.items() if k + self._hub.sensors.power.total.value < _max}
+        return {k: v for (k, v) in amps.items() if k + self.hub.sensors.power.total.value < _max}
 
     def _validate(self):
         if self.model.fuse_max == 0:
             return
-        if self._hub.options.peaqev_lite:
+        if self.hub.options.peaqev_lite:
             return
         if self.model.is_valid:
             self._enabled = True

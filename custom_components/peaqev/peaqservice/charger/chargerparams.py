@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from peaqevcore.models.chargecontroller_states import ChargeControllerStates
+
 
 @dataclass
 class ChargerParams:
@@ -8,3 +10,4 @@ class ChargerParams:
     session_active: bool = False
     latest_charger_call: int = 0
     charger_state_mismatch: bool = False
+    chargecontroller_state: ChargeControllerStates = ChargeControllerStates.Idle

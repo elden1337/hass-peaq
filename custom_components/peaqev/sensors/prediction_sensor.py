@@ -30,8 +30,7 @@ class PeaqPredictionSensor(PowerDevice):
         return "mdi:magic-staff"
 
     def update(self) -> None:
-        self._state = self._hub.prediction.predictedenergy
-        #_LOGGER.debug(f"pushing to predictions. minute: {datetime.now().minute}, second: {datetime.now().second}, moving-avg: {self._hub.sensors.powersensormovingaverage.value}, totalhourlyenergy: {self._hub.sensors.totalhourlyenergy.value}, is_quarterly: {self._hub.sensors.locale.data.is_quarterly(self._hub.sensors.locale.data)}")
+        self._state = self.hub.prediction.predictedenergy  #todo: composition
 
 
 

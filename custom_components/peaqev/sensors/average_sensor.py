@@ -13,19 +13,19 @@ from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
 
 class PeaqAverageSensor(SensorFilter):
     def __init__(self, hub, entry_id, name, filtertimedelta):
-        self._hub = hub
+        self.hub = hub
         self._entry_id = entry_id
         self._attr_name = f"{hub.hubname} {name}"
         super().__init__(
             self._attr_name,
             self.unique_id,
-            self._hub.sensors.power.house.entity,
-            self._set_filters(self._hub, filtertimedelta)
+            self.hub.sensors.power.house.entity,
+            self._set_filters(self.hub, filtertimedelta)
         )
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._hub.hub_id, POWERCONTROLS)}}
+        return {"identifiers": {(DOMAIN, self.hub.hub_id, POWERCONTROLS)}}
 
     @property
     def unique_id(self):

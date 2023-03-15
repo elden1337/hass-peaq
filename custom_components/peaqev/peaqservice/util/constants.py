@@ -26,7 +26,8 @@ NAME = "name"
 CAUTIONHOURTYPE_NAMES =[
     str(CautionHourType.SUAVE.value).capitalize(),
     str(CautionHourType.INTERMEDIATE.value).capitalize(),
-    str(CautionHourType.AGGRESSIVE.value).capitalize()
+    str(CautionHourType.AGGRESSIVE.value).capitalize(),
+    str(CautionHourType.SCROOGE.value).capitalize(),
 ]
 
 TYPEREGULAR = "Regular (requires power sensor)"

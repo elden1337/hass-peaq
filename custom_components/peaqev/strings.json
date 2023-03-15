@@ -37,7 +37,8 @@
       },
       "misc": {
         "data": {
-          "mains": "[%key:common::config_flow::data::mains%]"
+          "mains": "[%key:common::config_flow::data::mains%]",
+          "blocknocturnal": "[%key:common::config_flow::data::blocknocturnal%]"
         }
       }
     }
@@ -106,7 +107,8 @@
       },
       "misc": {
         "data": {
-          "mains": "[%key:common::config_flow::data::mains%]"
+          "mains": "[%key:common::config_flow::data::mains%]",
+          "blocknocturnal": "[%key:common::config_flow::data::blocknocturnal%]"
         }
       }
     },

@@ -19,6 +19,8 @@ from custom_components.peaqev.peaqservice.util.constants import (
 _LOGGER = logging.getLogger(__name__)
 # docs: https://github.com/fondberg/easee_hass
 
+CHARGER_ID = "charger_id"
+ACTION_COMMAND = "action_command"
 
 class Easee(ChargerBase):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype, auth_required: bool = False):
@@ -99,36 +101,36 @@ class Easee(ChargerBase):
 
     @property
     def call_on(self) -> CallType:
-        return CallType("action_command", {
-            "charger_id":     self._chargerid,
-            "action_command": "start"
+        return CallType(ACTION_COMMAND, {
+            CHARGER_ID:     self._chargerid,
+            ACTION_COMMAND: "start"
         })
 
     @property
     def call_off(self) -> CallType:
-        return CallType("action_command", {
-            "charger_id":     self._chargerid,
-            "action_command": "stop"
+        return CallType(ACTION_COMMAND, {
+            CHARGER_ID:     self._chargerid,
+            ACTION_COMMAND: "stop"
         })
 
     @property
     def call_resume(self) -> CallType:
         return CallType("set_charger_dynamic_limit", {
             "current": "7",
-            "charger_id": self._chargerid
+            CHARGER_ID: self._chargerid
         })
 
     @property
     def call_pause(self) -> CallType:
         return CallType("set_charger_dynamic_limit", {
             "current": "0",
-            "charger_id": self._chargerid
+            CHARGER_ID: self._chargerid
         })
 
     @property
     def call_update_current(self) -> CallType:
         return CallType("set_charger_dynamic_limit", {
-            CHARGER:   "charger_id",
+            CHARGER:   CHARGER_ID,
             CHARGERID: self._chargerid,
             CURRENT:   "current"
         })
