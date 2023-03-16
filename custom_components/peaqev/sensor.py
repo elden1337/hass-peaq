@@ -67,7 +67,7 @@ async def _gather_all_sensors(hub, config, async_add_entities, hass) -> None:
 async def _gather_utility_sensors(hub, config, integrationsensors, hass):
     ret = []
     for i in integrationsensors:
-        ret.append(PeaqUtilitySensor(hub, i, hub.sensors.locale.data.peak_cycle, METER_OFFSET, config.entry_id))
+        ret.append(PeaqUtilitySensor(hub, i, hub.sensors.locale.data.peak_cycle, METER_OFFSET, config.entry_id, hass))
         if all([
             i == ex.nametoid(CONSUMPTION_TOTAL_NAME),
             hub.options.peaqev_lite is False,
