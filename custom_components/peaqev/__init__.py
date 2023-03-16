@@ -4,8 +4,8 @@ from __future__ import annotations
 import asyncio
 import logging
 
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry # pylint: disable=import-error
+from homeassistant.core import HomeAssistant # pylint: disable=import-error
 from peaqevcore.hub.hub_options import HubOptions
 
 from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
