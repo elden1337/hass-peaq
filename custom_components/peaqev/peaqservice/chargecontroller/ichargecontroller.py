@@ -188,15 +188,19 @@ class IChargeController:
         return ret
 
     def _is_done(self, charger_state) -> bool:
+        ret = False
         if len(self._charger_states.get(ChargeControllerStates.Done)) > 0:
             _states_test = charger_state in self._charger_states.get(ChargeControllerStates.Done)
             if _states_test:
                 self.__debug_log(f"'is_done' reported that charger is Done based on current charger state")
-            return _states_test
+                ret = _states_test
         _regular_test = time.time() - self._latest_charger_start > DONETIMEOUT
         if _regular_test:
             self.__debug_log(f"'is_done' reported that charger is Done because of idle-charging for more than {DONETIMEOUT} seconds.")
-        return _regular_test
+            ret = _regular_test
+        if ret and self.hub.sensors.charger_done is False:
+            self.hub.observer.broadcast("update charger done", True)
+        return ret
 
     def __debug_log(self, message: str):
         if time.time() - self._latest_debuglog > DEBUGLOG_TIMEOUT:
