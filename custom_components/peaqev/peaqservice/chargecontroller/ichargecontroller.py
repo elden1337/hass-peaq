@@ -59,9 +59,10 @@ class IChargeController:
         if not self.hub.is_initialized:
             return False
         if self.hub.is_initialized and not self._is_initalized:
-            self._is_initalized = True
-            self.__debug_log("Chargecontroller is initialized and ready to work!")
-        return True
+            self._is_initalized = self._check_initialized()
+            if self._is_initalized:
+                self.__debug_log("Chargecontroller is initialized and ready to work!")
+        return self._is_initalized
 
     @property
     def non_hours_display_model(self) -> list:
@@ -107,6 +108,15 @@ class IChargeController:
             val = self.hub.dynamic_caution_hours.get(hour)
             ret = f"Charging allowed at {int(val * 100)}% of peak"
         return ret
+
+    def _check_initialized(self) -> bool:
+        if not self.hub.options.peaqev_lite:
+            _state = self.hub.get_power_sensor_from_hass()
+            if _state is not None:
+                if _state > 0:
+                    return True
+            return False
+        return True
 
     def _get_status_outlet(self) -> ChargeControllerStates:
         ret = ChargeControllerStates.Error

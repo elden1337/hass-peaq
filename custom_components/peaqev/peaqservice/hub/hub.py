@@ -161,6 +161,12 @@ class HomeAssistantHub:
         return 0
 
     """Composition below here"""
+    def get_power_sensor_from_hass(self) -> float|None:
+        ret = self.state_machine.states.get(self.options.powersensor)
+        if ret is not None:
+            return float(ret.state)
+        return ret
+
     def get_chargerobject_value(self) -> str:
         ret = getattr(self.sensors.chargerobject, "value", "unknown")
         return ret.lower()
