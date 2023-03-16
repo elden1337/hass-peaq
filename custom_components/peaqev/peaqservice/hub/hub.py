@@ -187,8 +187,9 @@ class HomeAssistantHub:
     @prices.setter
     def prices(self, val) -> None:
         if self.options.price.price_aware:
-            _LOGGER.debug(f"setting today's prices with: {val}")
-            self.hours.prices = val
+            if self.hours.prices != val:
+                _LOGGER.debug(f"setting today's prices with: {val}")
+                self.hours.prices = val
 
     @property
     def prices_tomorrow(self) -> list:
@@ -199,8 +200,9 @@ class HomeAssistantHub:
     @prices_tomorrow.setter
     def prices_tomorrow(self, val) -> None:
         if self.options.price.price_aware:
-            _LOGGER.debug(f"setting tomorrow's prices with: {val}")
-            self.hours.prices_tomorrow = val
+            if self.hours.prices_tomorrow != val:
+                _LOGGER.debug(f"setting tomorrow's prices with: {val}")
+                self.hours.prices_tomorrow = val
 
     @property
     def is_free_charge(self) -> bool:
