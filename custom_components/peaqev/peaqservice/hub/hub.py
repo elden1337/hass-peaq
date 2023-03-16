@@ -164,7 +164,10 @@ class HomeAssistantHub:
     def get_power_sensor_from_hass(self) -> float|None:
         ret = self.state_machine.states.get(self.options.powersensor)
         if ret is not None:
-            return float(ret.state)
+            try:
+                return float(ret.state)
+            except:
+                return None
         return ret
 
     def get_chargerobject_value(self) -> str:
