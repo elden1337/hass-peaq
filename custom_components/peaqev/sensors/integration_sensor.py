@@ -1,16 +1,11 @@
 
-from homeassistant.components.integration.const import METHOD_TRAPEZOIDAL
-from homeassistant.components.integration.sensor import (
-    IntegrationSensor
-)
-from homeassistant.components.sensor import (
-    SensorDeviceClass,
-    SensorStateClass
-)
+from homeassistant.components.integration.const import METHOD_TRAPEZOIDAL # pylint: disable=import-error
+from homeassistant.components.integration.sensor import IntegrationSensor # pylint: disable=import-error
+from homeassistant.components.sensor import SensorDeviceClass # pylint: disable=import-error
 from homeassistant.const import (
     TIME_HOURS,
     ENERGY_KILO_WATT_HOUR
-)
+) # pylint: disable=import-error
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
@@ -41,11 +36,6 @@ class PeaqIntegrationCostSensor(IntegrationSensor):
         return False
 
     @property
-    def state_class(self):
-        """Return state class of unit."""
-        return SensorStateClass.TOTAL_INCREASING
-
-    @property
     def unique_id(self):
         """Return a unique ID to use for this sensor."""
         return f"{DOMAIN}_{self._entry_id}_{ex.nametoid(self._attr_name)}"
@@ -74,11 +64,6 @@ class PeaqIntegrationSensor(IntegrationSensor):
             unit_prefix="k",
             unit_time=TIME_HOURS
         )
-
-    @property
-    def state_class(self):
-        """Return state class of unit."""
-        return SensorStateClass.TOTAL_INCREASING
 
     @property
     def unique_id(self):
