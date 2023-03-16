@@ -45,11 +45,11 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
     """Add sensors for passed config_entry in HA."""
 
     hub = hass.data[DOMAIN]["hub"]
-    await _gather_all_sensors(hub, config, async_add_entities)
+    await _gather_all_sensors(hub, config, async_add_entities, hass)
 
-async def _gather_all_sensors(hub, config, async_add_entities) -> None:
+async def _gather_all_sensors(hub, config, async_add_entities, hass) -> None:
     async_add_entities(await _gather_sensors(hub, config), update_before_add=True)
-    async_add_entities(await _gather_integration_sensors(hub, config.entry_id), update_before_add=True)
+    await _gather_integration_sensors(hub, config.entry_id, async_add_entities)
 
     integrationsensors = []
     if not hub.options.peaqev_lite:
@@ -57,13 +57,14 @@ async def _gather_all_sensors(hub, config, async_add_entities) -> None:
     if hub.chargertype.type is not ChargerType.NoCharger:
         integrationsensors.append(ex.nametoid(CONSUMPTION_INTEGRAL_NAME))
 
-    async_add_entities(await _gather_utility_sensors(hub, config, integrationsensors), update_before_add=True)
-    async_add_entities(await _setup_extra_utilities(hub, config), update_before_add=True)
+    async_add_entities(await _gather_utility_sensors(hub, config, integrationsensors, hass))    
+    async_add_entities(await _setup_extra_utilities(hub, config, hass))
 
     if hub.chargertype.type is not ChargerType.NoCharger:
         async_add_entities([PeaqPeakSensor(hub, config.entry_id)], update_before_add=True)
 
-async def _gather_utility_sensors(hub, config, integrationsensors):
+
+async def _gather_utility_sensors(hub, config, integrationsensors, hass):
     ret = []
     for i in integrationsensors:
         ret.append(PeaqUtilitySensor(hub, i, hub.sensors.locale.data.peak_cycle, METER_OFFSET, config.entry_id))
@@ -72,16 +73,16 @@ async def _gather_utility_sensors(hub, config, integrationsensors):
             hub.options.peaqev_lite is False,
             hub.options.price.price_aware is True
         ]):
-            ret.append(PeaqUtilitySensor(hub, i, TimePeriods.Daily, METER_OFFSET, config.entry_id))
-            ret.append(PeaqUtilitySensor(hub, i, TimePeriods.Monthly, METER_OFFSET, config.entry_id))
+            ret.append(PeaqUtilitySensor(hub, i, TimePeriods.Daily, METER_OFFSET, config.entry_id, hass))
+            ret.append(PeaqUtilitySensor(hub, i, TimePeriods.Monthly, METER_OFFSET, config.entry_id, hass))
     return ret
 
-async def _setup_extra_utilities(hub, config):
+async def _setup_extra_utilities(hub, config, hass):
     ret = []
     if not hub.options.peaqev_lite and hub.options.price.price_aware:
         energy_cost = "energy_cost_integral"
-        ret.append(PeaqUtilityCostSensor(hub, energy_cost, DAILY, METER_OFFSET, config.entry_id))
-        ret.append(PeaqUtilityCostSensor(hub, energy_cost, MONTHLY, METER_OFFSET, config.entry_id))
+        ret.append(PeaqUtilityCostSensor(hub, energy_cost, DAILY, METER_OFFSET, config.entry_id, hass))
+        ret.append(PeaqUtilityCostSensor(hub, energy_cost, MONTHLY, METER_OFFSET, config.entry_id, hass))
     return ret
 
 async def _gather_sensors(hub, config) -> list:
@@ -117,7 +118,7 @@ async def _gather_sensors(hub, config) -> list:
             ret.append(PeaqSessionCostSensor(hub, config.entry_id))
     return ret
 
-async def _gather_integration_sensors(hub, entry_id):
+async def _gather_integration_sensors(hub, entry_id, async_add_entities):
     ret = []
     if hub.options.peaqev_lite:
         return ret
@@ -169,4 +170,4 @@ async def _gather_integration_sensors(hub, entry_id):
                     entry_id=entry_id
                 )
         )
-    return ret
+    async_add_entities(ret)
