@@ -68,5 +68,6 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         if state:
             self.hub.nordpool.import_average_data(state.attributes.get('Nordpool average data', 50))
             self._average_nordpool = f"{self.hub.nordpool.get_average(7)} {self._currency}"
+            self._average_data_current_month = f"{self.hub.nordpool.average_month} {self._currency}"
         else:
             self._average_nordpool = f"- {self._currency}"

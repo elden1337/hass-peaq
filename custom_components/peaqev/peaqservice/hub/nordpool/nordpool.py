@@ -97,9 +97,9 @@ class NordPoolUpdater:
             daily_avg = result.get("avg_data")
             if daily_avg != self.model.daily_average:
                 self.model.daily_average = daily_avg
-                self.add_average_data(daily_avg)
+                await self._add_average_data(daily_avg)
                 self.hub.observer.broadcast("daily average price changed", daily_avg)
-                self._update_average_month()
+        self._update_average_month()
         return ret
 
     def _setup_nordpool(self):
@@ -125,7 +125,7 @@ class NordPoolUpdater:
                 self.model.average_data = rounded_vals
         self._cap_average_data_length()
 
-    def add_average_data(self, new_val):
+    async def _add_average_data(self, new_val):
         if isinstance(new_val, float):
             rounded = round(new_val, 3)
             if len(self.model.average_data) == 0:
