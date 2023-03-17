@@ -13,7 +13,7 @@ _LOGGER = logging.getLogger(__name__)
 
 DONETIMEOUT = 180
 DEBUGLOG_TIMEOUT = 60
-
+INITIALIZING = "Initializing..."
 
 class IChargeController:
     def __init__(self, hub, charger_states):
@@ -43,7 +43,7 @@ class IChargeController:
     def status_string(self) -> str:
         ret = ChargeControllerStates.Error
         if not self.is_initialized:
-            return "Hub not ready. Check logs!"
+            return INITIALIZING
         match self.hub.chargertype.type:
             case ChargerType.Outlet:
                 ret = self._get_status_outlet()
