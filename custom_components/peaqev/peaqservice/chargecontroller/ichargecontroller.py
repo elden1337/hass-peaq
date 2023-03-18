@@ -8,6 +8,7 @@ from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import calculate_stop_len
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
+from custom_components.peaqev.peaqservice.util.extensionmethods import dt_from_epoch
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -15,13 +16,14 @@ DONETIMEOUT = 180
 DEBUGLOG_TIMEOUT = 60
 INITIALIZING = "Initializing..."
 
+
 class IChargeController:
     def __init__(self, hub, charger_states):
         self.hub = hub
         self.name: str = f"{self.hub.hubname} {CHARGERCONTROLLER}"
         self._status_type: ChargeControllerStates = ChargeControllerStates.Idle
         self._is_initalized: bool = False
-        self._latest_charger_start = time.time()
+        self._latest_charger_start: float = time.time()
         self._latest_debuglog = 0
         self._charger_states: dict = charger_states
         self.hub.observer.add("update latest charger start", self._update_latest_charger_start)
@@ -36,8 +38,14 @@ class IChargeController:
             self._status_type = val
             self.hub.observer.broadcast("chargecontroller status changed", self._status_type)
 
+    @property
+    def latest_charger_start(self) -> str:
+        """For Lovelace-purposes. Converts and returns epoch-timer to readable datetime-string"""
+        return dt_from_epoch(self._latest_charger_start)
+
     def _update_latest_charger_start(self, val):
-        self._latest_charger_start = val
+        if self.hub.enabled:
+            self._latest_charger_start = val
 
     @property
     def status_string(self) -> str:
@@ -100,8 +108,8 @@ class IChargeController:
     def state_display_model(self) -> str:
         hour = datetime.now().hour
         ret = "Charging allowed"
-        if self.hub.timer.is_override:  #todo: composition
-            return self.hub.timer.override_string  #todo: composition
+        if self.hub.timer.is_override:  # todo: composition
+            return self.hub.timer.override_string  # todo: composition
         if hour in self.hub.non_hours:
             ret = calculate_stop_len(self.hub.non_hours)
         elif hour in self.hub.dynamic_caution_hours.keys():
@@ -127,17 +135,17 @@ class IChargeController:
             ret = ChargeControllerStates.Disabled
         elif self.hub.charger_done:
             ret = ChargeControllerStates.Done
-        elif datetime.now().hour in self.hub.non_hours and self.hub.timer.is_override is False:  #todo: composition
+        elif datetime.now().hour in self.hub.non_hours and self.hub.timer.is_override is False:  # todo: composition
             update_timer = True
             ret = ChargeControllerStates.Stop
-        elif self.hub.chargertype.entities.powerswitch == "on" and self.hub.chargertype.entities.powermeter < 1:  #todo: composition
+        elif self.hub.chargertype.entities.powerswitch == "on" and self.hub.chargertype.entities.powermeter < 1:  # todo: composition
             ret = self._get_status_connected()
             update_timer = (ret == ChargeControllerStates.Stop)
         else:
             ret = self._get_status_charging()
             update_timer = True
         if update_timer is True:
-            self._latest_charger_start = time.time()
+            self._update_latest_charger_start(time.time())
         return ret
 
     def _get_status(self) -> ChargeControllerStates:
@@ -155,22 +163,25 @@ class IChargeController:
             ret = ChargeControllerStates.Idle
             if self.hub.charger_done:
                 self.hub.observer.broadcast("update charger done", False)
-        elif self.hub.sensors.power.killswitch.is_dead:  #todo: composition
+        elif self.hub.sensors.power.killswitch.is_dead:  # todo: composition
             ret = ChargeControllerStates.Error
         elif _state not in self._charger_states.get(ChargeControllerStates.Idle) and self.hub.charger_done:
             ret = ChargeControllerStates.Done
             update_timer = False
-        elif datetime.now().hour in self.hub.non_hours and not self.hub.timer.is_override:  #todo: composition
+        elif datetime.now().hour in self.hub.non_hours and not self.hub.timer.is_override:  # todo: composition
             ret = ChargeControllerStates.Stop
         elif _state in self._charger_states.get(ChargeControllerStates.Connected):
             ret = self._get_status_connected(_state)
             update_timer = (ret == ChargeControllerStates.Stop)
         elif _state in self._charger_states.get(ChargeControllerStates.Charging):
             ret = self._get_status_charging()
+
         if update_timer:
-            self._latest_charger_start = time.time()
+            self._update_latest_charger_start(time.time())
+
         if ret == ChargeControllerStates.Error:
             _LOGGER.error(f"Chargecontroller returned faulty state. Charger reported {self.hub.get_chargerobject_value()} as state.")
+
         return ret
 
     def _get_status_no_charger(self) -> ChargeControllerStates:
@@ -184,7 +195,7 @@ class IChargeController:
         else:
             ret = ChargeControllerStates.Start
         if update_timer:
-            self._latest_charger_start = time.time()
+            self._update_latest_charger_start(time.time())
         return ret
 
     def _is_done(self, charger_state) -> bool:
@@ -196,7 +207,8 @@ class IChargeController:
                 ret = _states_test
         _regular_test = time.time() - self._latest_charger_start > DONETIMEOUT
         if _regular_test:
-            self.__debug_log(f"'is_done' reported that charger is Done because of idle-charging for more than {DONETIMEOUT} seconds.")
+            self.__debug_log(
+                f"'is_done' reported that charger is Done because of idle-charging for more than {DONETIMEOUT} seconds.")
             ret = _regular_test
         if ret and self.hub.sensors.charger_done is False:
             self.hub.observer.broadcast("update charger done", True)

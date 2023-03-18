@@ -10,13 +10,13 @@ class ServiceCalls:
 
     async def call_enable_peaq(self):
         """peaqev.enable"""
-        self.hub.observer.broadcast("update charger enabled", True)
-        self.hub.observer.broadcast("update charger done", False)
+        await self.hub.observer.async_broadcast("update charger enabled", True)
+        await self.hub.observer.async_broadcast("update charger done", False)
 
     async def call_disable_peaq(self):
         """peaqev.disable"""
-        self.hub.observer.broadcast("update charger enabled", False)
-        self.hub.observer.broadcast("update charger done", False)
+        await self.hub.observer.async_broadcast("update charger enabled", False)
+        await self.hub.observer.async_broadcast("update charger done", False)
 
     async def call_override_nonhours(self, hours: int = 1):
         """peaqev.override_nonhours"""

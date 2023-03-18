@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import datetime
 
@@ -216,11 +215,13 @@ class HomeAssistantHub:
         self.prices_tomorrow = prices[1]
 
     def _update_average_monthly_price(self, val) -> None:
+        _LOGGER.debug(f"got new monthly average price {val}")
         if self.options.price.price_aware and isinstance(val, float):
             self.hours.update_top_price(val)
             self.hours._core.update()
 
     def _update_average_weekly_price(self, val) -> None:
+        _LOGGER.debug(f"got new weekly average price {val}")
         if self.options.price.price_aware and isinstance(val, float):
             self.hours.adjusted_average = val
             self.hours._core.update()

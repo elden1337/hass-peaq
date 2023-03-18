@@ -1,11 +1,12 @@
+import asyncio
 import logging
 from datetime import datetime
 from statistics import mean
 
 import homeassistant.helpers.template as template
 
-from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_model import NordPoolModel
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_dto import NordpoolDTO
+from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_model import NordPoolModel
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -60,10 +61,22 @@ class NordPoolUpdater:
             _LOGGER.error("Could not get nordpool-prices")
 
     async def _update_average_month(self) -> None:
-        _new = self.get_average(datetime.now().day)
-        if self.model.average_month != _new:
+        _new = await self._get_average_async(datetime.now().day)
+        if len(self.model.average_data) >= datetime.now().day and self.model.average_month != _new:
             self.model.average_month = _new
             await self.hub.observer.async_broadcast("monthly average price changed", self.model.average_month)
+
+    async def _update_average_week(self) -> None:
+        _average7 = await self._get_average_async(7)
+        if len(self.model.average_data) >= 7 and self.model.average_weekly != _average7:
+            self.model.average_weekly = _average7
+            await self.hub.observer.async_broadcast("weekly average price changed", self.model.average_weekly)
+
+    async def _update_average_day(self, average) -> None:
+        if average != self.model.daily_average:
+            self.model.daily_average = average
+            await self._add_average_data(average)
+            await self.hub.observer.async_broadcast("daily average price changed", average)
 
     async def _update_set_prices(self, result: NordpoolDTO) -> bool:
         ret = False
@@ -73,16 +86,10 @@ class NordPoolUpdater:
         if self.model.prices_tomorrow != result.tomorrow:
             self.model.prices_tomorrow = result.tomorrow
             ret = True
-        if len(self.model.average_data) >= 7 and self.model.average_weekly != self.get_average(7):
-            self.model.average_weekly = self.get_average(7)
-            await self.hub.observer.async_broadcast("weekly average price changed", self.model.average_weekly)
+        await self._update_average_week()
         self.model.currency = result.currency
         self.state = result.state
-
-        if result.average != self.model.daily_average:
-            self.model.daily_average = result.average
-            await self._add_average_data(result.average)
-            await self.hub.observer.async_broadcast("daily average price changed", result.average)
+        await self._update_average_day(result.average)
         await self._update_average_month()
         return ret
 
@@ -94,7 +101,9 @@ class NordPoolUpdater:
             if len(list(entities)) == 1:
                 self.nordpool_entity = entities[0]
                 _LOGGER.debug(f"Nordpool has been set up and is ready to be used with {self.nordpool_entity}")
-                self.update_nordpool()
+                asyncio.run_coroutine_threadsafe(
+                    self.update_nordpool(), self.hub.state_machine.loop
+                )
             else:
                 self.hub.options.price.price_aware = False  # todo: composition
                 _LOGGER.error(f"more than one Nordpool entity found. Disabling Priceawareness until reboot of HA.")
@@ -122,7 +131,7 @@ class NordPoolUpdater:
         while len(self.model.average_data) > AVERAGE_MAX_LEN:
             del self.model.average_data[0]
 
-    def get_average(self, days: int) -> float:
+    async def _get_average_async(self, days: int) -> float:
         try:
             if len(self.model.average_data) > days:
                 ret = self.model.average_data[-days:]

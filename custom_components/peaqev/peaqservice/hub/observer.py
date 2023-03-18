@@ -38,8 +38,8 @@ class Observer:
         else:
             self.model.subscribers[command] = [func]
 
-    async def async_broadcast(self, command: str, argument= None):
-        await self.hub.state_machine.async_add_executor_job(self.broadcast,command, argument)
+    async def async_broadcast(self, command: str, argument=None):
+        await self.hub.state_machine.async_add_executor_job(self.broadcast, command, argument)
 
     def broadcast(self, command: str, argument=None):
         _expiration = time.time() + TIMEOUT
