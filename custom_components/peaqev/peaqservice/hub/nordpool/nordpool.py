@@ -102,12 +102,12 @@ class NordPoolUpdater:
             self.hub.options.price.price_aware = False  # todo: composition
             _LOGGER.error(f"Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness until reboot of HA: {e}")
 
-    def import_average_data(self, incoming: list):
+    async def import_average_data(self, incoming: list):
         if isinstance(incoming, list):
             rounded_vals = [round(h, 3) for h in incoming]
             if len(incoming):
                 self.model.average_data = rounded_vals
-        self._cap_average_data_length()
+        await self._cap_average_data_length()
 
     async def _add_average_data(self, new_val):
         if isinstance(new_val, float):
@@ -116,9 +116,9 @@ class NordPoolUpdater:
                 self.model.average_data.append(rounded)
             elif self.model.average_data[-1] != rounded:
                 self.model.average_data.append(rounded)
-            self._cap_average_data_length()
+            await self._cap_average_data_length()
 
-    def _cap_average_data_length(self):
+    async def _cap_average_data_length(self):
         while len(self.model.average_data) > AVERAGE_MAX_LEN:
             del self.model.average_data[0]
 
