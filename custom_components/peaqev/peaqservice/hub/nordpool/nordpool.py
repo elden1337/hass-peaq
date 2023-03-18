@@ -5,6 +5,7 @@ from statistics import mean
 import homeassistant.helpers.template as template
 
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_model import NordPoolModel
+from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_dto import NordpoolDTO
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -50,56 +51,39 @@ class NordPoolUpdater:
 
     async def update_nordpool(self):
         ret = self.hub.state_machine.states.get(self.nordpool_entity)
-        _result = {}
+        _result = NordpoolDTO()
         if ret is not None:
-            try:
-                _result["today"] = list(ret.attributes.get("today"))
-            except Exception as e:
-                _LOGGER.exception(f"Could not parse today's prices from Nordpool. Unsolveable error. {e}")
-                return
-            try:
-                _result["tomorrow"] = list(ret.attributes.get("tomorrow"))
-            except Exception as e:
-                _LOGGER.warning(f"Couldn't parse tomorrow's prices from Nordpool. Array will be empty. {e}")
-                _result["tomorrow"] = []
-            _result["currency"] = str(ret.attributes.get("currency"))
-            _result["state"] = ret.state
-            try:
-                _avg_data = float(str(ret.attributes.get("average")))
-                _result["avg_data"] = _avg_data
-            except Exception as ee:
-                _LOGGER.warning(f"Could not parse today's average from Nordpool. exception: {ee}")
+            await _result.set_model(ret)
             if await self._update_set_prices(_result):
-                self.hub.observer.broadcast("prices changed", [self.model.prices, self.model.prices_tomorrow])
+                await self.hub.observer.async_broadcast("prices changed",[self.model.prices, self.model.prices_tomorrow])
         elif self.hub.is_initialized:
             _LOGGER.error("Could not get nordpool-prices")
 
-    def _update_average_month(self) -> None:
+    async def _update_average_month(self) -> None:
         _new = self.get_average(datetime.now().day)
         if self.model.average_month != _new:
             self.model.average_month = _new
-            self.hub.observer.broadcast("monthly average price changed", self.model.average_month)
+            await self.hub.observer.async_broadcast("monthly average price changed", self.model.average_month)
 
-    async def _update_set_prices(self, result: dict) -> bool:
+    async def _update_set_prices(self, result: NordpoolDTO) -> bool:
         ret = False
-        if self.model.prices != result.get("today"):
-            self.model.prices = result.get("today")
+        if self.model.prices != result.today:
+            self.model.prices = result.today
             ret = True
-        if self.model.prices_tomorrow != result.get("tomorrow"):
-            self.model.prices_tomorrow = result.get("tomorrow")
+        if self.model.prices_tomorrow != result.tomorrow:
+            self.model.prices_tomorrow = result.tomorrow
             ret = True
         if len(self.model.average_data) >= 7 and self.model.average_weekly != self.get_average(7):
             self.model.average_weekly = self.get_average(7)
-            self.hub.observer.broadcast("weekly average price changed", self.model.average_weekly)
-        self.model.currency = result.get("currency")
-        self.state = result.get("state")
-        if "avg_data" in result.keys():
-            daily_avg = result.get("avg_data")
-            if daily_avg != self.model.daily_average:
-                self.model.daily_average = daily_avg
-                await self._add_average_data(daily_avg)
-                self.hub.observer.broadcast("daily average price changed", daily_avg)
-        self._update_average_month()
+            await self.hub.observer.async_broadcast("weekly average price changed", self.model.average_weekly)
+        self.model.currency = result.currency
+        self.state = result.state
+
+        if result.average != self.model.daily_average:
+            self.model.daily_average = result.average
+            await self._add_average_data(result.average)
+            await self.hub.observer.async_broadcast("daily average price changed", result.average)
+        await self._update_average_month()
         return ret
 
     def _setup_nordpool(self):
