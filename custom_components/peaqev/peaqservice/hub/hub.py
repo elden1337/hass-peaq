@@ -50,29 +50,31 @@ class HomeAssistantHub:
         self._is_initialized = False
         self.observer = Observer(self)
         self.hubname = domain.capitalize()
+
         self.chargertype = ChargerTypeFactory.create(
             hass=hass,
             input_type=self.options.charger.chargertype,
             options=self.options
-        )
-        self.charger = Charger(hub=self, chargertype=self.chargertype)
-        self.sensors = HubSensorsFactory.create(self.options)
+        ) #charger?
+        self.charger = Charger(hub=self, chargertype=self.chargertype) #top level
+        
+        self.sensors = HubSensorsFactory.create(self.options) #top level
         self.timer: Timer = Timer()
-        self.hours: Hours = HourselectionFactory.create(self)
-        self.threshold = ThresholdFactory.create(self)
-        self.prediction = Prediction(self)
-        self.scheduler = SchedulerFacade(hub=self, options=self.hours.options)
+        self.hours: Hours = HourselectionFactory.create(self) #top level
+        self.threshold = ThresholdFactory.create(self) #top level
+        self.prediction = Prediction(self) #threshold
+        self.scheduler = SchedulerFacade(hub=self, options=self.hours.options) #hours
 
         self.sensors.setup(state_machine=hass, options=options, domain=domain, chargerobject=self.chargertype)
         self.sensors.init_hub_values()
 
-        self.servicecalls = ServiceCalls(self)
-        self.states = StateChangesFactory.create(self)
-        self.chargecontroller = ChargeControllerFactory.create(self, charger_states=self.chargertype.chargerstates)
-        self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)
-        self.power_canary = PowerCanary(hub=self)
-        self.initializer = HubInitializer(self)
-        self.gainloss = GainLoss(self)
+        self.servicecalls = ServiceCalls(self) #top level
+        self.states = StateChangesFactory.create(self) #top level
+        self.chargecontroller = ChargeControllerFactory.create(self, charger_states=self.chargertype.chargerstates) #charger
+        self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware) #hours
+        self.power_canary = PowerCanary(hub=self)  #power
+        self.initializer = HubInitializer(self) #top level
+        self.gainloss = GainLoss(self) #power
 
         tracker_entities = []
 
@@ -80,7 +82,7 @@ class HomeAssistantHub:
             tracker_entities.append(self.options.powersensor)
             tracker_entities.append(self.sensors.totalhourlyenergy.entity)
 
-        self.coordinator = self._set_coordinator()
+        # self.coordinator = self._set_coordinator()
         self._set_observers()
 
         self.chargingtracker_entities = self._set_chargingtracker_entities()
@@ -238,29 +240,24 @@ class HomeAssistantHub:
         else:
             raise Exception("Peaqev cannot function without a charger_enabled entity")
 
-    async def get_states_async(self, module) -> dict:
-        if module in self.coordinator.keys():
-            return self.coordinator.get(module)
-        return {}
+    # async def get_states_async(self, module) -> dict:
+    #     if module in self.coordinator.keys():
+    #         return self.coordinator.get(module)
+    #     return {}
 
-    def get_states(self, module) -> dict:
-        return asyncio.run_coroutine_threadsafe(
-            self.get_states_async(module), self.state_machine.loop
-        ).result()
+    # def get_states(self, module) -> dict:
+    #     return asyncio.run_coroutine_threadsafe(
+    #         self.get_states_async(module), self.state_machine.loop
+    #     ).result()
 
-    def _set_coordinator(self) -> dict:
-        ret = {}
-        chargecontroller = {
-            "status":         self.chargecontroller.status_type,
-            "status_string":  self.chargecontroller.status_string,
-            "is_initialized": self.chargecontroller.is_initialized}
-        ret["chargecontroller"] = chargecontroller
-        # killswitch = {
-        #     "is_dead": self.sensors.power.killswitch.is_dead,
-        #     "total_timer": self.sensors.power.killswitch.total_timer
-        # }
-        # ret["killswitch"] = killswitch
-        return ret
+    # def _set_coordinator(self) -> dict:
+    #     ret = {}
+    #     chargecontroller = {
+    #         "status":         self.chargecontroller.status_type,
+    #         "status_string":  self.chargecontroller.status_string,
+    #         "is_initialized": self.chargecontroller.is_initialized}
+    #     ret["chargecontroller"] = chargecontroller
+    #     return ret
 
     def _set_observers(self) -> None:
         self.observer.add("prices changed", self._update_prices)
