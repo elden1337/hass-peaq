@@ -126,7 +126,7 @@ class Charger:
             await self._post_start_charger()
 
     async def _post_start_charger(self) -> None:
-        self.hub.observer.broadcast("update latest charger start", time.time())
+        await self.hub.observer.async_broadcast("update latest charger start", time.time())
         if self._charger.servicecalls.options.allowupdatecurrent and not self.hub.is_free_charge:
             self.hub.state_machine.async_create_task(self._updatemaxcurrent())
 
@@ -137,7 +137,7 @@ class Charger:
             await self._update_internal_state(ChargerStates.Stop)
             self.session_active = False
             await self._call_charger(CallTypes.Off)
-            self.hub.observer.broadcast("update charger done", True)
+            await self.hub.observer.async_broadcast("update charger done", True)
 
     async def _pause_charger(self, debugmessage: str = None) -> None:
         _LOGGER.debug(debugmessage)

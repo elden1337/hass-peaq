@@ -38,6 +38,9 @@ class Observer:
         else:
             self.model.subscribers[command] = [func]
 
+    async def async_broadcast(self, command: str, argument= None):
+        await self.hub.state_machine.async_add_executor_job(self.broadcast,command, argument)
+
     def broadcast(self, command: str, argument=None):
         _expiration = time.time() + TIMEOUT
         if (command, _expiration) not in self.model.broadcast_queue:
@@ -45,7 +48,7 @@ class Observer:
         for q in self.model.broadcast_queue:
             if q[0] in self.model.subscribers.keys():
                 self._dequeue_and_broadcast(q)
-        # self._prepare_dequeue()
+        self._prepare_dequeue()
 
     def _prepare_dequeue(self, attempt: int = 0) -> None:
         if self.model.active:
