@@ -82,7 +82,6 @@ class HomeAssistantHub:
             tracker_entities.append(self.options.powersensor)
             tracker_entities.append(self.sensors.totalhourlyenergy.entity)
 
-        # self.coordinator = self._set_coordinator()
         self._set_observers()
 
         self.chargingtracker_entities = self._set_chargingtracker_entities()
@@ -219,10 +218,12 @@ class HomeAssistantHub:
     def _update_average_monthly_price(self, val) -> None:
         if self.options.price.price_aware and isinstance(val, float):
             self.hours.update_top_price(val)
+            self.hours._core.update()
 
     def _update_average_weekly_price(self, val) -> None:
         if self.options.price.price_aware and isinstance(val, float):
             self.hours.adjusted_average = val
+            self.hours._core.update()
 
     @property
     def charger_done(self) -> bool:
@@ -239,25 +240,6 @@ class HomeAssistantHub:
             self.sensors.charger_enabled.value = bool(val)
         else:
             raise Exception("Peaqev cannot function without a charger_enabled entity")
-
-    # async def get_states_async(self, module) -> dict:
-    #     if module in self.coordinator.keys():
-    #         return self.coordinator.get(module)
-    #     return {}
-
-    # def get_states(self, module) -> dict:
-    #     return asyncio.run_coroutine_threadsafe(
-    #         self.get_states_async(module), self.state_machine.loop
-    #     ).result()
-
-    # def _set_coordinator(self) -> dict:
-    #     ret = {}
-    #     chargecontroller = {
-    #         "status":         self.chargecontroller.status_type,
-    #         "status_string":  self.chargecontroller.status_string,
-    #         "is_initialized": self.chargecontroller.is_initialized}
-    #     ret["chargecontroller"] = chargecontroller
-    #     return ret
 
     def _set_observers(self) -> None:
         self.observer.add("prices changed", self._update_prices)

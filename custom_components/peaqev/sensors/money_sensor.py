@@ -26,6 +26,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._charge_permittance = None
         self._offsets = {}
         self._average_nordpool_data = []
+        self._initialized = False
 
     @property
     def state(self):
@@ -36,17 +37,21 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         return "mdi:car-clock"
 
     def update(self) -> None:
-        self._nonhours = self.hub.chargecontroller.non_hours_display_model  #todo: composition
-        self._dynamic_caution_hours = self.hub.chargecontroller.caution_hours_display_model  #todo: composition
-        self._currency = self.hub.nordpool.currency  #todo: composition
-        self._offsets = self.hub.hours.offsets if self.hub.hours.offsets is not None else {}  #todo: composition
-        self._current_peak = self.hub.sensors.current_peak.value  #todo: composition
-        self._avg_cost = f"{self.hub.hours.get_average_kwh_price()} {self._currency}"  #todo: composition
-        self._max_charge = f"{self.hub.hours.get_total_charge()} kWh"  #todo: composition
-        self._average_nordpool = f"{self.hub.nordpool.get_average(7)} {self._currency}"  #todo: composition
-        self._average_data_current_month = f"{self.hub.nordpool.average_month} {self._currency}"  #todo: composition
-        self._average_nordpool_data = self.hub.nordpool.average_data  #todo: composition
-        self._charge_permittance = self.hub.chargecontroller.current_charge_permittance_display_model  #todo: composition
+        if self._initialized:
+            _non = self.hub.chargecontroller.non_hours_display_model  #todo: composition
+            if self._nonhours != _non:
+                self._nonhours = _non
+                _LOGGER.debug(f"Updating frontend nonhours. The params we got were: adj-avg:{self.hub.hours.adjusted_average}, monthly-avg:{self.hub.hours._core.model.options.absolute_top_price}")
+            self._dynamic_caution_hours = self.hub.chargecontroller.caution_hours_display_model  #todo: composition
+            self._currency = self.hub.nordpool.currency  #todo: composition
+            self._offsets = self.hub.hours.offsets if self.hub.hours.offsets is not None else {}  #todo: composition
+            self._current_peak = self.hub.sensors.current_peak.value  #todo: composition
+            self._avg_cost = f"{self.hub.hours.get_average_kwh_price()} {self._currency}"  #todo: composition
+            self._max_charge = f"{self.hub.hours.get_total_charge()} kWh"  #todo: composition
+            self._average_nordpool = f"{self.hub.nordpool.get_average(7)} {self._currency}"  #todo: composition
+            self._average_data_current_month = f"{self.hub.nordpool.average_month} {self._currency}"  #todo: composition
+            self._average_nordpool_data = self.hub.nordpool.average_data  #todo: composition
+            self._charge_permittance = self.hub.chargecontroller.current_charge_permittance_display_model  #todo: composition
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -69,5 +74,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             self.hub.nordpool.import_average_data(state.attributes.get('Nordpool average data', 50))
             self._average_nordpool = f"{self.hub.nordpool.get_average(7)} {self._currency}"
             self._average_data_current_month = f"{self.hub.nordpool.average_month} {self._currency}"
+            self._initialized = True
         else:
             self._average_nordpool = f"- {self._currency}"
+            self._initialized = True
