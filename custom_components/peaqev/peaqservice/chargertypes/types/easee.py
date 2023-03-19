@@ -48,8 +48,6 @@ class Easee(ChargerBase):
             _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
 
         self.set_sensors()
-        self.max_amps = self.get_allowed_amps()
-
         self._set_servicecalls(
             domain=self.domain_name,
             model=ServiceCallsDTO(
@@ -61,6 +59,10 @@ class Easee(ChargerBase):
             ),
             options=self.servicecalls_options
         )
+
+    @property
+    def max_amps(self): -> int:
+        return self.get_allowed_amps()
 
     @property
     def type(self) -> ChargerType:
