@@ -61,7 +61,7 @@ class Easee(ChargerBase):
         )
 
     @property
-    def max_amps(self): -> int:
+    def max_amps(self) -> int:
         return self.get_allowed_amps()
 
     @property
@@ -158,19 +158,17 @@ class Easee(ChargerBase):
         self.options.ampmeter_is_attribute = False
 
     def get_allowed_amps(self) -> int:
-        try:
             ret = self._hass.states.get(self.entities.maxamps)
             if ret is not None:
                 return int(ret.state)
-            return 16
-        except:
-            _LOGGER.warning("Unable to get max amps for circuit. Setting max amps to 16.")
+            else:
+                _LOGGER.warning(f"Unable to get max amps. The sensor {self.entities.maxamps} returned state None. Setting max amps to 16 til I get a proper state.")
             return 16
 
     def _validate_sensor(self, sensor: str) -> bool:
         ret = self._hass.states.get(sensor)
         if ret is None:
             return False
-        if ret.state == "Null":
+        if ret.state.lower() in ["null", "unavailable"]:
             return False
         return True
