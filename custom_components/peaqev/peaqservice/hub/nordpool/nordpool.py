@@ -62,13 +62,13 @@ class NordPoolUpdater:
 
     async def _update_average_month(self) -> None:
         _new = await self._get_average_async(datetime.now().day)
-        if len(self.model.average_data) >= datetime.now().day and self.model.average_month != _new:
+        if len(self.model.average_data) > 0 and self.model.average_month != _new:
             self.model.average_month = _new
             await self.hub.observer.async_broadcast("monthly average price changed", self.model.average_month)
 
     async def _update_average_week(self) -> None:
         _average7 = await self._get_average_async(7)
-        if len(self.model.average_data) >= 7 and self.model.average_weekly != _average7:
+        if len(self.model.average_data) > 0 and self.model.average_weekly != _average7:
             self.model.average_weekly = _average7
             await self.hub.observer.async_broadcast("weekly average price changed", self.model.average_weekly)
 
