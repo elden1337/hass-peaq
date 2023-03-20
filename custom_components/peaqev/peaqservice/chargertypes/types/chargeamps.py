@@ -118,7 +118,7 @@ class ChargeAmps(ChargerBase):
         return ServiceCallsOptions(
             allowupdatecurrent=True,
             update_current_on_termination=True,
-            switch_controls_charger=False
+            switch_controls_charger=False #this is for outlet mainly. if we should call a service or turn off a switch to enable/disable
         )
 
     def get_allowed_amps(self) -> int:
