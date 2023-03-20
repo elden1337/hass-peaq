@@ -42,10 +42,10 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._currency = self.hub.nordpool.currency  #todo: composition
         self._offsets = self.hub.hours.offsets if self.hub.hours.offsets is not None else {}  #todo: composition
         self._current_peak = self.hub.sensors.current_peak.value  #todo: composition
-        self._avg_cost = f"{self.hub.hours.get_average_kwh_price()} {self._currency}"  #todo: composition
+        self._avg_cost = self.currency_translation(value=self.hub.hours.get_average_kwh_price(), currency=self._currency)  #todo: composition
         self._max_charge = f"{self.hub.hours.get_total_charge()} kWh"  #todo: composition
-        self._average_nordpool = f"{self.hub.nordpool.average_weekly} {self._currency}"  #todo: composition
-        self._average_data_current_month = f"{self.hub.nordpool.average_month} {self._currency}"  #todo: composition
+        self._average_nordpool = self.currency_translation(value=self.hub.nordpool.average_weekly, currency=self._currency) #todo: composition
+        self._average_data_current_month = self.currency_translation(value=self.hub.nordpool.average_month, currency=self._currency)  #todo: composition
         self._average_nordpool_data = self.hub.nordpool.average_data  #todo: composition
         self._charge_permittance = self.hub.chargecontroller.current_charge_permittance_display_model  #todo: composition
 
@@ -72,3 +72,12 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             self._average_data_current_month = f"{self.hub.nordpool.average_month} {self._currency}"
         else:
             self._average_nordpool = f"- {self._currency}"
+
+    @staticmethod
+    def currency_translation(value, currency) -> str:
+        match currency:
+            case "EUR":
+                ret = f"{value}c"
+            case _:
+                ret = f"{value} {currency}"
+        return ret
