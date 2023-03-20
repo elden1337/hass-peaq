@@ -1,11 +1,11 @@
 
-from homeassistant.components.integration.const import METHOD_TRAPEZOIDAL # pylint: disable=import-error
-from homeassistant.components.integration.sensor import IntegrationSensor # pylint: disable=import-error
-from homeassistant.components.sensor import SensorDeviceClass # pylint: disable=import-error
+from homeassistant.components.integration.const import METHOD_TRAPEZOIDAL  # pylint: disable=import-error
+from homeassistant.components.integration.sensor import IntegrationSensor  # pylint: disable=import-error
+from homeassistant.components.sensor import SensorDeviceClass  # pylint: disable=import-error
 from homeassistant.const import (
     TIME_HOURS,
     ENERGY_KILO_WATT_HOUR
-) # pylint: disable=import-error
+)  # pylint: disable=import-error
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
@@ -64,6 +64,10 @@ class PeaqIntegrationSensor(IntegrationSensor):
             unit_prefix="k",
             unit_time=TIME_HOURS
         )
+
+    @property
+    def entity_registry_visible_default(self) -> bool:
+        return False
 
     @property
     def unique_id(self):

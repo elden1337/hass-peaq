@@ -63,6 +63,11 @@ class PeaqPowerCostSensor(PowerDevice):
 
     def update(self) -> None:
         self._state = self.hub.watt_cost
+
+    @property
+    def entity_registry_visible_default(self) -> bool:
+        return False
+
  
 
 class PeaqPowerSensor(PowerDevice):
