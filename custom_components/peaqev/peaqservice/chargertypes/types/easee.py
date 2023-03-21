@@ -162,7 +162,7 @@ class Easee(ChargerBase):
             if ret is not None:
                 return int(ret.state)
             else:
-                _LOGGER.warning(f"Unable to get max amps. The sensor {self.entities.maxamps} returned state None. Setting max amps to 16 til I get a proper state.")
+                _LOGGER.debug(f"Unable to get max amps. The sensor {self.entities.maxamps} returned state None. Setting max amps to 16 til I get a proper state.")
             return 16
 
     def _validate_sensor(self, sensor: str) -> bool:
