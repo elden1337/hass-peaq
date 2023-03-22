@@ -75,17 +75,10 @@ class HomeAssistantHub:
         self.initializer = HubInitializer(self) #top level
         self.gainloss = GainLoss(self) #power
 
-        tracker_entities = []
-
-        if not options.peaqev_lite:
-            tracker_entities.append(self.options.powersensor)
-            tracker_entities.append(self.sensors.totalhourlyenergy.entity)
-
+        self.chargingtracker_entities = []
+        trackers = self.__setup_tracking()
+        async_track_state_change(hass, trackers, self.state_changed)
         self._set_observers()
-
-        self.chargingtracker_entities = self._set_chargingtracker_entities()
-        tracker_entities += self.chargingtracker_entities
-        async_track_state_change(hass, tracker_entities, self.state_changed)
 
     @property
     def enabled(self) -> bool:
@@ -160,6 +153,15 @@ class HomeAssistantHub:
                 return 0
         return 0
 
+    def __setup_tracking(self) -> list:
+        tracker_entities = []
+        if not self.options.peaqev_lite:
+            tracker_entities.append(self.options.powersensor)
+            tracker_entities.append(self.sensors.totalhourlyenergy.entity)
+        self.chargingtracker_entities = self._set_chargingtracker_entities()
+        tracker_entities += self.chargingtracker_entities
+        return tracker_entities
+
     """Composition below here"""
     def get_power_sensor_from_hass(self) -> float|None:
         ret = self.state_machine.states.get(self.options.powersensor)
@@ -184,25 +186,11 @@ class HomeAssistantHub:
             return self.hours.prices
         return []
 
-    # @prices.setter
-    # def prices(self, val) -> None:
-    #     if self.options.price.price_aware:
-    #         if self.hours.prices != val:
-    #             _LOGGER.debug(f"setting today's prices with: {val}")
-    #             self.hours.prices = val
-
     @property
     def prices_tomorrow(self) -> list:
         if self.options.price.price_aware:
             return self.hours.prices_tomorrow
         return []
-
-    # @prices_tomorrow.setter
-    # def prices_tomorrow(self, val) -> None:
-    #     if self.options.price.price_aware:
-    #         if self.hours.prices_tomorrow != val:
-    #             _LOGGER.debug(f"setting tomorrow's prices with: {val}")
-    #             self.hours.prices_tomorrow = val
 
     @property
     def is_free_charge(self) -> bool:
@@ -211,9 +199,7 @@ class HomeAssistantHub:
         return False
 
     def _update_prices(self, prices: list) -> None:
-        self.hours._core.update_prices(prices[0], prices[1])
-        #self.prices = prices[0]
-        #self.prices_tomorrow = prices[1]
+        self.hours.update_prices(prices[0], prices[1])
 
     def _update_average_monthly_price(self, val) -> None:
         _LOGGER.debug(f"got new monthly average price {val}")
