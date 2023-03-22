@@ -1,131 +1,98 @@
 import logging
-from abc import abstractmethod
 from dataclasses import dataclass, field
 
+from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
-from peaqevcore.models.chargertype.calltype import CallType
-from peaqevcore.models.chargertype.calltype_enum import CallTypes
-from peaqevcore.models.chargertype.charger_entities_model import ChargerEntitiesModel
-from peaqevcore.models.chargertype.charger_options import ChargerOptions
-from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
-from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
-from peaqevcore.services.chargertype.servicecalls import ServiceCalls
+
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type_helpers import check_required_sensors
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
+from custom_components.peaqev.peaqservice.chargertypes.types.chargertype import SensorTypes
 
 _LOGGER = logging.getLogger(__name__)
 
-CHARGERSTATES_BASE = {
-    ChargeControllerStates.Idle:      [],
-    ChargeControllerStates.Connected: [],
-    ChargeControllerStates.Charging:  [],
-    ChargeControllerStates.Done:      []
-}
+ENTITYENDINGS = []
+NATIVE_CHARGERSTATES = []
+SENSORS_SCHEMA: dict[SensorTypes, str] = {}
+OPTIONS_SCHEMA: dict[OptionTypes, any] = {}
+CHARGERSTATES_SCHEMA: dict[ChargeControllerStates, list] = {}
+CALLS_SCHEMA: dict[CallTypes, dict] = {}
+REQUIRED_SENSORTYPES = [SensorTypes.ChargerEntity, SensorTypes.PowerSwitch]
 
 
 @dataclass
-class IChargerType:
-    _calls = {}
+class IChargerType(IChargerTypeCalls):
+    chargerid: str  # remove this when huboptions are there
+    _type: any
+    _domainname: str
+    _sensors: dict = field(init=False)
+    options: ChargerTypeOptions = field(init=False)
+    chargerstates: dict = field(init=False)
+    huboptions: HubOptions
+    hass: HomeAssistant
 
-    domainname: str = ""
-    _max_amps = None
-    native_chargerstates: list = field(default_factory=lambda: [])
-    servicecalls: ServiceCalls = None
-    chargerstates = CHARGERSTATES_BASE
-    entities = ChargerEntitiesModel
-    options = ChargerOptions
-
-    def _set_servicecalls(
-            self,
-            domain: str,
-            model: ServiceCallsDTO,
-            options: ServiceCallsOptions,
-    ) -> None:
-        self.servicecalls = ServiceCalls(domain, model, options)
+    def __post_init__(self):
+        self.__setup_sensors()
+        self.__setup_options()
+        self.__setup_chargerstates()
+        super().__init__(schema=self.__setup_calls())
 
     @property
-    def call_on(self) -> CallType:
-        try:
-            return self._calls.get(CallTypes.On)
-        except:
-            _LOGGER.exception(f"Could not fetch call_on for chargertype {self.type}")
-
-    @property
-    def call_off(self) -> CallType:
-        try:
-            return self._calls.get(CallTypes.Off)
-        except:
-            _LOGGER.exception(f"Could not fetch call_off for chargertype {self.type}")
-
-    @property
-    def call_resume(self) -> CallType:
-        try:
-            return self._calls.get(CallTypes.Resume, self._calls.get(CallTypes.On))
-        except:
-            _LOGGER.exception(f"Could not fetch call_resume for chargertype {self.type}")
-
-    @property
-    def call_pause(self) -> CallType:
-        try:
-            return self._calls.get(CallTypes.Pause, self._calls.get(CallTypes.Off))
-        except:
-            _LOGGER.exception(f"Could not fetch call_pause for chargertype {self.type}")
-
-    @property
-    def call_update_current(self) -> CallType:
-        try:
-            return self._calls.get(CallTypes.UpdateCurrent)
-        except:
-            _LOGGER.exception(f"Could not fetch call_updatecurrent for chargertype {self.type}")
-
-    @property
-    def max_amps(self) -> int:
-        return self._get_allowed_amps()
-
-    def _get_allowed_amps(self) -> int:
-        """update this in your derived type if you have a way of getting max amps"""
-        return 16
-
-    #abstracts below
-
-    @property
-    @abstractmethod
-    def servicecalls_options(self) -> ServiceCallsOptions:
-        pass
-
-    @property
-    @abstractmethod
-    def type(self):
+    def type(self) -> ChargerType:
         """type returns the implemented chargertype."""
-        pass
+        return self._type
 
     @property
-    @abstractmethod
     def domain_name(self) -> str:
         """declare the domain name as stated in HA"""
-        pass
+        return self._domainname
 
     @property
-    @abstractmethod
     def entity_endings(self) -> list:
         """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
-        pass
+        return ENTITYENDINGS
 
     @property
-    @abstractmethod
     def native_chargerstates(self) -> list:
         """declare a list of the native-charger states available for the type."""
-        pass
+        return NATIVE_CHARGERSTATES
 
+    def __setup_sensors(self) -> None:
+        self._sensors = {}
+        for type in SENSORS_SCHEMA:
+            self._sensors[type] = SENSORS_SCHEMA.get(type).format(self.chargerid)
+            # .format(self.huboptions.charger.chargerid)
+        check_required_sensors(REQUIRED_SENSORTYPES, self._sensors)
 
-    @abstractmethod
-    def validatecharger(self) -> bool:
-        pass
+    def __setup_options(self) -> None:
+        options = ChargerTypeOptions()
+        for option in OPTIONS_SCHEMA:
+            options.__setattr__(ChargerTypeOptions.get_param(option), OPTIONS_SCHEMA.get(option))
+        self.options = options
 
-    @abstractmethod
-    def get_entities(self):
-        pass
+    def __setup_chargerstates(self) -> None:
+        self.chargerstates = {}
+        for state in ChargeControllerStates:
+            self.chargerstates[state] = CHARGERSTATES_SCHEMA.get(state, [])
 
-    @abstractmethod
-    def _set_sensors(self, schema):
-        pass
+    def __setup_calls(self) -> dict:
+        ret = {}
+        for key, value in CALLS_SCHEMA.items():
+            ret[key] = self.__setup_calls_recursive(input=value)
+        return ret
 
+    def __setup_calls_recursive(self, input: dict) -> dict:
+        _ret = {}
+        for key, value in input.items():
+            if isinstance(value, dict):
+                _ret[key] = self.__setup_calls_recursive(input=value)
+            else:
+                _ret[key] = self.__set_calls_leaf(input=value)
+        return _ret
 
+    def __set_calls_leaf(self, input):
+        if str(input).startswith('>'):
+            try:
+                return self.__dict__[str(input).split('>')[1]]
+            except KeyError:
+                _LOGGER.exception(f"key {input} not found as referable property")
+        return input
