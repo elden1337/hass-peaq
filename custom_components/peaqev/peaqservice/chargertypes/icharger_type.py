@@ -1,4 +1,5 @@
 import logging
+from abc import abstractmethod
 from dataclasses import dataclass, field
 
 from homeassistant.core import HomeAssistant
@@ -26,19 +27,18 @@ REQUIRED_SENSORTYPES = [SensorTypes.ChargerEntity, SensorTypes.PowerSwitch]
 
 @dataclass
 class IChargerType(IChargerTypeCalls):
-    chargerid: str  # remove this when huboptions are there
-    _type: any
+    _type: ChargerType
     _domainname: str
+    huboptions: HubOptions
+    hass: HomeAssistant
     _sensors: dict = field(init=False)
     options: ChargerTypeOptions = field(init=False)
     chargerstates: dict = field(init=False)
-    huboptions: HubOptions
-    hass: HomeAssistant
 
     def __post_init__(self):
         self.__setup_sensors()
         self.__setup_options()
-        self.__setup_chargerstates()
+        self.__setup_charger_states()
         super().__init__(schema=self.__setup_calls())
 
     @property
@@ -61,11 +61,14 @@ class IChargerType(IChargerTypeCalls):
         """declare a list of the native-charger states available for the type."""
         return NATIVE_CHARGERSTATES
 
+    @abstractmethod
+    def get_allowed_amps(self) -> int:
+        pass
+
     def __setup_sensors(self) -> None:
         self._sensors = {}
         for type in SENSORS_SCHEMA:
-            self._sensors[type] = SENSORS_SCHEMA.get(type).format(self.chargerid)
-            # .format(self.huboptions.charger.chargerid)
+            self._sensors[type] = SENSORS_SCHEMA.get(type).format(self.huboptions.charger.chargerid)
         check_required_sensors(REQUIRED_SENSORTYPES, self._sensors)
 
     def __setup_options(self) -> None:
@@ -74,7 +77,7 @@ class IChargerType(IChargerTypeCalls):
             options.__setattr__(ChargerTypeOptions.get_param(option), OPTIONS_SCHEMA.get(option))
         self.options = options
 
-    def __setup_chargerstates(self) -> None:
+    def __setup_charger_states(self) -> None:
         self.chargerstates = {}
         for state in ChargeControllerStates:
             self.chargerstates[state] = CHARGERSTATES_SCHEMA.get(state, [])
@@ -82,22 +85,22 @@ class IChargerType(IChargerTypeCalls):
     def __setup_calls(self) -> dict:
         ret = {}
         for key, value in CALLS_SCHEMA.items():
-            ret[key] = self.__setup_calls_recursive(input=value)
+            ret[key] = self.__setup_calls_recursive(calls=value)
         return ret
 
-    def __setup_calls_recursive(self, input: dict) -> dict:
+    def __setup_calls_recursive(self, calls: dict) -> dict:
         _ret = {}
-        for key, value in input.items():
+        for key, value in calls.items():
             if isinstance(value, dict):
-                _ret[key] = self.__setup_calls_recursive(input=value)
+                _ret[key] = self.__setup_calls_recursive(calls=value)
             else:
-                _ret[key] = self.__set_calls_leaf(input=value)
+                _ret[key] = self.__set_calls_leaf(call=value)
         return _ret
 
-    def __set_calls_leaf(self, input):
-        if str(input).startswith('>'):
+    def __set_calls_leaf(self, call):
+        if str(call).startswith('>'):
             try:
-                return self.__dict__[str(input).split('>')[1]]
+                return self.__dict__[str(call).split('>')[1]]
             except KeyError:
-                _LOGGER.exception(f"key {input} not found as referable property")
-        return input
+                _LOGGER.exception(f"key {call} not found as referable property")
+        return call
