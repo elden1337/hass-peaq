@@ -184,12 +184,12 @@ class HomeAssistantHub:
             return self.hours.prices
         return []
 
-    @prices.setter
-    def prices(self, val) -> None:
-        if self.options.price.price_aware:
-            if self.hours.prices != val:
-                _LOGGER.debug(f"setting today's prices with: {val}")
-                self.hours.prices = val
+    # @prices.setter
+    # def prices(self, val) -> None:
+    #     if self.options.price.price_aware:
+    #         if self.hours.prices != val:
+    #             _LOGGER.debug(f"setting today's prices with: {val}")
+    #             self.hours.prices = val
 
     @property
     def prices_tomorrow(self) -> list:
@@ -197,12 +197,12 @@ class HomeAssistantHub:
             return self.hours.prices_tomorrow
         return []
 
-    @prices_tomorrow.setter
-    def prices_tomorrow(self, val) -> None:
-        if self.options.price.price_aware:
-            if self.hours.prices_tomorrow != val:
-                _LOGGER.debug(f"setting tomorrow's prices with: {val}")
-                self.hours.prices_tomorrow = val
+    # @prices_tomorrow.setter
+    # def prices_tomorrow(self, val) -> None:
+    #     if self.options.price.price_aware:
+    #         if self.hours.prices_tomorrow != val:
+    #             _LOGGER.debug(f"setting tomorrow's prices with: {val}")
+    #             self.hours.prices_tomorrow = val
 
     @property
     def is_free_charge(self) -> bool:
@@ -211,8 +211,9 @@ class HomeAssistantHub:
         return False
 
     def _update_prices(self, prices: list) -> None:
-        self.prices = prices[0]
-        self.prices_tomorrow = prices[1]
+        self.hours.update_prices(prices[0], prices[1])
+        #self.prices = prices[0]
+        #self.prices_tomorrow = prices[1]
 
     def _update_average_monthly_price(self, val) -> None:
         _LOGGER.debug(f"got new monthly average price {val}")
