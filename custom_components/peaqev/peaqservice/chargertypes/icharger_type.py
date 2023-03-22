@@ -1,12 +1,17 @@
 import logging
 from dataclasses import dataclass, field
 
+from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
+from peaqevcore.models.chargertype.calltype_enum import CallTypes
 
+from custom_components.peaqev.peaqservice.chargertypes.charger_type_options import ChargerTypeOptions
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type_calls import IChargerTypeCalls
 from custom_components.peaqev.peaqservice.chargertypes.icharger_type_helpers import check_required_sensors
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
-from custom_components.peaqev.peaqservice.chargertypes.types.chargertype import SensorTypes
+from custom_components.peaqev.peaqservice.chargertypes.models.option_types import OptionTypes
+from custom_components.peaqev.peaqservice.chargertypes.models.sensor_types import SensorTypes
 
 _LOGGER = logging.getLogger(__name__)
 
