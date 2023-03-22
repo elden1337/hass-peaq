@@ -211,7 +211,7 @@ class HomeAssistantHub:
         return False
 
     def _update_prices(self, prices: list) -> None:
-        self.hours.update_prices(prices[0], prices[1])
+        self.hours._core.update_prices(prices[0], prices[1])
         #self.prices = prices[0]
         #self.prices_tomorrow = prices[1]
 
