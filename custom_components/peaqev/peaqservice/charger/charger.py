@@ -127,7 +127,7 @@ class Charger:
 
     async def _post_start_charger(self) -> None:
         await self.hub.observer.async_broadcast("update latest charger start", time.time())
-        if self._charger.servicecalls.options.allowupdatecurrent and not self.hub.is_free_charge:
+        if self._charger.options.allowupdatecurrent and not self.hub.is_free_charge:
             self.hub.state_machine.async_create_task(self._updatemaxcurrent())
 
     async def _terminate_charger(self) -> None:
@@ -148,7 +148,7 @@ class Charger:
 
     async def _call_charger(self, command: CallTypes) -> None:
         calls = self._charger.servicecalls.get_call(command)
-        if self._charger.servicecalls.options.switch_controls_charger:  # todo: composition
+        if self._charger.options.switch_controls_charger:  # todo: composition
             await self._do_outlet_update(calls.get(command))
         else:
             await self._do_service_call(calls.get(DOMAIN), calls.get(command), calls.get("params"))
@@ -170,7 +170,7 @@ class Charger:
                         await self._do_service_call(calls[DOMAIN], calls[CallTypes.UpdateCurrent], serviceparams)
                     await self.hub.state_machine.async_add_executor_job(self.helpers.wait_loop_cycle)
 
-            if self._charger.servicecalls.options.update_current_on_termination is True:
+            if self._charger.options.update_current_on_termination is True:
                 final_service_params = await self.helpers.setchargerparams(calls, ampoverride=6)
                 await self._do_service_call(
                     calls[DOMAIN],

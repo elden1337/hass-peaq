@@ -26,16 +26,16 @@ CONNECTOR = "connector"
 
 class ChargeAmps(ChargerBase):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
-        self._hass = hass
-        self._type = chargertype
+        #self._hass = hass
+        #self._type = chargertype
         self._chargeramps_type = ""
-        self._chargerid = huboptions.charger.chargerid
+        #self._chargerid = huboptions.charger.chargerid
         self._chargeamps_connector = 1  # fix this later to be able to use aura
-        self.entities.imported_entityendings = self.entity_endings
-        self.options.powerswitch_controls_charging = True
-        self.chargerstates[ChargeControllerStates.Idle] = ["available"]
-        self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
-        self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
+        #self.entities.imported_entityendings = self.entity_endings
+        # self.options.powerswitch_controls_charging = True
+        # self.chargerstates[ChargeControllerStates.Idle] = ["available"]
+        # self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
+        # self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
 
         try:
             entitiesobj = helper.set_entitiesmodel(
@@ -83,35 +83,35 @@ class ChargeAmps(ChargerBase):
         """declare a list of the native-charger states available for the type."""
         return ["available", "connected", "charging"]
 
-    @property
-    def call_on(self) -> CallType:
-        return CallType("enable", {
-            CHARGEPOINT: self._chargerid,
-            CONNECTOR:   self._chargeamps_connector
-        })
+    # @property
+    # def call_on(self) -> CallType:
+    #     return CallType("enable", {
+    #         CHARGEPOINT: self._chargerid,
+    #         CONNECTOR:   self._chargeamps_connector
+    #     })
 
-    @property
-    def call_off(self) -> CallType:
-        return CallType("disable", {
-            CHARGEPOINT: self._chargerid,
-            CONNECTOR:   self._chargeamps_connector
-        })
+    # @property
+    # def call_off(self) -> CallType:
+    #     return CallType("disable", {
+    #         CHARGEPOINT: self._chargerid,
+    #         CONNECTOR:   self._chargeamps_connector
+    #     })
 
-    @property
-    def call_resume(self) -> CallType:
-        return self.call_on
+    # @property
+    # def call_resume(self) -> CallType:
+    #     return self.call_on
 
-    @property
-    def call_pause(self) -> CallType:
-        return self.call_off
+    # @property
+    # def call_pause(self) -> CallType:
+    #     return self.call_off
 
-    @property
-    def call_update_current(self) -> CallType:
-        return CallType("set_max_current", {
-            CHARGER:   CHARGEPOINT,
-            CHARGERID: self._chargerid,
-            CURRENT:   "max_current"
-        })
+    # @property
+    # def call_update_current(self) -> CallType:
+    #     return CallType("set_max_current", {
+    #         CHARGER:   CHARGEPOINT,
+    #         CHARGERID: self._chargerid,
+    #         CURRENT:   "max_current"
+    #     })
 
     @property
     def servicecalls_options(self) -> ServiceCallsOptions:
@@ -125,12 +125,12 @@ class ChargeAmps(ChargerBase):
         """no such method for chargeamps available right now."""
         pass
 
-    def set_sensors(self) -> None:
-        self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"
-        self.entities.powermeter = f"sensor.{self.entities.entityschema}_1_power"
-        self.entities.ampmeter = "max_current"
-        self.options.ampmeter_is_attribute = True
-        self.entities.powerswitch = self._determine_switch_entity()
+    # def set_sensors(self) -> None:
+    #     self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"
+    #     self.entities.powermeter = f"sensor.{self.entities.entityschema}_1_power"
+    #     self.entities.ampmeter = "max_current"
+    #     self.options.ampmeter_is_attribute = True
+    #     self.entities.powerswitch = self._determine_switch_entity()
         self._chargeramps_type = self._set_chargeamps_type(self.entities.chargerentity)
 
     def _determine_entities(self) -> list:

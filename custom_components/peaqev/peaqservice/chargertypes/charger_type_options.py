@@ -8,7 +8,6 @@ class ChargerTypeOptions:
     powermeter_factor: int= 1
     """if charger is reporting kW, set to 1000"""
     allow_update_current: bool = False
-    ampmeter_is_attribute: bool = False
     powerswitch_controls_charging: bool = False
     update_current_on_termination: bool=False
     """if true, will update current to 6A on termination of charging"""
@@ -20,7 +19,6 @@ class ChargerTypeOptions:
         SCHEMA = {
             OptionTypes.PowerMeterFactor: "powermeter_factor",
             OptionTypes.AllowUpdateCurrent: "allow_update_current",
-            OptionTypes.AmpMeterIsAttribute: "ampmeter_is_attribute",
             OptionTypes.PowerSwitchControlsCharging: "powerswitch_controls_charging",
             OptionTypes.UpdateCurrentOnTermination: "update_current_on_termination",
             OptionTypes.UseSwitchToggle: "use_switch_toggle"

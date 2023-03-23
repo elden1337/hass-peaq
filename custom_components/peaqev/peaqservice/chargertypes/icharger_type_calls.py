@@ -1,5 +1,8 @@
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
+from custom_components.peaqev.peaqservice.chargertypes.const import (
+    COMMAND,
+    PARAMETERS)
 
 REQUIRED_CALLTYPES = [CallTypes.On, CallTypes.Off]
 
@@ -35,11 +38,32 @@ class IChargerTypeCalls:
         return self._call_update_current
 
     def _setup(self, schema: dict) -> None:
-        self._call_on = schema.get(CallTypes.On)
-        self._call_off = schema.get(CallTypes.Off)
-        self._call_pause = schema.get(CallTypes.Pause, schema.get(CallTypes.Off, None))
-        self._call_resume = schema.get(CallTypes.Resume, schema.get(CallTypes.On, None))
-        self._call_update_current = schema.get(CallTypes.UpdateCurrent, None)
+        assert all(REQUIRED_CALLTYPES in schema.keys()), f"Missing required calltypes: {REQUIRED_CALLTYPES}"
+
+        CALLTYPES_CALL = {
+            CallTypes.On: self._call_on,
+            CallTypes.Off: self._call_off,
+            CallTypes.Pause: self._call_pause,
+            CallTypes.Resume: self._call_resume,
+            CallTypes.UpdateCurrent: self._call_update_current
+            }
+        
+        for k, v in schema.items():
+            _type = self.__create_calltype(v)
+            CALLTYPES_CALL[k] = _type  
+
+    def __create_calltype(self, calltype: dict) -> CallType:
+        return CallType(call=calltype.get(COMMAND), params=calltype.get(PARAMETERS))
 
     def _validate(self) -> bool:
         return True
+    
+    def _get_call_type(self, call: CallTypes) -> CallType:
+        _callsdict = {
+            CallTypes.On: self.on,
+            CallTypes.Off: self.off,
+            CallTypes.Pause: self.pause,
+            CallTypes.Resume: self.resume,
+            CallTypes.UpdateCurrent: self.update_current
+        }
+        return _callsdict.get(call)

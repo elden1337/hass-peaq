@@ -6,12 +6,16 @@ from homeassistant.core import HomeAssistant
 from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
-
+from custom_components.peaqev.peaqservice.chargertypes.const import (
+    DOMAIN,
+    PARAMS)
 from custom_components.peaqev.peaqservice.chargertypes.charger_type_options import ChargerTypeOptions
 from custom_components.peaqev.peaqservice.chargertypes.icharger_type_calls import IChargerTypeCalls
 from custom_components.peaqev.peaqservice.chargertypes.icharger_type_helpers import check_required_sensors
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.option_types import OptionTypes
+from peaqevcore.models.chargertype.calltype_enum import CallTypes
+from peaqevcore.models.chargertype.calltype import CallType
 from custom_components.peaqev.peaqservice.chargertypes.models.sensor_types import SensorTypes
 
 _LOGGER = logging.getLogger(__name__)
@@ -64,6 +68,18 @@ class IChargerType(IChargerTypeCalls):
     @abstractmethod
     def get_allowed_amps(self) -> int:
         pass
+
+    def get_call(self, call) -> dict[CallType, dict]:
+        ret = {DOMAIN: self.domain_name}
+        calltype = self._get_call_type(call)
+        ret[call] = calltype.call
+        ret[PARAMS] = calltype.params
+        if call is CallTypes.UpdateCurrent:
+            if self.options.allowupdatecurrent:
+                ret[PARAMS] = self.update_current.params #what is this?
+            else:
+                raise AttributeError
+        return ret
 
     def __setup_sensors(self) -> None:
         self._sensors = {}
