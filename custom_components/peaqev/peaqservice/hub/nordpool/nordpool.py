@@ -47,9 +47,9 @@ class NordPoolUpdater:
     def average_data(self) -> list:
         return self.model.average_data
 
-    @property
-    def average_ready(self) -> bool:
-        return len(self.model.average_data) >= AVERAGE_MAX_LEN
+    # @property
+    # def average_ready(self) -> bool:
+    #     return len(self.model.average_data) >= AVERAGE_MAX_LEN
 
     async def update_nordpool(self):
         if self._nordpool_entity is not None:
