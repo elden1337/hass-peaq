@@ -3,6 +3,7 @@ from peaqevcore.models.chargertype.calltype_enum import CallTypes
 
 from custom_components.peaqev.peaqservice.chargertypes.const import (
     COMMAND,
+    DOMAIN,
     CHARGEPOINT,
     CONNECTOR,
     PARAMETERS,
