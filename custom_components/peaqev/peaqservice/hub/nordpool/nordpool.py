@@ -18,6 +18,7 @@ class NordPoolUpdater:
     def __init__(self, hub, is_active: bool = True):
         self.model = NordPoolModel()
         self.hub = hub
+        self._nordpool_entity:str = None
         if is_active:
             self._setup_nordpool()
 
@@ -51,14 +52,15 @@ class NordPoolUpdater:
         return len(self.model.average_data) >= AVERAGE_MAX_LEN
 
     async def update_nordpool(self):
-        ret = self.hub.state_machine.states.get(self.nordpool_entity)
-        _result = NordpoolDTO()
-        if ret is not None:
-            await _result.set_model(ret)
-            if await self._update_set_prices(_result):
-                await self.hub.observer.async_broadcast("prices changed",[self.model.prices, self.model.prices_tomorrow])
-        elif self.hub.is_initialized:
-            _LOGGER.error("Could not get nordpool-prices")
+        if self._nordpool_entity is not None:
+            ret = self.hub.state_machine.states.get(self._nordpool_entity)
+            _result = NordpoolDTO()
+            if ret is not None:
+                await _result.set_model(ret)
+                if await self._update_set_prices(_result):
+                    await self.hub.observer.async_broadcast("prices changed",[self.model.prices, self.model.prices_tomorrow])
+            elif self.hub.is_initialized:
+                _LOGGER.error("Could not get nordpool-prices")
 
     async def _update_average_month(self) -> None:
         _new = await self._get_average_async(datetime.now().day)
@@ -99,8 +101,8 @@ class NordPoolUpdater:
             if len(list(entities)) < 1:
                 raise Exception("no entities found for Nordpool.")
             if len(list(entities)) == 1:
-                self.nordpool_entity = entities[0]
-                _LOGGER.debug(f"Nordpool has been set up and is ready to be used with {self.nordpool_entity}")
+                self._nordpool_entity = entities[0]
+                _LOGGER.debug(f"Nordpool has been set up and is ready to be used with {self._nordpool_entity}")
                 asyncio.run_coroutine_threadsafe(
                     self.update_nordpool(), self.hub.state_machine.loop
                 )
