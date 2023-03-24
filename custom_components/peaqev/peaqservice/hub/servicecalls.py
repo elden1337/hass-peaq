@@ -29,9 +29,17 @@ class ServiceCalls:
             schedule_starttime: str = None,
             override_settings: bool = False
     ):
-        dep_time = datetime.strptime(departure_time, '%y-%m-%d %H:%M')
+        dep_time = None
+        start_time = None
+        try:
+            dep_time = datetime.strptime(departure_time, '%Y-%m-%d %H:%M')
+        except ValueError:
+            _LOGGER.error(f"Could not parse departure time: {departure_time}")
         if schedule_starttime is not None:
-            start_time = datetime.strptime(schedule_starttime, '%y-%m-%d %H:%M')
+            try:
+                start_time = datetime.strptime(schedule_starttime, '%Y-%m-%d %H:%M')
+            except ValueError:
+                _LOGGER.error(f"Could not parse schedule start time: {schedule_starttime}")
         else:
             start_time = datetime.now()
         _LOGGER.debug(f"scheduler params. charge: {charge_amount}, dep-time: {dep_time}, start_time: {start_time}")

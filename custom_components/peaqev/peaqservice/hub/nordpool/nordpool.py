@@ -18,6 +18,7 @@ class NordPoolUpdater:
     def __init__(self, hub, is_active: bool = True):
         self.model = NordPoolModel()
         self.hub = hub
+        self._nordpool_entity: str = None
         if is_active:
             self._setup_nordpool()
 
@@ -47,18 +48,20 @@ class NordPoolUpdater:
         return self.model.average_data
 
     @property
-    def average_ready(self) -> bool:
-        return len(self.model.average_data) >= AVERAGE_MAX_LEN
+    def nordpool_entity(self) -> str:
+        return self._nordpool_entity
 
     async def update_nordpool(self):
-        ret = self.hub.state_machine.states.get(self.nordpool_entity)
-        _result = NordpoolDTO()
-        if ret is not None:
-            await _result.set_model(ret)
-            if await self._update_set_prices(_result):
-                await self.hub.observer.async_broadcast("prices changed",[self.model.prices, self.model.prices_tomorrow])
-        elif self.hub.is_initialized:
-            _LOGGER.error("Could not get nordpool-prices")
+        if self.nordpool_entity is not None:
+            ret = self.hub.state_machine.states.get(self.nordpool_entity)
+            _result = NordpoolDTO()
+            if ret is not None:
+                await _result.set_model(ret)
+                if await self._update_set_prices(_result):
+                    await self.hub.observer.async_broadcast("prices changed",
+                                                            [self.model.prices, self.model.prices_tomorrow])
+            elif self.hub.is_initialized:
+                _LOGGER.error("Could not get nordpool-prices")
 
     async def _update_average_month(self) -> None:
         _new = await self._get_average_async(datetime.now().day)
@@ -99,7 +102,7 @@ class NordPoolUpdater:
             if len(list(entities)) < 1:
                 raise Exception("no entities found for Nordpool.")
             if len(list(entities)) == 1:
-                self.nordpool_entity = entities[0]
+                self._nordpool_entity = entities[0]
                 _LOGGER.debug(f"Nordpool has been set up and is ready to be used with {self.nordpool_entity}")
                 asyncio.run_coroutine_threadsafe(
                     self.update_nordpool(), self.hub.state_machine.loop
@@ -109,7 +112,8 @@ class NordPoolUpdater:
                 _LOGGER.error(f"more than one Nordpool entity found. Disabling Priceawareness until reboot of HA.")
         except Exception as e:
             self.hub.options.price.price_aware = False  # todo: composition
-            _LOGGER.error(f"Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness until reboot of HA: {e}")
+            _LOGGER.error(
+                f"Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness until reboot of HA: {e}")
 
     async def import_average_data(self, incoming: list):
         if isinstance(incoming, list):

@@ -46,8 +46,9 @@ class StateChanges(IStateChanges):
             case self.hub.sensors.powersensormovingaverage24.entity:
                 self.hub.sensors.powersensormovingaverage24.value = value
             case self.hub.nordpool.nordpool_entity:
-                await self.hub.nordpool.update_nordpool()
-                update_session = True
+                if self.hub.options.price.price_aware:
+                    await self.hub.nordpool.update_nordpool()
+                    update_session = True
         return update_session
     
     async def _handle_outlet_updates(self):
@@ -87,7 +88,8 @@ class StateChangesLite(IStateChanges):
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self._update_total_energy_and_peak(value)
             case self.hub.nordpool.nordpool_entity:
-                await self.hub.nordpool.update_nordpool()
+                if self.hub.options.price.price_aware:
+                    await self.hub.nordpool.update_nordpool()
         return False
     
     async def _handle_outlet_updates(self):
@@ -127,8 +129,9 @@ class StateChangesNoCharger(IStateChanges):
             case self.hub.sensors.powersensormovingaverage24.entity:
                 self.hub.sensors.powersensormovingaverage24.value = value
             case self.hub.nordpool.nordpool_entity:
-                await self.hub.nordpool.update_nordpool()
-                update_session = True
+                if self.hub.options.price.price_aware:
+                    await self.hub.nordpool.update_nordpool()
+                    update_session = True
         return update_session
 
 class StateChangesLiteNoCharger(IStateChanges):
@@ -142,7 +145,8 @@ class StateChangesLiteNoCharger(IStateChanges):
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self._update_total_energy_and_peak(value)
             case self.hub.nordpool.nordpool_entity:
-                await self.hub.nordpool.update_nordpool()
+                if self.hub.options.price.price_aware:
+                    await self.hub.nordpool.update_nordpool()
         return False
 
 
