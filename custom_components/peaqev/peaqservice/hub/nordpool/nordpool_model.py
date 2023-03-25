@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+
 @dataclass
 class NordPoolModel:
     currency: str = ""
@@ -11,3 +12,16 @@ class NordPoolModel:
     average_month: float = 0
     average_weekly: float = 0
     daily_average: float = 0
+
+    async def fix_dst(self, val) -> list:
+        if val is None:
+            return None
+        if len(val) < 1:
+            return []
+        ll = [h for h in val if h is not None]
+        av = round(min(ll), 3)
+        if len(val) == 23:
+            val.insert(2, av)
+        elif val[2] is None:
+            val[2] = av
+        return val

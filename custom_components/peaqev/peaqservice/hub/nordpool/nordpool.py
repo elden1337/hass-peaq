@@ -58,20 +58,19 @@ class NordPoolUpdater:
             if ret is not None:
                 await _result.set_model(ret)
                 if await self._update_set_prices(_result):
-                    await self.hub.observer.async_broadcast("prices changed",
-                                                            [self.model.prices, self.model.prices_tomorrow])
+                    await self.hub.observer.async_broadcast("prices changed",[self.model.prices, self.model.prices_tomorrow])
             elif self.hub.is_initialized:
                 _LOGGER.error("Could not get nordpool-prices")
 
     async def _update_average_month(self) -> None:
         _new = await self._get_average_async(datetime.now().day)
-        if len(self.model.average_data) > 0 and self.model.average_month != _new:
+        if len(self.model.average_data) >= int(datetime.now().day) and self.model.average_month != _new:
             self.model.average_month = _new
             await self.hub.observer.async_broadcast("monthly average price changed", self.model.average_month)
 
     async def _update_average_week(self) -> None:
         _average7 = await self._get_average_async(7)
-        if len(self.model.average_data) > 0 and self.model.average_weekly != _average7:
+        if len(self.model.average_data) >= 7 and self.model.average_weekly != _average7:
             self.model.average_weekly = _average7
             await self.hub.observer.async_broadcast("weekly average price changed", self.model.average_weekly)
 
@@ -83,11 +82,13 @@ class NordPoolUpdater:
 
     async def _update_set_prices(self, result: NordpoolDTO) -> bool:
         ret = False
-        if self.model.prices != result.today:
-            self.model.prices = result.today
+        today = await self.model.fix_dst(result.today)
+        if self.model.prices != today:
+            self.model.prices = today
             ret = True
-        if self.model.prices_tomorrow != result.tomorrow:
-            self.model.prices_tomorrow = result.tomorrow
+        tomorrow = await self.model.fix_dst(result.tomorrow)
+        if self.model.prices_tomorrow != tomorrow:
+            self.model.prices_tomorrow = tomorrow
             ret = True
         await self._update_average_week()
         self.model.currency = result.currency
