@@ -10,6 +10,7 @@ from custom_components.peaqev.sensors.sensorbase import PowerDevice
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class PeaqPredictionSensor(PowerDevice):
     device_class = SensorDeviceClass.ENERGY
     unit_of_measurement = ENERGY_KILO_WATT_HOUR
@@ -30,8 +31,4 @@ class PeaqPredictionSensor(PowerDevice):
         return "mdi:magic-staff"
 
     async def async_update(self) -> None:
-        self._state = self.hub.prediction.predictedenergy  #todo: composition
-
-
-
-
+        self._state = getattr(self.hub.prediction, "predictedenergy")

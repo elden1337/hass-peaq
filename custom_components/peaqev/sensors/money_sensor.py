@@ -36,7 +36,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
     def icon(self) -> str:
         return "mdi:car-clock"
 
-    def update(self) -> None:
+    async def async_update(self) -> None:
         self._nonhours = self.hub.chargecontroller.non_hours_display_model  #todo: composition
         self._dynamic_caution_hours = self.hub.chargecontroller.caution_hours_display_model  #todo: composition
         self._currency = self.hub.nordpool.currency  #todo: composition
