@@ -68,7 +68,10 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     hass.services.async_register(DOMAIN, "scheduler_set", servicehandler_scheduler_set)
     hass.services.async_register(DOMAIN, "scheduler_cancel", servicehandler_scheduler_cancel)
 
-    await hass.config_entries.async_forward_entry_setups(conf, PLATFORMS)
+    await hass.async_create_task(
+        hass.config_entries.async_forward_entry_setups(conf, PLATFORMS)
+    )
+    #await hass.config_entries.async_forward_entry_setups(conf, PLATFORMS)
 
     return True
 

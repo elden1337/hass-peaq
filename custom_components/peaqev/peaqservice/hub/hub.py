@@ -110,6 +110,7 @@ class HomeAssistantHub:
             if self.initializer.check():
                 del self.initializer
                 self.observer.activate()
+                self.observer.broadcast("hub initialized")
                 return True
             return False
         return True
@@ -163,6 +164,9 @@ class HomeAssistantHub:
         return tracker_entities
 
     """Composition below here"""
+    async def async_set_init_dict(self, init_dict):
+        await self.state_machine.async_add_executor_job(self.sensors.locale.data.query_model.peaks.set_init_dict, init_dict)
+
     def get_power_sensor_from_hass(self) -> float|None:
         ret = self.state_machine.states.get(self.options.powersensor)
         if ret is not None:

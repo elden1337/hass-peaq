@@ -61,7 +61,7 @@ class Observer:
             return self._prepare_dequeue(attempt)
 
     def _dequeue_and_broadcast(self, command: Tuple[str, int, any]):
-        _LOGGER.debug(f"ready to broadcast: {command[0]} with params: {command[2]}")
+        #_LOGGER.debug(f"ready to broadcast: {command[0]} with params: {command[2]}")
         if self._ok_to_broadcast(command[0]):
             if command[1] > time.time():
                 for func in self.model.subscribers[command[0]]:

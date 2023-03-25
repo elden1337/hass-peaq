@@ -29,7 +29,7 @@ class PeaqPredictionSensor(PowerDevice):
     def icon(self) -> str:
         return "mdi:magic-staff"
 
-    def update(self) -> None:
+    async def async_update(self) -> None:
         self._state = self.hub.prediction.predictedenergy  #todo: composition
 
 

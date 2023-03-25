@@ -27,6 +27,7 @@ class IChargeController:
         self._latest_debuglog = 0
         self._charger_states: dict = charger_states
         self.hub.observer.add("update latest charger start", self._update_latest_charger_start)
+        self.hub.observer.add("hub initialized", self._do_initialize)
 
     @property
     def status_type(self) -> ChargeControllerStates:
@@ -66,6 +67,9 @@ class IChargeController:
     def is_initialized(self) -> bool:
         if not self.hub.is_initialized:
             return False
+        return self._do_initialize()
+
+    def _do_initialize(self):
         if self.hub.is_initialized and not self._is_initalized:
             self._is_initalized = self._check_initialized()
             if self._is_initalized:

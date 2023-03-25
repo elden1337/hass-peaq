@@ -1,7 +1,6 @@
 import logging
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
-#from peaqevcore.services.chargecontroller.chargecontrollerbase import ChargeControllerBase as _core
 
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import defer_start
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
@@ -12,7 +11,6 @@ _LOGGER = logging.getLogger(__name__)
 class ChargeController(IChargeController):
     def __init__(self, hub, charger_states):
         super().__init__(hub, charger_states)
-        #self._core = _core(charger_state_translation=charger_states)
 
     @property
     def below_startthreshold(self) -> bool:

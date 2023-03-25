@@ -2,7 +2,7 @@
 import logging
 from datetime import timedelta
 
-from homeassistant.components.utility_meter.const import QUARTER_HOURLY, DAILY, MONTHLY
+from homeassistant.components.utility_meter.const import DAILY, MONTHLY
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from peaqevcore.models.hub.const import AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H
@@ -48,7 +48,7 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
     await _gather_all_sensors(hub, config, async_add_entities, hass)
 
 async def _gather_all_sensors(hub, config, async_add_entities, hass) -> None:
-    async_add_entities(await _gather_sensors(hub, config), update_before_add=True)
+    async_add_entities(await _gather_sensors(hub, config), update_before_add=False)
     await _gather_integration_sensors(hub, config.entry_id, async_add_entities)
 
     integrationsensors = []

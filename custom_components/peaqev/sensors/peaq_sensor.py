@@ -1,5 +1,9 @@
+import logging
+
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 from custom_components.peaqev.sensors.sensorbase import SensorBase
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class PeaqSensor(SensorBase):

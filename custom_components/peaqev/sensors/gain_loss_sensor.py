@@ -1,3 +1,5 @@
+import logging
+
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import (
     PERCENTAGE
@@ -7,6 +9,8 @@ from peaqevcore.models.locale.enums.time_periods import TimePeriods
 from custom_components.peaqev.const import DOMAIN
 from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class GainLossSensor(SensorEntity):
@@ -19,7 +23,6 @@ class GainLossSensor(SensorEntity):
         self._timeperiod = timeperiod
         self._attr_icon = "mdi:cash-clock"
         self._attr_available = True
-        self.update()
 
     @property
     def state(self) -> float:
@@ -29,16 +32,16 @@ class GainLossSensor(SensorEntity):
     def native_unit_of_measurement(self):
         return PERCENTAGE
 
-    def update(self) -> None:
-        ret = self._hub.gainloss.state(self._timeperiod)
-        if self._state != round(ret * 100,1):
+    async def async_update(self) -> None:
+        ret = await self._hub.gainloss.state(self._timeperiod)
+        if self._state != round(ret * 100, 1):
             self._state = round(ret * 100, 1)
             self._raw_state = ret
 
     @property
     def unique_id(self):
         """Return a unique ID to use for this sensor."""
-        return f"{DOMAIN}_{self._entry_id}_{nametoid(self._attr_name)}" 
+        return f"{DOMAIN}_{self._entry_id}_{nametoid(self._attr_name)}"
 
     @property
     def device_info(self):
