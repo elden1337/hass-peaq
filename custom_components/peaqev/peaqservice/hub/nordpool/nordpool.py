@@ -92,6 +92,7 @@ class NordPoolUpdater:
             ret = True
         await self._update_average_week()
         self.model.currency = result.currency
+        self.model.use_cent = result.price_in_cent
         self.state = result.state
         await self._update_average_day(result.average)
         await self._update_average_month()
@@ -122,6 +123,7 @@ class NordPoolUpdater:
             if len(incoming):
                 self.model.average_data = rounded_vals
         await self._cap_average_data_length()
+        await self.update_nordpool()
 
     async def _add_average_data(self, new_val):
         if isinstance(new_val, float):

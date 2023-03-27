@@ -7,7 +7,7 @@ from custom_components.peaqev.peaqservice.hub.state_changes.state_changes import
 class StateChangesFactory:
 
     @staticmethod
-    def create(hub) -> IStateChanges:
+    async def create(hub) -> IStateChanges:
         if all([
             hub.options.peaqev_lite is True,
             hub.chargertype.type is ChargerType.NoCharger

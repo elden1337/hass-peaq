@@ -1,7 +1,6 @@
 """The peaqev integration."""
 from __future__ import annotations
 
-import asyncio
 import logging
 
 from homeassistant.config_entries import ConfigEntry  # pylint: disable=import-error
@@ -21,21 +20,15 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     """Set up Peaqev"""
+
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][conf.entry_id] = conf.data
-
     options = await _set_options(conf)
-    ci = {}
-
-    if options.peaqev_lite is False:
-        ci["powersensor"] = conf.data["name"]
-        options.powersensor = conf.data["name"]
-
-    unsub_options_update_listener = conf.add_update_listener(options_update_listener)
-    ci["unsub_options_update_listener"] = unsub_options_update_listener
-    hass.data[DOMAIN][conf.entry_id] = ci
     hub = HomeAssistantHub(hass, options, DOMAIN)
     hass.data[DOMAIN]["hub"] = hub
+    await hub.setup()
+
+    conf.async_on_unload(conf.add_update_listener(async_update_entry))
 
     async def servicehandler_enable(call):  # pylint:disable=unused-argument
         await hub.servicecalls.call_enable_peaq()
@@ -68,71 +61,33 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     hass.services.async_register(DOMAIN, "scheduler_set", servicehandler_scheduler_set)
     hass.services.async_register(DOMAIN, "scheduler_cancel", servicehandler_scheduler_cancel)
 
-    await hass.async_create_task(
-        hass.config_entries.async_forward_entry_setups(conf, PLATFORMS)
-    )
-    #await hass.config_entries.async_forward_entry_setups(conf, PLATFORMS)
+    forward_setup = hass.config_entries.async_forward_entry_setup
+    hass.async_create_task(forward_setup(conf, "switch"))
+    hass.async_create_task(forward_setup(conf, "binary_sensor"))
+    hass.async_create_task(forward_setup(conf, "sensor"))
 
     return True
 
 
-async def options_update_listener(hass: HomeAssistant, conf: ConfigEntry):
-    """Handle options update."""
-    # hub: HomeAssistantHub = hass.data[DOMAIN]["hub"]
-    # conf_options = await _set_options(conf)
-    # new_options = await _compare_options(hub.options, conf_options)
-    await hass.config_entries.async_reload(conf.entry_id)
+async def async_update_entry(hass: HomeAssistant, config_entry: ConfigEntry):
+    """Reload Peaqev component when options changed."""
+    await hass.config_entries.async_reload(config_entry.entry_id)
 
-
-async def async_unload_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    unload_ok = all(
-        await asyncio.gather(
-            *[
-                hass.config_entries.async_forward_entry_unload(conf, component)
-                for component in PLATFORMS
-            ]
-        )
+    unload_ok = await hass.config_entries.async_unload_platforms(
+        config_entry, PLATFORMS
     )
-    if unload_ok:
-        hass.data[DOMAIN].pop(conf.entry_id)
+    hass.data[DOMAIN].pop(config_entry.entry_id)
     return unload_ok
-
-
-# async def _compare_options(old_options: HubOptions, new_options: HubOptions) -> dict:
-#     """compare old to new and return the options that have changed as a dictionary"""
-#     changed_options = {}
-#     changed_options["base"] = await _compare(old_options, new_options)
-#     changed_options["price"] = await _compare(old_options.price, new_options.price)
-#     return changed_options
-#
-# async def compare_classes(first, second) -> dict:
-#     """compare old to new and return the options that have changed as a dictionary. make it recursive for subclasses"""
-#     if first.__class__ != second.__class__:
-#         raise TypeError("Can only compare objects of the same class")
-#     ret = {}
-#     for field in first.__dataclass_fields__:
-#         if getattr(first, field) != getattr(second, field):
-#             if getattr(first, field).__class__ == getattr(second, field).__class__:
-#                 ret[field] = await compare_classes(getattr(first, field), getattr(second, field))
-#             else:
-#                 ret[field] = getattr(second, field)
-#     return ret
-
-
-async def _compare(first, second) -> dict:
-    if first.__class__ != second.__class__:
-        raise TypeError("Can only compare objects of the same class")
-    ret = {}
-    for field in first.__dataclass_fields__:
-        if getattr(first, field) != getattr(second, field):
-            ret[field] = getattr(second, field)
-    return ret
 
 
 async def _set_options(conf) -> HubOptions:
     options = HubOptions()
+
     options.peaqev_lite = bool(conf.data.get("peaqevtype") == TYPELITE)
+    if options.peaqev_lite is False:
+        options.powersensor = conf.data["name"]
     options.locale = conf.data.get("locale", "")
     options.charger.chargertype = conf.data.get("chargertype", "")
     if options.charger.chargertype == ChargerType.Outlet.value:

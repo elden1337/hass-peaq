@@ -125,7 +125,7 @@ class IChargeController:
         if not self.hub.options.peaqev_lite:
             _state = self.hub.get_power_sensor_from_hass()
             if _state is not None:
-                if _state > 0:
+                if isinstance(_state, (float,int)):
                     return True
             return False
         return True

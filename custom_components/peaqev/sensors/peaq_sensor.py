@@ -22,7 +22,7 @@ class PeaqSensor(SensorBase):
 
     @property
     def state(self):
-        if self.hub.scheduler.scheduler_active:  #todo: composition
+        if self._scheduler_active:
             return f"(schedule) {self._state}"
         return self._state
 
@@ -36,13 +36,14 @@ class PeaqSensor(SensorBase):
         return ret
 
     def update(self) -> None:
-        self._state = self.hub.chargecontroller.status_string  #todo: composition
-        self._nonhours = self.hub.hours.non_hours  #todo: composition
-        self._cautionhours = self.hub.hours.caution_hours  #todo: composition
-        self._current_hour = self.hub.hours.state  #todo: composition
-        self._price_aware = self.hub.hours.price_aware  #todo: composition
-        self._latest_charger_start = self.hub.chargecontroller.latest_charger_start
-        self._scheduler_active = self.hub.scheduler.scheduler_active
+        if self.hub.is_initialized:
+            self._state = self.hub.chargecontroller.status_string  #todo: composition
+            self._nonhours = self.hub.hours.non_hours  #todo: composition
+            self._cautionhours = self.hub.hours.caution_hours  #todo: composition
+            self._current_hour = self.hub.hours.state  #todo: composition
+            self._price_aware = self.hub.hours.price_aware  #todo: composition
+            self._latest_charger_start = self.hub.chargecontroller.latest_charger_start
+            self._scheduler_active = self.hub.scheduler.scheduler_active
 
     @property
     def extra_state_attributes(self) -> dict:

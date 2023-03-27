@@ -31,10 +31,11 @@ class PeaqAmpSensor(PowerDevice):
         return self._state
 
     async def async_update(self) -> None:
-        self._state = getattr(self.hub.threshold, "allowedcurrent")
-        self._charger_current = self.hub.sensors.chargerobject_switch.current if hasattr(self.hub.sensors, "chargerobject_switch") else 0  #todo: composition
-        self._charger_phases = self.hub.threshold.phases  #todo: composition
-        self._all_currents = list(self.hub.threshold.currents.values())  #todo: composition
+        if self.hub.is_initialized:
+            self._state = getattr(self.hub.threshold, "allowedcurrent")
+            self._charger_current = self.hub.sensors.chargerobject_switch.current if hasattr(self.hub.sensors, "chargerobject_switch") else 0  #todo: composition
+            self._charger_phases = self.hub.threshold.phases  #todo: composition
+            self._all_currents = list(self.hub.threshold.currents.values())  #todo: composition
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -62,7 +63,8 @@ class PeaqPowerCostSensor(PowerDevice):
         return self._state
 
     async def update(self) -> None:
-        self._state = getattr(self.hub, "watt_cost")
+        if self.hub.is_initialized:
+            self._state = getattr(self.hub, "watt_cost")
 
     @property
     def entity_registry_visible_default(self) -> bool:
@@ -86,7 +88,8 @@ class PeaqPowerSensor(PowerDevice):
         return self._state
 
     async def async_update(self) -> None:
-        self._state = getattr(self.hub.sensors.power.total,"value")
+        if self.hub.is_initialized:
+            self._state = getattr(self.hub.sensors.power.total,"value")
 
 
 class PeaqHousePowerSensor(PowerDevice):
@@ -106,4 +109,5 @@ class PeaqHousePowerSensor(PowerDevice):
 
 
     async def async_update(self) -> None:
-        self._state = getattr(self.hub.sensors.power.house,"value")
+        if self.hub.is_initialized:
+            self._state = getattr(self.hub.sensors.power.house,"value")
