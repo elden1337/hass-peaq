@@ -30,7 +30,8 @@ class PeaqPredictionSensor(PowerDevice):
         return "mdi:magic-staff"
 
     def update(self) -> None:
-        self._state = self.hub.prediction.predictedenergy  #todo: composition
+        if self.hub.is_initialized:
+            self._state = self.hub.prediction.predictedenergy  #todo: composition
 
 
 

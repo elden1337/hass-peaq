@@ -20,19 +20,13 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     """Set up Peaqev"""
-    _LOGGER.debug("starting setup of Peaqev")
+
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][conf.entry_id] = conf.data
-
     options = await _set_options(conf)
-
-    _LOGGER.debug("creating Hub")
     hub = HomeAssistantHub(hass, options, DOMAIN)
-    _LOGGER.debug("Hub created")
     hass.data[DOMAIN]["hub"] = hub
-    _LOGGER.debug("Hub setup start")
     await hub.setup()
-    _LOGGER.debug("Hub setup done")
 
     conf.async_on_unload(conf.add_update_listener(async_update_entry))
 
@@ -67,9 +61,10 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     hass.services.async_register(DOMAIN, "scheduler_set", servicehandler_scheduler_set)
     hass.services.async_register(DOMAIN, "scheduler_cancel", servicehandler_scheduler_cancel)
 
-    _LOGGER.debug("Sensors setup start")
-    await hass.config_entries.async_forward_entry_setups(conf, PLATFORMS)
-    _LOGGER.debug("Sensors setup done")
+    forward_setup = hass.config_entries.async_forward_entry_setup
+    hass.async_create_task(forward_setup(conf, "switch"))
+    hass.async_create_task(forward_setup(conf, "binary_sensor"))
+    hass.async_create_task(forward_setup(conf, "sensor"))
 
     return True
 

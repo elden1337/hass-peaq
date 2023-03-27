@@ -50,7 +50,8 @@ class PowerCanaryStatusSensor(PowerCanaryDevice):
         return self._state
 
     def update(self) -> None:
-        self._state = self.hub.power_canary.state_string  #todo: composition
+        if self.hub.is_initialized:
+            self._state = self.hub.power_canary.state_string  #todo: composition
 
 
 class PowerCanaryPercentageSensor(PowerCanaryDevice):
@@ -72,10 +73,11 @@ class PowerCanaryPercentageSensor(PowerCanaryDevice):
         return PERCENTAGE
 
     def update(self) -> None:
-        if int(self.hub.power_canary.current_percentage * 100) != self._state:  #todo: composition
-            self._state = int(self.hub.power_canary.current_percentage * 100)  #todo: composition
-        self._warning = round(self.hub.power_canary.model.warning_threshold * 100, 2)  #todo: composition
-        self._cutoff = round(self.hub.power_canary.model.cutoff_threshold * 100, 2)  #todo: composition
+        if self.hub.is_initialized:
+            if int(self.hub.power_canary.current_percentage * 100) != self._state:  #todo: composition
+                self._state = int(self.hub.power_canary.current_percentage * 100)  #todo: composition
+            self._warning = round(self.hub.power_canary.model.warning_threshold * 100, 2)  #todo: composition
+            self._cutoff = round(self.hub.power_canary.model.cutoff_threshold * 100, 2)  #todo: composition
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -102,7 +104,8 @@ class PowerCanaryMaxAmpSensor(PowerCanaryDevice):
         return self._state
 
     def update(self) -> None:
-        if self.phases == 1:
-            self._state = max(self.hub.power_canary.onephase_amps.values())  #todo: composition
-        if self.phases == 3:
-            self._state = max(self.hub.power_canary.threephase_amps.values())  #todo: composition
+        if self.hub.is_initialized:
+            if self.phases == 1:
+                self._state = max(self.hub.power_canary.onephase_amps.values())  #todo: composition
+            if self.phases == 3:
+                self._state = max(self.hub.power_canary.threephase_amps.values())  #todo: composition

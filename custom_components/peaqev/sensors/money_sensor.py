@@ -38,18 +38,19 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         return "mdi:car-clock"
 
     def update(self) -> None:
-        self._state = self.hub.chargecontroller.state_display_model  #todo: composition
-        self._nonhours = self.hub.chargecontroller.non_hours_display_model  #todo: composition
-        self._dynamic_caution_hours = self.hub.chargecontroller.caution_hours_display_model  #todo: composition
-        self._currency = self.hub.nordpool.currency  #todo: composition
-        self._offsets = self.hub.hours.offsets if self.hub.hours.offsets is not None else {}  #todo: composition
-        self._current_peak = self.hub.sensors.current_peak.value  #todo: composition
-        self._avg_cost = self.currency_translation(value=self.hub.hours.get_average_kwh_price(), currency=self._currency)  #todo: composition
-        self._max_charge = f"{self.hub.hours.get_total_charge()} kWh"  #todo: composition
-        self._average_nordpool = self.currency_translation(value=self.hub.nordpool.average_weekly, currency=self._currency) #todo: composition
-        self._average_data_current_month = self.currency_translation(value=self.hub.nordpool.average_month, currency=self._currency)  #todo: composition
-        self._average_nordpool_data = self.hub.nordpool.average_data  #todo: composition
-        self._charge_permittance = self.hub.chargecontroller.current_charge_permittance_display_model  #todo: composition
+        if self.hub.is_initialized:
+            self._state = self.hub.chargecontroller.state_display_model  #todo: composition
+            self._nonhours = self.hub.chargecontroller.non_hours_display_model  #todo: composition
+            self._dynamic_caution_hours = self.hub.chargecontroller.caution_hours_display_model  #todo: composition
+            self._currency = self.hub.nordpool.currency  #todo: composition
+            self._offsets = self.hub.hours.offsets if self.hub.hours.offsets is not None else {}  #todo: composition
+            self._current_peak = self.hub.sensors.current_peak.value  #todo: composition
+            self._avg_cost = self.currency_translation(value=self.hub.hours.get_average_kwh_price(), currency=self._currency)  #todo: composition
+            self._max_charge = f"{self.hub.hours.get_total_charge()} kWh"  #todo: composition
+            self._average_nordpool = self.currency_translation(value=self.hub.nordpool.average_weekly, currency=self._currency) #todo: composition
+            self._average_data_current_month = self.currency_translation(value=self.hub.nordpool.average_month, currency=self._currency)  #todo: composition
+            self._average_nordpool_data = self.hub.nordpool.average_data  #todo: composition
+            self._charge_permittance = self.hub.chargecontroller.current_charge_permittance_display_model  #todo: composition
 
     @property
     def extra_state_attributes(self) -> dict:

@@ -11,9 +11,9 @@ from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 
 class GainLossSensor(SensorEntity):
     def __init__(self, hub, entry_id, timeperiod: TimePeriods):
-        self._hub = hub
+        self.hub = hub
         self._entry_id = entry_id
-        self._attr_name = f"{self._hub.hubname} gain/loss {timeperiod.value.lower()}"
+        self._attr_name = f"{self.hub.hubname} gain/loss {timeperiod.value.lower()}"
         self._state = None
         self._raw_state = None
         self._timeperiod = timeperiod
@@ -30,10 +30,11 @@ class GainLossSensor(SensorEntity):
         return PERCENTAGE
 
     def update(self) -> None:
-        ret = self._hub.gainloss.state(self._timeperiod)
-        if self._state != round(ret * 100,1):
-            self._state = round(ret * 100, 1)
-            self._raw_state = ret
+        if self.hub.is_initialized:
+            ret = self.hub.gainloss.state(self._timeperiod)
+            if self._state != round(ret * 100,1):
+                self._state = round(ret * 100, 1)
+                self._raw_state = ret
 
     @property
     def unique_id(self):
@@ -42,7 +43,7 @@ class GainLossSensor(SensorEntity):
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._hub.hub_id, POWERCONTROLS)}}
+        return {"identifiers": {(DOMAIN, self.hub.hub_id, POWERCONTROLS)}}
 
     @property
     def extra_state_attributes(self) -> dict:
