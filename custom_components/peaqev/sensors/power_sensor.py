@@ -55,7 +55,7 @@ class PeaqPowerCostSensor(PowerDevice):
         name = f"{hub.hubname} wattage_cost"
         super().__init__(hub, name, entry_id)
         self.hub = hub
-        self._state = self.hub.watt_cost
+        self._state = None
         self._attr_icon = "mdi:cash"
 
     @property
@@ -80,7 +80,7 @@ class PeaqPowerSensor(PowerDevice):
         name = f"{hub.hubname} {hub.sensors.power.total.name}"  #todo: composition
         super().__init__(hub, name, entry_id)
         self.hub = hub
-        self._state = self.hub.sensors.power.total.value  #todo: composition
+        self._state = None
         self._attr_icon = "mdi:flash"
 
     @property
@@ -99,7 +99,7 @@ class PeaqHousePowerSensor(PowerDevice):
         name = f"{hub.hubname} {hub.sensors.power.house.name}"  #todo: composition
         super().__init__(hub, name, entry_id)
         self.hub = hub
-        self._state = self.hub.sensors.power.house.value  #todo: composition
+        self._state = None
         self._attr_icon = "mdi:home-lightning-bolt"
 
     @property

@@ -70,7 +70,7 @@ class IChargeController:
         if self.hub.is_initialized and not self._is_initalized:
             self._is_initalized = self._check_initialized()
             if self._is_initalized:
-                self.__debug_log("Chargecontroller is initialized and ready to work!")
+                self.__debug_log("Chargecontroller is initialized and ready to work.")
         return self._is_initalized
 
     @property
