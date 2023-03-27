@@ -92,6 +92,7 @@ class NordPoolUpdater:
             ret = True
         await self._update_average_week()
         self.model.currency = result.currency
+        self.model.use_cent = result.price_in_cent
         self.state = result.state
         await self._update_average_day(result.average)
         await self._update_average_month()
