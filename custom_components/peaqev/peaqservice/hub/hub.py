@@ -204,13 +204,13 @@ class HomeAssistantHub:
                 return None
         return ret
 
-    def get_chargerobject_value(self) -> str:
+    async def get_chargerobject_value(self) -> str:
         ret = getattr(self.sensors.chargerobject, "value", "unknown")
         return ret.lower()
 
-    def set_chargerobject_value(self, value) -> None:
+    async def set_chargerobject_value(self, value) -> None:
         if hasattr(self.sensors, "chargerobject"):
-            self.sensors.chargerobject.value = value
+            setattr(self.sensors.chargerobject, "value", value)
 
     async def get_money_sensor_data(self) -> dict | None:
         ret = {}
