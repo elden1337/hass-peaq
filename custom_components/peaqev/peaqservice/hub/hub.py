@@ -69,25 +69,27 @@ class HomeAssistantHub:
         self._is_initialized = False
         self.observer = Observer(self)
         self._set_observers()
-
-        self.initializer = HubInitializer(self) #top level
+        self.initializer = HubInitializer(self)
 
     async def setup(self):
-        self.chargertype = await self.state_machine.async_add_executor_job(ChargerTypeFactory.create,self.state_machine,self.options.charger.chargertype,self.options)  # charger?
+        self.chargertype = await self.state_machine.async_add_executor_job(ChargerTypeFactory.create,
+                                                                           self.state_machine,
+                                                                           self.options.charger.chargertype,
+                                                                           self.options)  # charger?
         self.charger = Charger(hub=self, chargertype=self.chargertype)  # top level
-
-        self.sensors:IHubSensors = await HubSensorsFactory.create(self.options)  # top level
+        self.sensors: IHubSensors = await HubSensorsFactory.create(self.options)  # top level
         self.timer: Timer = Timer()
         self.hours: Hours = await HourselectionFactory.create(self)  # top level
-        self.threshold:ThresholdBase = await ThresholdFactory.create(self)  # top level
+        self.threshold: ThresholdBase = await ThresholdFactory.create(self)  # top level
         self.prediction = Prediction(self)  # threshold
         self.scheduler = SchedulerFacade(hub=self, options=self.hours.options)  # hours
 
-        self.sensors.setup(state_machine=self.state_machine, options=self.options, domain=self.domain, chargerobject=self.chargertype)
+        self.sensors.setup(state_machine=self.state_machine, options=self.options, domain=self.domain,
+                           chargerobject=self.chargertype)
         self.sensors.init_hub_values()
         self.servicecalls = ServiceCalls(self)  # top level
         self.states = await StateChangesFactory.create(self)  # top level
-        self.chargecontroller: IChargeController = await ChargeControllerFactory.create(self,charger_states=self.chargertype.chargerstates)  # charger
+        self.chargecontroller: IChargeController = await ChargeControllerFactory.create(self, charger_states=self.chargertype.chargerstates)  # charger
         self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)  # hours
         self.power_canary = PowerCanary(hub=self)  # power
         self.gainloss = GainLoss(self)  # power
@@ -95,7 +97,6 @@ class HomeAssistantHub:
         self.chargingtracker_entities = []
         trackers = await self.__setup_tracking()
         async_track_state_change(self.state_machine, trackers, self.state_changed)
-
 
     @property
     def enabled(self) -> bool:
@@ -132,25 +133,14 @@ class HomeAssistantHub:
             return False
         return True
 
-    def _set_chargingtracker_entities(self) -> list:
-        ret = [f"sensor.{self.domain}_{ex.nametoid(CHARGERCONTROLLER)}"]
-        if hasattr(self.sensors, "chargerobject_switch"):
-            ret.append(self.sensors.chargerobject_switch.entity)
-        if hasattr(self.sensors, "carpowersensor"):
-            ret.append(self.sensors.carpowersensor.entity)
-        if hasattr(self.sensors, "charger_enabled"):
-            ret.append(self.sensors.charger_enabled.entity)
-        if hasattr(self.sensors, "charger_done"):
-            ret.append(self.sensors.charger_done.entity)
-
-        if self.chargertype.type not in [ChargerType.Outlet, ChargerType.NoCharger]:
-            ret.append(self.sensors.chargerobject.entity)
-        if not self.options.peaqev_lite:
-            ret.append(self.sensors.powersensormovingaverage.entity)
-            ret.append(self.sensors.powersensormovingaverage24.entity)
-        if self.hours.nordpool_entity is not None:
-            ret.append(self.hours.nordpool_entity)
-        return ret
+    @property
+    def watt_cost(self) -> int:
+        if self.options.price.price_aware:
+            try:
+                return int(round(float(self.sensors.power.total.value) * float(self.nordpool.state), 0))
+            except:
+                return 0
+        return 0
 
     @callback
     async def state_changed(self, entity_id, old_state, new_state):
@@ -162,29 +152,50 @@ class HomeAssistantHub:
                 msg = f"Unable to handle data-update: {entity_id} {old_state}|{new_state}. Exception: {e}"
                 _LOGGER.error(msg)
 
-    @property
-    def watt_cost(self) -> int:
-        if self.options.price.price_aware:
-            try:
-                return int(round(float(self.sensors.power.total.value) * float(self.nordpool.state), 0))
-            except:
-                return 0
-        return 0
+
 
     async def __setup_tracking(self) -> list:
         tracker_entities = []
         if not self.options.peaqev_lite:
             tracker_entities.append(self.options.powersensor)
             tracker_entities.append(self.sensors.totalhourlyenergy.entity)
-        self.chargingtracker_entities = self._set_chargingtracker_entities()
+        self.chargingtracker_entities = await self._set_chargingtracker_entities()
         tracker_entities += self.chargingtracker_entities
         return tracker_entities
 
-    """Composition below here"""
-    async def async_set_init_dict(self, init_dict):
-        await self.state_machine.async_add_executor_job(self.sensors.locale.data.query_model.peaks.set_init_dict, init_dict)
+    async def _set_chargingtracker_entities(self) -> list:
+        ret = [f"sensor.{self.domain}_{ex.nametoid(CHARGERCONTROLLER)}"]
+        if hasattr(self.sensors, "chargerobject_switch"):
+            ret.append(self.sensors.chargerobject_switch.entity)
+        if hasattr(self.sensors, "carpowersensor"):
+            ret.append(self.sensors.carpowersensor.entity)
+        if hasattr(self.sensors, "charger_enabled"):
+            ret.append(self.sensors.charger_enabled.entity)
+        if hasattr(self.sensors, "charger_done"):
+            ret.append(self.sensors.charger_done.entity)
+        if self.chargertype.type not in [ChargerType.Outlet, ChargerType.NoCharger]:
+            ret.append(self.sensors.chargerobject.entity)
+        if not self.options.peaqev_lite:
+            ret.append(self.sensors.powersensormovingaverage.entity)
+            ret.append(self.sensors.powersensormovingaverage24.entity)
+        if self.hours.nordpool_entity is not None:
+            ret.append(self.hours.nordpool_entity)
+        return ret
 
-    def get_power_sensor_from_hass(self) -> float|None:
+    def _set_observers(self) -> None:
+        self.observer.add("prices changed", self._update_prices)
+        self.observer.add("monthly average price changed", self._update_average_monthly_price)
+        self.observer.add("weekly average price changed", self._update_average_weekly_price)
+        self.observer.add("update charger done", self._update_charger_done)
+        self.observer.add("update charger enabled", self._update_charger_enabled)
+
+
+    """Composition below here"""
+
+    async def async_set_init_dict(self, init_dict):
+        await self.state_machine.async_add_executor_job(self.sensors.locale.data.query_model.peaks.set_init_dict,init_dict)
+
+    def get_power_sensor_from_hass(self) -> float | None:
         ret = self.state_machine.states.get(self.options.powersensor)
         if ret is not None:
             try:
@@ -200,6 +211,23 @@ class HomeAssistantHub:
     def set_chargerobject_value(self, value) -> None:
         if hasattr(self.sensors, "chargerobject"):
             self.sensors.chargerobject.value = value
+
+    async def get_money_sensor_data(self) -> dict | None:
+        ret = {}
+        ret["state"] = getattr(self.chargecontroller, "state_display_model")
+        ret["nonhours"] = getattr(self.chargecontroller, "non_hours_display_model")
+        ret["cautionhours"] = getattr(self.chargecontroller, "caution_hours_display_model")
+        ret["currency"] = getattr(self.nordpool, "currency")
+        ret["offsets"] = getattr(self.hours, "offsets", {})
+        ret["charge_permittance"] = getattr(self.chargecontroller, "current_charge_permittance_display_model")
+        ret["average_nordpool_data"] = getattr(self.nordpool, "average_data")
+        ret["use_cent"] = getattr(self.nordpool.model, "use_cent")
+        ret["current_peak"] = getattr(self.sensors.current_peak, "value")
+        ret["avg_kwh_price"] = await self.state_machine.async_add_executor_job(self.hours.get_average_kwh_price)
+        ret["max_charge"] = await self.state_machine.async_add_executor_job(self.hours.get_total_charge)
+        ret["average_weekly"] = getattr(self.nordpool, "average_weekly")
+        ret["average_monthly"] = getattr(self.nordpool, "average_month")
+        return ret
 
     @property
     def prices(self) -> list:
@@ -219,6 +247,12 @@ class HomeAssistantHub:
             return self.sensors.locale.data.free_charge(self.sensors.locale.data)
         return False
 
+    @property
+    def charger_done(self) -> bool:
+        if hasattr(self.sensors, "charger_done"):
+            return self.sensors.charger_done.value
+        return False
+
     def _update_prices(self, prices: list) -> None:
         self.hours.update_prices(prices[0], prices[1])
 
@@ -228,27 +262,16 @@ class HomeAssistantHub:
 
     def _update_average_weekly_price(self, val) -> None:
         if self.options.price.price_aware and isinstance(val, float):
-            self.hours.adjusted_average = val
-
-    @property
-    def charger_done(self) -> bool:
-        if hasattr(self.sensors, "charger_done"):
-            return self.sensors.charger_done.value
-        return False
+            setattr(self.hours, "adjusted_average", val)
 
     def _update_charger_done(self, val):
         if hasattr(self.sensors, "charger_done"):
-            self.sensors.charger_done.value = bool(val)
+            setattr(self.sensors.charger_done, "value", bool(val))
 
     def _update_charger_enabled(self, val):
         if hasattr(self.sensors, "charger_enabled"):
-            self.sensors.charger_enabled.value = bool(val)
+            setattr(self.sensors.charger_enabled, "value", bool(val))
         else:
             raise Exception("Peaqev cannot function without a charger_enabled entity")
 
-    def _set_observers(self) -> None:
-        self.observer.add("prices changed", self._update_prices)
-        self.observer.add("monthly average price changed", self._update_average_monthly_price)
-        self.observer.add("weekly average price changed", self._update_average_weekly_price)
-        self.observer.add("update charger done", self._update_charger_done)
-        self.observer.add("update charger enabled", self._update_charger_enabled)
+

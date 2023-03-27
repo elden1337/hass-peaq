@@ -18,6 +18,7 @@ class NordPoolUpdater:
     def __init__(self, hub, is_active: bool = True):
         self.model = NordPoolModel()
         self.hub = hub
+        self.state_machine = hub.state_machine
         self._nordpool_entity: str = None
         if is_active:
             self._setup_nordpool()
@@ -51,14 +52,17 @@ class NordPoolUpdater:
     def nordpool_entity(self) -> str:
         return self._nordpool_entity
 
-    async def update_nordpool(self):
+    async def update_nordpool(self, initial: bool = False) -> None:
         if self.nordpool_entity is not None:
-            ret = self.hub.state_machine.states.get(self.nordpool_entity)
+            ret = self.state_machine.states.get(self.nordpool_entity)
             _result = NordpoolDTO()
             if ret is not None:
                 await _result.set_model(ret)
                 if await self._update_set_prices(_result):
-                    await self.hub.observer.async_broadcast("prices changed",[self.model.prices, self.model.prices_tomorrow])
+                    if initial:
+                        await self.state_machine.async_add_executor_job(self.hub._update_prices, [self.model.prices, self.model.prices_tomorrow])
+                    else:
+                        await self.hub.observer.async_broadcast("prices changed",[self.model.prices, self.model.prices_tomorrow])
             elif self.hub.is_initialized:
                 _LOGGER.error("Could not get nordpool-prices")
 
@@ -107,7 +111,7 @@ class NordPoolUpdater:
                 self._nordpool_entity = entities[0]
                 _LOGGER.debug(f"Nordpool has been set up and is ready to be used with {self.nordpool_entity}")
                 asyncio.run_coroutine_threadsafe(
-                    self.update_nordpool(), self.hub.state_machine.loop
+                    self.update_nordpool(initial=True), self.hub.state_machine.loop
                 )
             else:
                 self.hub.options.price.price_aware = False  # todo: composition

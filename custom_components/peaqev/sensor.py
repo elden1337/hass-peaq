@@ -72,7 +72,7 @@ async def _gather_utility_sensors(hub, config, hass, async_add_entities):
         ]):
             ret.append(PeaqUtilitySensor(hub, i, TimePeriods.Daily, METER_OFFSET, config.entry_id, hass))
             ret.append(PeaqUtilitySensor(hub, i, TimePeriods.Monthly, METER_OFFSET, config.entry_id, hass))
-    async_add_entities(ret, True)
+    async_add_entities(ret)
 
 
 async def _setup_extra_utilities(hub, config, hass, async_add_entities):
@@ -81,7 +81,7 @@ async def _setup_extra_utilities(hub, config, hass, async_add_entities):
         energy_cost = "energy_cost_integral"
         ret.append(PeaqUtilityCostSensor(hub, energy_cost, DAILY, METER_OFFSET, config.entry_id, hass))
         ret.append(PeaqUtilityCostSensor(hub, energy_cost, MONTHLY, METER_OFFSET, config.entry_id, hass))
-    async_add_entities(ret, True)
+    async_add_entities(ret)
     #return ret
 
 
@@ -172,4 +172,4 @@ async def _gather_integration_sensors(hub, entry_id, async_add_entities):
                 entry_id=entry_id
             )
         )
-    async_add_entities(ret, True)
+    async_add_entities(ret)

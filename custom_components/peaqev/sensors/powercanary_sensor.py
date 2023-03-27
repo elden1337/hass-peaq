@@ -71,12 +71,11 @@ class PowerCanaryPercentageSensor(PowerCanaryDevice):
     def native_unit_of_measurement(self):
         return PERCENTAGE
 
-    def update(self) -> None:
-        if self.hub.is_initialized:
-            if int(self.hub.power_canary.current_percentage * 100) != self._state:  #todo: composition
-                self._state = int(self.hub.power_canary.current_percentage * 100)  #todo: composition
-            self._warning = round(self.hub.power_canary.model.warning_threshold * 100, 2)  #todo: composition
-            self._cutoff = round(self.hub.power_canary.model.cutoff_threshold * 100, 2)  #todo: composition
+    async def async_update(self) -> None:
+        if int(self.hub.power_canary.current_percentage * 100) != self._state:  #todo: composition
+            self._state = int(self.hub.power_canary.current_percentage * 100)  #todo: composition
+        self._warning = round(self.hub.power_canary.model.warning_threshold * 100, 2)  #todo: composition
+        self._cutoff = round(self.hub.power_canary.model.cutoff_threshold * 100, 2)  #todo: composition
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -101,9 +100,10 @@ class PowerCanaryMaxAmpSensor(PowerCanaryDevice):
     def state(self) -> int:
         return self._state
 
-    def update(self) -> None:
-        if self.hub.is_initialized:
-            if self.phases == 1:
-                self._state = max(self.hub.power_canary.onephase_amps.values())  #todo: composition
-            if self.phases == 3:
-                self._state = max(self.hub.power_canary.threephase_amps.values())  #todo: composition
+    async def async_update(self) -> None:
+        if self.phases == 1:
+            ret = getattr(self.hub.power_canary, "onephase_amps", {})
+            self._state = max(ret.values())
+        if self.phases == 3:
+            ret = getattr(self.hub.power_canary, "threephase_amps", {})
+            self._state = max(ret.values())

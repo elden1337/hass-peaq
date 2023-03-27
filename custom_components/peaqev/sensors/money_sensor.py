@@ -38,26 +38,29 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
     def icon(self) -> str:
         return "mdi:car-clock"
 
-    def update(self) -> None:
-        if self.hub.is_initialized:
-            self._state = self.hub.chargecontroller.state_display_model  # todo: composition
-            self._nonhours = self.hub.chargecontroller.non_hours_display_model  # todo: composition
-            self._dynamic_caution_hours = self.hub.chargecontroller.caution_hours_display_model  # todo: composition
-            self._currency = self.hub.nordpool.currency  # todo: composition
-            self._offsets = self.hub.hours.offsets if self.hub.hours.offsets is not None else {}  # todo: composition
-            self._current_peak = self.hub.sensors.current_peak.value  # todo: composition
-            self._avg_cost = self.currency_translation(value=self.hub.hours.get_average_kwh_price(),
-                                                       currency=self._currency,
-                                                       use_cent=self.hub.nordpool.model.use_cent)  # todo: composition
-            self._max_charge = f"{self.hub.hours.get_total_charge()} kWh"  # todo: composition
-            self._average_nordpool = self.currency_translation(value=self.hub.nordpool.average_weekly,
-                                                               currency=self._currency,
-                                                               use_cent=self.hub.nordpool.model.use_cent)  # todo: composition
-            self._average_data_current_month = self.currency_translation(value=self.hub.nordpool.average_month,
-                                                                         currency=self._currency,
-                                                                         use_cent=self.hub.nordpool.model.use_cent)  # todo: composition
-            self._average_nordpool_data = self.hub.nordpool.average_data  # todo: composition
-            self._charge_permittance = self.hub.chargecontroller.current_charge_permittance_display_model  # todo: composition
+    async def async_update(self) -> None:
+        ret = await self.hub.get_money_sensor_data()
+        if ret is not None:
+            self._state = ret.get("state")
+            self._nonhours = ret.get("nonhours")
+            self._dynamic_caution_hours = ret.get("cautionhours")
+            self._currency = ret.get("currency")
+            self._offsets = ret.get("offsets", {})
+            self._current_peak = ret.get("current_peak")
+            self._max_charge = f"{ret.get('max_charge', '-')} kWh"
+            self._average_nordpool_data = ret.get("average_nordpool_data", [])
+            self._charge_permittance = ret.get("charge_permittance")
+
+            self._avg_cost = self.currency_translation(value=ret.get("avg_kwh_price"),
+                                                       currency=ret.get("currency"),
+                                                       use_cent=ret.get("use_cent"))
+
+            self._average_nordpool = self.currency_translation(value=ret.get("average_weekly"),
+                                                               currency=ret.get("currency"),
+                                                               use_cent=ret.get("use_cent"))
+            self._average_data_current_month = self.currency_translation(value=ret.get("average_monthly"),
+                                                                         currency=ret.get("currency"),
+                                                                         use_cent=ret.get("use_cent"))
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -78,6 +81,8 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         state = await super().async_get_last_state()
         _LOGGER.debug("last state of %s = %s", self._attr_name, state)
         if state:
+            # rr = [0.633, 1.128, 0.334, 0.646, 0.909, 1.637, 2.085, 2.093, 1.385, 1.849, 1.803, 1.805, 1.634, 1.302, 1.079, 0.58, 0.815, 0.813, 1.219, 1.145, 0.417, 0.426, 0.736, 1.138, 1.04, 0.647, 0.519, 0.599, 0.433, 0.727, 0.9]
+            # await self.hub.nordpool.import_average_data(rr)
             await self.hub.nordpool.import_average_data(state.attributes.get('Nordpool average data', 50))
             self._average_nordpool = f"{self.hub.nordpool.average_weekly} {self._currency}"
             self._average_data_current_month = f"{self.hub.nordpool.average_month} {self._currency}"

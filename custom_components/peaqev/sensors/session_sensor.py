@@ -64,11 +64,10 @@ class PeaqSessionSensor(SessionDevice, RestoreEntity):
         attr_dict["average_weekly"] = self._average_weekly
         return attr_dict
 
-    def update(self) -> None:
-        if self.hub.is_initialized:
-            self._state = self.hub.charger.session.session_energy
-            self._average_session = self.hub.charger.session.energy_average
-            self._average_weekly = self.hub.charger.session.core.average_data.export
+    async def async_update(self) -> None:
+        self._state = getattr(self.hub.charger.session, "session_energy")
+        self._average_session = getattr(self.hub.charger.session, "energy_average")
+        self._average_weekly = getattr(self.hub.charger.session.core.average_data, "export")
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
@@ -101,10 +100,9 @@ class PeaqSessionCostSensor(SessionDevice, RestoreEntity):
     def unit_of_measurement(self):
         return self._attr_unit_of_measurement
 
-    def update(self) -> None:
-        if self.hub.is_initialized:
-            self._state = self.hub.charger.session.session_price
-            self._attr_unit_of_measurement = self.hub.nordpool.currency
+    async def async_update(self) -> None:
+        self._state = getattr(self.hub.charger.session, "session_price")
+        self._attr_unit_of_measurement = getattr(self.hub.nordpool, "currency")
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()

@@ -32,6 +32,9 @@ class Observer:
     def activate(self) -> None:
         self.model.active = True
 
+    def deactivate(self) -> None:
+        self.model.active = False
+
     def add(self, command: str, func):
         if command in self.model.subscribers.keys():
             self.model.subscribers[command].append(func)
@@ -61,7 +64,7 @@ class Observer:
             return self._prepare_dequeue(attempt)
 
     def _dequeue_and_broadcast(self, command: Tuple[str, int, any]):
-        #_LOGGER.debug(f"ready to broadcast: {command[0]} with params: {command[2]}")
+        _LOGGER.debug(f"ready to broadcast: {command[0]} with params: {command[2]}")
         if self._ok_to_broadcast(command[0]):
             if command[1] > time.time():
                 for func in self.model.subscribers[command[0]]:
