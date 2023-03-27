@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import time
 from abc import abstractmethod
@@ -53,11 +52,9 @@ class IChargeController:
     def status_string(self) -> str:
         if not self.is_initialized:
             return INITIALIZING
-        return asyncio.run_coroutine_threadsafe(
-            self._get_status_string(), self.hub.state_machine.loop
-        ).result()
+        return self._status_type.name
 
-    async def _get_status_string(self):
+    async def get_status(self):
         ret = ChargeControllerStates.Error
         match self.hub.chargertype.type:
             case ChargerType.Outlet:
@@ -67,7 +64,6 @@ class IChargeController:
             case _:
                 ret = await self._get_status()
         self.status_type = ret
-        return ret.name
 
     @property
     def is_initialized(self) -> bool:
@@ -79,7 +75,7 @@ class IChargeController:
         if self.hub.is_initialized and not self._is_initalized:
             self._is_initalized = self._check_initialized()
             if self._is_initalized:
-                _LOGGER.info("Chargecontroller is initialized and ready to work!")
+                _LOGGER.info("Chargecontroller is initialized and ready to work.")
         return self._is_initalized
 
     @property
