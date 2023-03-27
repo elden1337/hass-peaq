@@ -51,7 +51,6 @@ class IChargeController:
 
     @property
     def status_string(self) -> str:
-        ret = ChargeControllerStates.Error
         if not self.is_initialized:
             return INITIALIZING
         return asyncio.run_coroutine_threadsafe(
@@ -59,6 +58,7 @@ class IChargeController:
         ).result()
 
     async def _get_status_string(self):
+        ret = ChargeControllerStates.Error
         match self.hub.chargertype.type:
             case ChargerType.Outlet:
                 ret = await self._get_status_outlet()
@@ -166,13 +166,13 @@ class IChargeController:
         if not self.hub.enabled:
             ret = ChargeControllerStates.Disabled
         elif _state in self._charger_states.get(ChargeControllerStates.Done):
-            self.hub.observer.async_broadcast("update charger done", True)
+            await self.hub.observer.async_broadcast("update charger done", True)
             ret = ChargeControllerStates.Done
             update_timer = False
         elif _state in self._charger_states.get(ChargeControllerStates.Idle):
             ret = ChargeControllerStates.Idle
             if self.hub.charger_done:
-                self.hub.observer.async_broadcast("update charger done", False)
+                await self.hub.observer.async_broadcast("update charger done", False)
         elif self.hub.sensors.power.killswitch.is_dead:  # todo: composition
             ret = ChargeControllerStates.Error
         elif _state not in self._charger_states.get(ChargeControllerStates.Idle) and self.hub.charger_done:
@@ -191,7 +191,6 @@ class IChargeController:
 
         if ret == ChargeControllerStates.Error:
             _LOGGER.error(f"Chargecontroller returned faulty state. Charger reported {self.hub.get_chargerobject_value()} as state.")
-
         return ret
 
     async def _get_status_no_charger(self) -> ChargeControllerStates:
@@ -221,7 +220,7 @@ class IChargeController:
                 f"'is_done' reported that charger is Done because of idle-charging for more than {DONETIMEOUT} seconds.")
             ret = _regular_test
         if ret and self.hub.sensors.charger_done is False:
-            self.hub.observer.async_broadcast("update charger done", True)
+            await self.hub.observer.async_broadcast("update charger done", True)
         return ret
 
     async def __debug_log(self, message: str):
