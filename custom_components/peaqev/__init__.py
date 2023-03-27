@@ -20,20 +20,20 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     """Set up Peaqev"""
+    _LOGGER.debug("starting setup of Peaqev")
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][conf.entry_id] = conf.data
 
     options = await _set_options(conf)
-    ci = {}
 
-    if options.peaqev_lite is False:
-        ci["powersensor"] = conf.data["name"]
-        options.powersensor = conf.data["name"]
-
-    hass.data[DOMAIN][conf.entry_id] = ci
+    _LOGGER.debug("creating Hub")
     hub = HomeAssistantHub(hass, options, DOMAIN)
-
+    _LOGGER.debug("Hub created")
     hass.data[DOMAIN]["hub"] = hub
+    _LOGGER.debug("Hub setup start")
+    await hub.setup()
+    _LOGGER.debug("Hub setup done")
+
     conf.async_on_unload(conf.add_update_listener(async_update_entry))
 
     async def servicehandler_enable(call):  # pylint:disable=unused-argument
@@ -67,7 +67,9 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     hass.services.async_register(DOMAIN, "scheduler_set", servicehandler_scheduler_set)
     hass.services.async_register(DOMAIN, "scheduler_cancel", servicehandler_scheduler_cancel)
 
+    _LOGGER.debug("Sensors setup start")
     await hass.config_entries.async_forward_entry_setups(conf, PLATFORMS)
+    _LOGGER.debug("Sensors setup done")
 
     return True
 
@@ -81,15 +83,16 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     unload_ok = await hass.config_entries.async_unload_platforms(
         config_entry, PLATFORMS
     )
-
     hass.data[DOMAIN].pop(config_entry.entry_id)
-
     return unload_ok
 
 
 async def _set_options(conf) -> HubOptions:
     options = HubOptions()
+
     options.peaqev_lite = bool(conf.data.get("peaqevtype") == TYPELITE)
+    if options.peaqev_lite is False:
+        options.powersensor = conf.data["name"]
     options.locale = conf.data.get("locale", "")
     options.charger.chargertype = conf.data.get("chargertype", "")
     if options.charger.chargertype == ChargerType.Outlet.value:

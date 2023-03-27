@@ -9,12 +9,16 @@ from homeassistant.core import (
 )
 from homeassistant.helpers.event import async_track_state_change
 from peaqevcore.hub.hub_options import HubOptions
+from peaqevcore.hub.hub_sensors import IHubSensors
+from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.scheduler.scheduler import SchedulerFacade
+from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 from peaqevcore.services.timer.timer import Timer
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
+from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
 from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.gainloss.gain_loss import GainLoss
@@ -28,6 +32,7 @@ from custom_components.peaqev.peaqservice.hub.hub_initializer import HubInitiali
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import NordPoolUpdater
 from custom_components.peaqev.peaqservice.hub.observer import Observer
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
+from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import IStateChanges
 from custom_components.peaqev.peaqservice.power_canary.power_canary import PowerCanary
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
@@ -36,6 +41,20 @@ _LOGGER = logging.getLogger(__name__)
 
 class HomeAssistantHub:
     hub_id = 1337
+    chargertype: ChargerBase
+    charger: Charger
+    sensors: IHubSensors
+    timer: Timer
+    hours: Hours
+    threshold: ThresholdBase
+    prediction: Prediction
+    scheduler: SchedulerFacade
+    servicecalls: ServiceCalls
+    states: IStateChanges
+    chargecontroller: IChargeController
+    nordpool: NordPoolUpdater
+    power_canary: PowerCanary
+    gainloss: GainLoss
 
     def __init__(
             self,
@@ -43,42 +62,40 @@ class HomeAssistantHub:
             options: HubOptions,
             domain: str
     ):
+        self.hubname = domain.capitalize()
         self.state_machine = hass
         self.domain = domain
         self.options: HubOptions = options
         self._is_initialized = False
         self.observer = Observer(self)
-        self.hubname = domain.capitalize()
+        self._set_observers()
 
-        self.chargertype = ChargerTypeFactory.create(
-            hass=hass,
-            input_type=self.options.charger.chargertype,
-            options=self.options
-        ) #charger?
-        self.charger = Charger(hub=self, chargertype=self.chargertype) #top level
-        
-        self.sensors = HubSensorsFactory.create(self.options) #top level
-        self.timer: Timer = Timer()
-        self.hours: Hours = HourselectionFactory.create(self) #top level
-        self.threshold = ThresholdFactory.create(self) #top level
-        self.prediction = Prediction(self) #threshold
-        self.scheduler = SchedulerFacade(hub=self, options=self.hours.options) #hours
-
-        self.sensors.setup(state_machine=hass, options=options, domain=domain, chargerobject=self.chargertype)
-        self.sensors.init_hub_values()
-
-        self.servicecalls = ServiceCalls(self) #top level
-        self.states = StateChangesFactory.create(self) #top level
-        self.chargecontroller = ChargeControllerFactory.create(self, charger_states=self.chargertype.chargerstates) #charger
-        self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware) #hours
-        self.power_canary = PowerCanary(hub=self)  #power
         self.initializer = HubInitializer(self) #top level
-        self.gainloss = GainLoss(self) #power
+
+    async def setup(self):
+        self.chargertype = await self.state_machine.async_add_executor_job(ChargerTypeFactory.create,self.state_machine,self.options.charger.chargertype,self.options)  # charger?
+        self.charger = Charger(hub=self, chargertype=self.chargertype)  # top level
+
+        self.sensors:IHubSensors = await HubSensorsFactory.create(self.options)  # top level
+        self.timer: Timer = Timer()
+        self.hours: Hours = await HourselectionFactory.create(self)  # top level
+        self.threshold:ThresholdBase = await ThresholdFactory.create(self)  # top level
+        self.prediction = Prediction(self)  # threshold
+        self.scheduler = SchedulerFacade(hub=self, options=self.hours.options)  # hours
+
+        self.sensors.setup(state_machine=self.state_machine, options=self.options, domain=self.domain, chargerobject=self.chargertype)
+        self.sensors.init_hub_values()
+        self.servicecalls = ServiceCalls(self)  # top level
+        self.states = await StateChangesFactory.create(self)  # top level
+        self.chargecontroller: IChargeController = await ChargeControllerFactory.create(self,charger_states=self.chargertype.chargerstates)  # charger
+        self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)  # hours
+        self.power_canary = PowerCanary(hub=self)  # power
+        self.gainloss = GainLoss(self)  # power
 
         self.chargingtracker_entities = []
-        trackers = self.__setup_tracking()
-        async_track_state_change(hass, trackers, self.state_changed)
-        self._set_observers()
+        trackers = await self.__setup_tracking()
+        async_track_state_change(self.state_machine, trackers, self.state_changed)
+
 
     @property
     def enabled(self) -> bool:
@@ -110,6 +127,7 @@ class HomeAssistantHub:
             if self.initializer.check():
                 del self.initializer
                 self.observer.activate()
+                self.observer.broadcast("hub initialized")
                 return True
             return False
         return True
@@ -153,7 +171,7 @@ class HomeAssistantHub:
                 return 0
         return 0
 
-    def __setup_tracking(self) -> list:
+    async def __setup_tracking(self) -> list:
         tracker_entities = []
         if not self.options.peaqev_lite:
             tracker_entities.append(self.options.powersensor)
@@ -202,12 +220,10 @@ class HomeAssistantHub:
         self.hours.update_prices(prices[0], prices[1])
 
     def _update_average_monthly_price(self, val) -> None:
-        _LOGGER.debug(f"got new monthly average price {val}")
         if self.options.price.price_aware and isinstance(val, float):
             self.hours.update_top_price(val)
 
     def _update_average_weekly_price(self, val) -> None:
-        _LOGGER.debug(f"got new weekly average price {val}")
         if self.options.price.price_aware and isinstance(val, float):
             self.hours.adjusted_average = val
 

@@ -85,7 +85,7 @@ class PeaqSessionCostSensor(SessionDevice, RestoreEntity):
         name = f"{hub.hubname} Session energy cost"
         super().__init__(hub, name, entry_id)
         self._attr_name = name
-        self._attr_unit_of_measurement = self.hub.nordpool.currency
+        self._attr_unit_of_measurement = None
         self._state = 0
 
     @property

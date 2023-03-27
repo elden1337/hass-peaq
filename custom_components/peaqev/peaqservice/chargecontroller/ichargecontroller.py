@@ -27,6 +27,7 @@ class IChargeController:
         self._latest_debuglog = 0
         self._charger_states: dict = charger_states
         self.hub.observer.add("update latest charger start", self._update_latest_charger_start)
+        self.hub.observer.add("hub initialized", self._check_initialized)
 
     @property
     def status_type(self) -> ChargeControllerStates:
@@ -121,7 +122,7 @@ class IChargeController:
         if not self.hub.options.peaqev_lite:
             _state = self.hub.get_power_sensor_from_hass()
             if _state is not None:
-                if _state > 0:
+                if isinstance(_state, (float,int)):
                     return True
             return False
         return True

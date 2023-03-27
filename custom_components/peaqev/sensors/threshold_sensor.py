@@ -11,7 +11,7 @@ class PeaqThresholdSensor(PowerDevice):
         super().__init__(hub, name, entry_id)
 
         self._attr_name = name
-        self._state = self.hub.prediction.predictedpercentageofpeak  #todo: composition
+        self._state = None
         self._start_threshold = None
         self._stop_threshold = None
 

@@ -4,7 +4,8 @@ from peaqevcore.hub.hub_sensors import HubSensorsLite, HubSensors, IHubSensors
 
 class HubSensorsFactory:
     @staticmethod
-    def create(options: HubOptions) -> IHubSensors:
+    async def create(options: HubOptions) -> IHubSensors:
         if options.peaqev_lite:
             return HubSensorsLite()
-        return HubSensors()
+        else:
+            return HubSensors()

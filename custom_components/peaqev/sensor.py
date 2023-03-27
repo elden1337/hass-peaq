@@ -2,7 +2,7 @@
 import logging
 from datetime import timedelta
 
-from homeassistant.components.utility_meter.const import QUARTER_HOURLY, DAILY, MONTHLY
+from homeassistant.components.utility_meter.const import DAILY, MONTHLY
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from peaqevcore.models.hub.const import AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H
@@ -48,8 +48,11 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
     await _gather_all_sensors(hub, config, async_add_entities, hass)
 
 async def _gather_all_sensors(hub, config, async_add_entities, hass) -> None:
-    async_add_entities(await _gather_sensors(hub, config), update_before_add=True)
-    await _gather_integration_sensors(hub, config.entry_id, async_add_entities)
+    _LOGGER.debug("Gathering sensors")
+    sensors = []
+    sensors.extend(await _gather_sensors(hub, config))
+    _LOGGER.debug("Gathering integration sensors")
+    sensors.extend(await _gather_integration_sensors(hub, config.entry_id))
 
     integrationsensors = []
     if not hub.options.peaqev_lite:
@@ -57,10 +60,14 @@ async def _gather_all_sensors(hub, config, async_add_entities, hass) -> None:
     if hub.chargertype.type is not ChargerType.NoCharger:
         integrationsensors.append(ex.nametoid(CONSUMPTION_INTEGRAL_NAME))
 
-    async_add_entities(await _gather_utility_sensors(hub, config, integrationsensors, hass))    
-    async_add_entities(await _setup_extra_utilities(hub, config, hass))
+    _LOGGER.debug("Gathering utility sensors")
+    sensors.extend(await _gather_utility_sensors(hub, config, integrationsensors, hass))
+    _LOGGER.debug("Gathering extra sensors")
+    sensors.extend(await _setup_extra_utilities(hub, config, hass))
+    async_add_entities(sensors)
 
     if hub.chargertype.type is not ChargerType.NoCharger:
+        _LOGGER.debug("Adding peaksensor")
         async_add_entities([PeaqPeakSensor(hub, config.entry_id)], update_before_add=True)
 
 
@@ -118,7 +125,7 @@ async def _gather_sensors(hub, config) -> list:
             ret.append(PeaqSessionCostSensor(hub, config.entry_id))
     return ret
 
-async def _gather_integration_sensors(hub, entry_id, async_add_entities):
+async def _gather_integration_sensors(hub, entry_id):
     ret = []
     if hub.options.peaqev_lite:
         return ret
@@ -170,4 +177,4 @@ async def _gather_integration_sensors(hub, entry_id, async_add_entities):
                     entry_id=entry_id
                 )
         )
-    async_add_entities(ret)
+    return ret

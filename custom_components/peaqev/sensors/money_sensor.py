@@ -20,6 +20,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._current_hour = None
         self._currency = None
         self._current_peak = None
+        self._state = None
         self._avg_cost = None
         self._max_charge = None
         self._average_nordpool = None
@@ -30,13 +31,14 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
 
     @property
     def state(self):
-        return self.hub.chargecontroller.state_display_model  #todo: composition
+        return self._state
 
     @property
     def icon(self) -> str:
         return "mdi:car-clock"
 
     def update(self) -> None:
+        self._state = self.hub.chargecontroller.state_display_model  #todo: composition
         self._nonhours = self.hub.chargecontroller.non_hours_display_model  #todo: composition
         self._dynamic_caution_hours = self.hub.chargecontroller.caution_hours_display_model  #todo: composition
         self._currency = self.hub.nordpool.currency  #todo: composition
@@ -66,6 +68,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
+        _LOGGER.debug("last state of %s = %s", self._attr_name, state)
         if state:
             await self.hub.nordpool.import_average_data(state.attributes.get('Nordpool average data', 50))
             self._average_nordpool = f"{self.hub.nordpool.average_weekly} {self._currency}"

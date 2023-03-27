@@ -18,7 +18,7 @@ class PeaqSensor(SensorBase):
 
     @property
     def state(self):
-        if self.hub.scheduler.scheduler_active:  #todo: composition
+        if self._scheduler_active:
             return f"(schedule) {self._state}"
         return self._state
 

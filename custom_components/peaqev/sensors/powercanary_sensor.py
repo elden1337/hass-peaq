@@ -42,7 +42,7 @@ class PowerCanaryStatusSensor(PowerCanaryDevice):
     def __init__(self, hub, entry_id):
         name = f"{hub.hubname} {POWERCANARY} status"
         super().__init__(hub, name, entry_id)
-        self._state = self.hub.power_canary.state_string  #todo: composition
+        self._state = None
         self._attr_icon = "mdi:bird"
 
     @property

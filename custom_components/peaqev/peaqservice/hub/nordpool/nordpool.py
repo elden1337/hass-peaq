@@ -122,6 +122,7 @@ class NordPoolUpdater:
             if len(incoming):
                 self.model.average_data = rounded_vals
         await self._cap_average_data_length()
+        await self.update_nordpool()
 
     async def _add_average_data(self, new_val):
         if isinstance(new_val, float):

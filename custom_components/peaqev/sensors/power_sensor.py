@@ -20,11 +20,11 @@ class PeaqAmpSensor(PowerDevice):
         name = f"{hub.hubname} {ALLOWEDCURRENT}"
         super().__init__(hub, name, entry_id)
         self.hub = hub
-        self._state = self.hub.threshold.allowedcurrent  #todo: composition
+        self._state = None
         self._attr_icon = "mdi:current-ac"
         self._charger_current = 0
-        self._charger_phases = self.hub.threshold.phases  #todo: composition
-        self._all_currents = list(self.hub.threshold.currents.values())  #todo: composition
+        self._charger_phases = None
+        self._all_currents = None
 
     @property
     def state(self) -> int:
