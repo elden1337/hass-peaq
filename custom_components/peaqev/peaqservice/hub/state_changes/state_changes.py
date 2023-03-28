@@ -12,7 +12,7 @@ class StateChanges(IStateChanges):
         self.hub = hub
         super().__init__(hub)
 
-    async def _update_sensor(self, entity, value) -> bool:
+    async def async_update_sensor_internal(self, entity, value) -> bool:
         update_session = False
         match entity:
             case self.hub.options.powersensor:
@@ -36,7 +36,7 @@ class StateChanges(IStateChanges):
                 self.hub.power_canary.total_power = self.hub.sensors.power.total.value
                 await self._handle_outlet_updates()
             case self.hub.sensors.chargerobject.entity:
-                self.hub.set_chargerobject_value(value)
+                self.hub.async_set_chargerobject_value(value)
             case self.hub.sensors.chargerobject_switch.entity:
                 await self._update_chargerobject_switch(value)
             case self.hub.sensors.totalhourlyenergy.entity:
@@ -47,22 +47,22 @@ class StateChanges(IStateChanges):
                 self.hub.sensors.powersensormovingaverage24.value = value
             case self.hub.nordpool.nordpool_entity:
                 if self.hub.options.price.price_aware:
-                    await self.hub.nordpool.update_nordpool()
+                    await self.hub.nordpool.async_update_nordpool()
                     update_session = True
         return update_session
     
     async def _handle_outlet_updates(self):
         if self.hub.chargertype.domainname is ChargerType.Outlet:
-            old_state = await self.hub.get_chargerobject_value()
+            old_state = await self.hub.async_get_chargerobject_value()
             if time.time() - self.latest_outlet_update < 10:
                 return
             self.latest_outlet_update = time.time()
             if self.hub.sensors.carpowersensor.value > 0:
-                await self.hub.set_chargerobject_value("charging")
+                await self.hub.async_set_chargerobject_value("charging")
             else:
-                await self.hub.set_chargerobject_value("connected")
-            if old_state != await self.hub.get_chargerobject_value():
-                _LOGGER.debug(f"smartoutlet is now {await self.hub.get_chargerobject_value()}")
+                await self.hub.async_set_chargerobject_value("connected")
+            if old_state != await self.hub.async_get_chargerobject_value():
+                _LOGGER.debug(f"smartoutlet is now {await self.hub.async_get_chargerobject_value()}")
 
 
 class StateChangesLite(IStateChanges):
@@ -80,7 +80,7 @@ class StateChangesLite(IStateChanges):
                     await self._handle_outlet_updates()
                     self.hub.sensors.chargerobject_switch.updatecurrent()
             case self.hub.sensors.chargerobject.entity:
-                self.hub.set_chargerobject_value(value)
+                self.hub.async_set_chargerobject_value(value)
             case self.hub.sensors.chargerobject_switch.entity:
                 await self._update_chargerobject_switch(value)
             case self.hub.sensors.current_peak.entity:
@@ -89,21 +89,21 @@ class StateChangesLite(IStateChanges):
                 await self._update_total_energy_and_peak(value)
             case self.hub.nordpool.nordpool_entity:
                 if self.hub.options.price.price_aware:
-                    await self.hub.nordpool.update_nordpool()
+                    await self.hub.nordpool.async_update_nordpool()
         return False
     
     async def _handle_outlet_updates(self):
         if self.hub.chargertype.domainname is ChargerType.Outlet:
-            old_state = await self.hub.get_chargerobject_value()
+            old_state = await self.hub.async_get_chargerobject_value()
             if time.time() - self.latest_outlet_update < 10:
                 return
             self.latest_outlet_update = time.time()
             if self.hub.sensors.carpowersensor.value > 0:
-                await self.hub.set_chargerobject_value("charging")
+                await self.hub.async_set_chargerobject_value("charging")
             else:
-                await self.hub.set_chargerobject_value("connected")
-            if old_state != await self.hub.get_chargerobject_value():
-                _LOGGER.debug(f"smartoutlet is now {await self.hub.get_chargerobject_value()}")
+                await self.hub.async_set_chargerobject_value("connected")
+            if old_state != await self.hub.async_get_chargerobject_value():
+                _LOGGER.debug(f"smartoutlet is now {await self.hub.async_get_chargerobject_value()}")
 
 
 class StateChangesNoCharger(IStateChanges):
@@ -130,7 +130,7 @@ class StateChangesNoCharger(IStateChanges):
                 self.hub.sensors.powersensormovingaverage24.value = value
             case self.hub.nordpool.nordpool_entity:
                 if self.hub.options.price.price_aware:
-                    await self.hub.nordpool.update_nordpool()
+                    await self.hub.nordpool.async_update_nordpool()
                     update_session = True
         return update_session
 
@@ -146,7 +146,7 @@ class StateChangesLiteNoCharger(IStateChanges):
                 await self._update_total_energy_and_peak(value)
             case self.hub.nordpool.nordpool_entity:
                 if self.hub.options.price.price_aware:
-                    await self.hub.nordpool.update_nordpool()
+                    await self.hub.nordpool.async_update_nordpool()
         return False
 
 

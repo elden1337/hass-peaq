@@ -17,10 +17,10 @@ class PeaqAverageSensor(SensorFilter):
         self._entry_id = entry_id
         self._attr_name = f"{hub.hubname} {name}"
         super().__init__(
-            self._attr_name,
-            self.unique_id,
-            self.hub.sensors.power.house.entity,
-            self._set_filters(self.hub, filtertimedelta)
+            name=self._attr_name,
+            unique_id=self.unique_id,
+            entity_id=self.hub.sensors.power.house.entity,
+            filters=self._set_filters(self.hub, filtertimedelta)
         )
 
     @property
@@ -32,11 +32,23 @@ class PeaqAverageSensor(SensorFilter):
         """Return a unique ID to use for this sensor."""
         return f"{DOMAIN}_{self._entry_id}_{ex.nametoid(self._attr_name)}"
 
-    def _set_filters(self, hub, filtertimedelta: timedelta) -> list:
-        filters = []
-
-        filters.append(LowPassFilter(1, 0, hub.sensors.power.house.entity, 10))
-        filters.append(TimeSMAFilter(filtertimedelta, 0, hub.sensors.power.house.entity, TIME_SMA_LAST))
-        filters.append(OutlierFilter(4, 0, hub.sensors.power.house.entity, 2))
-
-        return filters
+    @staticmethod
+    def _set_filters(hub, filtertimedelta: timedelta) -> list:
+        return [
+            LowPassFilter(
+                window_size=1,
+                precision=0,
+                entity=hub.sensors.power.house.entity,
+                time_constant=10),
+            TimeSMAFilter(
+                window_size=filtertimedelta,
+                precision=0,
+                entity=hub.sensors.power.house.entity,
+                type=TIME_SMA_LAST),
+            OutlierFilter(
+                window_size=4,
+                precision=0,
+                entity=hub.sensors.power.house.entity,
+                radius=2
+            )
+        ]

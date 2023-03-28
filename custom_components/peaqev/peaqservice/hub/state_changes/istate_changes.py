@@ -13,14 +13,13 @@ class IStateChanges:
     def __init__(self, hub):
         self.hub = hub
 
-    async def update_sensor(self, entity, value):
-        update_session = await self._update_sensor(entity, value)
-        _ = await self.hub.chargecontroller.get_status()
+    async def async_update_sensor(self, entity, value):
+        update_session = await self.async_update_sensor_internal(entity, value)
         if self.hub.options.price.price_aware:
             if entity != self.hub.nordpool.nordpool_entity and (not self.hub.hours.is_initialized or time.time() - self.latest_nordpool_update > 60):
                 """tweak to provoke nordpool to update more often"""
                 self.latest_nordpool_update = time.time()
-                await self.hub.nordpool.update_nordpool()
+                await self.hub.nordpool.async_update_nordpool()
         await self._handle_sensor_attribute()
         if self.hub.charger.session_active and update_session and hasattr(self.hub.sensors, "carpowersensor"):
             self.hub.charger.session.session_energy = self.hub.sensors.carpowersensor.value
@@ -32,7 +31,7 @@ class IStateChanges:
             await self.hub.charger.charge()
 
     @abstractmethod
-    async def _update_sensor(self, entity, value) -> bool:
+    async def async_update_sensor_internal(self, entity, value) -> bool:
         pass
 
     @abstractmethod

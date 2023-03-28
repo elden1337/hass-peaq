@@ -95,8 +95,8 @@ class HomeAssistantHub:
         self.gainloss = GainLoss(self)  # power
 
         self.chargingtracker_entities = []
-        trackers = await self.__setup_tracking()
-        async_track_state_change(self.state_machine, trackers, self.state_changed)
+        trackers = await self.async_setup_tracking()
+        async_track_state_change(self.state_machine, trackers, self.async_state_changed)
 
     @property
     def enabled(self) -> bool:
@@ -143,27 +143,27 @@ class HomeAssistantHub:
         return 0
 
     @callback
-    async def state_changed(self, entity_id, old_state, new_state):
+    async def async_state_changed(self, entity_id, old_state, new_state):
         if entity_id is not None:
             try:
                 if old_state is None or old_state != new_state:
-                    await self.states.update_sensor(entity_id, new_state.state)
+                    await self.states.async_update_sensor(entity_id, new_state.state)
             except Exception as e:
                 msg = f"Unable to handle data-update: {entity_id} {old_state}|{new_state}. Exception: {e}"
                 _LOGGER.error(msg)
 
 
 
-    async def __setup_tracking(self) -> list:
+    async def async_setup_tracking(self) -> list:
         tracker_entities = []
         if not self.options.peaqev_lite:
             tracker_entities.append(self.options.powersensor)
             tracker_entities.append(self.sensors.totalhourlyenergy.entity)
-        self.chargingtracker_entities = await self._set_chargingtracker_entities()
+        self.chargingtracker_entities = await self.async_set_chargingtracker_entities()
         tracker_entities += self.chargingtracker_entities
         return tracker_entities
 
-    async def _set_chargingtracker_entities(self) -> list:
+    async def async_set_chargingtracker_entities(self) -> list:
         ret = [f"sensor.{self.domain}_{ex.nametoid(CHARGERCONTROLLER)}"]
         if hasattr(self.sensors, "chargerobject_switch"):
             ret.append(self.sensors.chargerobject_switch.entity)
@@ -204,15 +204,15 @@ class HomeAssistantHub:
                 return None
         return ret
 
-    async def get_chargerobject_value(self) -> str:
+    async def async_get_chargerobject_value(self) -> str:
         ret = getattr(self.sensors.chargerobject, "value", "unknown")
         return ret.lower()
 
-    async def set_chargerobject_value(self, value) -> None:
+    async def async_set_chargerobject_value(self, value) -> None:
         if hasattr(self.sensors, "chargerobject"):
             setattr(self.sensors.chargerobject, "value", value)
 
-    async def get_money_sensor_data(self) -> dict | None:
+    async def async_get_money_sensor_data(self) -> dict | None:
         ret = {}
         ret["state"] = getattr(self.chargecontroller, "state_display_model")
         ret["nonhours"] = getattr(self.chargecontroller, "non_hours_display_model")

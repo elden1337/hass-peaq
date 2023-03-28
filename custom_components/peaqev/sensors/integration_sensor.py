@@ -13,12 +13,10 @@ from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
 
 
 class PeaqIntegrationCostSensor(IntegrationSensor):
-    device_class = SensorDeviceClass.ENERGY
     def __init__(self, hub, name, entry_id):
         self._entry_id = entry_id
         self.hub = hub
         self._attr_name = f"{self.hub.hubname} {name}"
-        self._attr_unique_id = f"{DOMAIN}_{self.hub.hub_id}_{self._attr_name}"
         self._attr_unit_of_measurement = ENERGY_KILO_WATT_HOUR
 
         super().__init__(
@@ -30,6 +28,15 @@ class PeaqIntegrationCostSensor(IntegrationSensor):
             unit_prefix="k",
             unit_time=TIME_HOURS
         )
+
+    @property
+    def device_class(self):
+        """Return the device class of the sensor."""
+        return SensorDeviceClass.ENERGY
+
+    @property
+    def name(self):
+        return self._attr_name
 
     @property
     def entity_registry_visible_default(self) -> bool:
@@ -47,12 +54,10 @@ class PeaqIntegrationCostSensor(IntegrationSensor):
 
 
 class PeaqIntegrationSensor(IntegrationSensor):
-    device_class = SensorDeviceClass.ENERGY
     def __init__(self, hub, sensor, name, entry_id):
         self._entry_id = entry_id
         self.hub = hub
         self._attr_name = f"{self.hub.hubname} {name}"
-        self._attr_unique_id = f"{DOMAIN}_{self.hub.hub_id}_{self._attr_name}"
         self._attr_unit_of_measurement = ENERGY_KILO_WATT_HOUR
 
         super().__init__(
@@ -64,6 +69,15 @@ class PeaqIntegrationSensor(IntegrationSensor):
             unit_prefix="k",
             unit_time=TIME_HOURS
         )
+
+    @property
+    def device_class(self):
+        """Return the device class of the sensor."""
+        return SensorDeviceClass.ENERGY
+
+    @property
+    def name(self):
+        return self._attr_name
 
     @property
     def entity_registry_visible_default(self) -> bool:

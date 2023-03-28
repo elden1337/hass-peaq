@@ -30,12 +30,12 @@ class PeaqAmpSensor(PowerDevice):
     def state(self) -> int:
         return self._state
 
-    async def async_update(self) -> None:
-        self._state = getattr(self.hub.threshold, "allowedcurrent")
-        self._charger_current = getattr(self.hub.sensors.chargerobject_switch, "current", 0)
-        self._charger_phases = getattr(self.hub.threshold, "phases")
-        _currs = getattr(self.hub.threshold, "currents", {})
-        self._all_currents = list(_currs.values())
+    def update(self) -> None:
+        if self.hub.is_initialized:
+            self._state = self.hub.threshold.allowedcurrent  #todo: composition
+            self._charger_current = self.hub.sensors.chargerobject_switch.current if hasattr(self.hub.sensors, "chargerobject_switch") else 0  #todo: composition
+            self._charger_phases = self.hub.threshold.phases  #todo: composition
+            self._all_currents = list(self.hub.threshold.currents.values())  #todo: composition
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -62,8 +62,9 @@ class PeaqPowerCostSensor(PowerDevice):
     def state(self) -> int:
         return self._state
 
-    async def update(self) -> None:
-        self._state = getattr(self.hub, "watt_cost")
+    def update(self) -> None:
+        if self.hub.is_initialized:
+            self._state = self.hub.watt_cost
 
     @property
     def entity_registry_visible_default(self) -> bool:
@@ -86,8 +87,8 @@ class PeaqPowerSensor(PowerDevice):
     def state(self) -> int:
         return self._state
 
-    async def async_update(self) -> None:
-        self._state = getattr(self.hub.sensors.power.total,"value")
+    def update(self) -> None:
+        self._state = self.hub.sensors.power.total.value  #todo: composition
 
 
 class PeaqHousePowerSensor(PowerDevice):
@@ -105,6 +106,6 @@ class PeaqHousePowerSensor(PowerDevice):
     def state(self) -> int:
         return self._state
 
-
-    async def async_update(self) -> None:
-        self._state = getattr(self.hub.sensors.power.house,"value")
+    def update(self) -> None:
+        if self.hub.is_initialized:
+            self._state = self.hub.sensors.power.house.value  #todo: composition

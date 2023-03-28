@@ -52,7 +52,7 @@ class NordPoolUpdater:
     def nordpool_entity(self) -> str:
         return self._nordpool_entity
 
-    async def update_nordpool(self, initial: bool = False) -> None:
+    async def async_update_nordpool(self, initial: bool = False) -> None:
         if self.nordpool_entity is not None:
             ret = self.state_machine.states.get(self.nordpool_entity)
             _result = NordpoolDTO()
@@ -111,7 +111,7 @@ class NordPoolUpdater:
                 self._nordpool_entity = entities[0]
                 _LOGGER.debug(f"Nordpool has been set up and is ready to be used with {self.nordpool_entity}")
                 asyncio.run_coroutine_threadsafe(
-                    self.update_nordpool(initial=True), self.hub.state_machine.loop
+                    self.async_update_nordpool(initial=True), self.hub.state_machine.loop
                 )
             else:
                 self.hub.options.price.price_aware = False  # todo: composition
@@ -127,7 +127,7 @@ class NordPoolUpdater:
             if len(incoming):
                 self.model.average_data = rounded_vals
         await self._cap_average_data_length()
-        await self.update_nordpool()
+        await self.async_update_nordpool()
 
     async def _add_average_data(self, new_val):
         if isinstance(new_val, float):

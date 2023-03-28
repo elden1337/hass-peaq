@@ -39,7 +39,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         return "mdi:car-clock"
 
     async def async_update(self) -> None:
-        ret = await self.hub.get_money_sensor_data()
+        ret = await self.hub.async_get_money_sensor_data()
         if ret is not None:
             self._state = ret.get("state")
             self._nonhours = ret.get("nonhours")

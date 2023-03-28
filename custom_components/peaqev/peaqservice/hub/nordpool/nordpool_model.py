@@ -12,6 +12,7 @@ class NordPoolModel:
     average_month: float = 0
     average_weekly: float = 0
     daily_average: float = 0
+    use_cent: bool = False
 
     async def fix_dst(self, val) -> list:
         if val is None:
