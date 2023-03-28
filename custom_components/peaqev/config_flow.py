@@ -9,7 +9,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 
-from custom_components.peaqev.configflow.config_flow_helpers import set_startpeak_dict
+from custom_components.peaqev.configflow.config_flow_helpers import async_set_startpeak_dict
 from custom_components.peaqev.configflow.config_flow_schemas import (
     SENSOR_SCHEMA,
     PRICEAWARE_SCHEMA,
@@ -150,7 +150,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_months(self, user_input=None):
         if user_input is not None:
-            months_dict = await set_startpeak_dict(user_input)
+            months_dict = await async_set_startpeak_dict(user_input)
             self.data["startpeaks"] = months_dict
             return await self.async_step_misc()
 
@@ -252,7 +252,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_months(self, user_input=None):
         """Months"""
         if user_input is not None:
-            months_dict = await set_startpeak_dict(user_input)
+            months_dict = await async_set_startpeak_dict(user_input)
             self.options["startpeaks"] = months_dict
             return await self.async_step_misc()
 

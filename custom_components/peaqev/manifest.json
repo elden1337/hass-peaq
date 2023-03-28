@@ -7,7 +7,9 @@
       "garo_wallbox",
       "zaptec",
       "nordpool",
-      "tibber"
+      "tibber",
+      "filter",
+      "integration"
     ],
     "codeowners": [
       "@elden1337"

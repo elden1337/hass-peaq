@@ -32,7 +32,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][conf.entry_id] = conf.data
-    options = await _async_set_options(conf)
+    options = await async_set_options(conf)
     hub = HomeAssistantHub(hass, options, DOMAIN)
     hass.data[DOMAIN]["hub"] = hub
     await hub.setup()
@@ -97,7 +97,7 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     return await hass.config_entries.async_unload_platforms(config_entry, PLATFORMS)
 
 
-async def _async_set_options(conf) -> HubOptions:
+async def async_set_options(conf) -> HubOptions:
     options = HubOptions()
 
     options.peaqev_lite = bool(conf.data.get("peaqevtype") == TYPELITE)
