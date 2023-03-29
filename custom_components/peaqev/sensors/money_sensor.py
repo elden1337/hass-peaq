@@ -81,10 +81,10 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         state = await super().async_get_last_state()
         _LOGGER.debug("last state of %s = %s", self._attr_name, state)
         if state:
-            rr = [0.646, 0.909, 1.637, 2.085, 2.093, 1.385, 1.849, 1.803, 1.805, 1.634, 1.302, 1.079, 0.58, 0.815, 0.813, 1.219, 1.145, 0.417, 0.426, 0.736, 1.138, 1.04, 0.647, 0.519, 0.599, 0.433, 0.727, 0.898, 1.124, 1.476]
-            await self.hub.nordpool.async_import_average_data(rr)
-            #await self.hub.nordpool.async_import_average_data(state.attributes.get('Nordpool average data', 50))
-            #self._average_nordpool_data = list(state.attributes.get('Nordpool average data', 50))
+            # rr = [0.646, 0.909, 1.637, 2.085, 2.093, 1.385, 1.849, 1.803, 1.805, 1.634, 1.302, 1.079, 0.58, 0.815, 0.813, 1.219, 1.145, 0.417, 0.426, 0.736, 1.138, 1.04, 0.647, 0.519, 0.599, 0.433, 0.727, 0.898, 1.124, 1.476]
+            # await self.hub.nordpool.async_import_average_data(rr)
+            await self.hub.nordpool.async_import_average_data(state.attributes.get('Nordpool average data', 50))
+            self._average_nordpool_data = list(state.attributes.get('Nordpool average data', 50))
             self._average_nordpool = f"{self.hub.nordpool.average_weekly} {self._currency}"
             self._average_data_current_month = f"{self.hub.nordpool.average_month} {self._currency}"
         else:

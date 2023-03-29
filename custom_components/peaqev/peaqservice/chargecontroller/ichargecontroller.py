@@ -8,14 +8,16 @@ from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import calculate_stop_len
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
-from custom_components.peaqev.peaqservice.util.extensionmethods import dt_from_epoch
+from custom_components.peaqev.peaqservice.util.extensionmethods import dt_from_epoch, log_once
 
 _LOGGER = logging.getLogger(__name__)
 
 DONETIMEOUT = 180
 DEBUGLOG_TIMEOUT = 60
 INITIALIZING = "Initializing..."
+WAITING_FOR_POWER = "Waiting for power-reading..."
 CHARGING_ALLOWED = "charging allowed"
+
 
 class IChargeController:
     def __init__(self, hub, charger_states):
@@ -27,7 +29,7 @@ class IChargeController:
         self._latest_debuglog = 0
         self._charger_states: dict = charger_states
         self.hub.observer.add("update latest charger start", self._update_latest_charger_start)
-        self.hub.observer.add("hub initialized", self._check_initialized)
+        self.hub.observer.add("hub initialized", self._do_initialize)
 
     @property
     def status_type(self) -> ChargeControllerStates:
@@ -53,6 +55,8 @@ class IChargeController:
         ret = ChargeControllerStates.Error
         if not self.is_initialized:
             return INITIALIZING
+        if not self._check_initialized():
+            return WAITING_FOR_POWER
         match self.hub.chargertype.type:
             case ChargerType.Outlet:
                 ret = self._get_status_outlet()
@@ -68,9 +72,7 @@ class IChargeController:
         if not self.hub.is_initialized:
             return False
         if self.hub.is_initialized and not self._is_initalized:
-            self._is_initalized = self._check_initialized()
-            if self._is_initalized:
-                self.__debug_log("Chargecontroller is initialized and ready to work.")
+            self._do_initialize()
         return self._is_initalized
 
     @property
@@ -104,7 +106,7 @@ class IChargeController:
         elif hour in self.hub.dynamic_caution_hours.keys():
             ret = int(self.hub.dynamic_caution_hours.get(hour) * 100)
         return f"{str(ret)}%"
-    
+
     @property
     def state_display_model(self) -> str:
         hour = datetime.now().hour
@@ -118,11 +120,15 @@ class IChargeController:
             ret += f" at {int(val * 100)}% of peak"
         return ret
 
+    def _do_initialize(self) -> None:
+        self._is_initalized = True
+        log_once("Chargecontroller is initialized and ready to work.")
+
     def _check_initialized(self) -> bool:
         if not self.hub.options.peaqev_lite:
             _state = self.hub.get_power_sensor_from_hass()
             if _state is not None:
-                if isinstance(_state, (float,int)):
+                if isinstance(_state, (float, int)):
                     return True
             return False
         return True
@@ -179,7 +185,8 @@ class IChargeController:
             self._update_latest_charger_start(time.time())
 
         if ret == ChargeControllerStates.Error:
-            _LOGGER.error(f"Chargecontroller returned faulty state. Charger reported {self.hub.async_get_chargerobject_value()} as state.")
+            _LOGGER.error(
+                f"Chargecontroller returned faulty state. Charger reported {self.hub.async_get_chargerobject_value()} as state.")
 
         return ret
 
