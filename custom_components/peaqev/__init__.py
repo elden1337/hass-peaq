@@ -124,6 +124,7 @@ async def async_set_options(conf) -> HubOptions:
     options.price.cautionhour_type = await _async_get_existing_param(conf, "cautionhour_type", "intermediate")
     options.fuse_type = await _async_get_existing_param(conf, "mains", "")
     options.blocknocturnal = await _async_get_existing_param(conf, "blocknocturnal", False)
+    options.gainloss = await _async_get_existing_param(conf, "gainloss", False)
     return options
 
 

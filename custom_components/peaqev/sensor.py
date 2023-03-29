@@ -54,20 +54,26 @@ async def _async_setup(hub, config, hass, async_add_entities):
     integrationsensors = []
     ret = [PeaqSensor(hub, config.entry_id)]
 
-    if hub.options.price.price_aware:
-        ret.append(PeaqMoneySensor(hub, config.entry_id))
-        ret.append(PeaqPowerCostSensor(hub, config.entry_id))
+    if all ([
+        hub.options.gainloss,
+        hub.options.price.price_aware,
+        hub.options.peaqev_lite is False
+    ]):
+        """implement gainloss sensors"""
         ret.append(GainLossSensor(hub, config.entry_id, TimePeriods.Daily))
         ret.append(GainLossSensor(hub, config.entry_id, TimePeriods.Monthly))
+        ret.append(PeaqPowerCostSensor(hub, config.entry_id))
         ret.append(PeaqIntegrationCostSensor(hub, ENERGY_COST_INTEGRAL, config.entry_id))
+        ret.append(PeaqUtilityCostSensor(hub, ENERGY_COST_INTEGRAL, DAILY, METER_OFFSET, config.entry_id, hass))
+        ret.append(PeaqUtilityCostSensor(hub, ENERGY_COST_INTEGRAL, MONTHLY, METER_OFFSET, config.entry_id, hass))
+
+    if hub.options.price.price_aware:
+        ret.append(PeaqMoneySensor(hub, config.entry_id))
         if hub.chargertype.type != ChargerType.NoCharger:
             ret.append(PeaqSessionCostSensor(hub, config.entry_id))
         if not hub.options.peaqev_lite:
-            ret.append(PeaqUtilityCostSensor(hub, ENERGY_COST_INTEGRAL, DAILY, METER_OFFSET, config.entry_id, hass))
-            ret.append(PeaqUtilityCostSensor(hub, ENERGY_COST_INTEGRAL, MONTHLY, METER_OFFSET, config.entry_id, hass))
             ret.append(PeaqUtilitySensor(hub, ex.nametoid(CONSUMPTION_TOTAL_NAME), TimePeriods.Daily, METER_OFFSET,config.entry_id, hass))
             ret.append(PeaqUtilitySensor(hub, ex.nametoid(CONSUMPTION_TOTAL_NAME), TimePeriods.Monthly, METER_OFFSET,config.entry_id, hass))
-
     if not hub.options.peaqev_lite:
         integrationsensors.append(ex.nametoid(CONSUMPTION_TOTAL_NAME))
         if hub.options.powersensor_includes_car or hub.chargertype.type is ChargerType.NoCharger:
