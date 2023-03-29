@@ -80,6 +80,11 @@ class Zaptec(ChargerBase):
             "charge_done"
         ]
 
+
+    @property
+    def max_amps(self) -> int:
+        return 16
+    
     @property
     def call_on(self) -> CallType:
         return CallType("start_charging", {"charger_id": self._chargerid})

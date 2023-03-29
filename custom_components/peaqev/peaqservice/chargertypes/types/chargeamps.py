@@ -74,6 +74,10 @@ class ChargeAmps(ChargerBase):
         return "chargeamps"
 
     @property
+    def max_amps(self) -> int:
+        return self.get_allowed_amps()
+
+    @property
     def entity_endings(self) -> list:
         """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
         return ["_power", "_1", "_2", "_status", "_dimmer", "_downlight", "_current", "_voltage"]
@@ -123,7 +127,7 @@ class ChargeAmps(ChargerBase):
 
     def get_allowed_amps(self) -> int:
         """no such method for chargeamps available right now."""
-        pass
+        return 16
 
     def set_sensors(self) -> None:
         self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"

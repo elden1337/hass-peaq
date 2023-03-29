@@ -160,6 +160,7 @@ class Easee(ChargerBase):
     def get_allowed_amps(self) -> int:
             ret = self._hass.states.get(self.entities.maxamps)
             if ret is not None:
+                log_once(f"Got max amps from Easee. Setting {ret.state}A.")
                 return int(ret.state)
             else:
                 log_once(f"Unable to get max amps. The sensor {self.entities.maxamps} returned state {ret}. Setting max amps to 16 til I get a proper state.")
