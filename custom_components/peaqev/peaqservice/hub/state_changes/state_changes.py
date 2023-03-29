@@ -140,7 +140,6 @@ class StateChangesLiteNoCharger(IStateChanges):
         super().__init__(hub)
 
     async def _update_sensor(self, entity, value) -> bool:
-
         match entity:
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self._update_total_energy_and_peak(value)

@@ -58,7 +58,7 @@ class NordPoolUpdater:
             _result = NordpoolDTO()
             if ret is not None:
                 await _result.set_model(ret)
-                if await self._update_set_prices(_result):
+                if await self.async_update_set_prices(_result):
                     if initial:
                         await self.state_machine.async_add_executor_job(self.hub._update_prices, [self.model.prices, self.model.prices_tomorrow])
                     else:
@@ -66,25 +66,25 @@ class NordPoolUpdater:
             elif self.hub.is_initialized:
                 _LOGGER.error("Could not get nordpool-prices")
 
-    async def _update_average_month(self) -> None:
-        _new = await self._get_average_async(datetime.now().day)
+    async def async_update_average_month(self) -> None:
+        _new = await self.async_get_average_async(datetime.now().day)
         if len(self.model.average_data) >= int(datetime.now().day) and self.model.average_month != _new:
             self.model.average_month = _new
             await self.hub.observer.async_broadcast("monthly average price changed", self.model.average_month)
 
-    async def _update_average_week(self) -> None:
-        _average7 = await self._get_average_async(7)
+    async def async_update_average_week(self) -> None:
+        _average7 = await self.async_get_average_async(7)
         if len(self.model.average_data) >= 7 and self.model.average_weekly != _average7:
             self.model.average_weekly = _average7
             await self.hub.observer.async_broadcast("weekly average price changed", self.model.average_weekly)
 
-    async def _update_average_day(self, average) -> None:
+    async def async_update_average_day(self, average) -> None:
         if average != self.model.daily_average:
             self.model.daily_average = average
-            await self._add_average_data(average)
+            await self.async_add_average_data(average)
             await self.hub.observer.async_broadcast("daily average price changed", average)
 
-    async def _update_set_prices(self, result: NordpoolDTO) -> bool:
+    async def async_update_set_prices(self, result: NordpoolDTO) -> bool:
         ret = False
         today = await self.model.fix_dst(result.today)
         if self.model.prices != today:
@@ -94,12 +94,12 @@ class NordPoolUpdater:
         if self.model.prices_tomorrow != tomorrow:
             self.model.prices_tomorrow = tomorrow
             ret = True
-        await self._update_average_week()
+        await self.async_update_average_week()
         self.model.currency = result.currency
         self.model.use_cent = result.price_in_cent
         self.state = result.state
-        await self._update_average_day(result.average)
-        await self._update_average_month()
+        await self.async_update_average_day(result.average)
+        await self.async_update_average_month()
         return ret
 
     def _setup_nordpool(self):
@@ -121,28 +121,28 @@ class NordPoolUpdater:
             _LOGGER.error(
                 f"Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness until reboot of HA: {e}")
 
-    async def import_average_data(self, incoming: list):
+    async def async_import_average_data(self, incoming: list):
         if isinstance(incoming, list):
             rounded_vals = [round(h, 3) for h in incoming]
             if len(incoming):
                 self.model.average_data = rounded_vals
-        await self._cap_average_data_length()
+        await self.async_cap_average_data_length()
         await self.async_update_nordpool()
 
-    async def _add_average_data(self, new_val):
+    async def async_add_average_data(self, new_val):
         if isinstance(new_val, float):
             rounded = round(new_val, 3)
             if len(self.model.average_data) == 0:
                 self.model.average_data.append(rounded)
             elif self.model.average_data[-1] != rounded:
                 self.model.average_data.append(rounded)
-            await self._cap_average_data_length()
+            await self.async_cap_average_data_length()
 
-    async def _cap_average_data_length(self):
+    async def async_cap_average_data_length(self):
         while len(self.model.average_data) > AVERAGE_MAX_LEN:
             del self.model.average_data[0]
 
-    async def _get_average_async(self, days: int) -> float:
+    async def async_get_average_async(self, days: int) -> float:
         try:
             if len(self.model.average_data) > days:
                 ret = self.model.average_data[-days:]

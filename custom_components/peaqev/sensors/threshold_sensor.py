@@ -17,7 +17,10 @@ class PeaqThresholdSensor(PowerDevice):
 
     @property
     def state(self):
-        return self._state
+        try:
+            return round(self._state, 1)
+        except:
+            return None
 
     @property
     def native_unit_of_measurement(self):
@@ -29,12 +32,20 @@ class PeaqThresholdSensor(PowerDevice):
 
     async def async_update(self) -> None:
         self._state = getattr(self.hub.prediction, "predictedpercentageofpeak")
-        self._start_threshold = getattr(self.hub.threshold, "start")
-        self._stop_threshold = getattr(self.hub.threshold, "stop")
+        _start = getattr(self.hub.threshold, "start")
+        _stop = getattr(self.hub.threshold, "stop")
+        try:
+            self._start_threshold = round(_start,1)
+        except:
+            self._start_threshold = _start
+        try:
+            self._stop_threshold = round(_stop,1)
+        except:
+            self._stop_threshold = _stop
 
     @property
     def extra_state_attributes(self) -> dict:
         return {
             "start_threshold": self._start_threshold,
-            "stop_threshold": self._stop_threshold,
+            "stop_threshold":  self._stop_threshold,
         }

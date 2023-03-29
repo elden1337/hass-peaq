@@ -25,7 +25,10 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
 
     @property
     def state(self) -> float:
-        return float(self._charged_peak)
+        try:
+            return round(float(self._charged_peak), 1)
+        except:
+            return 0
 
     async def async_update(self) -> None:
         self._charged_peak = getattr(self.hub.sensors.locale.data.query_model,"charged_peak")
@@ -64,10 +67,12 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
         state = await super().async_get_last_state()
         if state:
             _LOGGER.debug("last state of %s = %s", self._name, state)
+            # self._charged_peak = 2.84
+            # self._peaks_dict = {"m":3,"p":{"16h4":2.93,"7h4":2.72,"26h0":2.87}}
+            # self._observed_peak = 2.72
             self._charged_peak = state.state
             self._peaks_dict = state.attributes.get('peaks_dictionary', 50)
-            await self.hub.async_set_init_dict(state.attributes.get('peaks_dictionary', 50))
-            #self.hub.sensors.locale.data.query_model.peaks.set_init_dict(self._peaks_dict)  #todo: composition
+            await self.hub.async_set_init_dict(self._peaks_dict)
             self._observed_peak = state.attributes.get('observed_peak', 50)
         else:
             self._charged_peak = 0
