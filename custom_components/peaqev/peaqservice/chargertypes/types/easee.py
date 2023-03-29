@@ -117,16 +117,16 @@ class Easee(ChargerBase):
 
     @property
     def call_resume(self) -> CallType:
-        return CallType("set_charger_dynamic_limit", {
-            "current": "7",
-            CHARGER_ID: self._chargerid
+                return CallType(ACTION_COMMAND, {
+            CHARGER_ID:     self._chargerid,
+            ACTION_COMMAND: "resume"
         })
 
     @property
     def call_pause(self) -> CallType:
-        return CallType("set_charger_dynamic_limit", {
-            "current": "0",
-            CHARGER_ID: self._chargerid
+                return CallType(ACTION_COMMAND, {
+            CHARGER_ID:     self._chargerid,
+            ACTION_COMMAND: "pause"
         })
 
     @property
