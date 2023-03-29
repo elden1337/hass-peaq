@@ -66,7 +66,8 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
             _LOGGER.debug("last state of %s = %s", self._name, state)
             self._charged_peak = state.state
             self._peaks_dict = state.attributes.get('peaks_dictionary', 50)
-            await self.hub.async_set_init_dict(self._peaks_dict)
+            await self.hub.async_set_init_dict(state.attributes.get('peaks_dictionary', 50))
+            #self.hub.sensors.locale.data.query_model.peaks.set_init_dict(self._peaks_dict)  #todo: composition
             self._observed_peak = state.attributes.get('observed_peak', 50)
         else:
             self._charged_peak = 0
