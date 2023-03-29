@@ -4,9 +4,9 @@
       "init": {
         "data": {
           "priceaware": "Price aware charging",
-          "absolute_top_price": "Max price to allow charging",
+          "absolute_top_price": "(Optional) Never charge over this price",
           "dynamic_top_price": "Top price based on current month average price (ignores set max-price)",
-          "min_priceaware_threshold_price": "(Optional), all hours below this price will be permitted to charge",
+          "min_priceaware_threshold_price": "(Optional) Always allow charging below this price",
           "cautionhour_type": "Caution-hour type"
         },
         "description": "Select price-aware if you wish to adhere to Nordpool-prices (requires integration)"
@@ -38,7 +38,8 @@
       "misc": {
         "data": {
           "mains": "(Optional), pick your main fuses to allow peaqev to act as an ampguard.",
-          "blocknocturnal": "Block charging between 23-06 due to safety concerns."
+          "blocknocturnal": "Block charging between 23-06 due to safety concerns.",
+          "gainloss": "Add Gain/Loss-sensors (requires priceaware)"
         },
         "description": "Experimental and extra options."
       }
@@ -78,9 +79,9 @@
       "priceaware": {
         "data": {
           "priceaware": "Price aware charging (requires Nordpool)",
-          "absolute_top_price": "Max price to allow charging",
+          "absolute_top_price": "(Optional) Never charge over this price",
           "dynamic_top_price": "Top price based on current month average price (ignores set max-price)",
-          "min_priceaware_threshold_price": "(Optional), all hours below this price will be permitted to charge",
+          "min_priceaware_threshold_price": "(Optional) Always allow charging below this price",
           "cautionhour_type": "Caution-hour type"
         }
       },
@@ -109,7 +110,8 @@
       "misc": {
         "data": {
           "mains": "(Optional), pick your main fuses to allow peaqev to act as an ampguard.",
-          "blocknocturnal": "Block charging between 23-06 due to safety concerns."
+          "blocknocturnal": "Block charging between 23-06 due to safety concerns.",
+          "gainloss": "Add Gain/Loss-sensors (requires priceaware)"
         },
         "description": "Experimental and extra options."
       }

@@ -175,7 +175,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         default="",
                     ): vol.In(FUSES_LIST),
                     vol.Optional("blocknocturnal", default=False): cv.boolean,
-                    vol.Optional("gainloss", default=False): cv.boolean,
+                    vol.Optional("gainloss", default=True): cv.boolean,
                 })
 
         return self.async_show_form(
@@ -291,7 +291,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         mainsvalue = await self._get_existing_param("mains", "")
         blocknocturnal = await self._get_existing_param("blocknocturnal", False)
-        gainloss = await self._get_existing_param("gainloss", False)
+        gainloss = await self._get_existing_param("gainloss", True)
 
         schema = vol.Schema(
             {
