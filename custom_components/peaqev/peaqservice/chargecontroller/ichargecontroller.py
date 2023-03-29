@@ -15,7 +15,7 @@ _LOGGER = logging.getLogger(__name__)
 DONETIMEOUT = 180
 DEBUGLOG_TIMEOUT = 60
 INITIALIZING = "Initializing..."
-
+CHARGING_ALLOWED = "charging allowed"
 
 class IChargeController:
     def __init__(self, hub, charger_states):
@@ -104,18 +104,18 @@ class IChargeController:
         elif hour in self.hub.dynamic_caution_hours.keys():
             ret = int(self.hub.dynamic_caution_hours.get(hour) * 100)
         return f"{str(ret)}%"
-
+    
     @property
     def state_display_model(self) -> str:
         hour = datetime.now().hour
-        ret = "Charging allowed"
+        ret = CHARGING_ALLOWED.capitalize()
         if self.hub.timer.is_override:  # todo: composition
             return self.hub.timer.override_string  # todo: composition
         if hour in self.hub.non_hours:
             ret = calculate_stop_len(self.hub.non_hours)
         elif hour in self.hub.dynamic_caution_hours.keys():
             val = self.hub.dynamic_caution_hours.get(hour)
-            ret = f"Charging allowed at {int(val * 100)}% of peak"
+            ret += f" at {int(val * 100)}% of peak"
         return ret
 
     def _check_initialized(self) -> bool:
@@ -130,7 +130,6 @@ class IChargeController:
     def _get_status_outlet(self) -> ChargeControllerStates:
         ret = ChargeControllerStates.Error
         update_timer = False
-
         if not self.hub.enabled:
             update_timer = True
             ret = ChargeControllerStates.Disabled
@@ -153,7 +152,6 @@ class IChargeController:
         _state = self.hub.async_get_chargerobject_value()
         ret = ChargeControllerStates.Error
         update_timer = True
-
         if not self.hub.enabled:
             ret = ChargeControllerStates.Disabled
         elif _state in self._charger_states.get(ChargeControllerStates.Done):
@@ -202,15 +200,13 @@ class IChargeController:
     def _is_done(self, charger_state) -> bool:
         ret = False
         if len(self._charger_states.get(ChargeControllerStates.Done)) > 0:
-            _states_test = charger_state in self._charger_states.get(ChargeControllerStates.Done)
-            if _states_test:
+            if charger_state in self._charger_states.get(ChargeControllerStates.Done):
                 self.__debug_log(f"'is_done' reported that charger is Done based on current charger state")
-                ret = _states_test
-        _regular_test = time.time() - self._latest_charger_start > DONETIMEOUT
-        if _regular_test:
+                ret = True
+        elif time.time() - self._latest_charger_start > DONETIMEOUT:
             self.__debug_log(
                 f"'is_done' reported that charger is Done because of idle-charging for more than {DONETIMEOUT} seconds.")
-            ret = _regular_test
+            ret = True
         if ret and self.hub.sensors.charger_done is False:
             self.hub.observer.broadcast("update charger done", True)
         return ret
