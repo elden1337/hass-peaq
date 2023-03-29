@@ -107,7 +107,7 @@ class PowerCanary:
                 return max(self.onephase_amps.values())
         return -1
 
-    def allow_adjustment(self, new_amps: int) -> bool:
+    async def async_allow_adjustment(self, new_amps: int) -> bool:
         """this method returns true if the desired adjustment 'new_amps' is not breaching threshold"""
         if not self.enabled:
             return True

@@ -7,7 +7,7 @@ from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
-
+from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import (
@@ -162,7 +162,7 @@ class Easee(ChargerBase):
             if ret is not None:
                 return int(ret.state)
             else:
-                _LOGGER.debug(f"Unable to get max amps. The sensor {self.entities.maxamps} returned state None. Setting max amps to 16 til I get a proper state.")
+                log_once(f"Unable to get max amps. The sensor {self.entities.maxamps} returned state {ret}. Setting max amps to 16 til I get a proper state.")
             return 16
 
     def _validate_sensor(self, sensor: str) -> bool:
