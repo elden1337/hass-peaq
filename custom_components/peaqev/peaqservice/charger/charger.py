@@ -213,8 +213,9 @@ class Charger:
             self.params.running = False
             self.params.charger_state_mismatch = False
             _LOGGER.debug("Internal charger has been stopped")
-        else:
+        elif time.time() - self.params.lastest_call_off > 10:
             self.params.charger_state_mismatch = True
+            self.params.lastest_call_off = time.time()
             log_once(f"Fail when trying to stop connected charger. Retrying stop-attempt...")
 
 
