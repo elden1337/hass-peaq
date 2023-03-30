@@ -2,8 +2,9 @@ import logging
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import defer_start
-from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
+from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import async_defer_start
+from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController, INITIALIZING, WAITING_FOR_POWER
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -11,6 +12,23 @@ _LOGGER = logging.getLogger(__name__)
 class ChargeController(IChargeController):
     def __init__(self, hub, charger_states):
         super().__init__(hub, charger_states)
+
+    @property
+    def status_string(self) -> str:
+        ret = ChargeControllerStates.Error
+        if not self.is_initialized:
+            return INITIALIZING
+        if not self._check_initialized():
+            return WAITING_FOR_POWER
+        match self.hub.chargertype.type:
+            case ChargerType.Outlet:
+                ret = self._get_status_outlet()
+            case ChargerType.NoCharger:
+                ret = self._get_status_no_charger()
+            case _:
+                ret = self._get_status()
+        self.status_type = ret
+        return ret.name
 
     @property
     def below_startthreshold(self) -> bool:
@@ -46,7 +64,7 @@ class ChargeController(IChargeController):
                     (self.below_startthreshold and self.hub.sensors.totalhourlyenergy.value != 0),
                     self.hub.is_free_charge
                 ]),
-                not await defer_start(self.hub.hours.non_hours)
+                not await async_defer_start(self.hub.hours.non_hours)
             ]):
                 ret = ChargeControllerStates.Start
             else:
