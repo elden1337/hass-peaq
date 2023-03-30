@@ -137,7 +137,7 @@ class HomeAssistantHub:
     def watt_cost(self) -> int:
         if self.options.price.price_aware:
             try:
-                return int(round(float(self.sensors.power.total.value) * float(self.nordpool.state), 0))
+                return int(round(float(self.sensors.power.total.value) * self.nordpool.state, 0))
             except:
                 return 0
         return 0
