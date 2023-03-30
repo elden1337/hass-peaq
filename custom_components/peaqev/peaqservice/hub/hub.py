@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import datetime
 
@@ -62,6 +63,7 @@ class HomeAssistantHub:
             options: HubOptions,
             domain: str
     ):
+        self._lock = asyncio.Lock()
         self.hubname = domain.capitalize()
         self.state_machine = hass
         self.domain = domain
@@ -144,13 +146,14 @@ class HomeAssistantHub:
 
     @callback
     async def async_state_changed(self, entity_id, old_state, new_state):
-        if entity_id is not None:
-            try:
-                if old_state is None or old_state != new_state:
-                    await self.states.async_update_sensor(entity_id, new_state.state)
-            except Exception as e:
-                msg = f"Unable to handle data-update: {entity_id} {old_state}|{new_state}. Exception: {e}"
-                _LOGGER.error(msg)
+        async with self._lock:
+            if entity_id is not None:
+                try:
+                    if old_state is None or old_state != new_state:
+                        await self.states.async_update_sensor(entity_id, new_state.state)
+                except Exception as e:
+                    msg = f"Unable to handle data-update: {entity_id} {old_state}|{new_state}. Exception: {e}"
+                    _LOGGER.error(msg)
 
 
 
