@@ -208,7 +208,7 @@ class Charger:
 
     async def async_update_internal_state_off(self):
         self.params.disable_current_updates = True
-        charger_state = self.hub.async_get_chargerobject_value()
+        charger_state = await self.hub.async_get_chargerobject_value()
         if any([
             charger_state not in self._charger.chargerstates.get(ChargeControllerStates.Charging),
             len(charger_state) < 1
