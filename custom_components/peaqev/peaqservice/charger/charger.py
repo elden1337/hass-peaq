@@ -28,7 +28,7 @@ class Charger:
         self.session = Session(self)
         self.helpers = ChargerHelpers(self)
         self.hub.observer.add("power canary dead", self.async_pause_charger)
-        self.hub.observer.add("chargecontroller status changed", self._set_chargecontroller_status)
+        self.hub.observer.add("chargecontroller status changed", self.async_set_chargecontroller_status)
 
     @property
     def session_active(self) -> bool:
@@ -49,11 +49,11 @@ class Charger:
             ]
         )
 
-    def _set_chargecontroller_status(self, val):
+    async def async_set_chargecontroller_status(self, val):
         if isinstance(val, ChargeControllerStates):
             if val is not self.params.chargecontroller_state:
                 self.params.chargecontroller_state = val
-                self.charge()
+                await self.charge()
 
     async def charge(self) -> None:
         """Main function to turn charging on or off"""

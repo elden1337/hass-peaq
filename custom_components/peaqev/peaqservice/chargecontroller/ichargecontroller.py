@@ -9,14 +9,10 @@ from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_help
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import dt_from_epoch, log_once
-
+from custom_components.peaqev.peaqservice.chargecontroller.const import (
+    DONETIMEOUT, DEBUGLOG_TIMEOUT, CHARGING_ALLOWED
+)
 _LOGGER = logging.getLogger(__name__)
-
-DONETIMEOUT = 180
-DEBUGLOG_TIMEOUT = 60
-INITIALIZING = "Initializing..."
-WAITING_FOR_POWER = "Waiting for power-reading..."
-CHARGING_ALLOWED = "charging allowed"
 
 
 class IChargeController:
@@ -37,9 +33,7 @@ class IChargeController:
 
     @status_type.setter
     def status_type(self, val) -> None:
-        if val != self._status_type:
-            self._status_type = val
-            self.hub.observer.broadcast("chargecontroller status changed", self._status_type)
+        self._status_type = val
 
     @property
     def latest_charger_start(self) -> str:
@@ -125,7 +119,9 @@ class IChargeController:
                 ret = await self.async_get_status_no_charger()
             case _:
                 ret = await self.async_get_status()
-        self.status_type = ret
+        if ret != self.status_type:
+            self.status_type = ret
+            await self.hub.observer.async_broadcast("chargecontroller status changed", ret)
 
     async def async_get_status(self) -> ChargeControllerStates:
         _state = await self.hub.async_get_chargerobject_value()
