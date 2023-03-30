@@ -48,7 +48,7 @@ class ChargeController(IChargeController):
         return ChargeControllerStates.Start
 
     async def async_get_status_connected(self, charger_state=None) -> ChargeControllerStates:
-        if charger_state is not None and self.hub.sensors.carpowersensor.value < 1 and await self._is_done(charger_state):
+        if charger_state is not None and self.hub.sensors.carpowersensor.value < 1 and await self.async_is_done(charger_state):
             ret = ChargeControllerStates.Done
         else:
             if all([
