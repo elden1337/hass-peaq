@@ -15,18 +15,9 @@ class ChargeControllerLite(IChargeController):
 
     @property
     def status_string(self) -> str:
-        ret = ChargeControllerStates.Error
         if not self.is_initialized:
             return INITIALIZING
-        match self.hub.chargertype.type:
-            case ChargerType.Outlet:
-                ret = self.async_get_status_outlet()
-            case ChargerType.NoCharger:
-                ret = self.async_get_status_no_charger()
-            case _:
-                ret = self.async_get_status()
-        self.status_type = ret
-        return ret.name
+        return self.status_type.name
 
     async def async_get_status_charging(self) -> ChargeControllerStates:
         if self.hub.sensors.totalhourlyenergy.value >= self.hub.current_peak_dynamic and not self.hub.is_free_charge:

@@ -14,21 +14,14 @@ class ChargeController(IChargeController):
         super().__init__(hub, charger_states)
 
     @property
-    def status_string(self) -> str:
-        ret = ChargeControllerStates.Error
+    def status_string(self) -> str:        
         if not self.is_initialized:
             return INITIALIZING
         if not self._check_initialized():
             return WAITING_FOR_POWER
-        match self.hub.chargertype.type:
-            case ChargerType.Outlet:
-                ret = self._get_status_outlet()
-            case ChargerType.NoCharger:
-                ret = self._get_status_no_charger()
-            case _:
-                ret = self._get_status()
-        self.status_type = ret
-        return ret.name
+        return self.status_type.name
+    
+
 
     @property
     def below_startthreshold(self) -> bool:

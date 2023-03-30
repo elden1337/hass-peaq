@@ -50,7 +50,6 @@ class IChargeController:
         if self.hub.enabled:
             self._latest_charger_start = val
 
-
     @property
     def is_initialized(self) -> bool:
         if not self.hub.is_initialized:
@@ -117,7 +116,16 @@ class IChargeController:
             return False
         return True
 
-    
+    async def async_set_status(self) -> None:
+        ret = ChargeControllerStates.Error
+        match self.hub.chargertype.type:
+            case ChargerType.Outlet:
+                ret = await self.async_get_status_outlet()
+            case ChargerType.NoCharger:
+                ret = await self.async_get_status_no_charger()
+            case _:
+                ret = await self.async_get_status()
+        self.status_type = ret
 
     async def async_get_status(self) -> ChargeControllerStates:
         _state = await self.hub.async_get_chargerobject_value()
