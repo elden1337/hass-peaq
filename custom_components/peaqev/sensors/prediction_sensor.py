@@ -24,7 +24,10 @@ class PeaqPredictionSensor(PowerDevice):
 
     @property
     def state(self):
-        return self._state
+        try:
+            return round(float(self._state), 1)
+        except:
+            return self._state
 
     @property
     def icon(self) -> str:
