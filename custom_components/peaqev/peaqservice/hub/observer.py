@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
 from dataclasses import dataclass, field
@@ -35,11 +36,11 @@ class Observer:
     def deactivate(self) -> None:
         self.model.active = False
 
-    def add(self, command: str, func):
+    def add(self, command: str, func, _async: bool = False):
         if command in self.model.subscribers.keys():
-            self.model.subscribers[command].append(func)
+            self.model.subscribers[command].append((func, _async))
         else:
-            self.model.subscribers[command] = [func]
+            self.model.subscribers[command] = [(func, _async)]
 
     async def async_broadcast(self, command: str, argument=None, do_async: bool = False):
         if not do_async:
@@ -69,7 +70,12 @@ class Observer:
         if self._ok_to_broadcast(command[0]):
             if command[1] > time.time():
                 for func in self.model.subscribers[command[0]]:
-                    self._call_func(func, command)
+                    if func[1]:
+                        _ = asyncio.run_coroutine_threadsafe(
+                            self.async_call_func(func[0],command), self.hub.state_machine.loop
+                        ).result()
+                    else:
+                        self._call_func(func[0], command)
             self.model.broadcast_queue.remove(command)
 
     @staticmethod

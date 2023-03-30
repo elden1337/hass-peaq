@@ -43,8 +43,8 @@ class ServiceCalls:
         else:
             start_time = datetime.now()
         _LOGGER.debug(f"scheduler params. charge: {charge_amount}, dep-time: {dep_time}, start_time: {start_time}")
-        self.hub.scheduler.create_schedule(charge_amount, dep_time, start_time, override_settings)
-        self.hub.scheduler.update()
+        await self.hub.scheduler.async_create_schedule(charge_amount, dep_time, start_time, override_settings)
+        await self.hub.scheduler.async_update()
 
     async def call_scheduler_cancel(self):
-        self.hub.scheduler.cancel()
+        await self.hub.scheduler.async_cancel()

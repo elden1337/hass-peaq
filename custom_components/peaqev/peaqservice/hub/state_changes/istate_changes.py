@@ -23,16 +23,28 @@ class IStateChanges:
             if entity != self.hub.nordpool.nordpool_entity and (not self.hub.hours.is_initialized or time.time() - self.latest_nordpool_update > 60):
                 """tweak to provoke nordpool to update more often"""
                 self.latest_nordpool_update = time.time()
-                await self.hub.nordpool.async_update_nordpool()
-        await self.async_handle_sensor_attribute()
+                try:
+                    await self.hub.nordpool.async_update_nordpool()
+                except Exception as e:
+                    _LOGGER.error(f"3: {e}")
+        try:
+            await self.async_handle_sensor_attribute()
+        except Exception as e:
+            _LOGGER.error(f"4: {e}")
         if self.hub.charger.session_active and update_session and hasattr(self.hub.sensors, "carpowersensor"):
-            self.hub.charger.session.session_energy = self.hub.sensors.carpowersensor.value
+            setattr(self.hub.charger.session, "session_energy", getattr(self.hub.sensors.carpowersensor, "value"))
             if self.hub.options.price.price_aware:
                 self.hub.charger.session.session_price = float(self.hub.nordpool.state)
         if self.hub.scheduler.schedule_created:
-            self.hub.scheduler.update()
+            try:
+                await self.hub.scheduler.async_update()
+            except Exception as e:
+                _LOGGER.error(f"5: {e}")
         if entity in self.hub.chargingtracker_entities and self.hub.is_initialized:
-            await self.hub.charger.charge()
+            try:
+                await self.hub.charger.async_charge()
+            except Exception as e:
+                _LOGGER.error(f"6: {e}")
 
     @abstractmethod
     async def async_update_sensor_internal(self, entity, value) -> bool:
@@ -50,7 +62,7 @@ class IStateChanges:
                     val = self.hub.hass.states.get(entity.entity).attributes.get(entity.attribute)
                     if val is not None:
                         self.hub.sensors.carpowersensor.value = val
-                        self.hub.sensors.power.update(
+                        await self.hub.sensors.power.async_update(
                             carpowersensor_value=self.hub.sensors.carpowersensor.value,
                             config_sensor_value=None
                         )
@@ -60,7 +72,7 @@ class IStateChanges:
 
     async def async_update_chargerobject_switch(self, value) -> None:
         self.hub.sensors.chargerobject_switch.value = value
-        self.hub.sensors.chargerobject_switch.updatecurrent()
+        await self.hub.sensors.chargerobject_switch.async_updatecurrent()
         await self.async_handle_outlet_updates()
 
     async def async_update_total_energy_and_peak(self, value) -> None:

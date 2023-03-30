@@ -46,7 +46,7 @@ class IChargeController:
         if self.hub.enabled:
             self._latest_charger_start = val
 
-    def async_update_latest_charger_start(self, val):
+    async def async_update_latest_charger_start(self, val):
         if self.hub.enabled:
             self._latest_charger_start = val
 
@@ -131,37 +131,37 @@ class IChargeController:
             await self.hub.observer.async_broadcast("chargecontroller status changed", ret)
 
     async def async_get_status(self) -> ChargeControllerStates:
-        _state = await self.hub.async_get_chargerobject_value()
-        ret = ChargeControllerStates.Error
-        update_timer = True
-        if not self.hub.enabled:
-            ret = ChargeControllerStates.Disabled
-        elif _state in self._charger_states.get(ChargeControllerStates.Done):
-            self.hub.observer.broadcast("update charger done", True)
-            ret = ChargeControllerStates.Done
-            update_timer = False
-        elif _state in self._charger_states.get(ChargeControllerStates.Idle):
-            ret = ChargeControllerStates.Idle
-            if self.hub.charger_done:
-                self.hub.observer.broadcast("update charger done", False)
-        elif self.hub.sensors.power.killswitch.is_dead:  # todo: composition
+            _state = await self.hub.async_get_chargerobject_value()
             ret = ChargeControllerStates.Error
-        elif _state not in self._charger_states.get(ChargeControllerStates.Idle) and self.hub.charger_done:
-            ret = ChargeControllerStates.Done
-            update_timer = False
-        elif datetime.now().hour in self.hub.non_hours and not self.hub.timer.is_override:  # todo: composition
-            ret = ChargeControllerStates.Stop
-        elif _state in self._charger_states.get(ChargeControllerStates.Connected):
-            ret = await self.async_get_status_connected(_state)
-            update_timer = (ret == ChargeControllerStates.Stop)
-        elif _state in self._charger_states.get(ChargeControllerStates.Charging):
-            ret = await self.async_get_status_charging()
-        if update_timer:
-            await self.async_update_latest_charger_start(time.time())
-        if ret == ChargeControllerStates.Error:
-            _LOGGER.error(
-                f"Chargecontroller returned faulty state. Charger reported {_state} as state.")
-        return ret
+            update_timer = True
+            if not self.hub.enabled:
+                ret = ChargeControllerStates.Disabled
+            elif _state in self._charger_states.get(ChargeControllerStates.Done):
+                await self.hub.observer.async_broadcast("update charger done", True)
+                ret = ChargeControllerStates.Done
+                update_timer = False
+            elif _state in self._charger_states.get(ChargeControllerStates.Idle):
+                ret = ChargeControllerStates.Idle
+                if self.hub.charger_done:
+                    await self.hub.observer.async_broadcast("update charger done", False)
+            elif self.hub.sensors.power.killswitch.is_dead:  # todo: composition
+                ret = ChargeControllerStates.Error
+            elif _state not in self._charger_states.get(ChargeControllerStates.Idle) and self.hub.charger_done:
+                ret = ChargeControllerStates.Done
+                update_timer = False
+            elif datetime.now().hour in self.hub.non_hours and not self.hub.timer.is_override:  # todo: composition
+                ret = ChargeControllerStates.Stop
+            elif _state in self._charger_states.get(ChargeControllerStates.Connected):
+                ret = await self.async_get_status_connected(_state)
+                update_timer = (ret == ChargeControllerStates.Stop)
+            elif _state in self._charger_states.get(ChargeControllerStates.Charging):
+                ret = await self.async_get_status_charging()
+            if update_timer:
+                await self.async_update_latest_charger_start(time.time())
+            if ret == ChargeControllerStates.Error:
+                _LOGGER.error(
+                    f"Chargecontroller returned faulty state. Charger reported {_state} as state.")
+            return ret
 
     async def async_get_status_outlet(self) -> ChargeControllerStates:
         ret = ChargeControllerStates.Error

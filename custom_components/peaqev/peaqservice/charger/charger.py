@@ -2,7 +2,6 @@ import logging
 import time
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
-from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.services.session.session import Session
 
@@ -15,6 +14,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
     PARAMS,
     CURRENT
 )
+from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
 CALL_WAIT_TIMER = 60
@@ -27,8 +27,8 @@ class Charger:
         self.params = ChargerParams()
         self.session = Session(self)
         self.helpers = ChargerHelpers(self)
-        self.hub.observer.add("power canary dead", self.async_pause_charger)
-        self.hub.observer.add("chargecontroller status changed", self.async_set_chargecontroller_status)
+        self.hub.observer.add("power canary dead", self.async_pause_charger, _async=True)
+        self.hub.observer.add("chargecontroller status changed", self.async_set_chargecontroller_status, _async=True)
 
     @property
     def session_active(self) -> bool:
@@ -50,12 +50,15 @@ class Charger:
         )
 
     async def async_set_chargecontroller_status(self, val):
+        _LOGGER.debug(f"async_set_chargecontroller_status: {val}")
         if isinstance(val, ChargeControllerStates):
+            _LOGGER.debug(f"async_set_chargecontroller_status2: {val}")
             if val is not self.params.chargecontroller_state:
+                _LOGGER.debug(f"async_set_chargecontroller_status3: {val}")
                 self.params.chargecontroller_state = val
-                await self.charge()
+                await self.async_charge()
 
-    async def charge(self) -> None:
+    async def async_charge(self) -> None:
         """Main function to turn charging on or off"""
         if self._charger.type is ChargerType.NoCharger:
             return
@@ -124,7 +127,7 @@ class Charger:
                 self.session_active = True
             else:
                 await self.async_call_charger(CallTypes.Resume)
-            await self._postasync_start_charger()
+            await self.async_post_start_charger()
 
     async def async_post_start_charger(self) -> None:
         await self.hub.observer.async_broadcast("update latest charger start", time.time())
@@ -156,7 +159,7 @@ class Charger:
         self.params.latest_charger_call = time.time()
 
     async def async_update_max_current(self) -> None:
-        self.hub.sensors.chargerobject_switch.updatecurrent()
+        await self.hub.sensors.chargerobject_switch.async_updatecurrent()
         calls = self._charger.servicecalls.get_call(CallTypes.UpdateCurrent)
         if await self.hub.state_machine.async_add_executor_job(self.helpers.wait_turn_on):
             # call here to set amp-list

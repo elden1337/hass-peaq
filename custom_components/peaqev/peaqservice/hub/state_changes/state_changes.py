@@ -13,43 +13,46 @@ class StateChanges(IStateChanges):
         super().__init__(hub)
 
     async def async_update_sensor_internal(self, entity, value) -> bool:
-        update_session = False
-        match entity:
-            case self.hub.options.powersensor:
-                self.hub.sensors.power.update(
-                    carpowersensor_value=self.hub.sensors.carpowersensor.value,
-                    config_sensor_value=value
-                )
-                update_session = True
-                self.hub.power_canary.total_power = self.hub.sensors.power.total.value
-            case self.hub.sensors.carpowersensor.entity:
-                if self.hub.sensors.carpowersensor.use_attribute:
-                    pass
-                else:
-                    self.hub.sensors.carpowersensor.value = value
-                    self.hub.sensors.power.update(
+        try:
+            update_session = False
+            match entity:
+                case self.hub.options.powersensor:
+                    await self.hub.sensors.power.async_update(
                         carpowersensor_value=self.hub.sensors.carpowersensor.value,
-                        config_sensor_value=None
+                        config_sensor_value=value
                     )
-                update_session = True
-                self.hub.sensors.chargerobject_switch.updatecurrent()
-                self.hub.power_canary.total_power = self.hub.sensors.power.total.value
-                await self.async_handle_outlet_updates()
-            case self.hub.sensors.chargerobject.entity:
-                await self.hub.async_set_chargerobject_value(value)
-            case self.hub.sensors.chargerobject_switch.entity:
-                await self.async_update_chargerobject_switch(value)
-            case self.hub.sensors.totalhourlyenergy.entity:
-                await self.async_update_total_energy_and_peak(value)
-            case self.hub.sensors.powersensormovingaverage.entity:
-                self.hub.sensors.powersensormovingaverage.value = value
-            case self.hub.sensors.powersensormovingaverage24.entity:
-                self.hub.sensors.powersensormovingaverage24.value = value
-            case self.hub.nordpool.nordpool_entity:
-                if self.hub.options.price.price_aware:
-                    await self.hub.nordpool.async_update_nordpool()
                     update_session = True
-        return update_session
+                    self.hub.power_canary.total_power = self.hub.sensors.power.total.value
+                case self.hub.sensors.carpowersensor.entity:
+                    if self.hub.sensors.carpowersensor.use_attribute:
+                        pass
+                    else:
+                        self.hub.sensors.carpowersensor.value = value
+                        await self.hub.sensors.power.async_update(
+                            carpowersensor_value=self.hub.sensors.carpowersensor.value,
+                            config_sensor_value=None
+                        )
+                    update_session = True
+                    await self.hub.sensors.chargerobject_switch.async_updatecurrent()
+                    self.hub.power_canary.total_power = self.hub.sensors.power.total.value
+                    await self.async_handle_outlet_updates()
+                case self.hub.sensors.chargerobject.entity:
+                    await self.hub.async_set_chargerobject_value(value)
+                case self.hub.sensors.chargerobject_switch.entity:
+                    await self.async_update_chargerobject_switch(value)
+                case self.hub.sensors.totalhourlyenergy.entity:
+                    await self.async_update_total_energy_and_peak(value)
+                case self.hub.sensors.powersensormovingaverage.entity:
+                    self.hub.sensors.powersensormovingaverage.value = value
+                case self.hub.sensors.powersensormovingaverage24.entity:
+                    self.hub.sensors.powersensormovingaverage24.value = value
+                case self.hub.nordpool.nordpool_entity:
+                    if self.hub.options.price.price_aware:
+                        await self.hub.nordpool.async_update_nordpool()
+                        update_session = True
+            return update_session
+        except Exception as e:
+            _LOGGER.error(f"async_update_sensor_internal: {e}")
     
     async def async_handle_outlet_updates(self):
         if self.hub.chargertype.domainname is ChargerType.Outlet:
@@ -78,7 +81,7 @@ class StateChangesLite(IStateChanges):
                 else:
                     self.hub.sensors.carpowersensor.value = value
                     await self._handle_outlet_updates()
-                    self.hub.sensors.chargerobject_switch.updatecurrent()
+                    await self.hub.sensors.chargerobject_switch.async_updatecurrent()
             case self.hub.sensors.chargerobject.entity:
                 self.hub.async_set_chargerobject_value(value)
             case self.hub.sensors.chargerobject_switch.entity:
@@ -115,7 +118,7 @@ class StateChangesNoCharger(IStateChanges):
         update_session = False
         match entity:
             case self.hub.options.powersensor:
-                self.hub.sensors.power.update(
+                await self.hub.sensors.power.async_update(
                     carpowersensor_value=0,
                     config_sensor_value=value
                 )
