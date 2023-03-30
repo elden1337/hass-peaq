@@ -21,8 +21,6 @@ class ChargeController(IChargeController):
         if not self._check_initialized():
             return WAITING_FOR_POWER
         return self.status_type.name
-    
-
 
     @property
     def below_startthreshold(self) -> bool:
@@ -38,7 +36,7 @@ class ChargeController(IChargeController):
         threshold_stop=self.hub.threshold.stop / 100
         return (predicted_energy * 1000) > ((current_peak * 1000) * threshold_stop)
 
-    async def _get_status_charging(self) -> ChargeControllerStates:
+    async def async_get_status_charging(self) -> ChargeControllerStates:
         if not self.hub.power_canary.alive:
             return ChargeControllerStates.Stop
         if all([
@@ -49,7 +47,7 @@ class ChargeController(IChargeController):
             return ChargeControllerStates.Stop
         return ChargeControllerStates.Start
 
-    async def _get_status_connected(self, charger_state=None) -> ChargeControllerStates:
+    async def async_get_status_connected(self, charger_state=None) -> ChargeControllerStates:
         if charger_state is not None and self.hub.sensors.carpowersensor.value < 1 and await self._is_done(charger_state):
             ret = ChargeControllerStates.Done
         else:
