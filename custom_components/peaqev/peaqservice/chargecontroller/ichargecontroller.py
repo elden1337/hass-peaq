@@ -125,10 +125,10 @@ class IChargeController:
                 ret = await self.async_get_status_no_charger()
             case _:
                 ret = await self.async_get_status()
-        async with self._lock:
-            if ret != self.status_type:
-                self.status_type = ret
-                await self.hub.observer.async_broadcast("chargecontroller status changed", ret)
+        #async with self._lock:
+        if ret != self.status_type:
+            self.status_type = ret
+            await self.hub.observer.async_broadcast("chargecontroller status changed", ret)
 
     async def async_get_status(self) -> ChargeControllerStates:
         _state = await self.hub.async_get_chargerobject_value()

@@ -146,7 +146,7 @@ class HomeAssistantHub:
 
     @callback
     async def async_state_changed(self, entity_id, old_state, new_state):
-        async with self._lock:
+        #async with self._lock:
             if entity_id is not None:
                 try:
                     if old_state is None or old_state != new_state:
@@ -154,8 +154,6 @@ class HomeAssistantHub:
                 except Exception as e:
                     msg = f"Unable to handle data-update: {entity_id} {old_state}|{new_state}. Exception: {e}"
                     _LOGGER.error(msg)
-
-
 
     async def async_setup_tracking(self) -> list:
         tracker_entities = []

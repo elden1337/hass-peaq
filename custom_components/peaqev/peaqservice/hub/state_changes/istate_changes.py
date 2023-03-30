@@ -24,7 +24,7 @@ class IStateChanges:
                 """tweak to provoke nordpool to update more often"""
                 self.latest_nordpool_update = time.time()
                 await self.hub.nordpool.async_update_nordpool()
-        await self._handle_sensor_attribute()
+        await self.async_handle_sensor_attribute()
         if self.hub.charger.session_active and update_session and hasattr(self.hub.sensors, "carpowersensor"):
             self.hub.charger.session.session_energy = self.hub.sensors.carpowersensor.value
             if self.hub.options.price.price_aware:
@@ -39,10 +39,10 @@ class IStateChanges:
         pass
 
     @abstractmethod
-    async def _handle_outlet_updates(self):
+    async def async_handle_outlet_updates(self):
         pass
 
-    async def _handle_sensor_attribute(self) -> None:
+    async def async_handle_sensor_attribute(self) -> None:
         if hasattr(self.hub.sensors, "carpowersensor"):
             if self.hub.sensors.carpowersensor.use_attribute:
                 entity = self.hub.sensors.carpowersensor
@@ -58,12 +58,12 @@ class IStateChanges:
                 except Exception as e:
                     _LOGGER.debug(f"Unable to get attribute-state for {entity.entity}|{entity.attribute}. {e}")
 
-    async def _update_chargerobject_switch(self, value) -> None:
+    async def async_update_chargerobject_switch(self, value) -> None:
         self.hub.sensors.chargerobject_switch.value = value
         self.hub.sensors.chargerobject_switch.updatecurrent()
-        await self._handle_outlet_updates()
+        await self.async_handle_outlet_updates()
 
-    async def _update_total_energy_and_peak(self, value) -> None:
+    async def async_update_total_energy_and_peak(self, value) -> None:
         self.hub.sensors.totalhourlyenergy.value = value
         self.hub.sensors.current_peak.value = self.hub.sensors.locale.data.query_model.observed_peak
         self.hub.sensors.locale.data.query_model.try_update(

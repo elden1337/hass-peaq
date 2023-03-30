@@ -41,8 +41,9 @@ class Observer:
         else:
             self.model.subscribers[command] = [func]
 
-    async def async_broadcast(self, command: str, argument=None):
-        await self.hub.state_machine.async_add_executor_job(self.broadcast, command, argument)
+    async def async_broadcast(self, command: str, argument=None, do_async: bool = False):
+        if not do_async:
+            await self.hub.state_machine.async_add_executor_job(self.broadcast, command, argument)
 
     def broadcast(self, command: str, argument=None):
         _expiration = time.time() + TIMEOUT
@@ -80,6 +81,16 @@ class Observer:
                 func(command[2])
         else:
             func()
+
+    @staticmethod
+    async def async_call_func(func, command: Tuple[str, int, any]):
+        if command[2] is not None:
+            if isinstance(command[2], dict):
+                await func(**command[2])
+            else:
+                await func(command[2])
+        else:
+            await func()
 
     def _ok_to_broadcast(self, command) -> bool:
         if command not in self.model.wait_queue.keys():
