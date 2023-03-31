@@ -155,7 +155,6 @@ class Easee(ChargerBase):
         self.options.powermeter_factor = 1000
         self.entities.powerswitch = f"switch.{self.entities.entityschema}_is_enabled"
         self.entities.ampmeter = amp_sensor
-        self.options.ampmeter_is_attribute = False
 
     def get_allowed_amps(self) -> int:
             ret = self._hass.states.get(self.entities.maxamps)

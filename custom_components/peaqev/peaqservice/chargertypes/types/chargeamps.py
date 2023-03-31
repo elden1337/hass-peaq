@@ -132,7 +132,6 @@ class ChargeAmps(ChargerBase):
     def set_sensors(self) -> None:
         self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"
         self.entities.powermeter = f"sensor.{self.entities.entityschema}_1_power"
-        self.options.ampmeter_is_attribute = True
         self.entities.powerswitch = self._determine_switch_entity()
         self.entities.ampmeter = f"{self.entities.powerswitch}|max_current"
         self._chargeramps_type = self._set_chargeamps_type(self.entities.chargerentity)

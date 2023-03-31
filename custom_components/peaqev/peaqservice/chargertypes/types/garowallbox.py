@@ -73,7 +73,6 @@ class GaroWallbox(ChargerBase):
         self.options.powermeter_factor = 1
 
         self.entities.ampmeter = f"sensor.{self.entities.entityschema}-current_charging_current"
-        self.options.ampmeter_is_attribute = False
         self.options.powerswitch_controls_charging = False
         self._auth_required = auth_required
         self.entities.powerswitch = "n/a"
