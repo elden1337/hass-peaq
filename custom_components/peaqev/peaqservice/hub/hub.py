@@ -209,12 +209,34 @@ class HomeAssistantHub:
         return ret
 
     async def async_get_chargerobject_value(self) -> str:
-        ret = getattr(self.sensors.chargerobject, "value", "unknown")
+        ret = await self.async_request_sensor_data("chargerobject_value")[0]
         return ret.lower()
 
     async def async_set_chargerobject_value(self, value) -> None:
         if hasattr(self.sensors, "chargerobject"):
             setattr(self.sensors.chargerobject, "value", value)
+
+    async def async_request_sensor_data(self, *args) -> dict:
+        lookup = {
+        "chargerobject_value": getattr(self.sensors.chargerobject, "value", "unknown"),
+        "prices_tomorrow": getattr(self.hours, "prices_tomorrow"),
+        "non_hours": getattr(self.hours, "non_hours"),
+        "caution_hours": getattr(self.hours, "dynamic_caution_hours"),
+        "state": getattr(self.chargecontroller, "state_display_model"), #todo: fix this, cant be called state and should not be spawned from chargecontroller.
+        "currency": getattr(self.nordpool, "currency"),
+        "offsets": getattr(self.hours, "offsets", {}),
+        "average_nordpool_data": getattr(self.nordpool, "average_data"),
+        "use_cent": getattr(self.nordpool.model, "use_cent"),
+        "current_peak": getattr(self.sensors.current_peak, "value"),
+        "avg_kwh_price": await self.state_machine.async_add_executor_job(self.hours.get_average_kwh_price),
+        "max_charge": await self.state_machine.async_add_executor_job(self.hours.get_total_charge),
+        "average_weekly": getattr(self.nordpool, "average_weekly"),
+        "average_monthly": getattr(self.nordpool, "average_month"),
+        }
+        ret = {}
+        for arg in args:
+            ret[arg] = lookup.get(arg, None)
+        return ret
 
     async def async_get_money_sensor_data(self) -> dict | None:
         ret = {}
@@ -272,6 +294,7 @@ class HomeAssistantHub:
         setattr(self.sensors.charger_done, "value", bool(val))
 
     async def async_update_charger_enabled(self, val):
+        await self.observer.async_broadcast("update latest charger start")
         if hasattr(self.sensors, "charger_enabled"):
             setattr(self.sensors.charger_enabled, "value", bool(val))
         else:

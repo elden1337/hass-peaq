@@ -9,7 +9,7 @@ class ServiceCalls:
         self.hub = hub
 
     async def call_enable_peaq(self):
-        """peaqev.enable"""
+        """peaqev.enable"""        
         await self.hub.observer.async_broadcast("update charger enabled", True)
         await self.hub.observer.async_broadcast("update charger done", False)
 
