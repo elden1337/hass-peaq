@@ -9,8 +9,7 @@ from peaqevcore.models.hub.const import AVERAGECONSUMPTION, AVERAGECONSUMPTION_2
 from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
-from custom_components.peaqev.const import (
-    DOMAIN)
+from custom_components.peaqev.const import DOMAIN
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import (CONSUMPTION_TOTAL_NAME, CONSUMPTION_INTEGRAL_NAME)
 from custom_components.peaqev.sensors.average_sensor import PeaqAverageSensor
@@ -18,12 +17,11 @@ from custom_components.peaqev.sensors.gain_loss_sensor import GainLossSensor
 from custom_components.peaqev.sensors.integration_sensor import PeaqIntegrationSensor, PeaqIntegrationCostSensor
 from custom_components.peaqev.sensors.money_sensor import PeaqMoneySensor
 from custom_components.peaqev.sensors.peaq_sensor import PeaqSensor
-from custom_components.peaqev.sensors.power_sensor import (
-    PeaqPowerSensor,
-    PeaqAmpSensor,
-    PeaqHousePowerSensor,
-    PeaqPowerCostSensor)
-from custom_components.peaqev.sensors.powercanary_sensor import (
+from custom_components.peaqev.sensors.power.amp_sensor import PeaqAmpSensor
+from custom_components.peaqev.sensors.power.power_cost_sensor import PeaqPowerCostSensor
+from custom_components.peaqev.sensors.power.power_house_sensor import PeaqHousePowerSensor
+from custom_components.peaqev.sensors.power.power_sensor import PeaqPowerSensor
+from custom_components.peaqev.sensors.power.powercanary_sensor import (
     PowerCanaryStatusSensor,
     PowerCanaryPercentageSensor,
     PowerCanaryMaxAmpSensor)
