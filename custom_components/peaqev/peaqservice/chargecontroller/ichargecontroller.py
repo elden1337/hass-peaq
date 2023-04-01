@@ -27,7 +27,7 @@ class IChargeController:
         self._charger_states: dict = charger_states
         self._lock = asyncio.Lock()
         self.hub.observer.add("update latest charger start", self._update_latest_charger_start)
-        self.hub.observer.add("hub initialized", self._do_initialize)
+        self.hub.observer.add("hub initialized", self._check_initialized)
 
     @property
     def status_type(self) -> ChargeControllerStates:
@@ -55,7 +55,7 @@ class IChargeController:
         if not self.hub.is_initialized:
             return False
         if self.hub.is_initialized and not self._is_initalized:
-            self._do_initialize()
+            return self._check_initialized()
         return self._is_initalized
 
     @property
@@ -103,32 +103,36 @@ class IChargeController:
             ret += f" at {int(val * 100)}% of peak"
         return ret
 
-    def _do_initialize(self) -> None:
+    def _do_initialize(self) -> bool:
         self._is_initalized = True
         log_once("Chargecontroller is initialized and ready to work.")
+        return self._is_initalized
 
     def _check_initialized(self) -> bool:
+        if self.is_initialized:
+            return True
         if not self.hub.options.peaqev_lite:
             _state = self.hub.get_power_sensor_from_hass()
             if _state is not None:
                 if isinstance(_state, (float, int)):
-                    return True
+                    return self._do_initialize()
             return False
-        return True
+        return self._do_initialize()
 
     async def async_set_status(self) -> None:
         ret = ChargeControllerStates.Error
-        match self.hub.chargertype.type:
-            case ChargerType.Outlet:
-                ret = await self.async_get_status_outlet()
-            case ChargerType.NoCharger:
-                ret = await self.async_get_status_no_charger()
-            case _:
-                ret = await self.async_get_status()
-        #async with self._lock:
-        if ret != self.status_type:
-            self.status_type = ret
-            await self.hub.observer.async_broadcast("chargecontroller status changed", ret)
+        if self.is_initialized:
+            match self.hub.chargertype.type:
+                case ChargerType.Outlet:
+                    ret = await self.async_get_status_outlet()
+                case ChargerType.NoCharger:
+                    ret = await self.async_get_status_no_charger()
+                case _:
+                    ret = await self.async_get_status()
+            #async with self._lock:
+            if ret != self.status_type:
+                self.status_type = ret
+                await self.hub.observer.async_broadcast("chargecontroller status changed", ret)
 
     async def async_get_status(self) -> ChargeControllerStates:
             _state = await self.hub.async_get_chargerobject_value()
