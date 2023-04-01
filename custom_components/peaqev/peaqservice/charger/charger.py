@@ -64,7 +64,7 @@ class Charger:
         if self._charger.type is ChargerType.NoCharger:
             return
         if self.params.charger_state_mismatch:
-            await self.async_update_internal_state(ChargerStates.Pause)
+            await self.async_internal_state(ChargerStates.Pause)
         if self.hub.enabled and not self.hub.sensors.power.killswitch.is_dead:
             await self.async_reset_session()
             match self.params.chargecontroller_state:
@@ -75,11 +75,11 @@ class Charger:
                 case ChargeControllerStates.Done | ChargeControllerStates.Idle:
                     await self.async_done_idle_case()
                 case _:
-                    _LOGGER.debug(f"Could not match any chargecontroller-state. chargecontroller reports: {self.params.chargecontroller_state}")
+                    _LOGGER.debug(f"Could not match any chargecontroller-state. state: {self.params.chargecontroller_state}")
         else:
             if self.charger_active and self.params.running:
                 if self.hub.sensors.power.killswitch.is_dead:
-                    _LOGGER.debug(f"Your powersensor has failed to update peaqev for more than {self.hub.sensors.power.killswitch.total_timer} seconds. Therefore charging is paused until it comes alive again.")
+                    _LOGGER.debug(f"Powersensor has failed to update for more than {self.hub.sensors.power.killswitch.total_timer}s. Charging is paused until it comes alive again.")
                 elif self.hub.enabled:
                     _LOGGER.debug("Detected charger running outside of peaqev-session, overtaking command and pausing.")
                 await self.async_pause_charger()
@@ -113,7 +113,7 @@ class Charger:
             self.session_active = True
 
     async def async_overtake_charger(self) -> None:
-        await self.async_update_internal_state(ChargerStates.Start)
+        await self.async_internal_state(ChargerStates.Start)
         self.session_active = True
         await self.async_post_start_charger()
 
@@ -122,7 +122,7 @@ class Charger:
 
     async def async_start_charger(self) -> None:
         if await self.async_call_ok():
-            await self.async_update_internal_state(ChargerStates.Start)
+            await self.async_internal_state(ChargerStates.Start)
             if not self.session_active:
                 await self.async_call_charger(CallTypes.On)
                 self.session_active = True
@@ -138,7 +138,7 @@ class Charger:
     async def async_terminate_charger(self) -> None:
         if await self.async_call_ok():
             await self.hub.state_machine.async_add_executor_job(self.session.core.terminate)
-            await self.async_update_internal_state(ChargerStates.Stop)
+            await self.async_internal_state(ChargerStates.Stop)
             self.session_active = False
             await self.async_call_charger(CallTypes.Off)
             await self.hub.observer.async_broadcast("update charger done", True)
@@ -148,7 +148,7 @@ class Charger:
             if self.hub.charger_done or self.params.chargecontroller_state is ChargeControllerStates.Idle:
                 await self.async_terminate_charger()
             else:
-                await self.async_update_internal_state(ChargerStates.Pause)
+                await self.async_internal_state(ChargerStates.Pause)
                 await self.async_call_charger(CallTypes.Pause)
 
     async def async_call_charger(self, command: CallTypes) -> None:
@@ -186,25 +186,21 @@ class Charger:
                     self.hub.state_machine
                 )
 
-    async def async_update_internal_state(self, state: ChargerStates) -> None:
+    async def async_internal_state(self, state: ChargerStates) -> None:
         if state in [ChargerStates.Start, ChargerStates.Resume]:
-            await self.async_update_internal_state_on()
+            await self.async_internal_state_on()
         elif state in [ChargerStates.Stop, ChargerStates.Pause]:
-            await self.async_update_internal_state_off()
+            await self.async_internal_state_off()
 
-    async def async_update_internal_state_on(self):
+    async def async_internal_state_on(self):
         self.params.running = True
         self.params.disable_current_updates = False
         _LOGGER.debug("Internal charger has been started")
 
-
-    async def async_update_internal_state_off(self):
+    async def async_internal_state_off(self):
         self.params.disable_current_updates = True
         charger_state = await self.hub.async_request_sensor_data("chargerobject_value")
-        if any([
-            charger_state not in self._charger.chargerstates.get(ChargeControllerStates.Charging),
-            len(charger_state) < 1
-        ]):
+        if charger_state not in self._charger.chargerstates.get(ChargeControllerStates.Charging):
             self.params.running = False
             self.params.charger_state_mismatch = False
             _LOGGER.debug("Internal charger has been stopped")
