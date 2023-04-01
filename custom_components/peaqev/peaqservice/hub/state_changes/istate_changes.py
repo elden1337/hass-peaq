@@ -16,7 +16,7 @@ class IStateChanges:
 
     async def async_update_sensor(self, entity, value):
         update_session = await self.async_update_sensor_internal(entity, value)
-        if time.time() - self.latest_nordpool_update > 3:
+        if time.time() - self.latest_chargecontroller_update > 3:
             self.latest_chargecontroller_update = time.time()
             await self.hub.chargecontroller.async_set_status()
         if self.hub.options.price.price_aware:

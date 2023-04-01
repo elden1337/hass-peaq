@@ -56,7 +56,7 @@ class StateChanges(IStateChanges):
     
     async def async_handle_outlet_updates(self):
         if self.hub.chargertype.domainname is ChargerType.Outlet:
-            old_state = await self.hub.async_get_chargerobject_value()
+            old_state = await self.hub.async_request_sensor_data("chargerobject_value")
             if time.time() - self.latest_outlet_update < 10:
                 return
             self.latest_outlet_update = time.time()
@@ -64,8 +64,8 @@ class StateChanges(IStateChanges):
                 await self.hub.async_set_chargerobject_value("charging")
             else:
                 await self.hub.async_set_chargerobject_value("connected")
-            if old_state != await self.hub.async_get_chargerobject_value():
-                _LOGGER.debug(f"smartoutlet is now {await self.hub.async_get_chargerobject_value()}")
+            if old_state != await self.hub.async_request_sensor_data("chargerobject_value"):
+                _LOGGER.debug(f"smartoutlet is now {await self.hub.async_request_sensor_data('chargerobject_value')}")
 
 
 class StateChangesLite(IStateChanges):
@@ -97,7 +97,7 @@ class StateChangesLite(IStateChanges):
     
     async def _handle_outlet_updates(self):
         if self.hub.chargertype.domainname is ChargerType.Outlet:
-            old_state = await self.hub.async_get_chargerobject_value()
+            old_state = await self.hub.async_request_sensor_data("chargerobject_value")
             if time.time() - self.latest_outlet_update < 10:
                 return
             self.latest_outlet_update = time.time()
@@ -105,8 +105,8 @@ class StateChangesLite(IStateChanges):
                 await self.hub.async_set_chargerobject_value("charging")
             else:
                 await self.hub.async_set_chargerobject_value("connected")
-            if old_state != await self.hub.async_get_chargerobject_value():
-                _LOGGER.debug(f"smartoutlet is now {await self.hub.async_get_chargerobject_value()}")
+            if old_state != await self.hub.async_request_sensor_data("chargerobject_value"):
+                _LOGGER.debug(f"smartoutlet is now {await self.hub.async_request_sensor_data('chargerobject_value')}")
 
 
 class StateChangesNoCharger(IStateChanges):

@@ -26,7 +26,7 @@ class IChargeController:
         self._latest_debuglog = 0
         self._charger_states: dict = charger_states
         self._lock = asyncio.Lock()
-        self.hub.observer.add("update latest charger start", self._update_latest_charger_start)
+        self.hub.observer.add("update latest charger start", self.async_update_latest_charger_start)
         self.hub.observer.add("hub initialized", self._check_initialized)
 
     @property
@@ -42,10 +42,6 @@ class IChargeController:
         """For Lovelace-purposes. Converts and returns epoch-timer to readable datetime-string"""
         return dt_from_epoch(self._latest_charger_start)
 
-    def _update_latest_charger_start(self, val):
-        if self.hub.enabled:
-            self._latest_charger_start = val
-
     async def async_update_latest_charger_start(self):
         if self.hub.enabled:
             self._latest_charger_start = time.time()
@@ -57,38 +53,6 @@ class IChargeController:
         if self.hub.is_initialized and not self._is_initialized:
             return self._check_initialized()
         return self._is_initialized
-
-    # @property
-    # def non_hours_display_model(self) -> list:
-    #     ret = []
-    #     for i in self.hub.non_hours:
-    #         if i < datetime.now().hour and len(self.hub.prices_tomorrow) > 0:
-    #             ret.append(f"{str(i)}⁺¹")
-    #         elif i >= datetime.now().hour:
-    #             ret.append(str(i))
-    #     return ret
-
-    # @property
-    # def caution_hours_display_model(self) -> dict:
-    #     ret = {}
-    #     if len(self.hub.dynamic_caution_hours) > 0:
-    #         for h in self.hub.dynamic_caution_hours:
-    #             if h < datetime.now().hour:
-    #                 hh = f"{h}⁺¹"
-    #             else:
-    #                 hh = h
-    #             ret[hh] = f"{str((int(self.hub.dynamic_caution_hours[h] * 100)))}%"
-    #     return ret
-
-    # @property
-    # def current_charge_permittance_display_model(self) -> str:
-    #     ret = 100
-    #     hour = datetime.now().hour
-    #     if hour in self.hub.non_hours:
-    #         ret = 0
-    #     elif hour in self.hub.dynamic_caution_hours.keys():
-    #         ret = int(self.hub.dynamic_caution_hours.get(hour) * 100)
-    #     return f"{str(ret)}%"
 
     @property
     def state_display_model(self) -> str:
@@ -120,22 +84,26 @@ class IChargeController:
         return self._do_initialize()
 
     async def async_set_status(self) -> None:
-        ret = ChargeControllerStates.Error
-        if self.is_initialized:
-            match self.hub.chargertype.type:
-                case ChargerType.Outlet:
-                    ret = await self.async_get_status_outlet()
-                case ChargerType.NoCharger:
-                    ret = await self.async_get_status_no_charger()
-                case _:
-                    ret = await self.async_get_status()
-            #async with self._lock:
-            if ret != self.status_type:
-                self.status_type = ret
-                await self.hub.observer.async_broadcast("chargecontroller status changed", ret)
+        try:
+            ret = ChargeControllerStates.Error
+            if self.is_initialized:
+                match self.hub.chargertype.type:
+                    case ChargerType.Outlet:
+                        ret = await self.async_get_status_outlet()
+                    case ChargerType.NoCharger:
+                        ret = await self.async_get_status_no_charger()
+                    case _:
+                        ret = await self.async_get_status()
+                #async with self._lock:
+                if ret != self.status_type:
+                    self.status_type = ret
+                    await self.hub.observer.async_broadcast("chargecontroller status changed", ret)
+        except Exception as e:
+            _LOGGER.error(f"Error in async_set_status: {e}")
 
     async def async_get_status(self) -> ChargeControllerStates:
-            _state = await self.hub.async_get_chargerobject_value()
+        try:
+            _state = await self.hub.async_request_sensor_data("chargerobject_value")
             ret = ChargeControllerStates.Error
             update_timer = True
             if not self.hub.enabled:
@@ -161,11 +129,13 @@ class IChargeController:
             elif _state in self._charger_states.get(ChargeControllerStates.Charging):
                 ret = await self.async_get_status_charging()
             if update_timer:
-                await self.async_update_latest_charger_start(time.time())
+                await self.async_update_latest_charger_start()
             if ret == ChargeControllerStates.Error:
                 _LOGGER.error(
                     f"Chargecontroller returned faulty state. Charger reported {_state} as state.")
             return ret
+        except Exception as e:
+            _LOGGER.error(f"Error in async_get_status: {e}")
 
     async def async_get_status_outlet(self) -> ChargeControllerStates:
         ret = ChargeControllerStates.Error
@@ -182,7 +152,7 @@ class IChargeController:
         else:
             ret = await self.async_get_status_charging()
         if update_timer:
-            await self.async_update_latest_charger_start(time.time())
+            await self.async_update_latest_charger_start()
         return ret
 
     async def async_get_status_no_charger(self) -> ChargeControllerStates:
@@ -193,7 +163,7 @@ class IChargeController:
             ret = ChargeControllerStates.Stop
         else:
             ret = ChargeControllerStates.Start
-        await self.async_update_latest_charger_start(time.time())
+        await self.async_update_latest_charger_start()
         return ret
 
     async def async_is_done(self, charger_state) -> bool:

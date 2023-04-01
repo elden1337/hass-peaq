@@ -91,7 +91,8 @@ class HomeAssistantHub:
         self.sensors.init_hub_values()
         self.servicecalls = ServiceCalls(self)  # top level
         self.states = await StateChangesFactory.create(self)  # top level
-        self.chargecontroller: IChargeController = await ChargeControllerFactory.create(self, charger_states=self.chargertype.chargerstates)  # charger
+        self.chargecontroller: IChargeController = await ChargeControllerFactory.create(self,
+                                                                                        charger_states=self.chargertype.chargerstates)  # charger
         self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)  # hours
         self.power_canary = PowerCanary(hub=self)  # power
         self.gainloss = GainLoss(self)  # power
@@ -146,14 +147,14 @@ class HomeAssistantHub:
 
     @callback
     async def async_state_changed(self, entity_id, old_state, new_state):
-        #async with self._lock:
-            if entity_id is not None:
-                try:
-                    if old_state is None or old_state != new_state:
-                        await self.states.async_update_sensor(entity_id, new_state.state)
-                except Exception as e:
-                    msg = f"Unable to handle data-update: {entity_id} {old_state}|{new_state}. Exception: {e}"
-                    _LOGGER.error(msg)
+        # async with self._lock:
+        if entity_id is not None:
+            try:
+                if old_state is None or old_state != new_state:
+                    await self.states.async_update_sensor(entity_id, new_state.state)
+            except Exception as e:
+                msg = f"Unable to handle data-update: {entity_id} {old_state}|{new_state}. Exception: {e}"
+                _LOGGER.error(msg)
 
     async def async_setup_tracking(self) -> list:
         tracker_entities = []
@@ -190,7 +191,6 @@ class HomeAssistantHub:
         self.observer.add("update charger done", self.async_update_charger_done, _async=True)
         self.observer.add("update charger enabled", self.async_update_charger_enabled, _async=True)
 
-
     """Composition below here"""
 
     async def async_set_init_dict(self, init_dict):
@@ -208,34 +208,35 @@ class HomeAssistantHub:
                 return None
         return ret
 
-    async def async_get_chargerobject_value(self) -> str:
-        ret = await self.async_request_sensor_data("chargerobject_value")[0]
-        return ret.lower()
-
     async def async_set_chargerobject_value(self, value) -> None:
         if hasattr(self.sensors, "chargerobject"):
             setattr(self.sensors.chargerobject, "value", value)
 
-    async def async_request_sensor_data(self, *args) -> dict:
+    async def async_request_sensor_data(self, *args) -> dict | any:
         lookup = {
-        "chargerobject_value": getattr(self.sensors.chargerobject, "value", "unknown"),
-        "prices_tomorrow": getattr(self.hours, "prices_tomorrow"),
-        "non_hours": getattr(self.hours, "non_hours"),
-        "caution_hours": getattr(self.hours, "dynamic_caution_hours"),
-        "state": getattr(self.chargecontroller, "state_display_model"), #todo: fix this, cant be called state and should not be spawned from chargecontroller.
-        "currency": getattr(self.nordpool, "currency"),
-        "offsets": getattr(self.hours, "offsets", {}),
-        "average_nordpool_data": getattr(self.nordpool, "average_data"),
-        "use_cent": getattr(self.nordpool.model, "use_cent"),
-        "current_peak": getattr(self.sensors.current_peak, "value"),
-        "avg_kwh_price": await self.state_machine.async_add_executor_job(self.hours.get_average_kwh_price),
-        "max_charge": await self.state_machine.async_add_executor_job(self.hours.get_total_charge),
-        "average_weekly": getattr(self.nordpool, "average_weekly"),
-        "average_monthly": getattr(self.nordpool, "average_month"),
+            "chargerobject_value":   getattr(self.sensors.chargerobject, "value", "unknown"),
+            "prices_tomorrow":       getattr(self.hours, "prices_tomorrow"),
+            "non_hours":             getattr(self.hours, "non_hours"),
+            "caution_hours":         getattr(self.hours, "dynamic_caution_hours"),
+            "state":                 getattr(self.chargecontroller, "state_display_model"), # todo: fix this, cant be called state and should not be spawned from chargecontroller.
+            "currency":              getattr(self.nordpool, "currency"),
+            "offsets":               getattr(self.hours, "offsets", {}),
+            "average_nordpool_data": getattr(self.nordpool, "average_data"),
+            "use_cent":              getattr(self.nordpool.model, "use_cent"),
+            "current_peak":          getattr(self.sensors.current_peak, "value"),
+            "avg_kwh_price":         await self.state_machine.async_add_executor_job(self.hours.get_average_kwh_price),
+            "max_charge":            await self.state_machine.async_add_executor_job(self.hours.get_total_charge),
+            "average_weekly":        getattr(self.nordpool, "average_weekly"),
+            "average_monthly":       getattr(self.nordpool, "average_month"),
         }
         ret = {}
         for arg in args:
             ret[arg] = lookup.get(arg, None)
+        if len(ret) == 1:
+            rr = list(ret.values())[0]
+            if isinstance(rr, str):
+                return rr.lower()
+            return rr
         return ret
 
     async def async_get_money_sensor_data(self) -> dict | None:
@@ -243,7 +244,7 @@ class HomeAssistantHub:
         ret["prices_tomorrow"] = getattr(self.hours, "prices_tomorrow")
         ret["non_hours"] = getattr(self.hours, "non_hours")
         ret["caution_hours"] = getattr(self.hours, "dynamic_caution_hours")
-        ret["state"] = getattr(self.chargecontroller, "state_display_model") #todo: fix this
+        ret["state"] = getattr(self.chargecontroller, "state_display_model")  # todo: fix this
         ret["currency"] = getattr(self.nordpool, "currency")
         ret["offsets"] = getattr(self.hours, "offsets", {})
         ret["average_nordpool_data"] = getattr(self.nordpool, "average_data")
@@ -299,5 +300,3 @@ class HomeAssistantHub:
             setattr(self.sensors.charger_enabled, "value", bool(val))
         else:
             raise Exception("Peaqev cannot function without a charger_enabled entity")
-
-
