@@ -1,5 +1,7 @@
 import logging
 
+from peaqevcore.models.chargecontroller_states import ChargeControllerStates
+
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
@@ -27,20 +29,28 @@ class PeaqSensor(SensorBase):
 
     @property
     def icon(self) -> str:
-        ret = "mdi:electric-switch-closed"
-        if self.state == "Idle":
-            ret = "mdi:electric-switch"
-        elif self.state == "Done":
-            ret = "mdi:check"
+        ret = "mdi:battery"
+        if self.state is ChargeControllerStates.Idle.value:
+            ret = "mdi:ev-plug-type2"
+        elif self.state == "Disabled":
+            ret = "mdi:battery-off"
+        elif self.state is ChargeControllerStates.Start.value:
+            ret = "mdi:battery-charging"
+        elif self.state is ChargeControllerStates.Stop.value:
+            ret = "mdi:battery-clock"
+        elif self.state is ChargeControllerStates.Done.value:
+            ret = "mdi:battery-charging-100"
         return ret
 
     async def async_update(self) -> None:
-        self._state = self.hub.chargecontroller.status_string  #todo: composition
-        self._nonhours = self.hub.hours.non_hours  #todo: composition
-        self._cautionhours = self.hub.hours.caution_hours  #todo: composition
-        self._current_hour = self.hub.hours.state  #todo: composition
-        self._price_aware = self.hub.hours.price_aware  #todo: composition
-        self._scheduler_active = self.hub.scheduler.scheduler_active
+        ret = await self.hub.async_request_sensor_data("non_hours", "caution_hours", "chargecontroller_status", "hour_state","is_price_aware","is_scheduler_active")
+        if ret is not None:
+            self._state = ret.get("chargecontroller_status")
+            self._nonhours = ret.get("non_hours")
+            self._cautionhours = ret.get("caution_hours")
+            self._current_hour = ret.get("hour_state")
+            self._price_aware = ret.get("is_price_aware")
+            self._scheduler_active = ret.get("is_scheduler_active")
 
     @property
     def extra_state_attributes(self) -> dict:

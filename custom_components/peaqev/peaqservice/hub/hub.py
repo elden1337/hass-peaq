@@ -127,7 +127,7 @@ class HomeAssistantHub:
             if self.initializer.check():
                 del self.initializer
                 self.observer.activate("hub initialized")
-                #self.observer.broadcast("hub initialized")
+                # self.observer.broadcast("hub initialized")
                 return True
             return False
         return True
@@ -209,22 +209,26 @@ class HomeAssistantHub:
 
     async def async_request_sensor_data(self, *args) -> dict | any:
         lookup = {
-            "charger_done":          getattr(self.sensors.charger_done, "value", None),
-            "chargerobject_value":   getattr(self.sensors.chargerobject, "value", "unknown"),
-            "prices":                getattr(self.hours, "prices", []),
-            "prices_tomorrow":       getattr(self.hours, "prices_tomorrow", []),
-            "non_hours":             getattr(self.hours, "non_hours", []),
-            "caution_hours":         getattr(self.hours, "caution_hours", []),
-            "dynamic_caution_hours": getattr(self.hours, "dynamic_caution_hours", {}),
-            "currency":              getattr(self.nordpool, "currency"),
-            "offsets":               getattr(self.hours, "offsets", {}),
-            "average_nordpool_data": getattr(self.nordpool, "average_data"),
-            "use_cent":              getattr(self.nordpool.model, "use_cent"),
-            "current_peak":          getattr(self.sensors.current_peak, "value"),
-            "avg_kwh_price":         await self.state_machine.async_add_executor_job(self.hours.get_average_kwh_price),
-            "max_charge":            await self.state_machine.async_add_executor_job(self.hours.get_total_charge),
-            "average_weekly":        getattr(self.nordpool, "average_weekly"),
-            "average_monthly":       getattr(self.nordpool, "average_month"),
+            "charger_done":            getattr(self.sensors.charger_done, "value", None),
+            "chargerobject_value":     getattr(self.sensors.chargerobject, "value", "unknown"),
+            "hour_state":              getattr(self.hours, "state", "unknown"),
+            "prices":                  getattr(self.hours, "prices", []),
+            "prices_tomorrow":         getattr(self.hours, "prices_tomorrow", []),
+            "non_hours":               getattr(self.hours, "non_hours", []),
+            "caution_hours":           getattr(self.hours, "caution_hours", []),
+            "dynamic_caution_hours":   getattr(self.hours, "dynamic_caution_hours", {}),
+            "currency":                getattr(self.nordpool, "currency"),
+            "offsets":                 getattr(self.hours, "offsets", {}),
+            "average_nordpool_data":   getattr(self.nordpool, "average_data"),
+            "use_cent":                getattr(self.nordpool.model, "use_cent"),
+            "current_peak":            getattr(self.sensors.current_peak, "value"),
+            "avg_kwh_price":           await self.state_machine.async_add_executor_job(self.hours.get_average_kwh_price),
+            "max_charge":              await self.state_machine.async_add_executor_job(self.hours.get_total_charge),
+            "average_weekly":          getattr(self.nordpool, "average_weekly"),
+            "average_monthly":         getattr(self.nordpool, "average_month"),
+            "is_price_aware":          getattr(self.options.price, "price_aware"),
+            "is_scheduler_active":     getattr(self.scheduler, "scheduler_active"),
+            "chargecontroller_status": getattr(self.chargecontroller, "status_string"),
         }
         ret = {}
         for arg in args:

@@ -172,8 +172,10 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         hour = datetime.now().hour
         ret = CHARGING_ALLOWED.capitalize()
         if self.hub.timer.is_override:  # todo: composition
+            self._icon = "mdi:car-electric-outline"
             return self.hub.timer.override_string  # todo: composition
         if hour in non_hours:
+            self._icon = "mdi:car-clock"
             ret = calculate_stop_len(non_hours)
         elif hour in dynamic_caution_hours.keys():
             val = dynamic_caution_hours.get(hour)
