@@ -4,7 +4,7 @@ from peaqevcore.services.hourselection.initializers.regular_hours import Regular
 
 class HourselectionFactory:
     @staticmethod
-    async def create(hub):
+    async def async_create(hub):
         if hub.options.price.price_aware is False:
             return RegularHours(hub)
         else:

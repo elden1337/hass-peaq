@@ -54,8 +54,8 @@ class Charger:
 
     async def async_set_chargecontroller_status(self, val):
         if isinstance(val, ChargeControllerStates):
-            if val != self.params.chargecontroller_state:
-                async with self._lock:
+            async with self._lock:
+                if val != self.params.chargecontroller_state:
                     self.params.chargecontroller_state = val
                     await self.async_charge()
 

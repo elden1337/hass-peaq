@@ -6,7 +6,7 @@ from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 
 class ThresholdFactory:
     @staticmethod
-    async def create(hub) -> ThresholdBase:
+    async def async_create(hub) -> ThresholdBase:
         if hub.options.peaqev_lite:
             return ThresholdLite(hub)
         else:

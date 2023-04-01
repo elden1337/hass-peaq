@@ -74,15 +74,12 @@ class HomeAssistantHub:
         self.initializer = HubInitializer(self)
 
     async def setup(self):
-        self.chargertype = await self.state_machine.async_add_executor_job(ChargerTypeFactory.create,
-                                                                           self.state_machine,
-                                                                           self.options.charger.chargertype,
-                                                                           self.options)  # charger?
+        self.chargertype = await ChargerTypeFactory.async_create(self.state_machine,self.options)  # charger?
         self.charger = Charger(hub=self, chargertype=self.chargertype)  # top level
-        self.sensors: IHubSensors = await HubSensorsFactory.create(self.options)  # top level
+        self.sensors: IHubSensors = await HubSensorsFactory.async_create(self.options)  # top level
         self.timer: Timer = Timer()
-        self.hours: Hours = await HourselectionFactory.create(self)  # top level
-        self.threshold: ThresholdBase = await ThresholdFactory.create(self)  # top level
+        self.hours: Hours = await HourselectionFactory.async_create(self)  # top level
+        self.threshold: ThresholdBase = await ThresholdFactory.async_create(self)  # top level
         self.prediction = Prediction(self)  # threshold
         self.scheduler = SchedulerFacade(hub=self, options=self.hours.options)  # hours
 
@@ -90,8 +87,8 @@ class HomeAssistantHub:
                            chargerobject=self.chargertype)
         self.sensors.init_hub_values()
         self.servicecalls = ServiceCalls(self)  # top level
-        self.states = await StateChangesFactory.create(self)  # top level
-        self.chargecontroller: IChargeController = await ChargeControllerFactory.create(self,
+        self.states = await StateChangesFactory.async_create(self)  # top level
+        self.chargecontroller: IChargeController = await ChargeControllerFactory.async_create(self,
                                                                                         charger_states=self.chargertype.chargerstates)  # charger
         self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)  # hours
         self.power_canary = PowerCanary(hub=self)  # power

@@ -18,7 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 class ChargerTypeFactory:
 
     @staticmethod
-    def get_class(input_type: str):
+    async def async_get_class(input_type: str):
         types_dict = {
             ChargerType.ChargeAmps:  ChargeAmps,
             ChargerType.Easee:       Easee,
@@ -29,18 +29,19 @@ class ChargerTypeFactory:
         }
 
         try:
-            return types_dict[ChargerType(input_type)]
+            return types_dict.get(ChargerType(input_type))
         except Exception as e:
             _LOGGER.debug(f"Caught exception while parsing charger-type: {e}")
             raise ValueError
 
     @staticmethod
-    def create(hass: HomeAssistant, input_type, options: HubOptions) -> ChargerBase:
+    async def async_create(hass: HomeAssistant, options: HubOptions) -> ChargerBase:
+        input_type = options.charger.chargertype
         try:
-                charger = ChargerTypeFactory.get_class(input_type)(hass=hass, huboptions=options, chargertype=ChargerType(input_type))
-                _LOGGER.debug(f"Managed to set up charger-class for chargertype {input_type}")
-                charger.validatecharger()
-                return charger
+            charger = await ChargerTypeFactory.async_get_class(input_type)
+            _LOGGER.debug(f"Managed to set up charger-class for chargertype {input_type}")
+            #charger.validatecharger()
+            return charger(hass=hass, huboptions=options, chargertype=ChargerType(input_type))
         except Exception as e:
             _LOGGER.debug(f"Exception. Did not manage to set up charge-class for {input_type}: {e}")
             raise Exception
