@@ -9,7 +9,7 @@ from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from custom_components.peaqev.peaqservice.chargecontroller.const import (DONETIMEOUT, DEBUGLOG_TIMEOUT)
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
-from custom_components.peaqev.peaqservice.util.extensionmethods import dt_from_epoch, log_once
+from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,15 +30,6 @@ class IChargeController:
     @property
     def status_type(self) -> ChargeControllerStates:
         return self._status_type
-
-    @status_type.setter
-    def status_type(self, val) -> None:
-        self._status_type = val
-
-    @property
-    def latest_charger_start(self) -> str:
-        """For Lovelace-purposes. Converts and returns epoch-timer to readable datetime-string"""
-        return dt_from_epoch(self._latest_charger_start)
 
     async def async_update_latest_charger_start(self):
         if self.hub.enabled:
@@ -81,7 +72,7 @@ class IChargeController:
                         ret = await self.async_get_status()
                 #async with self._lock:
                 if ret != self.status_type:
-                    self.status_type = ret
+                    self._status_type = ret
                     await self.hub.observer.async_broadcast("chargecontroller status changed", ret)
         except Exception as e:
             _LOGGER.error(f"Error in async_set_status: {e}")

@@ -18,7 +18,6 @@ class PeaqSensor(SensorBase):
         self._current_hour = None
         self._price_aware: bool = False
         self._scheduler_active: bool = False
-        #self._latest_charger_start = None
 
     @property
     def state(self):
@@ -41,7 +40,6 @@ class PeaqSensor(SensorBase):
         self._cautionhours = self.hub.hours.caution_hours  #todo: composition
         self._current_hour = self.hub.hours.state  #todo: composition
         self._price_aware = self.hub.hours.price_aware  #todo: composition
-        #self._latest_charger_start = self.hub.chargecontroller.latest_charger_start
         self._scheduler_active = self.hub.scheduler.scheduler_active
 
     @property
@@ -54,5 +52,4 @@ class PeaqSensor(SensorBase):
 
         attr_dict["current_hour state"] = self._current_hour
         attr_dict["scheduler_active"] = self._scheduler_active
-        #attr_dict["latest_internal_chargerstart"] = self._latest_charger_start
         return attr_dict
