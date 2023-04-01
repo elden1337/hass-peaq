@@ -187,8 +187,8 @@ class HomeAssistantHub:
         self.observer.add("prices changed", self._update_prices)
         self.observer.add("monthly average price changed", self._update_average_monthly_price)
         self.observer.add("weekly average price changed", self._update_average_weekly_price)
-        self.observer.add("update charger done", self._update_charger_done)
-        self.observer.add("update charger enabled", self._update_charger_enabled)
+        self.observer.add("update charger done", self.async_update_charger_done, _async=True)
+        self.observer.add("update charger enabled", self.async_update_charger_enabled, _async=True)
 
 
     """Composition below here"""
@@ -268,11 +268,10 @@ class HomeAssistantHub:
         if self.options.price.price_aware and isinstance(val, float):
             setattr(self.hours, "adjusted_average", val)
 
-    def _update_charger_done(self, val):
-        if hasattr(self.sensors, "charger_done"):
-            setattr(self.sensors.charger_done, "value", bool(val))
+    async def async_update_charger_done(self, val):
+        setattr(self.sensors.charger_done, "value", bool(val))
 
-    def _update_charger_enabled(self, val):
+    async def async_update_charger_enabled(self, val):
         if hasattr(self.sensors, "charger_enabled"):
             setattr(self.sensors.charger_enabled, "value", bool(val))
         else:
