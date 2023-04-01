@@ -21,7 +21,7 @@ class IChargeController:
         self.hub = hub
         self.name: str = f"{self.hub.hubname} {CHARGERCONTROLLER}"
         self._status_type: ChargeControllerStates = ChargeControllerStates.Idle
-        self._is_initalized: bool = False
+        self._is_initialized: bool = False
         self._latest_charger_start: float = time.time()
         self._latest_debuglog = 0
         self._charger_states: dict = charger_states
@@ -54,41 +54,41 @@ class IChargeController:
     def is_initialized(self) -> bool:
         if not self.hub.is_initialized:
             return False
-        if self.hub.is_initialized and not self._is_initalized:
+        if self.hub.is_initialized and not self._is_initialized:
             return self._check_initialized()
-        return self._is_initalized
+        return self._is_initialized
 
-    @property
-    def non_hours_display_model(self) -> list:
-        ret = []
-        for i in self.hub.non_hours:
-            if i < datetime.now().hour and len(self.hub.prices_tomorrow) > 0:
-                ret.append(f"{str(i)}⁺¹")
-            elif i >= datetime.now().hour:
-                ret.append(str(i))
-        return ret
+    # @property
+    # def non_hours_display_model(self) -> list:
+    #     ret = []
+    #     for i in self.hub.non_hours:
+    #         if i < datetime.now().hour and len(self.hub.prices_tomorrow) > 0:
+    #             ret.append(f"{str(i)}⁺¹")
+    #         elif i >= datetime.now().hour:
+    #             ret.append(str(i))
+    #     return ret
 
-    @property
-    def caution_hours_display_model(self) -> dict:
-        ret = {}
-        if len(self.hub.dynamic_caution_hours) > 0:
-            for h in self.hub.dynamic_caution_hours:
-                if h < datetime.now().hour:
-                    hh = f"{h}⁺¹"
-                else:
-                    hh = h
-                ret[hh] = f"{str((int(self.hub.dynamic_caution_hours[h] * 100)))}%"
-        return ret
+    # @property
+    # def caution_hours_display_model(self) -> dict:
+    #     ret = {}
+    #     if len(self.hub.dynamic_caution_hours) > 0:
+    #         for h in self.hub.dynamic_caution_hours:
+    #             if h < datetime.now().hour:
+    #                 hh = f"{h}⁺¹"
+    #             else:
+    #                 hh = h
+    #             ret[hh] = f"{str((int(self.hub.dynamic_caution_hours[h] * 100)))}%"
+    #     return ret
 
-    @property
-    def current_charge_permittance_display_model(self) -> str:
-        ret = 100
-        hour = datetime.now().hour
-        if hour in self.hub.non_hours:
-            ret = 0
-        elif hour in self.hub.dynamic_caution_hours.keys():
-            ret = int(self.hub.dynamic_caution_hours.get(hour) * 100)
-        return f"{str(ret)}%"
+    # @property
+    # def current_charge_permittance_display_model(self) -> str:
+    #     ret = 100
+    #     hour = datetime.now().hour
+    #     if hour in self.hub.non_hours:
+    #         ret = 0
+    #     elif hour in self.hub.dynamic_caution_hours.keys():
+    #         ret = int(self.hub.dynamic_caution_hours.get(hour) * 100)
+    #     return f"{str(ret)}%"
 
     @property
     def state_display_model(self) -> str:
@@ -104,12 +104,12 @@ class IChargeController:
         return ret
 
     def _do_initialize(self) -> bool:
-        self._is_initalized = True
+        self._is_initialized = True
         log_once("Chargecontroller is initialized and ready to work.")
-        return self._is_initalized
+        return self._is_initialized
 
     def _check_initialized(self) -> bool:
-        if self.is_initialized:
+        if self._is_initialized:
             return True
         if not self.hub.options.peaqev_lite:
             _state = self.hub.get_power_sensor_from_hass()
