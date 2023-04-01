@@ -1,11 +1,39 @@
 import logging
 from datetime import datetime
+
 from homeassistant.helpers.restore_state import RestoreEntity
 
+from custom_components.peaqev.peaqservice.chargecontroller.const import CHARGING_ALLOWED
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def calculate_stop_len(nonhours) -> str:
+    ret = ""
+    for idx, h in enumerate(nonhours):
+        if idx + 1 < len(nonhours):
+            if _getuneven(nonhours[idx + 1], nonhours[idx]):
+                ret = _get_stopped_string(h)
+                break
+        elif idx + 1 == len(nonhours):
+            ret = _get_stopped_string(h)
+            break
+    return ret
+
+
+def _get_stopped_string(h) -> str:
+    val = h + 1 if h + 1 < 24 else h + 1 - 24
+    if len(str(val)) == 1:
+        return f"Charging stopped until 0{val}:00"
+    return f"Charging stopped until {val}:00"
+
+
+def _getuneven(first, second) -> bool:
+    if second > first:
+        return first - (second - 24) != 1
+    return first - second != 1
 
 
 class PeaqMoneySensor(SensorBase, RestoreEntity):
@@ -39,28 +67,33 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         return "mdi:car-clock"
 
     async def async_update(self) -> None:
-        ret = await self.hub.async_get_money_sensor_data()
+        ret = await self.hub.async_request_sensor_data("prices_tomorrow", "non_hours", "dynamic_caution_hours",
+                                                       "currency", "offsets", "average_nordpool_data", "use_cent",
+                                                       "current_peak", "avg_kwh_price", "max_charge", "average_weekly",
+                                                       "average_monthly")
         if ret is not None:
-            self._state = ret.get("state")
+            self._state = await self.async_state_display(ret.get("non_hours"), ret.get("dynamic_caution_hours"))
             self._nonhours = await self.async_set_non_hours_display(ret.get("non_hours"), ret.get("prices_tomorrow"))
-            self._dynamic_caution_hours = await self.async_set_caution_hours_display(ret.get("caution_hours"))
+            self._dynamic_caution_hours = await self.async_set_caution_hours_display(ret.get("dynamic_caution_hours"))
             self._currency = ret.get("currency")
             self._offsets = ret.get("offsets", {})
             self._current_peak = ret.get("current_peak")
             self._max_charge = f"{ret.get('max_charge', '-')} kWh"
             self._average_nordpool_data = ret.get("average_nordpool_data", [])
-            self._charge_permittance = await self.async_set_current_charge_permittance_display(ret.get("non_hours"), ret.get("caution_hours"))
+            self._charge_permittance = await self.async_set_current_charge_permittance_display(ret.get("non_hours"),
+                                                                                               ret.get(
+                                                                                                   "dynamic_caution_hours"))
 
             self._avg_cost = await self.async_currency_translation(value=ret.get("avg_kwh_price"),
-                                                       currency=ret.get("currency"),
-                                                       use_cent=ret.get("use_cent"))
+                                                                   currency=ret.get("currency"),
+                                                                   use_cent=ret.get("use_cent"))
 
             self._average_nordpool = await self.async_currency_translation(value=ret.get("average_weekly"),
-                                                               currency=ret.get("currency"),
-                                                               use_cent=ret.get("use_cent"))
+                                                                           currency=ret.get("currency"),
+                                                                           use_cent=ret.get("use_cent"))
             self._average_data_current_month = await self.async_currency_translation(value=ret.get("average_monthly"),
-                                                                         currency=ret.get("currency"),
-                                                                         use_cent=ret.get("use_cent"))
+                                                                                     currency=ret.get("currency"),
+                                                                                     use_cent=ret.get("use_cent"))
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -104,7 +137,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         return ret
 
     @staticmethod
-    async def async_set_non_hours_display(non_hours:list, prices_tomorrow:list) -> list:
+    async def async_set_non_hours_display(non_hours: list, prices_tomorrow: list) -> list:
         ret = []
         for i in non_hours:
             if i < datetime.now().hour and len(prices_tomorrow) > 0:
@@ -122,7 +155,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
                     hh = f"{h}⁺¹"
                 else:
                     hh = h
-                ret[hh] = f"{str((int(dynamic_caution_hours.get(h,0) * 100)))}%"
+                ret[hh] = f"{str((int(dynamic_caution_hours.get(h, 0) * 100)))}%"
         return ret
 
     @staticmethod
@@ -134,3 +167,15 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         elif hour in dynamic_caution_hours.keys():
             ret = int(dynamic_caution_hours.get(hour) * 100)
         return f"{str(ret)}%"
+
+    async def async_state_display(self, non_hours: list, dynamic_caution_hours: dict) -> str:
+        hour = datetime.now().hour
+        ret = CHARGING_ALLOWED.capitalize()
+        if self.hub.timer.is_override:  # todo: composition
+            return self.hub.timer.override_string  # todo: composition
+        if hour in non_hours:
+            ret = calculate_stop_len(non_hours)
+        elif hour in dynamic_caution_hours.keys():
+            val = dynamic_caution_hours.get(hour)
+            ret += f" at {int(val * 100)}% of peak"
+        return ret

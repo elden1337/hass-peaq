@@ -74,7 +74,7 @@ class HomeAssistantHub:
         self.initializer = HubInitializer(self)
 
     async def setup(self):
-        self.chargertype = await ChargerTypeFactory.async_create(self.state_machine,self.options)  # charger?
+        self.chargertype = await ChargerTypeFactory.async_create(self.state_machine, self.options)  # charger?
         self.charger = Charger(hub=self, chargertype=self.chargertype)  # top level
         self.sensors: IHubSensors = await HubSensorsFactory.async_create(self.options)  # top level
         self.timer: Timer = Timer()
@@ -82,14 +82,13 @@ class HomeAssistantHub:
         self.threshold: ThresholdBase = await ThresholdFactory.async_create(self)  # top level
         self.prediction = Prediction(self)  # threshold
         self.scheduler = SchedulerFacade(hub=self, options=self.hours.options)  # hours
-
         self.sensors.setup(state_machine=self.state_machine, options=self.options, domain=self.domain,
                            chargerobject=self.chargertype)
         self.sensors.init_hub_values()
         self.servicecalls = ServiceCalls(self)  # top level
         self.states = await StateChangesFactory.async_create(self)  # top level
         self.chargecontroller: IChargeController = await ChargeControllerFactory.async_create(self,
-                                                                                        charger_states=self.chargertype.chargerstates)  # charger
+                                                                                              charger_states=self.chargertype.chargerstates)  # charger
         self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)  # hours
         self.power_canary = PowerCanary(hub=self)  # power
         self.gainloss = GainLoss(self)  # power
@@ -144,7 +143,6 @@ class HomeAssistantHub:
 
     @callback
     async def async_state_changed(self, entity_id, old_state, new_state):
-        # async with self._lock:
         if entity_id is not None:
             try:
                 if old_state is None or old_state != new_state:
@@ -212,10 +210,11 @@ class HomeAssistantHub:
     async def async_request_sensor_data(self, *args) -> dict | any:
         lookup = {
             "chargerobject_value":   getattr(self.sensors.chargerobject, "value", "unknown"),
-            "prices_tomorrow":       getattr(self.hours, "prices_tomorrow"),
-            "non_hours":             getattr(self.hours, "non_hours"),
-            "caution_hours":         getattr(self.hours, "dynamic_caution_hours"),
-            "state":                 getattr(self.chargecontroller, "state_display_model"), # todo: fix this, cant be called state and should not be spawned from chargecontroller.
+            "prices":                getattr(self.hours, "prices", []),
+            "prices_tomorrow":       getattr(self.hours, "prices_tomorrow", []),
+            "non_hours":             getattr(self.hours, "non_hours", []),
+            "caution_hours":         getattr(self.hours, "caution_hours", []),
+            "dynamic_caution_hours": getattr(self.hours, "dynamic_caution_hours", {}),
             "currency":              getattr(self.nordpool, "currency"),
             "offsets":               getattr(self.hours, "offsets", {}),
             "average_nordpool_data": getattr(self.nordpool, "average_data"),
@@ -235,23 +234,22 @@ class HomeAssistantHub:
                 return rr.lower()
             return rr
         return ret
-
-    async def async_get_money_sensor_data(self) -> dict | None:
-        ret = {}
-        ret["prices_tomorrow"] = getattr(self.hours, "prices_tomorrow")
-        ret["non_hours"] = getattr(self.hours, "non_hours")
-        ret["caution_hours"] = getattr(self.hours, "dynamic_caution_hours")
-        ret["state"] = getattr(self.chargecontroller, "state_display_model")  # todo: fix this
-        ret["currency"] = getattr(self.nordpool, "currency")
-        ret["offsets"] = getattr(self.hours, "offsets", {})
-        ret["average_nordpool_data"] = getattr(self.nordpool, "average_data")
-        ret["use_cent"] = getattr(self.nordpool.model, "use_cent")
-        ret["current_peak"] = getattr(self.sensors.current_peak, "value")
-        ret["avg_kwh_price"] = await self.state_machine.async_add_executor_job(self.hours.get_average_kwh_price)
-        ret["max_charge"] = await self.state_machine.async_add_executor_job(self.hours.get_total_charge)
-        ret["average_weekly"] = getattr(self.nordpool, "average_weekly")
-        ret["average_monthly"] = getattr(self.nordpool, "average_month")
-        return ret
+    #
+    # async def async_get_money_sensor_data(self) -> dict | None:
+    #     ret = {}
+    #     ret["prices_tomorrow"] = getattr(self.hours, "prices_tomorrow")
+    #     ret["non_hours"] = getattr(self.hours, "non_hours")
+    #     ret["caution_hours"] = getattr(self.hours, "dynamic_caution_hours")
+    #     ret["currency"] = getattr(self.nordpool, "currency")
+    #     ret["offsets"] = getattr(self.hours, "offsets", {})
+    #     ret["average_nordpool_data"] = getattr(self.nordpool, "average_data")
+    #     ret["use_cent"] = getattr(self.nordpool.model, "use_cent")
+    #     ret["current_peak"] = getattr(self.sensors.current_peak, "value")
+    #     ret["avg_kwh_price"] = await self.state_machine.async_add_executor_job(self.hours.get_average_kwh_price)
+    #     ret["max_charge"] = await self.state_machine.async_add_executor_job(self.hours.get_total_charge)
+    #     ret["average_weekly"] = getattr(self.nordpool, "average_weekly")
+    #     ret["average_monthly"] = getattr(self.nordpool, "average_month")
+    #     return ret
 
     @property
     def prices(self) -> list:

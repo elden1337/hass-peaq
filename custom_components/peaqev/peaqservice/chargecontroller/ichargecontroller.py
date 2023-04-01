@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import time
 from abc import abstractmethod
@@ -5,16 +6,13 @@ from datetime import datetime
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import calculate_stop_len
-from custom_components.peaqev.peaqservice.chargecontroller.const import (
-    DONETIMEOUT, DEBUGLOG_TIMEOUT, CHARGING_ALLOWED
-)
+from custom_components.peaqev.peaqservice.chargecontroller.const import (DONETIMEOUT, DEBUGLOG_TIMEOUT)
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import dt_from_epoch, log_once
 
 _LOGGER = logging.getLogger(__name__)
-import asyncio
+
 
 class IChargeController:
     def __init__(self, hub, charger_states):
@@ -53,19 +51,6 @@ class IChargeController:
         if self.hub.is_initialized and not self._is_initialized:
             return self._check_initialized()
         return self._is_initialized
-
-    @property
-    def state_display_model(self) -> str:
-        hour = datetime.now().hour
-        ret = CHARGING_ALLOWED.capitalize()
-        if self.hub.timer.is_override:  # todo: composition
-            return self.hub.timer.override_string  # todo: composition
-        if hour in self.hub.non_hours:
-            ret = calculate_stop_len(self.hub.non_hours)
-        elif hour in self.hub.dynamic_caution_hours.keys():
-            val = self.hub.dynamic_caution_hours.get(hour)
-            ret += f" at {int(val * 100)}% of peak"
-        return ret
 
     def _do_initialize(self) -> bool:
         self._is_initialized = True
@@ -168,6 +153,8 @@ class IChargeController:
 
     async def async_is_done(self, charger_state) -> bool:
         ret = False
+        if any([charger_state in self._charger_states.get(x) for x in [ChargeControllerStates.Error, ChargeControllerStates.Disabled]]):
+            return ret
         if len(self._charger_states.get(ChargeControllerStates.Done)) > 0:
             if charger_state in self._charger_states.get(ChargeControllerStates.Done):
                 self.__debug_log(f"'is_done' reported that charger is Done based on current charger state")
