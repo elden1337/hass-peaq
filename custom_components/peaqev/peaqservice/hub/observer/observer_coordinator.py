@@ -45,11 +45,11 @@ class Observer:
         cc = Command(command, _expiration, argument)
         if cc not in self.model.broadcast_queue:
             self.model.broadcast_queue.append(cc)
-        if self.model.active:
-            q: Command
-            for q in self.model.broadcast_queue:
-                if q.command in self.model.subscribers.keys():
-                    self._dequeue_and_broadcast(q)
+        #if self.model.active:
+        q: Command
+        for q in self.model.broadcast_queue:
+            if q.command in self.model.subscribers.keys():
+                self._dequeue_and_broadcast(q)
 
     def _dequeue_and_broadcast(self, command: Command):
         _LOGGER.debug(f"ready to broadcast: {command.command} with params: {command.argument}")
