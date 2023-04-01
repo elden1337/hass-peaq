@@ -3,33 +3,14 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from dataclasses import dataclass, field
-from typing import Tuple
+
+from custom_components.peaqev.peaqservice.hub.observer.const import TIMEOUT, COMMAND_WAIT
+from custom_components.peaqev.peaqservice.hub.observer.models.command import Command
+from custom_components.peaqev.peaqservice.hub.observer.models.func import Func
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_model import ObserverModel
 
 _LOGGER = logging.getLogger(__name__)
-COMMAND_WAIT = 3
-TIMEOUT = 60
 
-
-@dataclass
-class ObserverModel:
-    subscribers: dict = field(default_factory=lambda: {})
-    broadcast_queue: list = field(default_factory=lambda: [])
-    wait_queue: dict = field(default_factory=lambda: {})
-    active: bool = False
-
-
-@dataclass
-class Command:
-    command: str
-    expiration: int = None
-    argument: any = None
-
-
-@dataclass
-class Func:
-    function: any
-    call_async: bool = False
 
 class Observer:
     """
@@ -65,17 +46,6 @@ class Observer:
         for q in self.model.broadcast_queue:
             if q.command in self.model.subscribers.keys():
                 self._dequeue_and_broadcast(q)
-        #self._prepare_dequeue()
-
-    # def _prepare_dequeue(self, attempt: int = 0) -> None:
-    #     if self.model.active:
-    #         for q in self.model.broadcast_queue:
-    #             if q[0] in self.model.subscribers.keys():
-    #                 self._dequeue_and_broadcast(q)
-    #     elif attempt < 5:
-    #         _ = self.hub.is_initialized
-    #         attempt += 1
-    #         return self._prepare_dequeue(attempt)
 
     def _dequeue_and_broadcast(self, command: Command):
         _LOGGER.debug(f"ready to broadcast: {command.command} with params: {command.argument}")

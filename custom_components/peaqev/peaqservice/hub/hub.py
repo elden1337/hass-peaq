@@ -31,7 +31,7 @@ from custom_components.peaqev.peaqservice.hub.factories.state_changes_factory im
 from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import ThresholdFactory
 from custom_components.peaqev.peaqservice.hub.hub_initializer import HubInitializer
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import NordPoolUpdater
-from custom_components.peaqev.peaqservice.hub.observer import Observer
+from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import Observer
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import IStateChanges
 from custom_components.peaqev.peaqservice.power_canary.power_canary import PowerCanary
