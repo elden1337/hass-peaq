@@ -19,6 +19,18 @@ class ObserverModel:
     active: bool = False
 
 
+@dataclass
+class Command:
+    command: str
+    expiration: int = None
+    argument: any = None
+
+
+@dataclass
+class Func:
+    function: any
+    call_async: bool = False
+
 class Observer:
     """
     Observer class handles updates throughout peaqev.
@@ -38,63 +50,64 @@ class Observer:
 
     def add(self, command: str, func, _async: bool = False):
         if command in self.model.subscribers.keys():
-            self.model.subscribers[command].append((func, _async))
+            self.model.subscribers[command].append(Func(func, _async))
         else:
-            self.model.subscribers[command] = [(func, _async)]
+            self.model.subscribers[command] = [Func(func, _async)]
 
-    async def async_broadcast(self, command: str, argument=None, do_async: bool = False):
-        if not do_async:
+    async def async_broadcast(self, command: str, argument=None):
             await self.hub.state_machine.async_add_executor_job(self.broadcast, command, argument)
 
     def broadcast(self, command: str, argument=None):
         _expiration = time.time() + TIMEOUT
         if (command, _expiration) not in self.model.broadcast_queue:
-            self.model.broadcast_queue.append((command, _expiration, argument))
+            self.model.broadcast_queue.append(Command(command, _expiration, argument))
+        q: Command
         for q in self.model.broadcast_queue:
-            if q[0] in self.model.subscribers.keys():
+            if q.command in self.model.subscribers.keys():
                 self._dequeue_and_broadcast(q)
-        self._prepare_dequeue()
+        #self._prepare_dequeue()
 
-    def _prepare_dequeue(self, attempt: int = 0) -> None:
-        if self.model.active:
-            for q in self.model.broadcast_queue:
-                if q[0] in self.model.subscribers.keys():
-                    self._dequeue_and_broadcast(q)
-        elif attempt < 5:
-            _ = self.hub.is_initialized
-            attempt += 1
-            return self._prepare_dequeue(attempt)
+    # def _prepare_dequeue(self, attempt: int = 0) -> None:
+    #     if self.model.active:
+    #         for q in self.model.broadcast_queue:
+    #             if q[0] in self.model.subscribers.keys():
+    #                 self._dequeue_and_broadcast(q)
+    #     elif attempt < 5:
+    #         _ = self.hub.is_initialized
+    #         attempt += 1
+    #         return self._prepare_dequeue(attempt)
 
-    def _dequeue_and_broadcast(self, command: Tuple[str, int, any]):
-        _LOGGER.debug(f"ready to broadcast: {command[0]} with params: {command[2]}")
-        if self._ok_to_broadcast(command[0]):
-            if command[1] > time.time():
-                for func in self.model.subscribers[command[0]]:
-                    if func[1]:
+    def _dequeue_and_broadcast(self, command: Command):
+        _LOGGER.debug(f"ready to broadcast: {command.command} with params: {command.argument}")
+        if self._ok_to_broadcast(command.command):
+            if command.expiration > time.time():
+                func: Func
+                for func in self.model.subscribers[command.command]:
+                    if func.call_async:
                         _ = asyncio.run_coroutine_threadsafe(
-                            self.async_call_func(func[0],command), self.hub.state_machine.loop
+                            self.async_call_func(func.function,command), self.hub.state_machine.loop
                         ).result()
                     else:
-                        self._call_func(func[0], command)
+                        self._call_func(func.function, command)
             self.model.broadcast_queue.remove(command)
 
     @staticmethod
-    def _call_func(func, command: Tuple[str, int, any]):
-        if command[2] is not None:
-            if isinstance(command[2], dict):
-                func(**command[2])
+    def _call_func(func, command: Command):
+        if command.argument is not None:
+            if isinstance(command.argument, dict):
+                func(**command.argument)
             else:
-                func(command[2])
+                func(command.argument)
         else:
             func()
 
     @staticmethod
-    async def async_call_func(func, command: Tuple[str, int, any]):
-        if command[2] is not None:
-            if isinstance(command[2], dict):
-                await func(**command[2])
+    async def async_call_func(func, command: Command):
+        if command.argument is not None:
+            if isinstance(command.argument, dict):
+                await func(**command.argument)
             else:
-                await func(command[2])
+                await func(command.argument)
         else:
             await func()
 
@@ -102,7 +115,7 @@ class Observer:
         if command not in self.model.wait_queue.keys():
             self.model.wait_queue[command] = time.time()
             return True
-        if time.time() - self.model.wait_queue[command] > COMMAND_WAIT:
+        if time.time() - self.model.wait_queue.get(command) > COMMAND_WAIT:
             self.model.wait_queue[command] = time.time()
             return True
         return False
