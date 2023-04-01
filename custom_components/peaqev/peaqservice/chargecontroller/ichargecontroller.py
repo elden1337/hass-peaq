@@ -46,9 +46,9 @@ class IChargeController:
         if self.hub.enabled:
             self._latest_charger_start = val
 
-    async def async_update_latest_charger_start(self, val):
+    async def async_update_latest_charger_start(self):
         if self.hub.enabled:
-            self._latest_charger_start = val
+            self._latest_charger_start = time.time()
 
     @property
     def is_initialized(self) -> bool:

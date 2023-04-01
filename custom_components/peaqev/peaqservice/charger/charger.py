@@ -130,7 +130,7 @@ class Charger:
             await self.async_post_start_charger()
 
     async def async_post_start_charger(self) -> None:
-        await self.hub.observer.async_broadcast("update latest charger start", time.time())
+        await self.hub.observer.async_broadcast("update latest charger start")
         if self._charger.servicecalls.options.allowupdatecurrent and not self.hub.is_free_charge:
             self.hub.state_machine.async_create_task(self.async_update_max_current())
 
