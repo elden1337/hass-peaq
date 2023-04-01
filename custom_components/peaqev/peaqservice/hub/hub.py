@@ -218,12 +218,12 @@ class HomeAssistantHub:
 
     async def async_get_money_sensor_data(self) -> dict | None:
         ret = {}
-        ret["state"] = getattr(self.chargecontroller, "state_display_model")
-        ret["nonhours"] = getattr(self.chargecontroller, "non_hours_display_model")
-        ret["cautionhours"] = getattr(self.chargecontroller, "caution_hours_display_model")
+        ret["prices_tomorrow"] = getattr(self.hours, "prices_tomorrow")
+        ret["non_hours"] = getattr(self.hours, "non_hours")
+        ret["caution_hours"] = getattr(self.hours, "dynamic_caution_hours")
+        ret["state"] = getattr(self.chargecontroller, "state_display_model") #todo: fix this
         ret["currency"] = getattr(self.nordpool, "currency")
         ret["offsets"] = getattr(self.hours, "offsets", {})
-        ret["charge_permittance"] = getattr(self.chargecontroller, "current_charge_permittance_display_model")
         ret["average_nordpool_data"] = getattr(self.nordpool, "average_data")
         ret["use_cent"] = getattr(self.nordpool.model, "use_cent")
         ret["current_peak"] = getattr(self.sensors.current_peak, "value")
