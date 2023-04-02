@@ -1,4 +1,5 @@
 import logging
+from typing import Tuple
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
@@ -48,10 +49,10 @@ class ChargeController(IChargeController):
             return ChargeControllerStates.Stop
         return ChargeControllerStates.Start
 
-    async def async_get_status_connected(self, charger_state=None) -> ChargeControllerStates:
+    async def async_get_status_connected(self, charger_state=None) -> Tuple[ChargeControllerStates, bool]:
         try:
             if charger_state is not None and self.hub.sensors.carpowersensor.value < 1 and await self.async_is_done(charger_state):
-                ret = ChargeControllerStates.Done
+                return ChargeControllerStates.Done, False
             else:
                 if all([
                     any([
@@ -60,10 +61,9 @@ class ChargeController(IChargeController):
                     ]),
                     not await async_defer_start(self.hub.hours.non_hours)
                 ]):
-                    ret = ChargeControllerStates.Start
+                    return ChargeControllerStates.Start, False
                 else:
-                    ret = ChargeControllerStates.Stop
-            return ret
+                    return ChargeControllerStates.Stop, True
         except Exception as e:
             _LOGGER.error(f"async_get_status_connected for {ret}: {e}")
 
