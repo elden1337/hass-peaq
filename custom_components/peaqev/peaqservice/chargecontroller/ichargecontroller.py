@@ -26,6 +26,7 @@ class IChargeController:
         self._charger_states: dict = charger_states
         self._lock = asyncio.Lock()
         self.hub.observer.add("update latest charger start", self.async_update_latest_charger_start)
+        self.hub.observer.add("update charger enabled", self.async_update_latest_charger_start, _async=True)
         self.hub.observer.add("hub initialized", self._check_initialized)
 
     @property
