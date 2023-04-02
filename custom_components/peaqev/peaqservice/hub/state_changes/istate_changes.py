@@ -18,7 +18,7 @@ class IStateChanges:
         update_session = await self.async_update_sensor_internal(entity, value)
         if time.time() - self.latest_chargecontroller_update > 3:
             self.latest_chargecontroller_update = time.time()
-            await self.hub.chargecontroller.async_set_status()
+            await self.hub.chargecontroller.async_set_status(self.hub.chargertype.type)
         if self.hub.options.price.price_aware:
             if entity != self.hub.nordpool.nordpool_entity and (not self.hub.hours.is_initialized or time.time() - self.latest_nordpool_update > 60):
                 """tweak to provoke nordpool to update more often"""

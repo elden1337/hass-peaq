@@ -3,6 +3,7 @@ import logging
 import time
 from abc import abstractmethod
 from datetime import datetime
+from typing import Tuple
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
@@ -59,59 +60,60 @@ class IChargeController:
             return False
         return self._do_initialize()
 
-    async def async_set_status(self) -> None:
-        try:
-            ret = ChargeControllerStates.Error
-            if self.is_initialized:
-                match self.hub.chargertype.type:
-                    case ChargerType.Outlet:
-                        ret = await self.async_get_status_outlet()
-                    case ChargerType.NoCharger:
-                        ret = await self.async_get_status_no_charger()
-                    case _:
-                        ret = await self.async_get_status()
-                #async with self._lock:
-                if ret != self.status_type:
-                    self._status_type = ret
-                    await self.hub.observer.async_broadcast("chargecontroller status changed", ret)
-        except Exception as e:
-            _LOGGER.error(f"Error in async_set_status: {e}")
+    async def async_set_status(self, chargertype_type: ChargerType) -> None:
+        async with self._lock:
+            update_timer: bool = False
+            try:
+                if self.is_initialized:
+                    ret: ChargeControllerStates
+                    match chargertype_type:
+                        case ChargerType.Outlet:
+                            ret = await self.async_get_status_outlet()
+                        case ChargerType.NoCharger:
+                            ret = await self.async_get_status_no_charger()
+                        case _:
+                            ret, update_timer = await self.async_get_status()
+                    if update_timer:
+                        await self.async_update_latest_charger_start()
+                    await self.async_set_status_type(ret)
+            except Exception as e:
+                _LOGGER.debug(f"Error in async_set_status: {e}")
 
-    async def async_get_status(self) -> ChargeControllerStates:
+    async def async_set_status_type(self, status_type: ChargeControllerStates) -> None:
+        if status_type != self.status_type:
+            self._status_type = status_type
+            await self.hub.observer.async_broadcast("chargecontroller status changed", status_type)
+
+    async def async_get_status(self) -> Tuple[ChargeControllerStates, bool]:
+        _state = await self.hub.async_request_sensor_data("chargerobject_value")
         try:
-            _state = await self.hub.async_request_sensor_data("chargerobject_value")
-            ret = ChargeControllerStates.Error
-            update_timer = True
             if not self.hub.enabled:
-                ret = ChargeControllerStates.Disabled
+                return ChargeControllerStates.Disabled, True
             elif _state in self._charger_states.get(ChargeControllerStates.Done):
                 await self.hub.observer.async_broadcast("update charger done", True)
-                ret = ChargeControllerStates.Done
-                update_timer = False
+                return ChargeControllerStates.Done, False
+
             elif _state in self._charger_states.get(ChargeControllerStates.Idle):
-                ret = ChargeControllerStates.Idle
                 if self.hub.charger_done:
                     await self.hub.observer.async_broadcast("update charger done", False)
+                return ChargeControllerStates.Idle, True
             elif self.hub.sensors.power.killswitch.is_dead:  # todo: composition
-                ret = ChargeControllerStates.Error
+                return ChargeControllerStates.Error, True
             elif _state not in self._charger_states.get(ChargeControllerStates.Idle) and self.hub.charger_done:
-                ret = ChargeControllerStates.Done
-                update_timer = False
+                return ChargeControllerStates.Done, False
             elif datetime.now().hour in self.hub.non_hours and not self.hub.timer.is_override:  # todo: composition
-                ret = ChargeControllerStates.Stop
+                return ChargeControllerStates.Stop, True
             elif _state in self._charger_states.get(ChargeControllerStates.Connected):
                 ret = await self.async_get_status_connected(_state)
-                update_timer = (ret == ChargeControllerStates.Stop)
+                return ret, (ret == ChargeControllerStates.Stop)
             elif _state in self._charger_states.get(ChargeControllerStates.Charging):
-                ret = await self.async_get_status_charging()
-            if update_timer:
-                await self.async_update_latest_charger_start()
-            if ret == ChargeControllerStates.Error:
-                _LOGGER.error(
-                    f"Chargecontroller returned faulty state. Charger reported {_state} as state.")
-            return ret
+                return await self.async_get_status_charging(), True
         except Exception as e:
-            _LOGGER.error(f"Error in async_get_status: {e}")
+            _LOGGER.debug(f"Error in async_get_status: {e}")
+
+        # if ret == ChargeControllerStates.Error:
+        #     _LOGGER.error(f"Chargecontroller returned faulty state. Charger reported {_state} as state.")
+        # return ret
 
     async def async_get_status_outlet(self) -> ChargeControllerStates:
         ret = ChargeControllerStates.Error
@@ -144,7 +146,8 @@ class IChargeController:
 
     async def async_is_done(self, charger_state) -> bool:
         ret = False
-        if any([charger_state in self._charger_states.get(x) for x in [ChargeControllerStates.Error, ChargeControllerStates.Disabled]]):
+        if any([charger_state in self._charger_states.get(x) for x in
+                [ChargeControllerStates.Error, ChargeControllerStates.Disabled]]):
             return ret
         if len(self._charger_states.get(ChargeControllerStates.Done)) > 0:
             if charger_state in self._charger_states.get(ChargeControllerStates.Done):

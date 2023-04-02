@@ -3,10 +3,11 @@ import logging
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import async_defer_start
-from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
 from custom_components.peaqev.peaqservice.chargecontroller.const import (
     INITIALIZING, WAITING_FOR_POWER
 )
+from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -48,18 +49,21 @@ class ChargeController(IChargeController):
         return ChargeControllerStates.Start
 
     async def async_get_status_connected(self, charger_state=None) -> ChargeControllerStates:
-        if charger_state is not None and self.hub.sensors.carpowersensor.value < 1 and await self.async_is_done(charger_state):
-            ret = ChargeControllerStates.Done
-        else:
-            if all([
-                any([
-                    (self.below_startthreshold and self.hub.sensors.totalhourlyenergy.value != 0),
-                    self.hub.is_free_charge
-                ]),
-                not await async_defer_start(self.hub.hours.non_hours)
-            ]):
-                ret = ChargeControllerStates.Start
+        try:
+            if charger_state is not None and self.hub.sensors.carpowersensor.value < 1 and await self.async_is_done(charger_state):
+                ret = ChargeControllerStates.Done
             else:
-                ret = ChargeControllerStates.Stop
-        return ret
+                if all([
+                    any([
+                        (self.below_startthreshold and self.hub.sensors.totalhourlyenergy.value != 0),
+                        self.hub.is_free_charge
+                    ]),
+                    not await async_defer_start(self.hub.hours.non_hours)
+                ]):
+                    ret = ChargeControllerStates.Start
+                else:
+                    ret = ChargeControllerStates.Stop
+            return ret
+        except Exception as e:
+            _LOGGER.error(f"async_get_status_connected for {ret}: {e}")
 

@@ -209,8 +209,8 @@ class HomeAssistantHub:
 
     async def async_request_sensor_data(self, *args) -> dict | any:
         lookup = {
-            "charger_done":            getattr(self.sensors.charger_done, "value", None),
-            "chargerobject_value":     getattr(self.sensors.chargerobject, "value", "unknown"),
+            "charger_done":            getattr(self.sensors.charger_done, "value"),
+            "chargerobject_value":     getattr(self.sensors.chargerobject, "value"),
             "hour_state":              getattr(self.hours, "state", "unknown"),
             "prices":                  getattr(self.hours, "prices", []),
             "prices_tomorrow":         getattr(self.hours, "prices_tomorrow", []),
