@@ -53,11 +53,11 @@ class Charger:
         )
 
     async def async_set_chargecontroller_status(self, val):
+        _LOGGER.debug("want to set chargecontroller status: %s", val)
         if isinstance(val, ChargeControllerStates):
-            async with self._lock:
-                if val != self.params.chargecontroller_state:
-                    self.params.chargecontroller_state = val
-                    await self.async_charge()
+            if val != self.params.chargecontroller_state:
+                self.params.chargecontroller_state = val
+                await self.async_charge()
 
     async def async_charge(self) -> None:
         """Main function to turn charging on or off"""

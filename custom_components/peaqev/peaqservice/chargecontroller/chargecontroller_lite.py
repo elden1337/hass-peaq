@@ -3,14 +3,15 @@ import logging
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import async_defer_start
-from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
 from custom_components.peaqev.peaqservice.chargecontroller.const import INITIALIZING
+from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
+
 _LOGGER = logging.getLogger(__name__)
 
 
 class ChargeControllerLite(IChargeController):
-    def __init__(self, hub, charger_states):
-        super().__init__(hub, charger_states)
+    def __init__(self, hub, charger_states, charger_type):
+        super().__init__(hub, charger_states, charger_type)
 
     @property
     def status_string(self) -> str:

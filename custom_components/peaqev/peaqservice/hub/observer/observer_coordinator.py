@@ -63,15 +63,24 @@ class Observer:
                         ).result()
                     else:
                         self._call_func(func.function, command)
-            self.model.broadcast_queue.remove(command)
+                self.model.broadcast_queue.remove(command)
+            else:
+                _LOGGER.debug(f"broadcast timed out: {command}")
+                self.model.broadcast_queue.remove(command)
 
     @staticmethod
     def _call_func(func, command: Command):
         if command.argument is not None:
             if isinstance(command.argument, dict):
-                func(**command.argument)
+                try:
+                    func(**command.argument)
+                except TypeError:
+                    func()
             else:
-                func(command.argument)
+                try:
+                    func(command.argument)
+                except TypeError:
+                    func()
         else:
             func()
 
@@ -79,9 +88,15 @@ class Observer:
     async def async_call_func(func, command: Command):
         if command.argument is not None:
             if isinstance(command.argument, dict):
-                await func(**command.argument)
+                try:
+                    await func(**command.argument)
+                except TypeError:
+                    await func()
             else:
-                await func(command.argument)
+                try:
+                    await func(command.argument)
+                except TypeError:
+                    await func()
         else:
             await func()
 

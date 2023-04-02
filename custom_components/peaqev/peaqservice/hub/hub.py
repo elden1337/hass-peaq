@@ -77,7 +77,7 @@ class HomeAssistantHub:
         self.chargertype = await ChargerTypeFactory.async_create(self.state_machine, self.options)  # charger?
         self.charger = Charger(hub=self, chargertype=self.chargertype)  # top level
         self.sensors: IHubSensors = await HubSensorsFactory.async_create(self.options)  # top level
-        self.timer: Timer = Timer()
+        self.timer: Timer = Timer() #hours
         self.hours: Hours = await HourselectionFactory.async_create(self)  # top level
         self.threshold: ThresholdBase = await ThresholdFactory.async_create(self)  # top level
         self.prediction = Prediction(self)  # threshold
@@ -88,7 +88,8 @@ class HomeAssistantHub:
         self.servicecalls = ServiceCalls(self)  # top level
         self.states = await StateChangesFactory.async_create(self)  # top level
         self.chargecontroller: IChargeController = await ChargeControllerFactory.async_create(self,
-                                                                                              charger_states=self.chargertype.chargerstates)  # charger
+                                                                                              charger_states=self.chargertype.chargerstates,
+                                                                                              charger_type=self.chargertype.type)  # charger
         self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)  # hours
         self.power_canary = PowerCanary(hub=self)  # power
         self.gainloss = GainLoss(self)  # power

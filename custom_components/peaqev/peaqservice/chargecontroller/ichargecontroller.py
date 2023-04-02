@@ -16,7 +16,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class IChargeController:
-    def __init__(self, hub, charger_states):
+    def __init__(self, hub, charger_states, charger_type):
         self.hub = hub
         self.name: str = f"{self.hub.hubname} {CHARGERCONTROLLER}"
         self._status_type: ChargeControllerStates = ChargeControllerStates.Idle
@@ -24,10 +24,12 @@ class IChargeController:
         self._latest_charger_start: float = time.time()
         self._latest_debuglog = 0
         self._charger_states: dict = charger_states
+        self._charger_type: ChargerType = charger_type
         self._lock = asyncio.Lock()
         self.hub.observer.add("update latest charger start", self.async_update_latest_charger_start)
         self.hub.observer.add("update charger enabled", self.async_update_latest_charger_start, _async=True)
         self.hub.observer.add("hub initialized", self._check_initialized)
+        self.hub.observer.add("timer activated", self.async_set_status, _async=True)
 
     @property
     def status_type(self) -> ChargeControllerStates:
@@ -61,29 +63,29 @@ class IChargeController:
             return False
         return self._do_initialize()
 
-    async def async_set_status(self, chargertype_type: ChargerType) -> None:
-        async with self._lock:
-            try:
-                if self.is_initialized:
-                    ret: ChargeControllerStates
-                    update_timer: bool = False
-                    match chargertype_type:
-                        case ChargerType.Outlet:
-                            ret, update_timer = await self.async_get_status_outlet()
-                        case ChargerType.NoCharger:
-                            ret, update_timer = await self.async_get_status_no_charger()
-                        case _:
-                            ret, update_timer = await self.async_get_status()
-                    if update_timer is True:
-                        await self.async_update_latest_charger_start()
-                    await self.async_set_status_type(ret)
-            except Exception as e:
-                _LOGGER.debug(f"Error in async_set_status: {e}")
+    async def async_set_status(self) -> None:
+        try:
+            if self.is_initialized:
+                ret: ChargeControllerStates
+                update_timer: bool = False
+                match self._charger_type:
+                    case ChargerType.Outlet:
+                        ret, update_timer = await self.async_get_status_outlet()
+                    case ChargerType.NoCharger:
+                        ret, update_timer = await self.async_get_status_no_charger()
+                    case _:
+                        ret, update_timer = await self.async_get_status()
+                if update_timer is True:
+                    await self.async_update_latest_charger_start()
+                await self.async_set_status_type(ret)
+        except Exception as e:
+            _LOGGER.debug(f"Error in async_set_status: {e}")
 
     async def async_set_status_type(self, status_type: ChargeControllerStates) -> None:
-        if status_type != self.status_type:
-            self._status_type = status_type
-            await self.hub.observer.async_broadcast("chargecontroller status changed", status_type)
+        if isinstance(status_type, ChargeControllerStates):
+            if status_type != self.status_type:
+                self._status_type = status_type
+                await self.hub.observer.async_broadcast("chargecontroller status changed", self._status_type)
 
     async def async_get_status(self) -> Tuple[ChargeControllerStates, bool]:
         _state = await self.hub.async_request_sensor_data("chargerobject_value")
@@ -93,7 +95,6 @@ class IChargeController:
             elif _state in self._charger_states.get(ChargeControllerStates.Done):
                 await self.hub.observer.async_broadcast("update charger done", True)
                 return ChargeControllerStates.Done, False
-
             elif _state in self._charger_states.get(ChargeControllerStates.Idle):
                 if self.hub.charger_done:
                     await self.hub.observer.async_broadcast("update charger done", False)

@@ -13,8 +13,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class ChargeController(IChargeController):
-    def __init__(self, hub, charger_states):
-        super().__init__(hub, charger_states)
+    def __init__(self, hub, charger_states, charger_type):
+        super().__init__(hub, charger_states, charger_type)
 
     @property
     def status_string(self) -> str:        
@@ -65,5 +65,5 @@ class ChargeController(IChargeController):
                 else:
                     return ChargeControllerStates.Stop, True
         except Exception as e:
-            _LOGGER.error(f"async_get_status_connected for {ret}: {e}")
+            _LOGGER.error(f"async_get_status_connected for: {e}")
 

@@ -41,16 +41,16 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
 
     async def async_servicehandler_enable(call):  # pylint:disable=unused-argument
         _LOGGER.debug("Calling {} service".format(ServiceCalls.ENABLE.value))
-        await hub.servicecalls.call_enable_peaq()
+        await hub.servicecalls.async_call_enable_peaq()
 
     async def async_servicehandler_disable(call):  # pylint:disable=unused-argument
         _LOGGER.debug("Calling {} service".format(ServiceCalls.DISABLE.value))
-        await hub.servicecalls.call_disable_peaq()
+        await hub.servicecalls.async_call_disable_peaq()
 
     async def async_servicehandler_override_nonhours(call):  # pylint:disable=unused-argument
         hours = call.data.get("hours")
         _LOGGER.debug("Calling {} service".format(ServiceCalls.OVERRIDE_NONHOURS.value))
-        await hub.servicecalls.call_override_nonhours(1 if hours is None else hours)
+        await hub.servicecalls.async_call_override_nonhours(1 if hours is None else hours)
 
     async def async_servicehandler_scheduler_set(call):  # pylint:disable=unused-argument
         charge_amount = call.data.get("charge_amount")
@@ -58,7 +58,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
         schedule_starttime = call.data.get("schedule_starttime")
         override_settings = call.data.get("override_settings")
         _LOGGER.debug("Calling {} service".format(ServiceCalls.SCHEDULER_SET.value))
-        await hub.servicecalls.call_schedule_needed_charge(
+        await hub.servicecalls.async_call_schedule_needed_charge(
             charge_amount=charge_amount,
             departure_time=departure_time,
             schedule_starttime=schedule_starttime,
@@ -67,7 +67,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
 
     async def async_servicehandler_scheduler_cancel(call):
         _LOGGER.debug("Calling {} service".format(ServiceCalls.SCHEDULER_CANCEL.value))
-        await hub.servicecalls.call_scheduler_cancel()
+        await hub.servicecalls.async_call_scheduler_cancel()
 
     for platform in PLATFORMS:
         hass.async_create_task(hass.config_entries.async_forward_entry_setup(conf, platform))
