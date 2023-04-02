@@ -59,3 +59,5 @@ class ChargerHelpers:
 
     def _too_late_to_increase(self) -> bool:
         return datetime.now().minute >= 55 and self.c.hub.threshold.allowedcurrent > self.c.hub.sensors.chargerobject_switch.current  # todo: composition
+
+

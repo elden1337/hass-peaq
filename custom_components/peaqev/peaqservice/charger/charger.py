@@ -6,7 +6,7 @@ from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.services.session.session import Session
 
-from custom_components.peaqev.peaqservice.charger.charger_call_service import async_do_service_call, async_do_update
+# from custom_components.peaqev.peaqservice.charger.charger_call_service import async_do_service_call, async_do_update
 from custom_components.peaqev.peaqservice.charger.charger_states import ChargerStates
 from custom_components.peaqev.peaqservice.charger.chargerhelpers import ChargerHelpers
 from custom_components.peaqev.peaqservice.charger.chargerparams import ChargerParams
@@ -20,7 +20,6 @@ from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
 CALL_WAIT_TIMER = 60
-
 
 class Charger:
     def __init__(self, hub, chargertype):
@@ -52,13 +51,6 @@ class Charger:
             ]
         )
 
-    async def async_set_chargecontroller_status(self, val):
-        _LOGGER.debug("want to set chargecontroller status: %s", val)
-        if isinstance(val, ChargeControllerStates):
-            if val != self.params.chargecontroller_state:
-                self.params.chargecontroller_state = val
-                await self.async_charge()
-
     async def async_charge(self) -> None:
         """Main function to turn charging on or off"""
         if self._charger.type is ChargerType.NoCharger:
@@ -74,6 +66,8 @@ class Charger:
                     await self.async_stop_case()
                 case ChargeControllerStates.Done | ChargeControllerStates.Idle:
                     await self.async_done_idle_case()
+                case ChargeControllerStates.Disabled:
+                    pass
                 case _:
                     _LOGGER.debug(f"Could not match any chargecontroller-state. state: {self.params.chargecontroller_state}")
         else:
@@ -83,6 +77,13 @@ class Charger:
                 elif self.hub.enabled:
                     _LOGGER.debug("Detected charger running outside of peaqev-session, overtaking command and pausing.")
                 await self.async_pause_charger()
+
+    async def async_set_chargecontroller_status(self, val=None):
+        _LOGGER.debug("want to set chargecontroller status: %s", val)
+        if isinstance(val, ChargeControllerStates):
+            if val != self.params.chargecontroller_state:
+                self.params.chargecontroller_state = val
+                await self.async_charge()
 
     async def async_done_idle_case(self) -> None:
         _state = self.params.chargecontroller_state
@@ -117,11 +118,8 @@ class Charger:
         self.session_active = True
         await self.async_post_start_charger()
 
-    async def async_call_ok(self) -> bool:
-        return time.time() - self.params.latest_charger_call > CALL_WAIT_TIMER
-
     async def async_start_charger(self) -> None:
-        if await self.async_call_ok():
+        if await self.async_call_ok(self.params.latest_charger_call):
             await self.async_internal_state(ChargerStates.Start)
             if not self.session_active:
                 await self.async_call_charger(CallTypes.On)
@@ -136,7 +134,7 @@ class Charger:
             self.hub.state_machine.async_create_task(self.async_update_max_current())
 
     async def async_terminate_charger(self) -> None:
-        if await self.async_call_ok():
+        if await self.async_call_ok(self.params.latest_charger_call):
             await self.hub.state_machine.async_add_executor_job(self.session.core.terminate)
             await self.async_internal_state(ChargerStates.Stop)
             self.session_active = False
@@ -144,7 +142,7 @@ class Charger:
             await self.hub.observer.async_broadcast("update charger done", True)
 
     async def async_pause_charger(self) -> None:
-        if await self.async_call_ok():
+        if await self.async_call_ok(self.params.latest_charger_call):
             if self.hub.charger_done or self.params.chargecontroller_state is ChargeControllerStates.Idle:
                 await self.async_terminate_charger()
             else:
@@ -152,14 +150,15 @@ class Charger:
                 await self.async_call_charger(CallTypes.Pause)
 
     async def async_call_charger(self, command: CallTypes) -> None:
-        calls = self._charger.servicecalls.get_call(command)
-        await async_do_update(
-            calls.get(DOMAIN),
-            calls.get(command),
-            calls.get("params"),
-            self.hub.state_machine,
-            self._charger.servicecalls.options.switch_controls_charger)
-        self.params.latest_charger_call = time.time()
+        try:
+            calls = self._charger.servicecalls.get_call(command)
+            await self.async_do_update(
+                calls.get(DOMAIN),
+                calls.get(command),
+                calls.get("params"))
+            self.params.latest_charger_call = time.time()
+        except Exception as e:
+            _LOGGER.error(f"Error calling charger: {e}")
 
     async def async_update_max_current(self) -> None:
         await self.hub.sensors.chargerobject_switch.async_updatecurrent()
@@ -174,16 +173,15 @@ class Charger:
                     serviceparams = await self.helpers.setchargerparams(calls)
                     if not self.params.disable_current_updates and await self.hub.power_canary.async_allow_adjustment(
                             new_amps=serviceparams[calls[PARAMS][CURRENT]]):
-                        await async_do_service_call(calls[DOMAIN], calls[CallTypes.UpdateCurrent], serviceparams, self.hub.state_machine)
+                        await self.async_do_service_call(calls[DOMAIN], calls[CallTypes.UpdateCurrent], serviceparams)
                     await self.hub.state_machine.async_add_executor_job(self.helpers.wait_loop_cycle)
 
             if self._charger.servicecalls.options.update_current_on_termination is True:
                 final_service_params = await self.helpers.setchargerparams(calls, ampoverride=6)
-                await async_do_service_call(
+                await self.async_do_service_call(
                     calls[DOMAIN],
                     calls[CallTypes.UpdateCurrent],
-                    final_service_params,
-                    self.hub.state_machine
+                    final_service_params
                 )
 
     async def async_internal_state(self, state: ChargerStates) -> None:
@@ -209,4 +207,34 @@ class Charger:
             self.params.lastest_call_off = time.time()
             log_once(f"Fail when trying to stop connected charger. Retrying stop-attempt...")
 
+    async def async_do_update(self, calls_domain, calls_command, calls_params) -> bool:
+        if self._charger.servicecalls.options.switch_controls_charger:
+            return await self.async_do_outlet_update(calls_command)
+        else:
+            return await self.async_do_service_call(calls_domain, calls_command, calls_params)
 
+    async def async_do_outlet_update(self, call) -> bool:
+        _LOGGER.debug("Calling charger-outlet")
+        try:
+            await self.hub.state_machine.states.async_set(self._charger.entities.powerswitch, call)  # todo: composition
+        except Exception as e:
+            _LOGGER.error(f"Error in async_do_outlet_update: {e}")
+            return False
+        return True
+
+    async def async_do_service_call(self, domain, command, params) -> bool:
+        _LOGGER.debug(f"Calling charger {command} for domain '{domain}' with parameters: {params}")
+        try:
+            await self.hub.state_machine.services.async_call(
+                domain,
+                command,
+                params
+            )
+        except Exception as e:
+            _LOGGER.error(f"Error in async_do_service_call: {e}")
+            return False
+        return True
+
+    @staticmethod
+    async def async_call_ok(latest_charger_call) -> bool:
+        return time.time() - latest_charger_call > CALL_WAIT_TIMER
