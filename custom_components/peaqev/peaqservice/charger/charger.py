@@ -4,18 +4,14 @@ import time
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
+from peaqevcore.services.chargertype.const import PARAMS, DOMAIN
 from peaqevcore.services.session.session import Session
 
-# from custom_components.peaqev.peaqservice.charger.charger_call_service import async_do_service_call, async_do_update
 from custom_components.peaqev.peaqservice.charger.charger_states import ChargerStates
-from custom_components.peaqev.peaqservice.charger.chargerhelpers import ChargerHelpers
+from custom_components.peaqev.peaqservice.charger.chargerhelpers import ChargerHelpers, async_set_chargerparams
 from custom_components.peaqev.peaqservice.charger.chargerparams import ChargerParams
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
-from custom_components.peaqev.peaqservice.util.constants import (
-    DOMAIN,
-    PARAMS,
-    CURRENT
-)
+from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
@@ -23,8 +19,8 @@ CALL_WAIT_TIMER = 60
 
 class Charger:
     def __init__(self, hub, chargertype):
-        self.hub = hub
-        self._charger = chargertype
+        self.hub = hub #todo: should not have direct access. route through chargecontroller
+        self._charger = chargertype #todo: should not have direct access. route through chargecontroller
         self.params = ChargerParams()
         self.session = Session(self)
         self._lock = asyncio.Lock()
@@ -155,7 +151,7 @@ class Charger:
             await self.async_do_update(
                 calls.get(DOMAIN),
                 calls.get(command),
-                calls.get("params"))
+                calls.get(PARAMS))
             self.params.latest_charger_call = time.time()
         except Exception as e:
             _LOGGER.error(f"Error calling charger: {e}")
@@ -170,14 +166,14 @@ class Charger:
                 self.params.running
             ]):
                 if await self.hub.state_machine.async_add_executor_job(self.helpers.wait_update_current):
-                    serviceparams = await self.helpers.setchargerparams(calls)
+                    serviceparams = await async_set_chargerparams(calls, self.hub.threshold.allowedcurrent)
                     if not self.params.disable_current_updates and await self.hub.power.power_canary.async_allow_adjustment(
                             new_amps=serviceparams[calls[PARAMS][CURRENT]]):
                         await self.async_do_service_call(calls[DOMAIN], calls[CallTypes.UpdateCurrent], serviceparams)
                     await self.hub.state_machine.async_add_executor_job(self.helpers.wait_loop_cycle)
 
             if self._charger.servicecalls.options.update_current_on_termination is True:
-                final_service_params = await self.helpers.setchargerparams(calls, ampoverride=6)
+                final_service_params = await async_set_chargerparams(calls, 6)
                 await self.async_do_service_call(
                     calls[DOMAIN],
                     calls[CallTypes.UpdateCurrent],
