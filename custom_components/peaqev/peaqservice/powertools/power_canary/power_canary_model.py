@@ -6,6 +6,8 @@ from peaqevcore.models.const import CURRENTS_THREEPHASE_1_32, CURRENTS_THREEPHAS
     CURRENTS_ONEPHASE_1_32
 from peaqevcore.models.fuses import Fuses
 
+from custom_components.peaqev.peaqservice.powertools.power_canary.const import FUSES_DICT
+
 
 @dataclass
 class PowerCanaryModel:
@@ -18,7 +20,7 @@ class PowerCanaryModel:
     fuse_max: int = field(init=False)
 
     def __post_init__(self):
-        self.fuse_max = self.FUSES_DICT[self.fuse] if self.fuse is not None else 0
+        self.fuse_max = FUSES_DICT.get(self.fuse) if self.fuse is not None else 0
         self.threephase_amps = self._set_allowed_amps(CURRENTS_THREEPHASE_1_32, CURRENTS_THREEPHASE_1_16)
         self.onephase_amps = self._set_allowed_amps(CURRENTS_ONEPHASE_1_32, CURRENTS_ONEPHASE_1_16)
 
@@ -35,16 +37,7 @@ class PowerCanaryModel:
         else:
             return all(
                 [
-                    self.fuse_max == self.FUSES_DICT[self.fuse],
+                    self.fuse_max == FUSES_DICT.get(self.fuse),
                     self.allow_amp_adjustment is not None
                  ])
 
-    FUSES_DICT = {
-        Fuses.FUSE_3_16: 11000,
-        Fuses.FUSE_3_20: 14000,
-        Fuses.FUSE_3_25: 17000,
-        Fuses.FUSE_3_35: 24000,
-        Fuses.FUSE_3_50: 35000,
-        Fuses.FUSE_3_63: 44000,
-        Fuses.DEFAULT:   0
-    }

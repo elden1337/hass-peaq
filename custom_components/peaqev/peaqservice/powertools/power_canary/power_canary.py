@@ -5,25 +5,14 @@ import logging
 from peaqevcore.models.fuses import Fuses
 from peaqevcore.models.phases import Phases
 
+from custom_components.peaqev.peaqservice.powertools.power_canary.const import (
+    DISABLED, CRITICAL, WARNING, OK,
+    WARNING_THRESHOLD, CUTOFF_THRESHOLD, FUSES_MAX_SINGLE_FUSE)
 from custom_components.peaqev.peaqservice.powertools.power_canary.power_canary_model import PowerCanaryModel
 from custom_components.peaqev.peaqservice.powertools.power_canary.smooth_average import SmoothAverage
 
 _LOGGER = logging.getLogger(__name__)
 
-
-FUSES_MAX_SINGLE_FUSE = {
-    Fuses.FUSE_3_16: 16,
-    Fuses.FUSE_3_20: 20,
-    Fuses.FUSE_3_25: 25,
-    Fuses.FUSE_3_35: 35,
-    Fuses.FUSE_3_50: 50,
-    Fuses.FUSE_3_63: 63
-}
-
-FUSES_LIST = [f.value for f in Fuses]
-
-CUTOFF_THRESHOLD = 0.9
-WARNING_THRESHOLD = 0.75
 
 class PowerCanary:
     def __init__(self, hub):
@@ -74,17 +63,17 @@ class PowerCanary:
     @property
     def state_string(self) -> str:
         if not self.enabled:
-            return "Disabled"
+            return DISABLED
         if not self.alive:
-            return f"Critical!"
+            return CRITICAL
         if self.current_percentage >= self.model.warning_threshold:
-            return f"Warning!"
-        return f"Ok"
+            return WARNING
+        return OK
 
     @property
     def onephase_amps(self) -> dict:
         ret = self._get_currently_allowed_amps(self.model.onephase_amps)
-        return {k: v for (k, v) in ret.items() if v < FUSES_MAX_SINGLE_FUSE[self.model.fuse]}
+        return {k: v for (k, v) in ret.items() if v < FUSES_MAX_SINGLE_FUSE.get(self.model.fuse)}
 
     @property
     def threephase_amps(self) -> dict:
@@ -114,7 +103,6 @@ class PowerCanary:
         if not self.model.allow_amp_adjustment:
             return False
         ret = new_amps <= self.max_current_amp
-
         if ret is False and self.max_current_amp > -1:
             _LOGGER.warning(f"Power Canary cannot allow amp-increase due to the current power-draw. max-amp is:{self.max_current_amp} ")
         return ret
