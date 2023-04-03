@@ -21,7 +21,7 @@ from custom_components.peaqev.configflow.config_flow_schemas import (
     CHARGER_DETAILS_SCHEMA
 )
 from custom_components.peaqev.configflow.config_flow_validation import ConfigFlowValidation
-from custom_components.peaqev.peaqservice.power_canary.power_canary import FUSES_LIST
+from custom_components.peaqev.peaqservice.powertools.power_canary.power_canary import FUSES_LIST
 from custom_components.peaqev.peaqservice.util.constants import CautionHourType, TYPELITE, CAUTIONHOURTYPE_NAMES
 from .const import DOMAIN  # pylint:disable=unused-import
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType

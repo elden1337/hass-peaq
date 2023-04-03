@@ -171,7 +171,7 @@ class Charger:
             ]):
                 if await self.hub.state_machine.async_add_executor_job(self.helpers.wait_update_current):
                     serviceparams = await self.helpers.setchargerparams(calls)
-                    if not self.params.disable_current_updates and await self.hub.power_canary.async_allow_adjustment(
+                    if not self.params.disable_current_updates and await self.hub.power.power_canary.async_allow_adjustment(
                             new_amps=serviceparams[calls[PARAMS][CURRENT]]):
                         await self.async_do_service_call(calls[DOMAIN], calls[CallTypes.UpdateCurrent], serviceparams)
                     await self.hub.state_machine.async_add_executor_job(self.helpers.wait_loop_cycle)

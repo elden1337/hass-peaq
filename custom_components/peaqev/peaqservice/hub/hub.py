@@ -22,11 +22,11 @@ import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
 from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
-from custom_components.peaqev.peaqservice.gainloss.gain_loss import GainLoss
 from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import ChargeControllerFactory
 from custom_components.peaqev.peaqservice.hub.factories.chargertype_factory import ChargerTypeFactory
 from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import HourselectionFactory
 from custom_components.peaqev.peaqservice.hub.factories.hubsensors_factory import HubSensorsFactory
+from custom_components.peaqev.peaqservice.hub.factories.powertools_factory import PowerToolsFactory
 from custom_components.peaqev.peaqservice.hub.factories.state_changes_factory import StateChangesFactory
 from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import ThresholdFactory
 from custom_components.peaqev.peaqservice.hub.hub_initializer import HubInitializer
@@ -34,7 +34,6 @@ from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import NordPoolU
 from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import Observer
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import IStateChanges
-from custom_components.peaqev.peaqservice.power_canary.power_canary import PowerCanary
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 
 _LOGGER = logging.getLogger(__name__)
@@ -54,8 +53,6 @@ class HomeAssistantHub:
     states: IStateChanges
     chargecontroller: IChargeController
     nordpool: NordPoolUpdater
-    power_canary: PowerCanary
-    gainloss: GainLoss
 
     def __init__(
             self,
@@ -89,8 +86,7 @@ class HomeAssistantHub:
                                                                                               charger_states=self.chargertype.chargerstates,
                                                                                               charger_type=self.chargertype.type)  # charger
         self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)  # hours
-        self.power_canary = PowerCanary(hub=self)  # power
-        self.gainloss = GainLoss(self)  # power
+        self.power = await PowerToolsFactory.async_create(self)
 
         self.chargingtracker_entities = []
         trackers = await self.async_setup_tracking()

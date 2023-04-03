@@ -5,8 +5,8 @@ import logging
 from peaqevcore.models.fuses import Fuses
 from peaqevcore.models.phases import Phases
 
-from custom_components.peaqev.peaqservice.power_canary.power_canary_model import PowerCanaryModel
-from custom_components.peaqev.peaqservice.power_canary.smooth_average import SmoothAverage
+from custom_components.peaqev.peaqservice.powertools.power_canary.power_canary_model import PowerCanaryModel
+from custom_components.peaqev.peaqservice.powertools.power_canary.smooth_average import SmoothAverage
 
 _LOGGER = logging.getLogger(__name__)
 

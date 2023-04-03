@@ -28,7 +28,7 @@ class PowerCanaryDevice(SensorEntity):
             "identifiers":  {(DOMAIN, self.hub.hub_id, POWERCANARY)},
             "name":         f"{DOMAIN} {POWERCANARY}",
             "sw_version":   1,
-            "model":        f"{self.hub.power_canary.fuse}",  #todo: composition
+            "model":        f"{self.hub.power.power_canary.fuse}",  #todo: composition
             "manufacturer": "Peaq systems",
         }
 
@@ -51,7 +51,7 @@ class PowerCanaryStatusSensor(PowerCanaryDevice):
 
     def update(self) -> None:
         if self.hub.is_initialized:
-            self._state = self.hub.power_canary.state_string  #todo: composition
+            self._state = self.hub.power.power_canary.state_string  #todo: composition
 
 
 class PowerCanaryPercentageSensor(PowerCanaryDevice):
@@ -72,10 +72,10 @@ class PowerCanaryPercentageSensor(PowerCanaryDevice):
         return PERCENTAGE
 
     async def async_update(self) -> None:
-        if int(self.hub.power_canary.current_percentage * 100) != self._state:  #todo: composition
-            self._state = int(self.hub.power_canary.current_percentage * 100)  #todo: composition
-        self._warning = round(self.hub.power_canary.model.warning_threshold * 100, 2)  #todo: composition
-        self._cutoff = round(self.hub.power_canary.model.cutoff_threshold * 100, 2)  #todo: composition
+        if int(self.hub.power.power_canary.current_percentage * 100) != self._state:  #todo: composition
+            self._state = int(self.hub.power.power_canary.current_percentage * 100)  #todo: composition
+        self._warning = round(self.hub.power.power_canary.model.warning_threshold * 100, 2)  #todo: composition
+        self._cutoff = round(self.hub.power.power_canary.model.cutoff_threshold * 100, 2)  #todo: composition
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -102,8 +102,8 @@ class PowerCanaryMaxAmpSensor(PowerCanaryDevice):
 
     async def async_update(self) -> None:
         if self.phases == 1:
-            ret = getattr(self.hub.power_canary, "onephase_amps", {})
+            ret = getattr(self.hub.power.power_canary, "onephase_amps", {})
             self._state = max(ret.values())
         if self.phases == 3:
-            ret = getattr(self.hub.power_canary, "threephase_amps", {})
+            ret = getattr(self.hub.power.power_canary, "threephase_amps", {})
             self._state = max(ret.values())

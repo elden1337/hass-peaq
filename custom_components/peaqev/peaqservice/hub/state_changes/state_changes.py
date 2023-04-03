@@ -22,7 +22,7 @@ class StateChanges(IStateChanges):
                         config_sensor_value=value
                     )
                     update_session = True
-                    self.hub.power_canary.total_power = self.hub.sensors.power.total.value
+                    self.hub.power.power_canary.total_power = self.hub.sensors.power.total.value
                 case self.hub.sensors.carpowersensor.entity:
                     if self.hub.sensors.carpowersensor.use_attribute:
                         pass
@@ -34,7 +34,7 @@ class StateChanges(IStateChanges):
                         )
                     update_session = True
                     await self.hub.sensors.chargerobject_switch.async_updatecurrent()
-                    self.hub.power_canary.total_power = self.hub.sensors.power.total.value
+                    self.hub.power.power_canary.total_power = self.hub.sensors.power.total.value
                     await self.async_handle_outlet_updates()
                 case self.hub.sensors.chargerobject.entity:
                     await self.hub.async_set_chargerobject_value(value)
@@ -123,7 +123,7 @@ class StateChangesNoCharger(IStateChanges):
                     config_sensor_value=value
                 )
                 update_session = True
-                self.hub.power_canary.total_power = self.hub.sensors.power.total.value
+                self.hub.power.power_canary.total_power = self.hub.sensors.power.total.value
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self.async_update_total_energy_and_peak(value)
             case self.hub.sensors.powersensormovingaverage.entity:

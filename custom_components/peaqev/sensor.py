@@ -101,7 +101,7 @@ async def _async_setup(hub, config, hass, async_add_entities):
         ret.append(PeaqAmpSensor(hub, config.entry_id))
         ret.append(PeaqPeakSensor(hub, config.entry_id))
 
-    if hub.power_canary.enabled:
+    if hub.power.power_canary.enabled:
         ret.append(PowerCanaryStatusSensor(hub, config.entry_id))
         ret.append(PowerCanaryPercentageSensor(hub, config.entry_id))
         ret.append(PowerCanaryMaxAmpSensor(hub, config.entry_id, 1))
