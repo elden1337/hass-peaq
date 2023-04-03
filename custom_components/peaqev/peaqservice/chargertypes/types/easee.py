@@ -7,7 +7,7 @@ from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
-from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
+
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import (
@@ -15,6 +15,7 @@ from custom_components.peaqev.peaqservice.util.constants import (
     CHARGERID,
     CURRENT,
 )
+from custom_components.peaqev.peaqservice.util.extensionmethods import log_once_per_minute
 
 _LOGGER = logging.getLogger(__name__)
 # docs: https://github.com/fondberg/easee_hass
@@ -159,10 +160,10 @@ class Easee(ChargerBase):
     def get_allowed_amps(self) -> int:
             ret = self._hass.states.get(self.entities.maxamps)
             if ret is not None:
-                log_once(f"Got max amps from Easee. Setting {ret.state}A.")
+                log_once_per_minute(f"Got max amps from Easee. Setting {ret.state}A.")
                 return int(ret.state)
             else:
-                log_once(f"Unable to get max amps. The sensor {self.entities.maxamps} returned state {ret}. Setting max amps to 16 til I get a proper state.")
+                log_once_per_minute(f"Unable to get max amps. The sensor {self.entities.maxamps} returned state {ret}. Setting max amps to 16 til I get a proper state.")
             return 16
 
     def _validate_sensor(self, sensor: str) -> bool:

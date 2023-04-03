@@ -10,7 +10,7 @@ from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from custom_components.peaqev.peaqservice.chargecontroller.const import (DONETIMEOUT, DEBUGLOG_TIMEOUT)
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
-from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
+from custom_components.peaqev.peaqservice.util.extensionmethods import log_once_per_minute
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class IChargeController:
 
     def _do_initialize(self) -> bool:
         self._is_initialized = True
-        log_once("Chargecontroller is initialized and ready to work.")
+        log_once_per_minute("Chargecontroller is initialized and ready to work.")
         return self._is_initialized
 
     def _check_initialized(self) -> bool:
