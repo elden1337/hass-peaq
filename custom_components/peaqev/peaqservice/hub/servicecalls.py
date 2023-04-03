@@ -20,8 +20,9 @@ class ServiceCalls:
 
     async def async_call_override_nonhours(self, hours: int = 1):
         """peaqev.override_nonhours"""
-        await self.hub.timer.async_update(hours)
-        await self.hub.observer.async_broadcast("timer activated")
+        if self.hub.hours.price_aware:
+            await self.hub.hours.timer.async_update(hours)
+            await self.hub.observer.async_broadcast("timer activated")
 
     async def async_call_schedule_needed_charge(
             self,
@@ -30,24 +31,26 @@ class ServiceCalls:
             schedule_starttime: str = None,
             override_settings: bool = False
     ):
-        dep_time = None
-        start_time = None
-        try:
-            dep_time = datetime.strptime(departure_time, '%Y-%m-%d %H:%M')
-        except ValueError:
-            _LOGGER.error(f"Could not parse departure time: {departure_time}")
-        if schedule_starttime is not None:
+        if self.hub.hours.price_aware:
+            dep_time = None
+            start_time = None
             try:
-                start_time = datetime.strptime(schedule_starttime, '%Y-%m-%d %H:%M')
+                dep_time = datetime.strptime(departure_time, '%Y-%m-%d %H:%M')
             except ValueError:
-                _LOGGER.error(f"Could not parse schedule start time: {schedule_starttime}")
-        else:
-            start_time = datetime.now()
-        _LOGGER.debug(f"scheduler params. charge: {charge_amount}, dep-time: {dep_time}, start_time: {start_time}")
-        await self.hub.scheduler.async_create_schedule(charge_amount, dep_time, start_time, override_settings)
-        await self.hub.scheduler.async_update()
-        await self.hub.observer.async_broadcast("scheduler created")
+                _LOGGER.error(f"Could not parse departure time: {departure_time}")
+            if schedule_starttime is not None:
+                try:
+                    start_time = datetime.strptime(schedule_starttime, '%Y-%m-%d %H:%M')
+                except ValueError:
+                    _LOGGER.error(f"Could not parse schedule start time: {schedule_starttime}")
+            else:
+                start_time = datetime.now()
+            _LOGGER.debug(f"scheduler params. charge: {charge_amount}, dep-time: {dep_time}, start_time: {start_time}")
+            await self.hub.hours.scheduler.async_create_schedule(charge_amount, dep_time, start_time, override_settings)
+            await self.hub.hours.scheduler.async_update()
+            await self.hub.observer.async_broadcast("scheduler created")
 
     async def async_call_scheduler_cancel(self):
-        await self.hub.scheduler.async_cancel()
-        await self.hub.observer.async_broadcast("scheduler cancelled")
+        if self.hub.hours.price_aware:
+            await self.hub.hours.hub.scheduler.async_cancel()
+            await self.hub.observer.async_broadcast("scheduler cancelled")

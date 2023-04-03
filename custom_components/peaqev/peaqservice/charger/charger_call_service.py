@@ -35,5 +35,6 @@ async def async_do_service_call(domain, command, params, state_machine) -> bool:
         return False
     return True
 
+
 async def async_call_ok(latest_charger_call) -> bool:
     return time.time() - latest_charger_call > CALL_WAIT_TIMER

@@ -77,11 +77,9 @@ class HomeAssistantHub:
         self.chargertype = await ChargerTypeFactory.async_create(self.state_machine, self.options)  # charger?
         self.charger = Charger(hub=self, chargertype=self.chargertype)  # top level
         self.sensors: IHubSensors = await HubSensorsFactory.async_create(self.options)  # top level
-        self.timer: Timer = Timer() #hours
         self.hours: Hours = await HourselectionFactory.async_create(self)  # top level
         self.threshold: ThresholdBase = await ThresholdFactory.async_create(self)  # top level
         self.prediction = Prediction(self)  # threshold
-        self.scheduler = SchedulerFacade(hub=self, options=self.hours.options)  # hours
         self.sensors.setup(state_machine=self.state_machine, options=self.options, domain=self.domain,
                            chargerobject=self.chargertype)
         self.sensors.init_hub_values()
@@ -104,21 +102,23 @@ class HomeAssistantHub:
 
     @property
     def non_hours(self) -> list:
-        if self.scheduler.scheduler_active:
-            return self.scheduler.non_hours
+        if self.options.price.price_aware:
+            if self.hours.scheduler.scheduler_active:
+                return self.hours.scheduler.non_hours
         return self.hours.non_hours
 
     @property
     def dynamic_caution_hours(self) -> dict:
-        if self.scheduler.scheduler_active:
-            return self.scheduler.caution_hours
+        if self.options.price.price_aware:
+            if self.hours.scheduler.scheduler_active:
+                return self.hours.scheduler.caution_hours
         return self.hours.dynamic_caution_hours
 
     @property
     def current_peak_dynamic(self):
         """Dynamically calculated peak to adhere to caution-hours"""
         if self.options.price.price_aware and len(self.dynamic_caution_hours) > 0:
-            if datetime.now().hour in self.dynamic_caution_hours.keys() and not self.timer.is_override:
+            if datetime.now().hour in self.dynamic_caution_hours.keys() and not self.hours.timer.is_override:
                 return self.sensors.current_peak.value * self.dynamic_caution_hours[datetime.now().hour]
         return self.sensors.current_peak.value
 
@@ -182,8 +182,8 @@ class HomeAssistantHub:
 
     def _set_observers(self) -> None:
         self.observer.add("prices changed", self._update_prices)
-        self.observer.add("monthly average price changed", self._update_average_monthly_price)
-        self.observer.add("weekly average price changed", self._update_average_weekly_price)
+        self.observer.add("monthly average price changed", self.async_update_average_monthly_price, _async=True)
+        self.observer.add("weekly average price changed", self.async_update_average_weekly_price, _async=True)
         self.observer.add("update charger done", self.async_update_charger_done, _async=True)
         self.observer.add("update charger enabled", self.async_update_charger_enabled, _async=True)
 
@@ -223,12 +223,12 @@ class HomeAssistantHub:
             "average_nordpool_data":   getattr(self.nordpool, "average_data"),
             "use_cent":                getattr(self.nordpool.model, "use_cent"),
             "current_peak":            getattr(self.sensors.current_peak, "value"),
-            "avg_kwh_price":           await self.state_machine.async_add_executor_job(self.hours.get_average_kwh_price),
-            "max_charge":              await self.state_machine.async_add_executor_job(self.hours.get_total_charge),
+            "avg_kwh_price":           await self.hours.async_get_average_kwh_price(),
+            "max_charge":              await self.hours.async_get_total_charge(),
             "average_weekly":          getattr(self.nordpool, "average_weekly"),
             "average_monthly":         getattr(self.nordpool, "average_month"),
             "is_price_aware":          getattr(self.options.price, "price_aware"),
-            "is_scheduler_active":     getattr(self.scheduler, "scheduler_active"),
+            "is_scheduler_active":     getattr(self.hours.scheduler, "scheduler_active"),
             "chargecontroller_status": getattr(self.chargecontroller, "status_string"),
         }
         ret = {}
@@ -268,11 +268,11 @@ class HomeAssistantHub:
     def _update_prices(self, prices: list) -> None:
         self.hours.update_prices(prices[0], prices[1])
 
-    def _update_average_monthly_price(self, val) -> None:
+    async def async_update_average_monthly_price(self, val) -> None:
         if self.options.price.price_aware and isinstance(val, float):
-            self.hours.update_top_price(val)
+            await self.hours.async_update_top_price(val)
 
-    def _update_average_weekly_price(self, val) -> None:
+    async def async_update_average_weekly_price(self, val) -> None:
         if self.options.price.price_aware and isinstance(val, float):
             setattr(self.hours, "adjusted_average", val)
 

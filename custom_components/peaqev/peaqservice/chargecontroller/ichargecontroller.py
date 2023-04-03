@@ -103,7 +103,7 @@ class IChargeController:
                 return ChargeControllerStates.Error, True
             elif _state not in self._charger_states.get(ChargeControllerStates.Idle) and self.hub.charger_done:
                 return ChargeControllerStates.Done, False
-            elif datetime.now().hour in self.hub.non_hours and not self.hub.timer.is_override:  # todo: composition
+            elif datetime.now().hour in self.hub.non_hours and not self.hub.hours.timer.is_override:  # todo: composition
                 return ChargeControllerStates.Stop, True
             elif _state in self._charger_states.get(ChargeControllerStates.Connected):
                 return await self.async_get_status_connected(_state)
@@ -117,7 +117,7 @@ class IChargeController:
             return ChargeControllerStates.Disabled, True
         elif self.hub.charger_done:
             return ChargeControllerStates.Done, True
-        elif datetime.now().hour in self.hub.non_hours and self.hub.timer.is_override is False:  # todo: composition
+        elif datetime.now().hour in self.hub.non_hours and self.hub.hours.timer.is_override is False:  # todo: composition
             return ChargeControllerStates.Stop, True
         elif self.hub.chargertype.entities.powerswitch == "on" and self.hub.chargertype.entities.powermeter < 1:  # todo: composition
             return await self.async_get_status_connected()
@@ -127,7 +127,7 @@ class IChargeController:
     async def async_get_status_no_charger(self) -> Tuple[ChargeControllerStates, bool]:
         if not self.hub.enabled:
             return ChargeControllerStates.Disabled, True
-        elif datetime.now().hour in self.hub.non_hours and not self.hub.timer.is_override:
+        elif datetime.now().hour in self.hub.non_hours and not self.hub.hours.timer.is_override:
             return ChargeControllerStates.Stop, True
         else:
             return ChargeControllerStates.Start, True

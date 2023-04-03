@@ -35,9 +35,9 @@ class IStateChanges:
             setattr(self.hub.charger.session, "session_energy", getattr(self.hub.sensors.carpowersensor, "value"))
             if self.hub.options.price.price_aware:
                 self.hub.charger.session.session_price = float(self.hub.nordpool.state)
-        if self.hub.scheduler.schedule_created:
+        if self.hub.hours.scheduler.schedule_created:
             try:
-                await self.hub.scheduler.async_update()
+                await self.hub.hours.scheduler.async_update()
             except Exception as e:
                 _LOGGER.error(f"5: {e}")
         if entity in self.hub.chargingtracker_entities and self.hub.is_initialized:
