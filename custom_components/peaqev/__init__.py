@@ -33,7 +33,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][conf.entry_id] = conf.data
     options = await async_set_options(conf)
-    hub = HomeAssistantHub(hass, options, DOMAIN)
+    hub = HomeAssistantHub(hass, options)
     hass.data[DOMAIN]["hub"] = hub
     await hub.setup()
 

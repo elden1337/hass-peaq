@@ -13,6 +13,7 @@ from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 
+from custom_components.peaqev import DOMAIN
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import ChargeControllerFactory
@@ -50,12 +51,10 @@ class HomeAssistantHub:
     def __init__(
             self,
             hass: HomeAssistant,
-            options: HubOptions,
-            domain: str
+            options: HubOptions
     ):
-        self.hubname = domain.capitalize()
+        self.hubname = DOMAIN.capitalize()
         self.state_machine = hass
-        self.domain = domain
         self.options: HubOptions = options
         self._is_initialized = False
         self.observer = Observer(self)
@@ -73,12 +72,6 @@ class HomeAssistantHub:
         self.prediction = Prediction(self)  # threshold
         self.servicecalls = ServiceCalls(self)  # top level
         self.states = await StateChangesFactory.async_create(self)  # top level
-
-        #move in to hubsensorsfactory
-        await self.sensors.async_setup(state_machine=self.state_machine, options=self.options, domain=self.domain,
-                           chargerobject=self.chargertype)
-        await self.sensors.async_init_hub_values()
-        # move in to hubsensorsfactory
 
         self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)  # hours
         self.power = await PowerToolsFactory.async_create(self)
@@ -153,7 +146,7 @@ class HomeAssistantHub:
         return tracker_entities
 
     async def async_set_chargingtracker_entities(self) -> list:
-        ret = [f"sensor.{self.domain}_{nametoid(CHARGERCONTROLLER)}"]
+        ret = [f"sensor.{DOMAIN}_{nametoid(CHARGERCONTROLLER)}"]
         if hasattr(self.sensors, "chargerobject_switch"):
             ret.append(self.sensors.chargerobject_switch.entity)
         if hasattr(self.sensors, "carpowersensor"):
