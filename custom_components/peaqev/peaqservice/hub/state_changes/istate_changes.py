@@ -31,10 +31,10 @@ class IStateChanges:
             await self.async_handle_sensor_attribute()
         except Exception as e:
             _LOGGER.error(f"4: {e}")
-        if self.hub.charger.session_active and update_session and hasattr(self.hub.sensors, "carpowersensor"):
-            setattr(self.hub.charger.session, "session_energy", getattr(self.hub.sensors.carpowersensor, "value"))
+        if self.hub.chargecontroller.charger.session_active and update_session and hasattr(self.hub.sensors, "carpowersensor"):
+            setattr(self.hub.chargecontroller.charger.session, "session_energy", getattr(self.hub.sensors.carpowersensor, "value"))
             if self.hub.options.price.price_aware:
-                self.hub.charger.session.session_price = float(self.hub.nordpool.state)
+                self.hub.chargecontroller.charger.session.session_price = float(self.hub.nordpool.state)
         if self.hub.hours.scheduler.schedule_created:
             try:
                 await self.hub.hours.scheduler.async_update()
@@ -42,7 +42,7 @@ class IStateChanges:
                 _LOGGER.error(f"5: {e}")
         if entity in self.hub.chargingtracker_entities and self.hub.is_initialized:
             try:
-                await self.hub.charger.async_charge()
+                await self.hub.chargecontroller.charger.async_charge()
             except Exception as e:
                 _LOGGER.error(f"6: {e}")
 

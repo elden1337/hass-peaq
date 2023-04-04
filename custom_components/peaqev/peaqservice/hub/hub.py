@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import datetime
 
@@ -14,13 +13,9 @@ from peaqevcore.hub.hub_sensors import IHubSensors
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
-from peaqevcore.services.scheduler.scheduler import SchedulerFacade
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase
-from peaqevcore.services.timer.timer import Timer
 
-import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
-from custom_components.peaqev.peaqservice.charger.charger import Charger
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import ChargeControllerFactory
 from custom_components.peaqev.peaqservice.hub.factories.chargertype_factory import ChargerTypeFactory
@@ -35,6 +30,7 @@ from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator impo
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import IStateChanges
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
+from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,13 +38,10 @@ _LOGGER = logging.getLogger(__name__)
 class HomeAssistantHub:
     hub_id = 1337
     chargertype: ChargerBase
-    charger: Charger
     sensors: IHubSensors
-    timer: Timer
     hours: Hours
     threshold: ThresholdBase
     prediction: Prediction
-    scheduler: SchedulerFacade
     servicecalls: ServiceCalls
     states: IStateChanges
     chargecontroller: IChargeController
@@ -60,7 +53,6 @@ class HomeAssistantHub:
             options: HubOptions,
             domain: str
     ):
-        self._lock = asyncio.Lock()
         self.hubname = domain.capitalize()
         self.state_machine = hass
         self.domain = domain
@@ -71,20 +63,20 @@ class HomeAssistantHub:
         self.initializer = HubInitializer(self)
 
     async def setup(self):
-        self.chargertype = await ChargerTypeFactory.async_create(self.state_machine, self.options)  # charger?
-        self.charger = Charger(hub=self, chargertype=self.chargertype)  # top level
+        self.chargertype = await ChargerTypeFactory.async_create(self.state_machine, self.options)  # chargecontroller
         self.sensors: IHubSensors = await HubSensorsFactory.async_create(self.options)  # top level
         self.hours: Hours = await HourselectionFactory.async_create(self)  # top level
         self.threshold: ThresholdBase = await ThresholdFactory.async_create(self)  # top level
         self.prediction = Prediction(self)  # threshold
-        self.sensors.setup(state_machine=self.state_machine, options=self.options, domain=self.domain,
-                           chargerobject=self.chargertype)
+
         self.sensors.init_hub_values()
         self.servicecalls = ServiceCalls(self)  # top level
         self.states = await StateChangesFactory.async_create(self)  # top level
         self.chargecontroller: IChargeController = await ChargeControllerFactory.async_create(self,
                                                                                               charger_states=self.chargertype.chargerstates,
                                                                                               charger_type=self.chargertype.type)  # charger
+        self.sensors.setup(state_machine=self.state_machine, options=self.options, domain=self.domain,
+                           chargerobject=self.chargertype)
         self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)  # hours
         self.power = await PowerToolsFactory.async_create(self)
 
@@ -158,7 +150,7 @@ class HomeAssistantHub:
         return tracker_entities
 
     async def async_set_chargingtracker_entities(self) -> list:
-        ret = [f"sensor.{self.domain}_{ex.nametoid(CHARGERCONTROLLER)}"]
+        ret = [f"sensor.{self.domain}_{nametoid(CHARGERCONTROLLER)}"]
         if hasattr(self.sensors, "chargerobject_switch"):
             ret.append(self.sensors.chargerobject_switch.entity)
         if hasattr(self.sensors, "carpowersensor"):

@@ -11,6 +11,7 @@ class ChargerType(Enum):
     Outlet = "Smart outdoor plug"
     Zaptec = "Zaptec"
     NoCharger = "None"
+    Unknown = "Unknown"
 
 
 CHARGERTYPES = [

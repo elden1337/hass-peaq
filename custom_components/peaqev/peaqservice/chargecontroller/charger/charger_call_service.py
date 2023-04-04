@@ -1,8 +1,9 @@
 import logging
 import time
 
+from custom_components.peaqev.peaqservice.chargecontroller.charger.const import CALL_WAIT_TIMER
+
 _LOGGER = logging.getLogger(__name__)
-CALL_WAIT_TIMER = 60
 
 
 async def async_do_update(state_machine, calls_domain, calls_command, calls_params, switch_controls_charger) -> bool:
