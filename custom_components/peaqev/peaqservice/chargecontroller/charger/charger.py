@@ -14,7 +14,7 @@ from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelper
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import ChargerModel
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
-from custom_components.peaqev.peaqservice.util.extensionmethods import log_once_per_minute
+from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -191,7 +191,7 @@ class Charger:
         elif time.time() - self.model.lastest_call_off > 10:
             self.model.charger_state_mismatch = True
             self.model.lastest_call_off = time.time()
-            log_once_per_minute(f"Fail when trying to stop connected charger. Retrying stop-attempt...")
+            log_once(f"Fail when trying to stop connected charger. Retrying stop-attempt...")
 
     async def async_do_update(self, calls_domain, calls_command, calls_params) -> bool:
         if self._charger.servicecalls.options.switch_controls_charger:

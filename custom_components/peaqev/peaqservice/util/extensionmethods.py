@@ -3,6 +3,7 @@ import time
 
 _LOGGER = logging.getLogger(__name__)
 
+
 def nametoid(input_string) -> str:
     if isinstance(input_string, str):
         return input_string.lower().replace(" ", "_").replace(",", "")
@@ -15,7 +16,8 @@ def dt_from_epoch(epoch: float) -> str:
 
 already_logged = []
 
-def log_once_per_minute(msg):
+
+def log_once(msg):
     try:
         if msg not in already_logged:
             already_logged.append(msg)
