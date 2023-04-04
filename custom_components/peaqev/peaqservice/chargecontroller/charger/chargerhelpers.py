@@ -28,7 +28,7 @@ class ChargerHelpers:
         self.charger = charger
 
     def wait_turn_on(self) -> bool:
-        while not self.charger.charger_active and self.charger.params.running:
+        while not self.charger.charger_active and self.charger.model.running:
             time.sleep(LOOP_WAIT)
         return self._updates_should_continue()
 
@@ -36,7 +36,7 @@ class ChargerHelpers:
         self.charger.controller.hub.sensors.chargerobject_switch.updatecurrent()  # todo: composition
         while all([
             (self._currents_match() or self._too_late_to_increase()),
-            self.charger.params.running
+            self.charger.model.running
         ]):
             time.sleep(LOOP_WAIT)
         return self._updates_should_continue()
@@ -50,8 +50,8 @@ class ChargerHelpers:
 
     def _updates_should_continue(self) -> bool:
         return not any([
-            self.charger.params.running is False,
-            self.charger.params.disable_current_updates
+            self.charger.model.running is False,
+            self.charger.model.disable_current_updates
         ])
 
     def _currents_match(self) -> bool:

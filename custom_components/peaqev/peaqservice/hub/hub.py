@@ -8,7 +8,6 @@ from homeassistant.core import (
     callback
 )
 from homeassistant.helpers.event import async_track_state_change
-from peaqevcore.hub.hub_sensors import IHubSensors
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
@@ -27,6 +26,7 @@ from custom_components.peaqev.peaqservice.hub.hub_initializer import HubInitiali
 from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import NordPoolUpdater
 from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import Observer
+from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import IHubSensors
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import IStateChanges
 from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
@@ -71,13 +71,15 @@ class HomeAssistantHub:
         self.hours: Hours = await HourselectionFactory.async_create(self)  # top level
         self.threshold: ThresholdBase = await ThresholdFactory.async_create(self)  # top level
         self.prediction = Prediction(self)  # threshold
-
-        self.sensors.init_hub_values()
         self.servicecalls = ServiceCalls(self)  # top level
         self.states = await StateChangesFactory.async_create(self)  # top level
 
-        self.sensors.setup(state_machine=self.state_machine, options=self.options, domain=self.domain,
+        #move in to hubsensorsfactory
+        await self.sensors.async_setup(state_machine=self.state_machine, options=self.options, domain=self.domain,
                            chargerobject=self.chargertype)
+        await self.sensors.async_init_hub_values()
+        # move in to hubsensorsfactory
+
         self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)  # hours
         self.power = await PowerToolsFactory.async_create(self)
 

@@ -28,16 +28,17 @@ class IHubSensors:
     powersensormovingaverage: HubMember = field(init=False)
     powersensormovingaverage24: HubMember = field(init=False)
     power: Power = field(init=False)
+    chargertype: any = field(init=False)
 
     @abstractmethod
-    def setup(self,
+    async def async_setup(self,
               state_machine,
               options: HubOptions,
               domain: str,
               chargerobject: any):
         pass
 
-    def setup_base(
+    async def async_setup_base(
             self,
             options: HubOptions,
             state_machine,
@@ -120,21 +121,15 @@ class IHubSensors:
             initval=0
         )
 
-    def init_hub_values(self):
+    async def async_init_hub_values(self):
         """Initialize values from Home Assistant on the set objects"""
         if self.chargertype.type.value != "None":
             if self.chargerobject is not None:
-                self.chargerobject.value = self.state_machine.states.get(
-                    self.chargerobject.entity).state if self.state_machine.states.get(
-                    self.chargerobject.entity) is not None else 0
-            self.chargerobject_switch.value = self.state_machine.states.get(
-                self.chargerobject_switch.entity).state if self.state_machine.states.get(
-                self.chargerobject_switch.entity) is not None else ""
+                self.chargerobject.value = self.state_machine.states.get(self.chargerobject.entity).state if self.state_machine.states.get(self.chargerobject.entity) is not None else 0
+            self.chargerobject_switch.value = self.state_machine.states.get(self.chargerobject_switch.entity).state if self.state_machine.states.get(self.chargerobject_switch.entity) is not None else ""
             self.chargerobject_switch.updatecurrent()
-            self.carpowersensor.value = self.state_machine.states.get(self.carpowersensor.entity).state if isinstance(
-                self.state_machine.states.get(self.carpowersensor.entity), (float, int)) else 0
-        self.totalhourlyenergy.value = self.state_machine.states.get(self.totalhourlyenergy.entity) if isinstance(
-            self.state_machine.states.get(self.totalhourlyenergy.entity), (float, int)) else 0
+            self.carpowersensor.value = self.state_machine.states.get(self.carpowersensor.entity).state if isinstance(self.state_machine.states.get(self.carpowersensor.entity), (float, int)) else 0
+        self.totalhourlyenergy.value = self.state_machine.states.get(self.totalhourlyenergy.entity) if isinstance(self.state_machine.states.get(self.totalhourlyenergy.entity), (float, int)) else 0
 
 
 

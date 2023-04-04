@@ -6,10 +6,10 @@ from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import IHubSe
 
 @dataclass
 class HubSensorsLite(IHubSensors):
-    def setup(
+    async def async_setup(
             self,
             state_machine,
             options: HubOptions,
             domain: str,
             chargerobject: any):
-        super().setup_base(state_machine=state_machine, options=options, domain=domain, chargerobject=chargerobject)
+        await super().async_setup_base(state_machine=state_machine, options=options, domain=domain, chargerobject=chargerobject)

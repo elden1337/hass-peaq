@@ -13,13 +13,12 @@ def dt_from_epoch(epoch: float) -> str:
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(epoch))
 
 
-ALREADY_LOGGED = {}
+already_logged = []
 
 def log_once_per_minute(msg):
-    """log max once per 1 minutes."""
-    if any([
-        msg not in ALREADY_LOGGED.keys,
-        time.time() - ALREADY_LOGGED[msg] > 60
-    ]):
-        ALREADY_LOGGED[msg] = time.time()
-        _LOGGER.debug(msg)
+    try:
+        if msg not in already_logged:
+            already_logged.append(msg)
+            _LOGGER.debug(msg)
+    except Exception as e:
+        _LOGGER.error(f"Error in log_once_per_minute: {e}")

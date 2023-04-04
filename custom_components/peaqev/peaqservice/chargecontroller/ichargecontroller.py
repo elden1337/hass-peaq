@@ -65,24 +65,31 @@ class IChargeController:
             if self.is_initialized:
                 ret: ChargeControllerStates
                 update_timer: bool = False
-                match self.model.charger_type:
-                    case ChargerType.Outlet:
-                        ret, update_timer = await self.async_get_status_outlet()
-                    case ChargerType.NoCharger:
-                        ret, update_timer = await self.async_get_status_no_charger()
-                    case _:
-                        ret, update_timer = await self.async_get_status()
+                try:
+                    match self.model.charger_type:
+                        case ChargerType.Outlet:
+                            ret, update_timer = await self.async_get_status_outlet()
+                        case ChargerType.NoCharger:
+                            ret, update_timer = await self.async_get_status_no_charger()
+                        case _:
+                            ret, update_timer = await self.async_get_status()
+                except Exception as e:
+                    _LOGGER.debug(f"Error in async_set_status1: {e}")
+                    ret = ChargeControllerStates.Error
                 if update_timer is True:
                     await self.async_update_latest_charger_start()
                 await self.async_set_status_type(ret)
         except Exception as e:
-            _LOGGER.debug(f"Error in async_set_status: {e}")
+            _LOGGER.debug(f"Error in async_set_status2: {e}")
 
     async def async_set_status_type(self, status_type: ChargeControllerStates) -> None:
-        if isinstance(status_type, ChargeControllerStates):
-            if status_type != self.status_type:
-                self.model.status_type = status_type
-                await self.charger.async_charge()
+        try:
+            if isinstance(status_type, ChargeControllerStates):
+                if status_type != self.status_type:
+                    self.model.status_type = status_type
+                    await self.charger.async_charge()
+        except Exception as e:
+            _LOGGER.debug(f"Error in async_set_status_type: {e}")
 
     async def async_get_status(self) -> Tuple[ChargeControllerStates, bool]:
         _state = await self.hub.async_request_sensor_data("chargerobject_value")
