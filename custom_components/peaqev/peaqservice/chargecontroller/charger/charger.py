@@ -12,7 +12,6 @@ from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_state
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelpers import ChargerHelpers, \
     async_set_chargerparams
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import ChargerModel
-from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once_per_minute
@@ -21,9 +20,6 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class Charger:
-
-    controller: IChargeController
-
     def __init__(self, controller):
         self.controller = controller
         self._charger = controller.hub.chargertype #todo: should not have direct access. route through chargecontroller

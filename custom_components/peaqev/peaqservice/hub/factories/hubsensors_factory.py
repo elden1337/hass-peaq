@@ -1,5 +1,7 @@
-from peaqevcore.hub.hub_options import HubOptions
-from peaqevcore.hub.hub_sensors import HubSensorsLite, HubSensors, IHubSensors
+from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
+from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors import HubSensors
+from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_lite import HubSensorsLite
+from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import IHubSensors
 
 
 class HubSensorsFactory:

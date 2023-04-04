@@ -8,7 +8,6 @@ from homeassistant.core import (
     callback
 )
 from homeassistant.helpers.event import async_track_state_change
-from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.hub.hub_sensors import IHubSensors
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 from peaqevcore.services.hourselection.initializers.hoursbase import Hours
@@ -25,6 +24,7 @@ from custom_components.peaqev.peaqservice.hub.factories.powertools_factory impor
 from custom_components.peaqev.peaqservice.hub.factories.state_changes_factory import StateChangesFactory
 from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import ThresholdFactory
 from custom_components.peaqev.peaqservice.hub.hub_initializer import HubInitializer
+from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import NordPoolUpdater
 from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import Observer
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
@@ -64,6 +64,9 @@ class HomeAssistantHub:
 
     async def setup(self):
         self.chargertype = await ChargerTypeFactory.async_create(self.state_machine, self.options)  # chargecontroller
+        self.chargecontroller: IChargeController = await ChargeControllerFactory.async_create(self,
+                                                                                              charger_states=self.chargertype.chargerstates,
+                                                                                              charger_type=self.chargertype.type)  # charger
         self.sensors: IHubSensors = await HubSensorsFactory.async_create(self.options)  # top level
         self.hours: Hours = await HourselectionFactory.async_create(self)  # top level
         self.threshold: ThresholdBase = await ThresholdFactory.async_create(self)  # top level
@@ -72,9 +75,7 @@ class HomeAssistantHub:
         self.sensors.init_hub_values()
         self.servicecalls = ServiceCalls(self)  # top level
         self.states = await StateChangesFactory.async_create(self)  # top level
-        self.chargecontroller: IChargeController = await ChargeControllerFactory.async_create(self,
-                                                                                              charger_states=self.chargertype.chargerstates,
-                                                                                              charger_type=self.chargertype.type)  # charger
+
         self.sensors.setup(state_machine=self.state_machine, options=self.options, domain=self.domain,
                            chargerobject=self.chargertype)
         self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)  # hours

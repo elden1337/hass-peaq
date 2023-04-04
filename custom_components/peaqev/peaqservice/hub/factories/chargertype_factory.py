@@ -1,7 +1,6 @@
 import logging
 
 from homeassistant.core import HomeAssistant
-from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
@@ -11,6 +10,7 @@ from custom_components.peaqev.peaqservice.chargertypes.types.garowallbox import 
 from custom_components.peaqev.peaqservice.chargertypes.types.no_charger import NoCharger
 from custom_components.peaqev.peaqservice.chargertypes.types.outlet import SmartOutlet
 from custom_components.peaqev.peaqservice.chargertypes.types.zaptec import Zaptec
+from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
 
 _LOGGER = logging.getLogger(__name__)
 

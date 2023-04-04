@@ -1,10 +1,11 @@
 import logging
 
 from homeassistant.core import HomeAssistant
-from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
+
+from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
 
 _LOGGER = logging.getLogger(__name__)
 
