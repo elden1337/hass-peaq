@@ -3,16 +3,16 @@ from __future__ import annotations
 
 import logging
 
-from homeassistant.config_entries import ConfigEntry  # pylint: disable=import-error
+from homeassistant.config_entries import \
+    ConfigEntry  # pylint: disable=import-error
 from homeassistant.core import HomeAssistant  # pylint: disable=import-error
 
 from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
-from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
+from custom_components.peaqev.peaqservice.hub.models.hub_options import \
+    HubOptions
 from custom_components.peaqev.peaqservice.util.constants import TYPELITE
-from .const import (
-    DOMAIN,
-    PLATFORMS
-)
+
+from .const import DOMAIN, PLATFORMS
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
 _LOGGER = logging.getLogger(__name__)
@@ -48,12 +48,18 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
         _LOGGER.debug("Calling {} service".format(ServiceCalls.DISABLE.value))
         await hub.servicecalls.async_call_disable_peaq()
 
-    async def async_servicehandler_override_nonhours(call):  # pylint:disable=unused-argument
+    async def async_servicehandler_override_nonhours(
+        call,
+    ):  # pylint:disable=unused-argument
         hours = call.data.get("hours")
         _LOGGER.debug("Calling {} service".format(ServiceCalls.OVERRIDE_NONHOURS.value))
-        await hub.servicecalls.async_call_override_nonhours(1 if hours is None else hours)
+        await hub.servicecalls.async_call_override_nonhours(
+            1 if hours is None else hours
+        )
 
-    async def async_servicehandler_scheduler_set(call):  # pylint:disable=unused-argument
+    async def async_servicehandler_scheduler_set(
+        call,
+    ):  # pylint:disable=unused-argument
         charge_amount = call.data.get("charge_amount")
         departure_time = call.data.get("departure_time")
         schedule_starttime = call.data.get("schedule_starttime")
@@ -63,7 +69,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
             charge_amount=charge_amount,
             departure_time=departure_time,
             schedule_starttime=schedule_starttime,
-            override_settings=override_settings
+            override_settings=override_settings,
         )
 
     async def async_servicehandler_scheduler_cancel(call):
@@ -71,15 +77,17 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
         await hub.servicecalls.async_call_scheduler_cancel()
 
     for platform in PLATFORMS:
-        hass.async_create_task(hass.config_entries.async_forward_entry_setup(conf, platform))
+        hass.async_create_task(
+            hass.config_entries.async_forward_entry_setup(conf, platform)
+        )
 
     # Register services
     SERVICES = {
-        ServiceCalls.ENABLE:            async_servicehandler_enable,
-        ServiceCalls.DISABLE:           async_servicehandler_disable,
+        ServiceCalls.ENABLE: async_servicehandler_enable,
+        ServiceCalls.DISABLE: async_servicehandler_disable,
         ServiceCalls.OVERRIDE_NONHOURS: async_servicehandler_override_nonhours,
-        ServiceCalls.SCHEDULER_SET:     async_servicehandler_scheduler_set,
-        ServiceCalls.SCHEDULER_CANCEL:  async_servicehandler_scheduler_cancel
+        ServiceCalls.SCHEDULER_SET: async_servicehandler_scheduler_set,
+        ServiceCalls.SCHEDULER_CANCEL: async_servicehandler_scheduler_cancel,
     }
 
     for service, handler in SERVICES.items():
@@ -114,17 +122,31 @@ async def async_set_options(conf) -> HubOptions:
     if options.charger.chargertype == ChargerType.NoCharger.value:
         options.powersensor_includes_car = True
     else:
-        options.powersensor_includes_car = conf.data.get("powersensorincludescar", False)
+        options.powersensor_includes_car = conf.data.get(
+            "powersensorincludescar", False
+        )
     options.startpeaks = conf.options.get("startpeaks", conf.data.get("startpeaks"))
     options.cautionhours = await _async_get_existing_param(conf, "cautionhours", [])
     options.nonhours = await _async_get_existing_param(conf, "nonhours", [])
-    options.price.price_aware = await _async_get_existing_param(conf, "priceaware", False)
-    options.price.min_price = await _async_get_existing_param(conf, "min_priceaware_threshold_price", 0)
-    options.price.top_price = await _async_get_existing_param(conf, "absolute_top_price", 0)
-    options.price.dynamic_top_price = await _async_get_existing_param(conf, "dynamic_top_price", False)
-    options.price.cautionhour_type = await _async_get_existing_param(conf, "cautionhour_type", "intermediate")
+    options.price.price_aware = await _async_get_existing_param(
+        conf, "priceaware", False
+    )
+    options.price.min_price = await _async_get_existing_param(
+        conf, "min_priceaware_threshold_price", 0
+    )
+    options.price.top_price = await _async_get_existing_param(
+        conf, "absolute_top_price", 0
+    )
+    options.price.dynamic_top_price = await _async_get_existing_param(
+        conf, "dynamic_top_price", False
+    )
+    options.price.cautionhour_type = await _async_get_existing_param(
+        conf, "cautionhour_type", "intermediate"
+    )
     options.fuse_type = await _async_get_existing_param(conf, "mains", "")
-    options.blocknocturnal = await _async_get_existing_param(conf, "blocknocturnal", False)
+    options.blocknocturnal = await _async_get_existing_param(
+        conf, "blocknocturnal", False
+    )
     options.gainloss = await _async_get_existing_param(conf, "gainloss", False)
     return options
 

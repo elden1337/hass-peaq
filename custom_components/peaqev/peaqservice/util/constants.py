@@ -1,4 +1,3 @@
-
 from peaqevcore.models.hourselection.cautionhourtype import CautionHourType
 
 """NAMING CONSTANTS"""
@@ -23,7 +22,7 @@ CURRENT = "current"
 DOMAIN = "domain"
 NAME = "name"
 
-CAUTIONHOURTYPE_NAMES =[
+CAUTIONHOURTYPE_NAMES = [
     str(CautionHourType.SUAVE.value).capitalize(),
     str(CautionHourType.INTERMEDIATE.value).capitalize(),
     str(CautionHourType.AGGRESSIVE.value).capitalize(),
@@ -33,7 +32,4 @@ CAUTIONHOURTYPE_NAMES =[
 TYPEREGULAR = "Regular (requires power sensor)"
 TYPELITE = "Lite"
 
-INSTALLATIONTYPES = [
-    TYPEREGULAR,
-    TYPELITE
-]
+INSTALLATIONTYPES = [TYPEREGULAR, TYPELITE]

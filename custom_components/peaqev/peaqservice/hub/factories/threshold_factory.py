@@ -1,4 +1,3 @@
-
 from peaqevcore.services.threshold.threshold import Threshold
 from peaqevcore.services.threshold.threshold_lite import ThresholdLite
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase

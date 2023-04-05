@@ -1,10 +1,7 @@
 import logging
 
-from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
-from homeassistant.const import (
-    PERCENTAGE,
-    ELECTRIC_CURRENT_AMPERE
-)
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.const import ELECTRIC_CURRENT_AMPERE, PERCENTAGE
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
@@ -25,10 +22,10 @@ class PowerCanaryDevice(SensorEntity):
     @property
     def device_info(self):
         return {
-            "identifiers":  {(DOMAIN, self.hub.hub_id, POWERCANARY)},
-            "name":         f"{DOMAIN} {POWERCANARY}",
-            "sw_version":   1,
-            "model":        f"{self.hub.power.power_canary.fuse}",  #todo: composition
+            "identifiers": {(DOMAIN, self.hub.hub_id, POWERCANARY)},
+            "name": f"{DOMAIN} {POWERCANARY}",
+            "sw_version": 1,
+            "model": f"{self.hub.power.power_canary.fuse}",  # todo: composition
             "manufacturer": "Peaq systems",
         }
 
@@ -51,7 +48,7 @@ class PowerCanaryStatusSensor(PowerCanaryDevice):
 
     def update(self) -> None:
         if self.hub.is_initialized:
-            self._state = self.hub.power.power_canary.state_string  #todo: composition
+            self._state = self.hub.power.power_canary.state_string  # todo: composition
 
 
 class PowerCanaryPercentageSensor(PowerCanaryDevice):
@@ -72,17 +69,22 @@ class PowerCanaryPercentageSensor(PowerCanaryDevice):
         return PERCENTAGE
 
     async def async_update(self) -> None:
-        if int(self.hub.power.power_canary.current_percentage * 100) != self._state:  #todo: composition
-            self._state = int(self.hub.power.power_canary.current_percentage * 100)  #todo: composition
-        self._warning = round(self.hub.power.power_canary.model.warning_threshold * 100, 2)  #todo: composition
-        self._cutoff = round(self.hub.power.power_canary.model.cutoff_threshold * 100, 2)  #todo: composition
+        if (
+            int(self.hub.power.power_canary.current_percentage * 100) != self._state
+        ):  # todo: composition
+            self._state = int(
+                self.hub.power.power_canary.current_percentage * 100
+            )  # todo: composition
+        self._warning = round(
+            self.hub.power.power_canary.model.warning_threshold * 100, 2
+        )  # todo: composition
+        self._cutoff = round(
+            self.hub.power.power_canary.model.cutoff_threshold * 100, 2
+        )  # todo: composition
 
     @property
     def extra_state_attributes(self) -> dict:
-        return {
-            "warning_threshold": self._warning,
-            "cutoff_threshold":  self._cutoff
-        }
+        return {"warning_threshold": self._warning, "cutoff_threshold": self._cutoff}
 
 
 class PowerCanaryMaxAmpSensor(PowerCanaryDevice):

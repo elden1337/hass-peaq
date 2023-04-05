@@ -9,7 +9,7 @@ class ServiceCalls:
         self.hub = hub
 
     async def async_call_enable_peaq(self):
-        """peaqev.enable"""        
+        """peaqev.enable"""
         await self.hub.observer.async_broadcast("update charger enabled", True)
         await self.hub.observer.async_broadcast("update charger done", False)
 
@@ -25,28 +25,34 @@ class ServiceCalls:
             await self.hub.observer.async_broadcast("timer activated")
 
     async def async_call_schedule_needed_charge(
-            self,
-            charge_amount: float,
-            departure_time: str,
-            schedule_starttime: str = None,
-            override_settings: bool = False
+        self,
+        charge_amount: float,
+        departure_time: str,
+        schedule_starttime: str = None,
+        override_settings: bool = False,
     ):
         if self.hub.hours.price_aware:
             dep_time = None
             start_time = None
             try:
-                dep_time = datetime.strptime(departure_time, '%Y-%m-%d %H:%M')
+                dep_time = datetime.strptime(departure_time, "%Y-%m-%d %H:%M")
             except ValueError:
                 _LOGGER.error(f"Could not parse departure time: {departure_time}")
             if schedule_starttime is not None:
                 try:
-                    start_time = datetime.strptime(schedule_starttime, '%Y-%m-%d %H:%M')
+                    start_time = datetime.strptime(schedule_starttime, "%Y-%m-%d %H:%M")
                 except ValueError:
-                    _LOGGER.error(f"Could not parse schedule start time: {schedule_starttime}")
+                    _LOGGER.error(
+                        f"Could not parse schedule start time: {schedule_starttime}"
+                    )
             else:
                 start_time = datetime.now()
-            _LOGGER.debug(f"scheduler params. charge: {charge_amount}, dep-time: {dep_time}, start_time: {start_time}")
-            await self.hub.hours.scheduler.async_create_schedule(charge_amount, dep_time, start_time, override_settings)
+            _LOGGER.debug(
+                f"scheduler params. charge: {charge_amount}, dep-time: {dep_time}, start_time: {start_time}"
+            )
+            await self.hub.hours.scheduler.async_create_schedule(
+                charge_amount, dep_time, start_time, override_settings
+            )
             await self.hub.hours.scheduler.async_update()
             await self.hub.observer.async_broadcast("scheduler created")
 

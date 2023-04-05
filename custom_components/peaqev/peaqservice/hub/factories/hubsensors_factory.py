@@ -1,9 +1,13 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
-from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors import HubSensors
-from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_lite import HubSensorsLite
-from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import IHubSensors
+from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors import \
+    HubSensors
+from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_lite import \
+    HubSensorsLite
+from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import \
+    IHubSensors
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import Hub
@@ -23,6 +27,7 @@ class HubSensorsFactory:
             state_machine=hub.state_machine,
             options=hub.options,
             domain=hub.domain,
-            chargerobject=hub.chargertype)
+            chargerobject=hub.chargertype,
+        )
         await sensors.async_init_hub_values()
         return sensors

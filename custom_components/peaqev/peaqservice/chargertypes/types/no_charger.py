@@ -2,12 +2,15 @@ import logging
 
 from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
-from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
+from peaqevcore.models.chargertype.servicecalls_options import \
+    ServiceCallsOptions
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
-from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
+from custom_components.peaqev.peaqservice.hub.models.hub_options import \
+    HubOptions
 
 _LOGGER = logging.getLogger(__name__)
+
 
 class NoCharger(ChargerBase):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
@@ -20,9 +23,9 @@ class NoCharger(ChargerBase):
                 off=self.call_off,
                 pause=self.call_pause,
                 resume=self.call_resume,
-                update_current=self.call_update_current
+                update_current=self.call_update_current,
             ),
-            options=self.servicecalls_options
+            options=self.servicecalls_options,
         )
 
     @property
@@ -40,5 +43,5 @@ class NoCharger(ChargerBase):
         return ServiceCallsOptions(
             allowupdatecurrent=False,
             update_current_on_termination=False,
-            switch_controls_charger=False
+            switch_controls_charger=False,
         )

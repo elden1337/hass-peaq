@@ -6,10 +6,12 @@ from peaqevcore.models.fuses import Fuses
 from peaqevcore.models.phases import Phases
 
 from custom_components.peaqev.peaqservice.powertools.power_canary.const import (
-    DISABLED, CRITICAL, WARNING, OK,
-    WARNING_THRESHOLD, CUTOFF_THRESHOLD, FUSES_MAX_SINGLE_FUSE)
-from custom_components.peaqev.peaqservice.powertools.power_canary.power_canary_model import PowerCanaryModel
-from custom_components.peaqev.peaqservice.powertools.power_canary.smooth_average import SmoothAverage
+    CRITICAL, CUTOFF_THRESHOLD, DISABLED, FUSES_MAX_SINGLE_FUSE, OK, WARNING,
+    WARNING_THRESHOLD)
+from custom_components.peaqev.peaqservice.powertools.power_canary.power_canary_model import \
+    PowerCanaryModel
+from custom_components.peaqev.peaqservice.powertools.power_canary.smooth_average import \
+    SmoothAverage
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -22,7 +24,7 @@ class PowerCanary:
             warning_threshold=WARNING_THRESHOLD,
             cutoff_threshold=CUTOFF_THRESHOLD,
             fuse=Fuses.parse_from_config(hub.options.fuse_type),
-            allow_amp_adjustment=self.hub.chargertype.servicecalls.options.allowupdatecurrent
+            allow_amp_adjustment=self.hub.chargertype.servicecalls.options.allowupdatecurrent,
         )
         self._total_power = SmoothAverage(max_age=60, max_samples=30, ignore=0)
         self._validate()
@@ -36,7 +38,10 @@ class PowerCanary:
         """if returns false no charging can be conducted"""
         if self._enabled is False:
             return True
-        return self.hub.sensors.power.total.value < self.model.fuse_max * self.model.cutoff_threshold
+        return (
+            self.hub.sensors.power.total.value
+            < self.model.fuse_max * self.model.cutoff_threshold
+        )
 
     @property
     def fuse(self) -> str:
@@ -73,7 +78,11 @@ class PowerCanary:
     @property
     def onephase_amps(self) -> dict:
         ret = self._get_currently_allowed_amps(self.model.onephase_amps)
-        return {k: v for (k, v) in ret.items() if v < FUSES_MAX_SINGLE_FUSE.get(self.model.fuse)}
+        return {
+            k: v
+            for (k, v) in ret.items()
+            if v < FUSES_MAX_SINGLE_FUSE.get(self.model.fuse)
+        }
 
     @property
     def threephase_amps(self) -> dict:
@@ -104,13 +113,19 @@ class PowerCanary:
             return False
         ret = new_amps <= self.max_current_amp
         if ret is False and self.max_current_amp > -1:
-            _LOGGER.warning(f"Power Canary cannot allow amp-increase due to the current power-draw. max-amp is:{self.max_current_amp} ")
+            _LOGGER.warning(
+                f"Power Canary cannot allow amp-increase due to the current power-draw. max-amp is:{self.max_current_amp} "
+            )
         return ret
 
     def _get_currently_allowed_amps(self, amps) -> dict:
         """get the currently allowed amps based on the current power draw"""
-        _max = (self.model.fuse_max * self.model.cutoff_threshold)
-        return {k: v for (k, v) in amps.items() if k + self.hub.sensors.power.total.value < _max}
+        _max = self.model.fuse_max * self.model.cutoff_threshold
+        return {
+            k: v
+            for (k, v) in amps.items()
+            if k + self.hub.sensors.power.total.value < _max
+        }
 
     def _validate(self):
         if self.model.fuse_max == 0:

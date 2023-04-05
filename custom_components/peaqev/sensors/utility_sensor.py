@@ -20,7 +20,9 @@ DATA_TARIFF_SENSORS = "utility_meter_sensors"
 
 
 class PeaqUtilityCostSensor(UtilityMeterSensor):
-    def __init__(self, hub, sensor: any, meter_type: str, meter_offset: str, entry_id: any, hass):
+    def __init__(
+        self, hub, sensor: any, meter_type: str, meter_offset: str, entry_id: any, hass
+    ):
         self._entry_id = entry_id
         self.hub = hub
         self._attr_name = f"{self.hub.hubname} {sensor} {meter_type.lower()}"
@@ -38,7 +40,7 @@ class PeaqUtilityCostSensor(UtilityMeterSensor):
             source_entity=self._parent,
             tariff_entity=None,
             tariff=None,
-            unique_id=self.unique_id
+            unique_id=self.unique_id,
         )
         hass.data[DATA_UTILITY][self._parent] = {DATA_TARIFF_SENSORS: [self]}
 
@@ -57,7 +59,15 @@ class PeaqUtilityCostSensor(UtilityMeterSensor):
 
 
 class PeaqUtilitySensor(UtilityMeterSensor):
-    def __init__(self, hub, sensor: any, meter_type: TimePeriods, meter_offset: str, entry_id: any, hass):
+    def __init__(
+        self,
+        hub,
+        sensor: any,
+        meter_type: TimePeriods,
+        meter_offset: str,
+        entry_id: any,
+        hass,
+    ):
         self._entry_id = entry_id
         self.hub = hub
         self._attr_name = f"{self.hub.hubname} {sensor} {meter_type.value.lower()}"
@@ -75,7 +85,7 @@ class PeaqUtilitySensor(UtilityMeterSensor):
             source_entity=self._parent,
             tariff_entity=None,
             tariff=None,
-            unique_id=self.unique_id
+            unique_id=self.unique_id,
         )
         hass.data[DATA_UTILITY][self._parent] = {DATA_TARIFF_SENSORS: [self]}
 

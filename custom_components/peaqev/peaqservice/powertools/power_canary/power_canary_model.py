@@ -2,11 +2,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from peaqevcore.models.const import CURRENTS_THREEPHASE_1_32, CURRENTS_THREEPHASE_1_16, CURRENTS_ONEPHASE_1_16, \
-    CURRENTS_ONEPHASE_1_32
+from peaqevcore.models.const import (CURRENTS_ONEPHASE_1_16,
+                                     CURRENTS_ONEPHASE_1_32,
+                                     CURRENTS_THREEPHASE_1_16,
+                                     CURRENTS_THREEPHASE_1_32)
 from peaqevcore.models.fuses import Fuses
 
-from custom_components.peaqev.peaqservice.powertools.power_canary.const import FUSES_DICT
+from custom_components.peaqev.peaqservice.powertools.power_canary.const import \
+    FUSES_DICT
 
 
 @dataclass
@@ -21,8 +24,12 @@ class PowerCanaryModel:
 
     def __post_init__(self):
         self.fuse_max = FUSES_DICT.get(self.fuse) if self.fuse is not None else 0
-        self.threephase_amps = self._set_allowed_amps(CURRENTS_THREEPHASE_1_32, CURRENTS_THREEPHASE_1_16)
-        self.onephase_amps = self._set_allowed_amps(CURRENTS_ONEPHASE_1_32, CURRENTS_ONEPHASE_1_16)
+        self.threephase_amps = self._set_allowed_amps(
+            CURRENTS_THREEPHASE_1_32, CURRENTS_THREEPHASE_1_16
+        )
+        self.onephase_amps = self._set_allowed_amps(
+            CURRENTS_ONEPHASE_1_32, CURRENTS_ONEPHASE_1_16
+        )
 
     def _set_allowed_amps(self, amps_dict, default_amps) -> dict:
         """only allow amps if user has set this value high enough"""
@@ -38,6 +45,6 @@ class PowerCanaryModel:
             return all(
                 [
                     self.fuse_max == FUSES_DICT.get(self.fuse),
-                    self.allow_amp_adjustment is not None
-                 ])
-
+                    self.allow_amp_adjustment is not None,
+                ]
+            )

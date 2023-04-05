@@ -1,10 +1,10 @@
 from datetime import timedelta
 
-from homeassistant.components.filter.sensor import (
-    OutlierFilter, LowPassFilter,
-    TimeSMAFilter, SensorFilter,
-    TIME_SMA_LAST
-)
+from homeassistant.components.filter.sensor import (TIME_SMA_LAST,
+                                                    LowPassFilter,
+                                                    OutlierFilter,
+                                                    SensorFilter,
+                                                    TimeSMAFilter)
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
@@ -20,7 +20,7 @@ class PeaqAverageSensor(SensorFilter):
             name=self._attr_name,
             unique_id=self.unique_id,
             entity_id=self.hub.sensors.power.house.entity,
-            filters=self._set_filters(self.hub, filtertimedelta)
+            filters=self._set_filters(self.hub, filtertimedelta),
         )
 
     @property
@@ -39,16 +39,18 @@ class PeaqAverageSensor(SensorFilter):
                 window_size=1,
                 precision=0,
                 entity=hub.sensors.power.house.entity,
-                time_constant=10),
+                time_constant=10,
+            ),
             TimeSMAFilter(
                 window_size=filtertimedelta,
                 precision=0,
                 entity=hub.sensors.power.house.entity,
-                type=TIME_SMA_LAST),
+                type=TIME_SMA_LAST,
+            ),
             OutlierFilter(
                 window_size=4,
                 precision=0,
                 entity=hub.sensors.power.house.entity,
-                radius=2
-            )
+                radius=2,
+            ),
         ]

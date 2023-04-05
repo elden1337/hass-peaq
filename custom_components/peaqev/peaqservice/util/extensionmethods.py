@@ -11,7 +11,7 @@ def nametoid(input_string) -> str:
 
 
 def dt_from_epoch(epoch: float) -> str:
-    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(epoch))
+    return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(epoch))
 
 
 already_logged = []

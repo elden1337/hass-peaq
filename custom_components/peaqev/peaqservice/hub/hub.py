@@ -3,33 +3,46 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 
-from homeassistant.core import (
-    HomeAssistant,
-    callback
-)
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_state_change
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 
-from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
-from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import ChargeControllerFactory
-from custom_components.peaqev.peaqservice.hub.factories.chargertype_factory import ChargerTypeFactory
-from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import HourselectionFactory
-from custom_components.peaqev.peaqservice.hub.factories.hubsensors_factory import HubSensorsFactory
-from custom_components.peaqev.peaqservice.hub.factories.powertools_factory import PowerToolsFactory
-from custom_components.peaqev.peaqservice.hub.factories.state_changes_factory import StateChangesFactory
-from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import ThresholdFactory
-from custom_components.peaqev.peaqservice.hub.hub_initializer import HubInitializer
-from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
-from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import NordPoolUpdater
-from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import Observer
-from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import IHubSensors
+from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
+    IChargeController
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
+    ChargerType
+from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import \
+    ChargeControllerFactory
+from custom_components.peaqev.peaqservice.hub.factories.chargertype_factory import \
+    ChargerTypeFactory
+from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import \
+    HourselectionFactory
+from custom_components.peaqev.peaqservice.hub.factories.hubsensors_factory import \
+    HubSensorsFactory
+from custom_components.peaqev.peaqservice.hub.factories.powertools_factory import \
+    PowerToolsFactory
+from custom_components.peaqev.peaqservice.hub.factories.state_changes_factory import \
+    StateChangesFactory
+from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import \
+    ThresholdFactory
+from custom_components.peaqev.peaqservice.hub.hub_initializer import \
+    HubInitializer
+from custom_components.peaqev.peaqservice.hub.models.hub_options import \
+    HubOptions
+from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import \
+    NordPoolUpdater
+from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
+    Observer
+from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import \
+    IHubSensors
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
-from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import IStateChanges
-from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
+from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
+    IStateChanges
+from custom_components.peaqev.peaqservice.util.constants import \
+    CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,12 +60,7 @@ class HomeAssistantHub:
     chargecontroller: IChargeController
     nordpool: NordPoolUpdater
 
-    def __init__(
-            self,
-            hass: HomeAssistant,
-            options: HubOptions,
-            domain: str
-    ):
+    def __init__(self, hass: HomeAssistant, options: HubOptions, domain: str):
         self.hubname = domain.capitalize()
         self.domain = domain
         self.state_machine = hass
@@ -63,18 +71,28 @@ class HomeAssistantHub:
         self.initializer = HubInitializer(self)
 
     async def setup(self):
-        self.chargertype = await ChargerTypeFactory.async_create(self.state_machine, self.options)  # chargecontroller
+        self.chargertype = await ChargerTypeFactory.async_create(
+            self.state_machine, self.options
+        )  # chargecontroller
         self.chargecontroller = await ChargeControllerFactory.async_create(
-                                self, charger_states=self.chargertype.chargerstates, charger_type=self.chargertype.type
-                                )  # charger
-        self.sensors: IHubSensors = await HubSensorsFactory.async_create(hub=self)  # top level
+            self,
+            charger_states=self.chargertype.chargerstates,
+            charger_type=self.chargertype.type,
+        )  # charger
+        self.sensors: IHubSensors = await HubSensorsFactory.async_create(
+            hub=self
+        )  # top level
         self.hours: Hours = await HourselectionFactory.async_create(self)  # top level
-        self.threshold: ThresholdBase = await ThresholdFactory.async_create(self)  # top level
+        self.threshold: ThresholdBase = await ThresholdFactory.async_create(
+            self
+        )  # top level
         self.prediction = Prediction(self)  # threshold
         self.servicecalls = ServiceCalls(self)  # top level
         self.states = await StateChangesFactory.async_create(self)  # top level
 
-        self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)  # hours
+        self.nordpool = NordPoolUpdater(
+            hub=self, is_active=self.hours.price_aware
+        )  # hours
         self.power = await PowerToolsFactory.async_create(self)
 
         self.chargingtracker_entities = []
@@ -103,8 +121,14 @@ class HomeAssistantHub:
     def current_peak_dynamic(self):
         """Dynamically calculated peak to adhere to caution-hours"""
         if self.options.price.price_aware and len(self.dynamic_caution_hours) > 0:
-            if datetime.now().hour in self.dynamic_caution_hours.keys() and not self.hours.timer.is_override:
-                return self.sensors.current_peak.value * self.dynamic_caution_hours[datetime.now().hour]
+            if (
+                datetime.now().hour in self.dynamic_caution_hours.keys()
+                and not self.hours.timer.is_override
+            ):
+                return (
+                    self.sensors.current_peak.value
+                    * self.dynamic_caution_hours[datetime.now().hour]
+                )
         return self.sensors.current_peak.value
 
     @property
@@ -122,7 +146,13 @@ class HomeAssistantHub:
     def watt_cost(self) -> int:
         if self.options.price.price_aware:
             try:
-                return int(round(float(self.sensors.power.total.value) * float(self.nordpool.state), 0))
+                return int(
+                    round(
+                        float(self.sensors.power.total.value)
+                        * float(self.nordpool.state),
+                        0,
+                    )
+                )
             except Exception as e:
                 _LOGGER.error(f"Unable to calculate watt cost. Exception: {e}")
                 return 0
@@ -168,15 +198,29 @@ class HomeAssistantHub:
 
     def _set_observers(self) -> None:
         self.observer.add("prices changed", self._update_prices)
-        self.observer.add("monthly average price changed", self.async_update_average_monthly_price, _async=True)
-        self.observer.add("weekly average price changed", self.async_update_average_weekly_price, _async=True)
-        self.observer.add("update charger done", self.async_update_charger_done, _async=True)
-        self.observer.add("update charger enabled", self.async_update_charger_enabled, _async=True)
+        self.observer.add(
+            "monthly average price changed",
+            self.async_update_average_monthly_price,
+            _async=True,
+        )
+        self.observer.add(
+            "weekly average price changed",
+            self.async_update_average_weekly_price,
+            _async=True,
+        )
+        self.observer.add(
+            "update charger done", self.async_update_charger_done, _async=True
+        )
+        self.observer.add(
+            "update charger enabled", self.async_update_charger_enabled, _async=True
+        )
 
     """Composition below here"""
 
     async def async_set_init_dict(self, init_dict):
-        ret = await self.sensors.locale.data.query_model.peaks.async_set_init_dict(init_dict)
+        ret = await self.sensors.locale.data.query_model.peaks.async_set_init_dict(
+            init_dict
+        )
         if ret:
             ff = getattr(self.sensors.locale.data.query_model.peaks, "export_peaks")
             _LOGGER.debug(f"intialized_peaks: {ff}")
@@ -197,25 +241,25 @@ class HomeAssistantHub:
 
     async def async_request_sensor_data(self, *args) -> dict | any:
         lookup = {
-            "charger_done":            getattr(self.sensors.charger_done, "value"),
-            "chargerobject_value":     getattr(self.sensors.chargerobject, "value"),
-            "hour_state":              getattr(self.hours, "state", "unknown"),
-            "prices":                  getattr(self.hours, "prices", []),
-            "prices_tomorrow":         getattr(self.hours, "prices_tomorrow", []),
-            "non_hours":               getattr(self.hours, "non_hours", []),
-            "caution_hours":           getattr(self.hours, "caution_hours", []),
-            "dynamic_caution_hours":   getattr(self.hours, "dynamic_caution_hours", {}),
-            "currency":                getattr(self.nordpool, "currency"),
-            "offsets":                 getattr(self.hours, "offsets", {}),
-            "average_nordpool_data":   getattr(self.nordpool, "average_data"),
-            "use_cent":                getattr(self.nordpool.model, "use_cent"),
-            "current_peak":            getattr(self.sensors.current_peak, "value"),
-            "avg_kwh_price":           await self.hours.async_get_average_kwh_price(),
-            "max_charge":              await self.hours.async_get_total_charge(),
-            "average_weekly":          getattr(self.nordpool, "average_weekly"),
-            "average_monthly":         getattr(self.nordpool, "average_month"),
-            "is_price_aware":          getattr(self.options.price, "price_aware"),
-            "is_scheduler_active":     getattr(self.hours.scheduler, "scheduler_active"),
+            "charger_done": getattr(self.sensors.charger_done, "value"),
+            "chargerobject_value": getattr(self.sensors.chargerobject, "value"),
+            "hour_state": getattr(self.hours, "state", "unknown"),
+            "prices": getattr(self.hours, "prices", []),
+            "prices_tomorrow": getattr(self.hours, "prices_tomorrow", []),
+            "non_hours": getattr(self.hours, "non_hours", []),
+            "caution_hours": getattr(self.hours, "caution_hours", []),
+            "dynamic_caution_hours": getattr(self.hours, "dynamic_caution_hours", {}),
+            "currency": getattr(self.nordpool, "currency"),
+            "offsets": getattr(self.hours, "offsets", {}),
+            "average_nordpool_data": getattr(self.nordpool, "average_data"),
+            "use_cent": getattr(self.nordpool.model, "use_cent"),
+            "current_peak": getattr(self.sensors.current_peak, "value"),
+            "avg_kwh_price": await self.hours.async_get_average_kwh_price(),
+            "max_charge": await self.hours.async_get_total_charge(),
+            "average_weekly": getattr(self.nordpool, "average_weekly"),
+            "average_monthly": getattr(self.nordpool, "average_month"),
+            "is_price_aware": getattr(self.options.price, "price_aware"),
+            "is_scheduler_active": getattr(self.hours.scheduler, "scheduler_active"),
             "chargecontroller_status": getattr(self.chargecontroller, "status_string"),
         }
         ret = {}

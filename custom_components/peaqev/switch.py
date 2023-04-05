@@ -10,17 +10,16 @@ from .const import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(seconds=4)
 
-async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities): # pylint:disable=unused-argument
+
+async def async_setup_entry(
+    hass: HomeAssistant, config_entry, async_add_entities
+):  # pylint:disable=unused-argument
     hub = hass.data[DOMAIN]["hub"]
 
-    switches = [
-        {
-            "name": "Charger enabled",
-            "entity": "charger_enabled"
-        }
-    ]
+    switches = [{"name": "Charger enabled", "entity": "charger_enabled"}]
 
     async_add_entities(PeaqSwitch(s, hub) for s in switches)
+
 
 class PeaqSwitch(SwitchEntity, RestoreEntity):
     def __init__(self, switch, hub) -> None:

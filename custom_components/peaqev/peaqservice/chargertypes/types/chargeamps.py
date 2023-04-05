@@ -4,18 +4,20 @@ from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
-from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
+from peaqevcore.models.chargertype.servicecalls_options import \
+    ServiceCallsOptions
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
-from custom_components.peaqev.peaqservice.chargertypes.models.chargeamps_types import ChargeAmpsTypes
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
-from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
-from custom_components.peaqev.peaqservice.util.constants import (
-    CHARGER,
-    CHARGERID,
-    CURRENT,
-)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargeamps_types import \
+    ChargeAmpsTypes
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
+    ChargerType
+from custom_components.peaqev.peaqservice.hub.models.hub_options import \
+    HubOptions
+from custom_components.peaqev.peaqservice.util.constants import (CHARGER,
+                                                                 CHARGERID,
+                                                                 CURRENT)
 
 _LOGGER = logging.getLogger(__name__)
 # docs: https://github.com/kirei/hass-chargeamps
@@ -42,12 +44,14 @@ class ChargeAmps(ChargerBase):
                 hass=self._hass,
                 domain=self.domain_name,
                 entity_endings=self.entity_endings,
-                entity_schema=self.entities.entityschema
+                entity_schema=self.entities.entityschema,
             )
             self.entities.imported_entities = entitiesobj.imported_entities
             self.entities.entityschema = entitiesobj.entityschema
         except:
-            _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
+            _LOGGER.debug(
+                f"Could not get a proper entityschema for {self.domain_name}."
+            )
 
         self.set_sensors()
 
@@ -58,9 +62,9 @@ class ChargeAmps(ChargerBase):
                 off=self.call_off,
                 pause=self.call_pause,
                 resume=self.call_resume,
-                update_current=self.call_update_current
+                update_current=self.call_update_current,
             ),
-            options=self.servicecalls_options
+            options=self.servicecalls_options,
         )
 
     @property
@@ -80,7 +84,16 @@ class ChargeAmps(ChargerBase):
     @property
     def entity_endings(self) -> list:
         """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
-        return ["_power", "_1", "_2", "_status", "_dimmer", "_downlight", "_current", "_voltage"]
+        return [
+            "_power",
+            "_1",
+            "_2",
+            "_status",
+            "_dimmer",
+            "_downlight",
+            "_current",
+            "_voltage",
+        ]
 
     @property
     def native_chargerstates(self) -> list:
@@ -89,17 +102,17 @@ class ChargeAmps(ChargerBase):
 
     @property
     def call_on(self) -> CallType:
-        return CallType("enable", {
-            CHARGEPOINT: self._chargerid,
-            CONNECTOR:   self._chargeamps_connector
-        })
+        return CallType(
+            "enable",
+            {CHARGEPOINT: self._chargerid, CONNECTOR: self._chargeamps_connector},
+        )
 
     @property
     def call_off(self) -> CallType:
-        return CallType("disable", {
-            CHARGEPOINT: self._chargerid,
-            CONNECTOR:   self._chargeamps_connector
-        })
+        return CallType(
+            "disable",
+            {CHARGEPOINT: self._chargerid, CONNECTOR: self._chargeamps_connector},
+        )
 
     @property
     def call_resume(self) -> CallType:
@@ -111,18 +124,17 @@ class ChargeAmps(ChargerBase):
 
     @property
     def call_update_current(self) -> CallType:
-        return CallType("set_max_current", {
-            CHARGER:   CHARGEPOINT,
-            CHARGERID: self._chargerid,
-            CURRENT:   "max_current"
-        })
+        return CallType(
+            "set_max_current",
+            {CHARGER: CHARGEPOINT, CHARGERID: self._chargerid, CURRENT: "max_current"},
+        )
 
     @property
     def servicecalls_options(self) -> ServiceCallsOptions:
         return ServiceCallsOptions(
             allowupdatecurrent=True,
             update_current_on_termination=True,
-            switch_controls_charger=False
+            switch_controls_charger=False,
         )
 
     def get_allowed_amps(self) -> int:
@@ -146,7 +158,9 @@ class ChargeAmps(ChargerBase):
 
     def _set_chargeamps_type(self, main_sensor_entity) -> ChargeAmpsTypes:
         if self._hass.states.get(main_sensor_entity) is not None:
-            chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get("chargepoint_type")
+            chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get(
+                "chargepoint_type"
+            )
             return ChargeAmpsTypes.get_type(chargeampstype)
 
     def _determine_switch_entity(self) -> str:

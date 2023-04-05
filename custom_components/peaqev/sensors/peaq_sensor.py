@@ -2,7 +2,8 @@ import logging
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
-from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
+from custom_components.peaqev.peaqservice.util.constants import \
+    CHARGERCONTROLLER
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -43,7 +44,14 @@ class PeaqSensor(SensorBase):
         return ret
 
     async def async_update(self) -> None:
-        ret = await self.hub.async_request_sensor_data("non_hours", "caution_hours", "chargecontroller_status", "hour_state","is_price_aware","is_scheduler_active")
+        ret = await self.hub.async_request_sensor_data(
+            "non_hours",
+            "caution_hours",
+            "chargecontroller_status",
+            "hour_state",
+            "is_price_aware",
+            "is_scheduler_active",
+        )
         if ret is not None:
             self._state = ret.get("chargecontroller_status")
             self._nonhours = ret.get("non_hours")

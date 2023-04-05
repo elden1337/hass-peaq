@@ -1,7 +1,5 @@
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.const import (
-    PERCENTAGE
-)
+from homeassistant.const import PERCENTAGE
 from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
 from custom_components.peaqev.const import DOMAIN
@@ -45,6 +43,4 @@ class GainLossSensor(SensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict:
-        return {
-            "raw_state": self._raw_state
-        }
+        return {"raw_state": self._raw_state}

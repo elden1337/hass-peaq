@@ -6,17 +6,25 @@ from homeassistant.core import HomeAssistant
 
 _LOGGER = logging.getLogger(__name__)
 
-class ConfigFlowValidation:
 
+class ConfigFlowValidation:
     @staticmethod
     async def validate_power_sensor(hass: HomeAssistant, powersensor: str):
-        _powersensor = f"sensor.{powersensor}" if not powersensor.startswith("sensor.") else powersensor
+        _powersensor = (
+            f"sensor.{powersensor}"
+            if not powersensor.startswith("sensor.")
+            else powersensor
+        )
         val_state = hass.states.get(_powersensor)
         if val_state is None:
-            _LOGGER.error(f"Could not validate chosen powersensor {_powersensor}. It returned None as state.")
+            _LOGGER.error(
+                f"Could not validate chosen powersensor {_powersensor}. It returned None as state."
+            )
             raise FaultyPowerSensor
         elif not isinstance(float(val_state.state), float):
-            _LOGGER.error(f"Could not validate chosen powersensor {_powersensor}. The value of its state is not a number. {val_state.state}")
+            _LOGGER.error(
+                f"Could not validate chosen powersensor {_powersensor}. The value of its state is not a number. {val_state.state}"
+            )
             raise FaultyPowerSensor
 
     @staticmethod
@@ -29,8 +37,8 @@ class ConfigFlowValidation:
 
     @staticmethod
     async def validate_input_first_chargerid(data: dict) -> dict[str, Any]:
-        """ Validate the chargerId"""
-        #if len(data["chargerid"]) < 1:
+        """Validate the chargerId"""
+        # if len(data["chargerid"]) < 1:
         #    raise ValueError
 
         return {"title": data["name"]}

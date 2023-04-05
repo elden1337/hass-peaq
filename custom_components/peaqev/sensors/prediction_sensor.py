@@ -1,9 +1,7 @@
 import logging
 
 from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.const import (
-    ENERGY_KILO_WATT_HOUR
-)
+from homeassistant.const import ENERGY_KILO_WATT_HOUR
 
 from custom_components.peaqev.peaqservice.util.constants import PREDICTION
 from custom_components.peaqev.sensors.sensorbase import PowerDevice

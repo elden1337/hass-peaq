@@ -20,7 +20,10 @@ class IStateChanges:
             self.latest_chargecontroller_update = time.time()
             await self.hub.chargecontroller.async_set_status()
         if self.hub.options.price.price_aware:
-            if entity != self.hub.nordpool.nordpool_entity and (not self.hub.hours.is_initialized or time.time() - self.latest_nordpool_update > 60):
+            if entity != self.hub.nordpool.nordpool_entity and (
+                not self.hub.hours.is_initialized
+                or time.time() - self.latest_nordpool_update > 60
+            ):
                 """tweak to provoke nordpool to update more often"""
                 self.latest_nordpool_update = time.time()
                 try:
@@ -31,10 +34,20 @@ class IStateChanges:
             await self.async_handle_sensor_attribute()
         except Exception as e:
             _LOGGER.error(f"4: {e}")
-        if self.hub.chargecontroller.charger.session_active and update_session and hasattr(self.hub.sensors, "carpowersensor"):
-            setattr(self.hub.chargecontroller.charger.session, "session_energy", getattr(self.hub.sensors.carpowersensor, "value"))
+        if (
+            self.hub.chargecontroller.charger.session_active
+            and update_session
+            and hasattr(self.hub.sensors, "carpowersensor")
+        ):
+            setattr(
+                self.hub.chargecontroller.charger.session,
+                "session_energy",
+                getattr(self.hub.sensors.carpowersensor, "value"),
+            )
             if self.hub.options.price.price_aware:
-                self.hub.chargecontroller.charger.session.session_price = float(self.hub.nordpool.state)
+                self.hub.chargecontroller.charger.session.session_price = float(
+                    self.hub.nordpool.state
+                )
         if self.hub.hours.scheduler.schedule_created:
             try:
                 await self.hub.hours.scheduler.async_update()
@@ -59,16 +72,20 @@ class IStateChanges:
             if self.hub.sensors.carpowersensor.use_attribute:
                 entity = self.hub.sensors.carpowersensor
                 try:
-                    val = self.hub.hass.states.get(entity.entity).attributes.get(entity.attribute)
+                    val = self.hub.hass.states.get(entity.entity).attributes.get(
+                        entity.attribute
+                    )
                     if val is not None:
                         self.hub.sensors.carpowersensor.value = val
                         await self.hub.sensors.power.async_update(
                             carpowersensor_value=self.hub.sensors.carpowersensor.value,
-                            config_sensor_value=None
+                            config_sensor_value=None,
                         )
                     return
                 except Exception as e:
-                    _LOGGER.debug(f"Unable to get attribute-state for {entity.entity}|{entity.attribute}. {e}")
+                    _LOGGER.debug(
+                        f"Unable to get attribute-state for {entity.entity}|{entity.attribute}. {e}"
+                    )
 
     async def async_update_chargerobject_switch(self, value) -> None:
         self.hub.sensors.chargerobject_switch.value = value
@@ -77,8 +94,9 @@ class IStateChanges:
 
     async def async_update_total_energy_and_peak(self, value) -> None:
         self.hub.sensors.totalhourlyenergy.value = value
-        self.hub.sensors.current_peak.value = self.hub.sensors.locale.data.query_model.observed_peak
+        self.hub.sensors.current_peak.value = (
+            self.hub.sensors.locale.data.query_model.observed_peak
+        )
         self.hub.sensors.locale.data.query_model.try_update(
-            new_val=float(value),
-            timestamp=datetime.now()
+            new_val=float(value), timestamp=datetime.now()
         )

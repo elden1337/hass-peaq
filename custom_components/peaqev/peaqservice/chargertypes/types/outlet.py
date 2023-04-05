@@ -5,14 +5,15 @@ from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
-from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
+from peaqevcore.models.chargertype.servicecalls_options import \
+    ServiceCallsOptions
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
-from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
-from custom_components.peaqev.peaqservice.util.constants import (
-    SMARTOUTLET
-)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
+    ChargerType
+from custom_components.peaqev.peaqservice.hub.models.hub_options import \
+    HubOptions
+from custom_components.peaqev.peaqservice.util.constants import SMARTOUTLET
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,11 +33,8 @@ class SmartOutlet(ChargerBase):
 
         self._set_servicecalls(
             domain=self.domain_name,
-            model=ServiceCallsDTO(
-                on=self.call_on,
-                off=self.call_off
-            ),
-            options=self.servicecalls_options
+            model=ServiceCallsDTO(on=self.call_on, off=self.call_off),
+            options=self.servicecalls_options,
         )
 
     @property
@@ -67,7 +65,7 @@ class SmartOutlet(ChargerBase):
         return ServiceCallsOptions(
             allowupdatecurrent=False,
             update_current_on_termination=False,
-            switch_controls_charger=True
+            switch_controls_charger=True,
         )
 
     def _validate_setup(self):
@@ -82,8 +80,8 @@ class SmartOutlet(ChargerBase):
                 return False
 
         return all(
-            [check_states(
-                self.entities.powerswitch, str),
-                check_states(self.entities.powermeter, float)
+            [
+                check_states(self.entities.powerswitch, str),
+                check_states(self.entities.powermeter, float),
             ]
         )

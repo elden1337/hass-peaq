@@ -1,5 +1,7 @@
-from custom_components.peaqev.peaqservice.powertools.ipower_tools import IPowerTools
-from custom_components.peaqev.peaqservice.powertools.power_tools import PowerToolsLite, PowerTools
+from custom_components.peaqev.peaqservice.powertools.ipower_tools import \
+    IPowerTools
+from custom_components.peaqev.peaqservice.powertools.power_tools import (
+    PowerTools, PowerToolsLite)
 
 
 class PowerToolsFactory:

@@ -3,10 +3,10 @@ import logging
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from peaqevcore.models.hub.const import CHARGERDONE
 
-from custom_components.peaqev.const import (
-    DOMAIN)
+from custom_components.peaqev.const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
+
 
 class PeaqBinarySensorDone(BinarySensorEntity):
     def __init__(self, hub) -> None:

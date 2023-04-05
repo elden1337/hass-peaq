@@ -5,36 +5,36 @@ from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
-from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
+from peaqevcore.models.chargertype.servicecalls_options import \
+    ServiceCallsOptions
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
-from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
-from custom_components.peaqev.peaqservice.util.constants import (
-    CHARGER,
-    CHARGERID,
-    CURRENT,
-)
+from custom_components.peaqev.peaqservice.hub.models.hub_options import \
+    HubOptions
+from custom_components.peaqev.peaqservice.util.constants import (CHARGER,
+                                                                 CHARGERID,
+                                                                 CURRENT)
 
 _LOGGER = logging.getLogger(__name__)
 
 ENTITYENDINGS = [
-    '_current_temperature',
-    '_latest_reading_k',
-    '_latest_reading',
-    '_acc_session_energy',
-    '_pilot_level',
-    '_current_limit',
-    '_nr_of_phases',
-    '_current_charging_power',
-    '_current_charging_current',
-    '_status'
- ]
+    "_current_temperature",
+    "_latest_reading_k",
+    "_latest_reading",
+    "_acc_session_energy",
+    "_pilot_level",
+    "_current_limit",
+    "_nr_of_phases",
+    "_current_charging_power",
+    "_current_charging_current",
+    "_status",
+]
 
 DOMAINNAME = "garo_wallbox"
 UPDATECURRENT = True
 UPDATECURRENT_ON_TERMINATION = True
-#docs: https://github.com/sockless-coding/garo_wallbox/
+# docs: https://github.com/sockless-coding/garo_wallbox/
 
 """
 states:
@@ -54,55 +54,70 @@ states:
 'UNAVAILABLE'
 """
 
+
 class GaroWallbox(ChargerBase):
-    def __init__(self, hass: HomeAssistant, huboptions: HubOptions, auth_required: bool = False):
-        _LOGGER.warning("You are initiating GaroWallbox as Chargertype. Bare in mind that this chargertype is not finalized and may be very unstable.")
+    def __init__(
+        self, hass: HomeAssistant, huboptions: HubOptions, auth_required: bool = False
+    ):
+        _LOGGER.warning(
+            "You are initiating GaroWallbox as Chargertype. Bare in mind that this chargertype is not finalized and may be very unstable."
+        )
         self._hass = hass
         self._chargerid = huboptions.charger.chargerid
         self.getentities(DOMAINNAME, ENTITYENDINGS)
-        self.chargerstates[ChargeControllerStates.Idle] = ['NOT_CONNECTED']
+        self.chargerstates[ChargeControllerStates.Idle] = ["NOT_CONNECTED"]
         self.chargerstates[ChargeControllerStates.Connected] = [
-            'CONNECTED',
-            'CHARGING_PAUSED',
-            'CHARGING_CANCELLED'
+            "CONNECTED",
+            "CHARGING_PAUSED",
+            "CHARGING_CANCELLED",
         ]
-        self.chargerstates[ChargeControllerStates.Done] = ['CHARGING_FINISHED']
-        self.chargerstates[ChargeControllerStates.Charging] = ['CHARGING']
+        self.chargerstates[ChargeControllerStates.Done] = ["CHARGING_FINISHED"]
+        self.chargerstates[ChargeControllerStates.Charging] = ["CHARGING"]
         self.entities.chargerentity = f"sensor.{self.entities.entityschema}-status"
-        self.entities.powermeter = f"sensor.{self.entities.entityschema}-current_charging_power"
+        self.entities.powermeter = (
+            f"sensor.{self.entities.entityschema}-current_charging_power"
+        )
         self.options.powermeter_factor = 1
 
-        self.entities.ampmeter = f"sensor.{self.entities.entityschema}-current_charging_current"
+        self.entities.ampmeter = (
+            f"sensor.{self.entities.entityschema}-current_charging_current"
+        )
         self.options.powerswitch_controls_charging = False
         self._auth_required = auth_required
         self.entities.powerswitch = "n/a"
 
         servicecall_params = {
             CHARGER: "entity_id",
-            CHARGERID: self._chargerid, #sensor for garo, not id
-            CURRENT: "limit"
+            CHARGERID: self._chargerid,  # sensor for garo, not id
+            CURRENT: "limit",
         }
 
-        _on = CallType("set_mode", {"mode": "on", "entity_id": self.entities.chargerentity})
-        _off = CallType("set_mode", {"mode": "off", "entity_id": self.entities.chargerentity})
+        _on = CallType(
+            "set_mode", {"mode": "on", "entity_id": self.entities.chargerentity}
+        )
+        _off = CallType(
+            "set_mode", {"mode": "off", "entity_id": self.entities.chargerentity}
+        )
 
         self._set_servicecalls(
             domain=DOMAINNAME,
             model=ServiceCallsDTO(
                 on=_on,
                 off=_off,
-                update_current=CallType("set_current_limit", servicecall_params)
+                update_current=CallType("set_current_limit", servicecall_params),
             ),
             options=ServiceCallsOptions(
                 allowupdatecurrent=UPDATECURRENT,
-                update_current_on_termination=UPDATECURRENT_ON_TERMINATION
-            )
+                update_current_on_termination=UPDATECURRENT_ON_TERMINATION,
+            ),
         )
 
     def getentities(self, domain: str = None, endings: list = None):
         if len(self.entities.entityschema) < 1:
             domain = self.domainname if domain is None else domain
-            endings = self.entities.imported_entityendings if endings is None else endings
+            endings = (
+                self.entities.imported_entityendings if endings is None else endings
+            )
 
             entities = helper.get_entities_from_hass(self._hass, domain)
 
@@ -116,11 +131,13 @@ class GaroWallbox(ChargerBase):
                     splitted = e.split(".")
                     for ending in _endings:
                         if splitted[1].endswith(ending):
-                            candidate = splitted[1].replace(ending, '')
+                            candidate = splitted[1].replace(ending, "")
                             break
                     if len(candidate) > 1:
                         break
 
                 self.entities.entityschema = candidate
-                _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
+                _LOGGER.debug(
+                    f"entityschema is: {self.entities.entityschema} at {time.time()}"
+                )
                 self.entities.imported_entities = entities

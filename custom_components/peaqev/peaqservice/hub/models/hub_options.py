@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List
 
+
 @dataclass
 class Price:
     price_aware: bool = False
@@ -9,12 +10,14 @@ class Price:
     cautionhour_type: str = ""
     dynamic_top_price: bool = False
 
+
 @dataclass
 class Charger:
     chargertype: str = ""
     chargerid: str = ""
     powerswitch: str = ""
     powermeter: str = ""
+
 
 @dataclass
 class HubOptions:
@@ -31,4 +34,3 @@ class HubOptions:
     blocknocturnal: bool = False
     gainloss: bool = False
     """blocks charging during the night for safety concern reasons."""
-

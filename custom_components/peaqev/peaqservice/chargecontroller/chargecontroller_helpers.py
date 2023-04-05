@@ -6,5 +6,3 @@ async def async_defer_start(non_hours: list) -> bool:
     if (datetime.now() + timedelta(hours=1)).hour in non_hours:
         return datetime.now().minute >= 50
     return False
-
-

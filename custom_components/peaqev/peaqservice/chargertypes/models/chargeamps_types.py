@@ -15,7 +15,7 @@ class ChargeAmpsTypes(Enum):
         types = {
             "halo": ChargeAmpsTypes.Halo,
             "aura": ChargeAmpsTypes.Aura,
-            "dawn": ChargeAmpsTypes.Dawn
+            "dawn": ChargeAmpsTypes.Dawn,
         }
         try:
             return types[type_string.lower()]

@@ -4,12 +4,15 @@ from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
-from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
+from peaqevcore.models.chargertype.servicecalls_options import \
+    ServiceCallsOptions
 from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
-from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
+    ChargerType
+from custom_components.peaqev.peaqservice.hub.models.hub_options import \
+    HubOptions
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,7 +20,13 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class Zaptec(ChargerBase):
-    def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype, auth_required: bool = False):
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        huboptions: HubOptions,
+        chargertype,
+        auth_required: bool = False,
+    ):
         self._hass = hass
         self._type = chargertype
         self._chargerid = huboptions.charger.chargerid
@@ -35,12 +44,14 @@ class Zaptec(ChargerBase):
                 hass=self._hass,
                 domain=self.domain_name,
                 entity_endings=self.entity_endings,
-                entity_schema=self.entities.entityschema
+                entity_schema=self.entities.entityschema,
             )
             self.entities.imported_entities = entitiesobj.imported_entities
             self.entities.entityschema = entitiesobj.entityschema
         except:
-            _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
+            _LOGGER.debug(
+                f"Could not get a proper entityschema for {self.domain_name}."
+            )
 
         self.set_sensors()
         self._set_servicecalls(
@@ -49,9 +60,9 @@ class Zaptec(ChargerBase):
                 on=self.call_on,
                 off=self.call_off,
                 resume=self.call_resume,
-                pause=self.call_pause
+                pause=self.call_pause,
             ),
-            options=self.servicecalls_options
+            options=self.servicecalls_options,
         )
 
     @property
@@ -72,19 +83,12 @@ class Zaptec(ChargerBase):
     @property
     def native_chargerstates(self) -> list:
         """declare a list of the native-charger states available for the type."""
-        return [
-            "unknown",
-            "charging",
-            "disconnected",
-            "waiting",
-            "charge_done"
-        ]
-
+        return ["unknown", "charging", "disconnected", "waiting", "charge_done"]
 
     @property
     def max_amps(self) -> int:
         return 16
-    
+
     @property
     def call_on(self) -> CallType:
         return CallType("start_charging", {"charger_id": self._chargerid})
@@ -108,17 +112,21 @@ class Zaptec(ChargerBase):
     @property
     def servicecalls_options(self) -> ServiceCallsOptions:
         return ServiceCallsOptions(
-                allowupdatecurrent=False,
-                update_current_on_termination=False,
-                switch_controls_charger=False
-            )
+            allowupdatecurrent=False,
+            update_current_on_termination=False,
+            switch_controls_charger=False,
+        )
 
     def set_sensors(self):
         try:
             self.entities.chargerentity = f"sensor.zaptec_{self.entities.entityschema}"
-            self.entities.powermeter = f"{self.entities.chargerentity}|total_charge_power"
+            self.entities.powermeter = (
+                f"{self.entities.chargerentity}|total_charge_power"
+            )
             self.options.powermeter_factor = 1
-            self.entities.powerswitch = f"switch.zaptec_{self.entities.entityschema}_switch"
+            self.entities.powerswitch = (
+                f"switch.zaptec_{self.entities.entityschema}_switch"
+            )
             _LOGGER.debug("Sensors for Zaptec have been set up.")
         except Exception as e:
             _LOGGER.exception(f"Could not set needed sensors for Zaptec. {e}")

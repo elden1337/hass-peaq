@@ -1,5 +1,7 @@
-from peaqevcore.services.hourselection.initializers.price_aware_hours import PriceAwareHours
-from peaqevcore.services.hourselection.initializers.regular_hours import RegularHours
+from peaqevcore.services.hourselection.initializers.price_aware_hours import \
+    PriceAwareHours
+from peaqevcore.services.hourselection.initializers.regular_hours import \
+    RegularHours
 
 
 class HourselectionFactory:

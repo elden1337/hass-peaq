@@ -6,7 +6,9 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class SmoothAverage:
-    def __init__(self, max_age: int, max_samples: int, precision: int = 2, ignore: int = None):
+    def __init__(
+        self, max_age: int, max_samples: int, precision: int = 2, ignore: int = None
+    ):
         self._init_time = time.time()
         self._readings = []
         self._max_age = max_age
@@ -22,7 +24,7 @@ class SmoothAverage:
             if ret == 0:
                 _LOGGER.debug(f"Reading was 0. The samples are {self._readings}")
             return ret
-        #_LOGGER.debug(f"No readings available for smooth average")
+        # _LOGGER.debug(f"No readings available for smooth average")
         return None
 
     @property
@@ -39,12 +41,7 @@ class SmoothAverage:
 
     @property
     def is_clean(self) -> bool:
-        return all(
-            [
-                time.time() - self._init_time > 300,
-                self.samples > 1
-            ]
-        )
+        return all([time.time() - self._init_time > 300, self.samples > 1])
 
     def add_reading(self, val):
         t = time.time()
@@ -65,4 +62,3 @@ class SmoothAverage:
         for i in gen:
             if len(self._readings) > 2:
                 self._readings.remove(i)
-

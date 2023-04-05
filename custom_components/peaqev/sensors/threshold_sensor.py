@@ -5,7 +5,6 @@ from custom_components.peaqev.sensors.sensorbase import PowerDevice
 
 
 class PeaqThresholdSensor(PowerDevice):
-
     def __init__(self, hub, entry_id):
         name = f"{hub.hubname} {THRESHOLD}"
         super().__init__(hub, name, entry_id)
@@ -35,11 +34,11 @@ class PeaqThresholdSensor(PowerDevice):
         _start = getattr(self.hub.threshold, "start")
         _stop = getattr(self.hub.threshold, "stop")
         try:
-            self._start_threshold = round(_start,1)
+            self._start_threshold = round(_start, 1)
         except:
             self._start_threshold = _start
         try:
-            self._stop_threshold = round(_stop,1)
+            self._stop_threshold = round(_stop, 1)
         except:
             self._stop_threshold = _stop
 
@@ -47,5 +46,5 @@ class PeaqThresholdSensor(PowerDevice):
     def extra_state_attributes(self) -> dict:
         return {
             "start_threshold": self._start_threshold,
-            "stop_threshold":  self._stop_threshold,
+            "stop_threshold": self._stop_threshold,
         }

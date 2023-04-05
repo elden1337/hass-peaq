@@ -17,7 +17,9 @@ class NordpoolDTO:
         try:
             self.today = list(ret.attributes.get("today"))
         except Exception as e:
-            _LOGGER.exception(f"Could not parse today's prices from Nordpool. Unsolveable error. {e}")
+            _LOGGER.exception(
+                f"Could not parse today's prices from Nordpool. Unsolveable error. {e}"
+            )
             return
         self.tomorrow = list(ret.attributes.get("tomorrow", []))
         self.currency = str(ret.attributes.get("currency", ""))

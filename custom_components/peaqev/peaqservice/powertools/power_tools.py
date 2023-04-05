@@ -1,6 +1,9 @@
-from custom_components.peaqev.peaqservice.powertools.gainloss.gain_loss import GainLoss
-from custom_components.peaqev.peaqservice.powertools.ipower_tools import IPowerTools
-from custom_components.peaqev.peaqservice.powertools.power_canary.power_canary import PowerCanary
+from custom_components.peaqev.peaqservice.powertools.gainloss.gain_loss import \
+    GainLoss
+from custom_components.peaqev.peaqservice.powertools.ipower_tools import \
+    IPowerTools
+from custom_components.peaqev.peaqservice.powertools.power_canary.power_canary import \
+    PowerCanary
 
 
 class PowerTools(IPowerTools):

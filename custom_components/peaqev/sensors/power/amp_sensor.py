@@ -29,11 +29,13 @@ class PeaqAmpSensor(PowerDevice):
 
     async def async_update(self) -> None:
         if self.hub.is_initialized:
-            self._state = self.hub.threshold.allowedcurrent  #todo: composition
+            self._state = self.hub.threshold.allowedcurrent  # todo: composition
             await self.hub.sensors.chargerobject_switch.async_updatecurrent()
             self._charger_current = self.hub.sensors.chargerobject_switch.current
-            self._charger_phases = self.hub.threshold.phases  #todo: composition
-            self._all_currents = list(self.hub.threshold.currents.values())  #todo: composition
+            self._charger_phases = self.hub.threshold.phases  # todo: composition
+            self._all_currents = list(
+                self.hub.threshold.currents.values()
+            )  # todo: composition
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -41,6 +43,5 @@ class PeaqAmpSensor(PowerDevice):
         return {
             "charger_reported_current": curr,
             "peaqev phase-setting": self._charger_phases,
-            "allowed current-list": self._all_currents
+            "allowed current-list": self._all_currents,
         }
-

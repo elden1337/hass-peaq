@@ -13,7 +13,7 @@ class PeaqPowerSensor(PowerDevice):
     unit_of_measurement = POWER_WATT
 
     def __init__(self, hub, entry_id):
-        name = f"{hub.hubname} {hub.sensors.power.total.name}"  #todo: composition
+        name = f"{hub.hubname} {hub.sensors.power.total.name}"  # todo: composition
         super().__init__(hub, name, entry_id)
         self.hub = hub
         self._state = None
@@ -24,5 +24,4 @@ class PeaqPowerSensor(PowerDevice):
         return self._state
 
     def update(self) -> None:
-        self._state = self.hub.sensors.power.total.value  #todo: composition
-
+        self._state = self.hub.sensors.power.total.value  # todo: composition

@@ -1,9 +1,7 @@
 import logging
 
 from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.const import (
-    ENERGY_KILO_WATT_HOUR
-)
+from homeassistant.const import ENERGY_KILO_WATT_HOUR
 from homeassistant.helpers.restore_state import RestoreEntity
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
@@ -16,6 +14,7 @@ _LOGGER = logging.getLogger(__name__)
 class PeaqPeakSensor(SensorBase, RestoreEntity):
     device_class = SensorDeviceClass.ENERGY
     unit_of_measurement = ENERGY_KILO_WATT_HOUR
+
     def __init__(self, hub, entry_id):
         self._name = f"{hub.hubname} peak"
         self._charged_peak = 0
@@ -31,15 +30,21 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
             return 0
 
     async def async_update(self) -> None:
-        self._charged_peak = getattr(self.hub.sensors.locale.data.query_model,"charged_peak")
-        self._peaks_dict = getattr(self.hub.sensors.locale.data.query_model.peaks, "export_peaks")
-        self._observed_peak = getattr(self.hub.sensors.locale.data.query_model, "observed_peak")
+        self._charged_peak = getattr(
+            self.hub.sensors.locale.data.query_model, "charged_peak"
+        )
+        self._peaks_dict = getattr(
+            self.hub.sensors.locale.data.query_model.peaks, "export_peaks"
+        )
+        self._observed_peak = getattr(
+            self.hub.sensors.locale.data.query_model, "observed_peak"
+        )
 
     @property
     def extra_state_attributes(self) -> dict:
         attr_dict = {
             "observed_peak": float(self._observed_peak),
-            "peaks_dictionary": self.set_peaksdict()
+            "peaks_dictionary": self.set_peaksdict(),
         }
         return attr_dict
 
@@ -71,9 +76,9 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
             # self._peaks_dict = {"m":3,"p":{"16h4":2.93,"7h4":2.72,"26h0":2.87}}
             # self._observed_peak = 2.72
             self._charged_peak = state.state
-            self._peaks_dict = state.attributes.get('peaks_dictionary', 50)
+            self._peaks_dict = state.attributes.get("peaks_dictionary", 50)
             await self.hub.async_set_init_dict(self._peaks_dict)
-            self._observed_peak = state.attributes.get('observed_peak', 50)
+            self._observed_peak = state.attributes.get("observed_peak", 50)
         else:
             self._charged_peak = 0
             self._peaks_dict = {}
