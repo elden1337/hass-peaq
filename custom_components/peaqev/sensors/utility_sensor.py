@@ -20,9 +20,7 @@ DATA_TARIFF_SENSORS = "utility_meter_sensors"
 
 
 class PeaqUtilityCostSensor(UtilityMeterSensor):
-    def __init__(
-        self, hub, sensor: any, meter_type: str, meter_offset: str, entry_id: any, hass
-    ):
+    def __init__(self, hub, sensor: any, meter_type: str, meter_offset: str, entry_id: any, hass):
         self._entry_id = entry_id
         self.hub = hub
         self._attr_name = f"{self.hub.hubname} {sensor} {meter_type.lower()}"

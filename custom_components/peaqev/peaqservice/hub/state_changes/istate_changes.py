@@ -21,8 +21,7 @@ class IStateChanges:
             await self.hub.chargecontroller.async_set_status()
         if self.hub.options.price.price_aware:
             if entity != self.hub.nordpool.nordpool_entity and (
-                not self.hub.hours.is_initialized
-                or time.time() - self.latest_nordpool_update > 60
+                not self.hub.hours.is_initialized or time.time() - self.latest_nordpool_update > 60
             ):
                 """tweak to provoke nordpool to update more often"""
                 self.latest_nordpool_update = time.time()
@@ -45,9 +44,7 @@ class IStateChanges:
                 getattr(self.hub.sensors.carpowersensor, "value"),
             )
             if self.hub.options.price.price_aware:
-                self.hub.chargecontroller.charger.session.session_price = float(
-                    self.hub.nordpool.state
-                )
+                self.hub.chargecontroller.charger.session.session_price = float(self.hub.nordpool.state)
         if self.hub.hours.scheduler.schedule_created:
             try:
                 await self.hub.hours.scheduler.async_update()
@@ -72,9 +69,7 @@ class IStateChanges:
             if self.hub.sensors.carpowersensor.use_attribute:
                 entity = self.hub.sensors.carpowersensor
                 try:
-                    val = self.hub.hass.states.get(entity.entity).attributes.get(
-                        entity.attribute
-                    )
+                    val = self.hub.hass.states.get(entity.entity).attributes.get(entity.attribute)
                     if val is not None:
                         self.hub.sensors.carpowersensor.value = val
                         await self.hub.sensors.power.async_update(
@@ -94,9 +89,5 @@ class IStateChanges:
 
     async def async_update_total_energy_and_peak(self, value) -> None:
         self.hub.sensors.totalhourlyenergy.value = value
-        self.hub.sensors.current_peak.value = (
-            self.hub.sensors.locale.data.query_model.observed_peak
-        )
-        self.hub.sensors.locale.data.query_model.try_update(
-            new_val=float(value), timestamp=datetime.now()
-        )
+        self.hub.sensors.current_peak.value = self.hub.sensors.locale.data.query_model.observed_peak
+        self.hub.sensors.locale.data.query_model.try_update(new_val=float(value), timestamp=datetime.now())

@@ -52,9 +52,7 @@ class ChargeController(IChargeController):
             return ChargeControllerStates.Stop
         return ChargeControllerStates.Start
 
-    async def async_get_status_connected(
-        self, charger_state=None
-    ) -> Tuple[ChargeControllerStates, bool]:
+    async def async_get_status_connected(self, charger_state=None) -> Tuple[ChargeControllerStates, bool]:
         try:
             if (
                 charger_state is not None
@@ -67,10 +65,7 @@ class ChargeController(IChargeController):
                     [
                         any(
                             [
-                                (
-                                    self.below_startthreshold
-                                    and self.hub.sensors.totalhourlyenergy.value != 0
-                                ),
+                                (self.below_startthreshold and self.hub.sensors.totalhourlyenergy.value != 0),
                                 self.hub.is_free_charge,
                             ]
                         ),

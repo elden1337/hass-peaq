@@ -79,20 +79,14 @@ class HomeAssistantHub:
             charger_states=self.chargertype.chargerstates,
             charger_type=self.chargertype.type,
         )  # charger
-        self.sensors: IHubSensors = await HubSensorsFactory.async_create(
-            hub=self
-        )  # top level
+        self.sensors: IHubSensors = await HubSensorsFactory.async_create(hub=self)  # top level
         self.hours: Hours = await HourselectionFactory.async_create(self)  # top level
-        self.threshold: ThresholdBase = await ThresholdFactory.async_create(
-            self
-        )  # top level
+        self.threshold: ThresholdBase = await ThresholdFactory.async_create(self)  # top level
         self.prediction = Prediction(self)  # threshold
         self.servicecalls = ServiceCalls(self)  # top level
         self.states = await StateChangesFactory.async_create(self)  # top level
 
-        self.nordpool = NordPoolUpdater(
-            hub=self, is_active=self.hours.price_aware
-        )  # hours
+        self.nordpool = NordPoolUpdater(hub=self, is_active=self.hours.price_aware)  # hours
         self.power = await PowerToolsFactory.async_create(self)
 
         self.chargingtracker_entities = []
@@ -121,14 +115,8 @@ class HomeAssistantHub:
     def current_peak_dynamic(self):
         """Dynamically calculated peak to adhere to caution-hours"""
         if self.options.price.price_aware and len(self.dynamic_caution_hours) > 0:
-            if (
-                datetime.now().hour in self.dynamic_caution_hours.keys()
-                and not self.hours.timer.is_override
-            ):
-                return (
-                    self.sensors.current_peak.value
-                    * self.dynamic_caution_hours[datetime.now().hour]
-                )
+            if datetime.now().hour in self.dynamic_caution_hours.keys() and not self.hours.timer.is_override:
+                return self.sensors.current_peak.value * self.dynamic_caution_hours[datetime.now().hour]
         return self.sensors.current_peak.value
 
     @property
@@ -148,8 +136,7 @@ class HomeAssistantHub:
             try:
                 return int(
                     round(
-                        float(self.sensors.power.total.value)
-                        * float(self.nordpool.state),
+                        float(self.sensors.power.total.value) * float(self.nordpool.state),
                         0,
                     )
                 )
@@ -208,19 +195,13 @@ class HomeAssistantHub:
             self.async_update_average_weekly_price,
             _async=True,
         )
-        self.observer.add(
-            "update charger done", self.async_update_charger_done, _async=True
-        )
-        self.observer.add(
-            "update charger enabled", self.async_update_charger_enabled, _async=True
-        )
+        self.observer.add("update charger done", self.async_update_charger_done, _async=True)
+        self.observer.add("update charger enabled", self.async_update_charger_enabled, _async=True)
 
     """Composition below here"""
 
     async def async_set_init_dict(self, init_dict):
-        ret = await self.sensors.locale.data.query_model.peaks.async_set_init_dict(
-            init_dict
-        )
+        ret = await self.sensors.locale.data.query_model.peaks.async_set_init_dict(init_dict)
         if ret:
             ff = getattr(self.sensors.locale.data.query_model.peaks, "export_peaks")
             _LOGGER.debug(f"intialized_peaks: {ff}")

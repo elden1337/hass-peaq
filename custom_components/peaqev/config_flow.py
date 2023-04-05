@@ -49,18 +49,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return await self.async_step_charger()
             return await self.async_step_sensor()
 
-        return self.async_show_form(
-            step_id="user", data_schema=TYPE_SCHEMA, errors=errors, last_step=False
-        )
+        return self.async_show_form(step_id="user", data_schema=TYPE_SCHEMA, errors=errors, last_step=False)
 
     async def async_step_sensor(self, user_input=None):
         errors = {}
         if user_input is not None:
             try:
                 self.info = await ConfigFlowValidation.validate_input_first(user_input)
-                await ConfigFlowValidation.validate_power_sensor(
-                    self.hass, user_input["name"]
-                )
+                await ConfigFlowValidation.validate_power_sensor(self.hass, user_input["name"])
             except ValueError:
                 errors["base"] = "invalid_powersensor"
             if not errors:
@@ -200,9 +196,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         _priceaware = await self._get_existing_param("priceaware", False)
         _topprice = await self._get_existing_param("absolute_top_price", 0)
         _minprice = await self._get_existing_param("min_priceaware_threshold_price", 0)
-        _hourtype = await self._get_existing_param(
-            "cautionhour_type", CautionHourType.INTERMEDIATE.value
-        )
+        _hourtype = await self._get_existing_param("cautionhour_type", CautionHourType.INTERMEDIATE.value)
         _dynamic_top_price = await self._get_existing_param("dynamic_top_price", False)
 
         return self.async_show_form(
@@ -211,15 +205,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema(
                 {
                     vol.Optional("priceaware", default=_priceaware): cv.boolean,
-                    vol.Optional(
-                        "dynamic_top_price", default=_dynamic_top_price
-                    ): cv.boolean,
-                    vol.Optional(
-                        "absolute_top_price", default=_topprice
-                    ): cv.positive_float,
-                    vol.Optional(
-                        "min_priceaware_threshold_price", default=_minprice
-                    ): cv.positive_float,
+                    vol.Optional("dynamic_top_price", default=_dynamic_top_price): cv.boolean,
+                    vol.Optional("absolute_top_price", default=_topprice): cv.positive_float,
+                    vol.Optional("min_priceaware_threshold_price", default=_minprice): cv.positive_float,
                     vol.Optional(
                         "cautionhour_type",
                         default=_hourtype,
@@ -235,21 +223,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return await self.async_step_months()
 
         _nonhours = await self._get_existing_param("nonhours", list(range(0, 24)))
-        _cautionhours = await self._get_existing_param(
-            "cautionhours", list(range(0, 24))
-        )
+        _cautionhours = await self._get_existing_param("cautionhours", list(range(0, 24)))
 
         return self.async_show_form(
             step_id="hours",
             last_step=False,
             data_schema=vol.Schema(
                 {
-                    vol.Optional("nonhours", default=_nonhours): cv.multi_select(
-                        list(range(0, 24))
-                    ),
-                    vol.Optional(
-                        "cautionhours", default=_cautionhours
-                    ): cv.multi_select(list(range(0, 24))),
+                    vol.Optional("nonhours", default=_nonhours): cv.multi_select(list(range(0, 24))),
+                    vol.Optional("cautionhours", default=_cautionhours): cv.multi_select(list(range(0, 24))),
                 }
             ),
         )
@@ -261,9 +243,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self.options["startpeaks"] = months_dict
             return await self.async_step_misc()
 
-        _defaultvalues = self.config_entry.options.get(
-            "startpeaks", self.config_entry.data.get("startpeaks")
-        )
+        _defaultvalues = self.config_entry.options.get("startpeaks", self.config_entry.data.get("startpeaks"))
         defaultvalues = {float(k): v for (k, v) in _defaultvalues.items()}
 
         return self.async_show_form(

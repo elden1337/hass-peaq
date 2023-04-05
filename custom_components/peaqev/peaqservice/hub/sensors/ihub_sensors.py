@@ -33,14 +33,10 @@ class IHubSensors:
     chargertype: any = field(init=False)
 
     @abstractmethod
-    async def async_setup(
-        self, state_machine, options: HubOptions, domain: str, chargerobject: any
-    ):
+    async def async_setup(self, state_machine, options: HubOptions, domain: str, chargerobject: any):
         pass
 
-    async def async_setup_base(
-        self, options: HubOptions, state_machine, domain: str, chargerobject
-    ):
+    async def async_setup_base(self, options: HubOptions, state_machine, domain: str, chargerobject):
         self.chargertype = chargerobject
         self.state_machine = state_machine
         resultdict = {}
@@ -62,10 +58,7 @@ class IHubSensors:
             initval=0,
             startpeaks=options.startpeaks,
         )
-        if (
-            len(self.chargertype.entities.chargerentity)
-            and self.chargertype.type.value != "None"
-        ):
+        if len(self.chargertype.entities.chargerentity) and self.chargertype.type.value != "None":
             self.chargerobject = ChargerObject(
                 data_type=self.chargertype.native_chargerstates,
                 listenerentity=self.chargertype.entities.chargerentity,
@@ -123,14 +116,12 @@ class IHubSensors:
             if self.chargerobject is not None:
                 self.chargerobject.value = (
                     self.state_machine.states.get(self.chargerobject.entity).state
-                    if self.state_machine.states.get(self.chargerobject.entity)
-                    is not None
+                    if self.state_machine.states.get(self.chargerobject.entity) is not None
                     else 0
                 )
             self.chargerobject_switch.value = (
                 self.state_machine.states.get(self.chargerobject_switch.entity).state
-                if self.state_machine.states.get(self.chargerobject_switch.entity)
-                is not None
+                if self.state_machine.states.get(self.chargerobject_switch.entity) is not None
                 else ""
             )
             self.chargerobject_switch.updatecurrent()

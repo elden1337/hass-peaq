@@ -30,15 +30,9 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
             return 0
 
     async def async_update(self) -> None:
-        self._charged_peak = getattr(
-            self.hub.sensors.locale.data.query_model, "charged_peak"
-        )
-        self._peaks_dict = getattr(
-            self.hub.sensors.locale.data.query_model.peaks, "export_peaks"
-        )
-        self._observed_peak = getattr(
-            self.hub.sensors.locale.data.query_model, "observed_peak"
-        )
+        self._charged_peak = getattr(self.hub.sensors.locale.data.query_model, "charged_peak")
+        self._peaks_dict = getattr(self.hub.sensors.locale.data.query_model.peaks, "export_peaks")
+        self._observed_peak = getattr(self.hub.sensors.locale.data.query_model, "observed_peak")
 
     @property
     def extra_state_attributes(self) -> dict:

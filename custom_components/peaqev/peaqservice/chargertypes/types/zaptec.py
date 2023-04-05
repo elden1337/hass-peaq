@@ -49,9 +49,7 @@ class Zaptec(ChargerBase):
             self.entities.imported_entities = entitiesobj.imported_entities
             self.entities.entityschema = entitiesobj.entityschema
         except:
-            _LOGGER.debug(
-                f"Could not get a proper entityschema for {self.domain_name}."
-            )
+            _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
 
         self.set_sensors()
         self._set_servicecalls(
@@ -120,13 +118,9 @@ class Zaptec(ChargerBase):
     def set_sensors(self):
         try:
             self.entities.chargerentity = f"sensor.zaptec_{self.entities.entityschema}"
-            self.entities.powermeter = (
-                f"{self.entities.chargerentity}|total_charge_power"
-            )
+            self.entities.powermeter = f"{self.entities.chargerentity}|total_charge_power"
             self.options.powermeter_factor = 1
-            self.entities.powerswitch = (
-                f"switch.zaptec_{self.entities.entityschema}_switch"
-            )
+            self.entities.powerswitch = f"switch.zaptec_{self.entities.entityschema}_switch"
             _LOGGER.debug("Sensors for Zaptec have been set up.")
         except Exception as e:
             _LOGGER.exception(f"Could not set needed sensors for Zaptec. {e}")

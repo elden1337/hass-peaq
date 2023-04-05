@@ -49,9 +49,7 @@ class ChargeAmps(ChargerBase):
             self.entities.imported_entities = entitiesobj.imported_entities
             self.entities.entityschema = entitiesobj.entityschema
         except:
-            _LOGGER.debug(
-                f"Could not get a proper entityschema for {self.domain_name}."
-            )
+            _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
 
         self.set_sensors()
 
@@ -158,9 +156,7 @@ class ChargeAmps(ChargerBase):
 
     def _set_chargeamps_type(self, main_sensor_entity) -> ChargeAmpsTypes:
         if self._hass.states.get(main_sensor_entity) is not None:
-            chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get(
-                "chargepoint_type"
-            )
+            chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get("chargepoint_type")
             return ChargeAmpsTypes.get_type(chargeampstype)
 
     def _determine_switch_entity(self) -> str:

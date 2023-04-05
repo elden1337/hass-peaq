@@ -33,9 +33,7 @@ class PeaqAmpSensor(PowerDevice):
             await self.hub.sensors.chargerobject_switch.async_updatecurrent()
             self._charger_current = self.hub.sensors.chargerobject_switch.current
             self._charger_phases = self.hub.threshold.phases  # todo: composition
-            self._all_currents = list(
-                self.hub.threshold.currents.values()
-            )  # todo: composition
+            self._all_currents = list(self.hub.threshold.currents.values())  # todo: composition
 
     @property
     def extra_state_attributes(self) -> dict:

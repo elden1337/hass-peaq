@@ -97,10 +97,8 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             self._current_peak = ret.get("current_peak")
             self._max_charge = f"{ret.get('max_charge', '-')} kWh"
             self._average_nordpool_data = ret.get("average_nordpool_data", [])
-            self._charge_permittance = (
-                await self.async_set_current_charge_permittance_display(
-                    ret.get("non_hours"), ret.get("dynamic_caution_hours")
-                )
+            self._charge_permittance = await self.async_set_current_charge_permittance_display(
+                ret.get("non_hours"), ret.get("dynamic_caution_hours")
             )
 
             self._avg_cost = await self.async_currency_translation(
@@ -144,22 +142,14 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             await self.hub.nordpool.async_import_average_data(
                 state.attributes.get("Nordpool average data", 50)
             )
-            self._average_nordpool_data = list(
-                state.attributes.get("Nordpool average data", 50)
-            )
-            self._average_nordpool = (
-                f"{self.hub.nordpool.average_weekly} {self._currency}"
-            )
-            self._average_data_current_month = (
-                f"{self.hub.nordpool.average_month} {self._currency}"
-            )
+            self._average_nordpool_data = list(state.attributes.get("Nordpool average data", 50))
+            self._average_nordpool = f"{self.hub.nordpool.average_weekly} {self._currency}"
+            self._average_data_current_month = f"{self.hub.nordpool.average_month} {self._currency}"
         else:
             self._average_nordpool = f"- {self._currency}"
 
     @staticmethod
-    async def async_currency_translation(
-        value, currency, use_cent: bool = False
-    ) -> str:
+    async def async_currency_translation(value, currency, use_cent: bool = False) -> str:
         match currency:
             case "EUR":
                 ret = f"{value}¢" if use_cent else f"€ {value}"
@@ -172,9 +162,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         return ret
 
     @staticmethod
-    async def async_set_non_hours_display(
-        non_hours: list, prices_tomorrow: list
-    ) -> list:
+    async def async_set_non_hours_display(non_hours: list, prices_tomorrow: list) -> list:
         ret = []
         for i in non_hours:
             if i < datetime.now().hour and len(prices_tomorrow) > 0:
@@ -196,9 +184,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         return ret
 
     @staticmethod
-    async def async_set_current_charge_permittance_display(
-        non_hours, dynamic_caution_hours
-    ) -> str:
+    async def async_set_current_charge_permittance_display(non_hours, dynamic_caution_hours) -> str:
         ret = 100
         hour = datetime.now().hour
         if hour in non_hours:
@@ -207,9 +193,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             ret = int(dynamic_caution_hours.get(hour) * 100)
         return f"{str(ret)}%"
 
-    async def async_state_display(
-        self, non_hours: list, dynamic_caution_hours: dict
-    ) -> str:
+    async def async_state_display(self, non_hours: list, dynamic_caution_hours: dict) -> str:
         hour = datetime.now().hour
         ret = CHARGING_ALLOWED.capitalize()
         if self.hub.hours.timer.is_override:  # todo: composition

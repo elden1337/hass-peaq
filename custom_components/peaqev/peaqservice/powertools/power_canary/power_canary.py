@@ -38,10 +38,7 @@ class PowerCanary:
         """if returns false no charging can be conducted"""
         if self._enabled is False:
             return True
-        return (
-            self.hub.sensors.power.total.value
-            < self.model.fuse_max * self.model.cutoff_threshold
-        )
+        return self.hub.sensors.power.total.value < self.model.fuse_max * self.model.cutoff_threshold
 
     @property
     def fuse(self) -> str:
@@ -78,11 +75,7 @@ class PowerCanary:
     @property
     def onephase_amps(self) -> dict:
         ret = self._get_currently_allowed_amps(self.model.onephase_amps)
-        return {
-            k: v
-            for (k, v) in ret.items()
-            if v < FUSES_MAX_SINGLE_FUSE.get(self.model.fuse)
-        }
+        return {k: v for (k, v) in ret.items() if v < FUSES_MAX_SINGLE_FUSE.get(self.model.fuse)}
 
     @property
     def threephase_amps(self) -> dict:
@@ -121,11 +114,7 @@ class PowerCanary:
     def _get_currently_allowed_amps(self, amps) -> dict:
         """get the currently allowed amps based on the current power draw"""
         _max = self.model.fuse_max * self.model.cutoff_threshold
-        return {
-            k: v
-            for (k, v) in amps.items()
-            if k + self.hub.sensors.power.total.value < _max
-        }
+        return {k: v for (k, v) in amps.items() if k + self.hub.sensors.power.total.value < _max}
 
     def _validate(self):
         if self.model.fuse_max == 0:

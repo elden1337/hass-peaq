@@ -47,9 +47,7 @@ SCAN_INTERVAL = timedelta(seconds=4)
 ENERGY_COST_INTEGRAL = "energy_cost_integral"
 
 
-async def async_setup_entry(
-    hass: HomeAssistant, config: ConfigEntry, async_add_entities
-):
+async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_entities):
     """Add sensors for passed config_entry in HA."""
 
     hub = hass.data[DOMAIN]["hub"]
@@ -71,18 +69,12 @@ async def _async_setup(hub, config, hass, async_add_entities):
         ret.append(GainLossSensor(hub, config.entry_id, TimePeriods.Daily))
         ret.append(GainLossSensor(hub, config.entry_id, TimePeriods.Monthly))
         ret.append(PeaqPowerCostSensor(hub, config.entry_id))
+        ret.append(PeaqIntegrationCostSensor(hub, ENERGY_COST_INTEGRAL, config.entry_id))
         ret.append(
-            PeaqIntegrationCostSensor(hub, ENERGY_COST_INTEGRAL, config.entry_id)
+            PeaqUtilityCostSensor(hub, ENERGY_COST_INTEGRAL, DAILY, METER_OFFSET, config.entry_id, hass)
         )
         ret.append(
-            PeaqUtilityCostSensor(
-                hub, ENERGY_COST_INTEGRAL, DAILY, METER_OFFSET, config.entry_id, hass
-            )
-        )
-        ret.append(
-            PeaqUtilityCostSensor(
-                hub, ENERGY_COST_INTEGRAL, MONTHLY, METER_OFFSET, config.entry_id, hass
-            )
+            PeaqUtilityCostSensor(hub, ENERGY_COST_INTEGRAL, MONTHLY, METER_OFFSET, config.entry_id, hass)
         )
 
     if hub.options.price.price_aware:
@@ -112,16 +104,11 @@ async def _async_setup(hub, config, hass, async_add_entities):
             )
     if not hub.options.peaqev_lite:
         integrationsensors.append(ex.nametoid(CONSUMPTION_TOTAL_NAME))
-        if (
-            hub.options.powersensor_includes_car
-            or hub.chargertype.type is ChargerType.NoCharger
-        ):
+        if hub.options.powersensor_includes_car or hub.chargertype.type is ChargerType.NoCharger:
             ret.append(PeaqHousePowerSensor(hub, config.entry_id))
         else:
             ret.append(PeaqPowerSensor(hub, config.entry_id))
-        average_delta = (
-            2 if hub.sensors.locale.data.is_quarterly(hub.sensors.locale.data) else 5
-        )
+        average_delta = 2 if hub.sensors.locale.data.is_quarterly(hub.sensors.locale.data) else 5
         ret.append(
             PeaqAverageSensor(
                 hub,
@@ -130,11 +117,7 @@ async def _async_setup(hub, config, hass, async_add_entities):
                 timedelta(minutes=average_delta),
             )
         )
-        ret.append(
-            PeaqAverageSensor(
-                hub, config.entry_id, AVERAGECONSUMPTION_24H, timedelta(hours=24)
-            )
-        )
+        ret.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION_24H, timedelta(hours=24)))
         ret.append(PeaqPredictionSensor(hub, config.entry_id))
         ret.append(PeaqThresholdSensor(hub, config.entry_id))
         if any(

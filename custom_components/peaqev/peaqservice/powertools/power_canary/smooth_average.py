@@ -6,9 +6,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class SmoothAverage:
-    def __init__(
-        self, max_age: int, max_samples: int, precision: int = 2, ignore: int = None
-    ):
+    def __init__(self, max_age: int, max_samples: int, precision: int = 2, ignore: int = None):
         self._init_time = time.time()
         self._readings = []
         self._max_age = max_age

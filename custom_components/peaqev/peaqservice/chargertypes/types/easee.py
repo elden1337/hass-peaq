@@ -57,9 +57,7 @@ class Easee(ChargerBase):
             self.entities.imported_entities = entitiesobj.imported_entities
             self.entities.entityschema = entitiesobj.entityschema
         except:
-            _LOGGER.debug(
-                f"Could not get a proper entityschema for {self.domain_name}."
-            )
+            _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
 
         self.set_sensors()
         self._set_servicecalls(
@@ -126,27 +124,19 @@ class Easee(ChargerBase):
 
     @property
     def call_on(self) -> CallType:
-        return CallType(
-            ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "start"}
-        )
+        return CallType(ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "start"})
 
     @property
     def call_off(self) -> CallType:
-        return CallType(
-            ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "stop"}
-        )
+        return CallType(ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "stop"})
 
     @property
     def call_resume(self) -> CallType:
-        return CallType(
-            ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "resume"}
-        )
+        return CallType(ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "resume"})
 
     @property
     def call_pause(self) -> CallType:
-        return CallType(
-            ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "pause"}
-        )
+        return CallType(ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "pause"})
 
     @property
     def call_update_current(self) -> CallType:

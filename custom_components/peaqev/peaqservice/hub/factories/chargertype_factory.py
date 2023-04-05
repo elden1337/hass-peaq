@@ -45,15 +45,9 @@ class ChargerTypeFactory:
         input_type = options.charger.chargertype
         try:
             charger = await ChargerTypeFactory.async_get_class(input_type)
-            _LOGGER.debug(
-                f"Managed to set up charger-class for chargertype {input_type}"
-            )
+            _LOGGER.debug(f"Managed to set up charger-class for chargertype {input_type}")
             # charger.validatecharger()
-            return charger(
-                hass=hass, huboptions=options, chargertype=ChargerType(input_type)
-            )
+            return charger(hass=hass, huboptions=options, chargertype=ChargerType(input_type))
         except Exception as e:
-            _LOGGER.debug(
-                f"Exception. Did not manage to set up charge-class for {input_type}: {e}"
-            )
+            _LOGGER.debug(f"Exception. Did not manage to set up charge-class for {input_type}: {e}")
             raise Exception

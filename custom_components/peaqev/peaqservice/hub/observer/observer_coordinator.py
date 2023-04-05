@@ -42,9 +42,7 @@ class Observer:
             self.model.subscribers[command] = [FunctionCall(func, _async)]
 
     async def async_broadcast(self, command: str, argument=None):
-        await self.hub.state_machine.async_add_executor_job(
-            self.broadcast, command, argument
-        )
+        await self.hub.state_machine.async_add_executor_job(self.broadcast, command, argument)
 
     def broadcast(self, command: str, argument=None):
         _expiration = time.time() + TIMEOUT
@@ -58,9 +56,7 @@ class Observer:
                 self._dequeue_and_broadcast(q)
 
     def _dequeue_and_broadcast(self, command: Command):
-        _LOGGER.debug(
-            f"ready to broadcast: {command.command} with params: {command.argument}"
-        )
+        _LOGGER.debug(f"ready to broadcast: {command.command} with params: {command.argument}")
         if self._ok_to_broadcast(command.command):
             if command.expiration > time.time():
                 func: FunctionCall

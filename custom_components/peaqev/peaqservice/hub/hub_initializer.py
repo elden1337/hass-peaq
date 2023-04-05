@@ -27,21 +27,15 @@ class HubInitializer:
 
         init_types = {InitializerTypes.Hours: self.parent.hours.is_initialized}
         if hasattr(self.parent.sensors, "carpowersensor"):
-            init_types[
-                InitializerTypes.CarPowerSensor
-            ] = self.parent.sensors.carpowersensor.is_initialized
+            init_types[InitializerTypes.CarPowerSensor] = self.parent.sensors.carpowersensor.is_initialized
         if hasattr(self.parent.sensors, "chargerobject_switch"):
             init_types[
                 InitializerTypes.ChargerObjectSwitch
             ] = self.parent.sensors.chargerobject_switch.is_initialized
         if hasattr(self.parent.sensors, "power"):
-            init_types[
-                InitializerTypes.Power
-            ] = self.parent.sensors.power.is_initialized
+            init_types[InitializerTypes.Power] = self.parent.sensors.power.is_initialized
         if hasattr(self.parent.sensors, "chargerobject"):
-            init_types[
-                InitializerTypes.ChargerObject
-            ] = self.parent.sensors.chargerobject.is_initialized
+            init_types[InitializerTypes.ChargerObject] = self.parent.sensors.chargerobject.is_initialized
 
         if all(init_types.values()):
             self._initialized = True

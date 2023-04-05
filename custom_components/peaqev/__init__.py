@@ -53,9 +53,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     ):  # pylint:disable=unused-argument
         hours = call.data.get("hours")
         _LOGGER.debug("Calling {} service".format(ServiceCalls.OVERRIDE_NONHOURS.value))
-        await hub.servicecalls.async_call_override_nonhours(
-            1 if hours is None else hours
-        )
+        await hub.servicecalls.async_call_override_nonhours(1 if hours is None else hours)
 
     async def async_servicehandler_scheduler_set(
         call,
@@ -77,9 +75,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
         await hub.servicecalls.async_call_scheduler_cancel()
 
     for platform in PLATFORMS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(conf, platform)
-        )
+        hass.async_create_task(hass.config_entries.async_forward_entry_setup(conf, platform))
 
     # Register services
     SERVICES = {
@@ -122,31 +118,17 @@ async def async_set_options(conf) -> HubOptions:
     if options.charger.chargertype == ChargerType.NoCharger.value:
         options.powersensor_includes_car = True
     else:
-        options.powersensor_includes_car = conf.data.get(
-            "powersensorincludescar", False
-        )
+        options.powersensor_includes_car = conf.data.get("powersensorincludescar", False)
     options.startpeaks = conf.options.get("startpeaks", conf.data.get("startpeaks"))
     options.cautionhours = await _async_get_existing_param(conf, "cautionhours", [])
     options.nonhours = await _async_get_existing_param(conf, "nonhours", [])
-    options.price.price_aware = await _async_get_existing_param(
-        conf, "priceaware", False
-    )
-    options.price.min_price = await _async_get_existing_param(
-        conf, "min_priceaware_threshold_price", 0
-    )
-    options.price.top_price = await _async_get_existing_param(
-        conf, "absolute_top_price", 0
-    )
-    options.price.dynamic_top_price = await _async_get_existing_param(
-        conf, "dynamic_top_price", False
-    )
-    options.price.cautionhour_type = await _async_get_existing_param(
-        conf, "cautionhour_type", "intermediate"
-    )
+    options.price.price_aware = await _async_get_existing_param(conf, "priceaware", False)
+    options.price.min_price = await _async_get_existing_param(conf, "min_priceaware_threshold_price", 0)
+    options.price.top_price = await _async_get_existing_param(conf, "absolute_top_price", 0)
+    options.price.dynamic_top_price = await _async_get_existing_param(conf, "dynamic_top_price", False)
+    options.price.cautionhour_type = await _async_get_existing_param(conf, "cautionhour_type", "intermediate")
     options.fuse_type = await _async_get_existing_param(conf, "mains", "")
-    options.blocknocturnal = await _async_get_existing_param(
-        conf, "blocknocturnal", False
-    )
+    options.blocknocturnal = await _async_get_existing_param(conf, "blocknocturnal", False)
     options.gainloss = await _async_get_existing_param(conf, "gainloss", False)
     return options
 

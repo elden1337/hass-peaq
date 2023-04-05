@@ -42,9 +42,7 @@ class ServiceCalls:
                 try:
                     start_time = datetime.strptime(schedule_starttime, "%Y-%m-%d %H:%M")
                 except ValueError:
-                    _LOGGER.error(
-                        f"Could not parse schedule start time: {schedule_starttime}"
-                    )
+                    _LOGGER.error(f"Could not parse schedule start time: {schedule_starttime}")
             else:
                 start_time = datetime.now()
             _LOGGER.debug(
