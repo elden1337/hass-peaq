@@ -13,7 +13,8 @@ from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 
-from custom_components.peaqev import DOMAIN
+DOMAIN = "peaqev"
+
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import ChargeControllerFactory
