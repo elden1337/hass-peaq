@@ -46,7 +46,10 @@ class HubInitializer:
 
     def _scramble_not_initialized(self, init_types) -> bool:
         not_ready = [r.value for r in init_types if init_types[r] is False]
-        if len(not_ready) != self.not_ready_list_old_state or self.initialized_log_last_logged - time.time() > 30:
+        if any([
+            len(not_ready) != self.not_ready_list_old_state,
+            self.initialized_log_last_logged - time.time() > 30
+            ]):
             _LOGGER.info(f"Hub is awaiting {not_ready} before being ready to use.")
             self.not_ready_list_old_state = len(not_ready)
             self.initialized_log_last_logged = time.time()

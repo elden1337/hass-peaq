@@ -11,13 +11,14 @@ from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptio
 from custom_components.peaqev.peaqservice.util.constants import TYPELITE
 from .const import (
     DOMAIN,
-    PLATFORMS, LISTENER_FN_CLOSE
+    PLATFORMS
 )
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
 _LOGGER = logging.getLogger(__name__)
 
 from enum import Enum
+
 
 class ServiceCalls(Enum):
     ENABLE = "enable"
@@ -33,7 +34,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][conf.entry_id] = conf.data
     options = await async_set_options(conf)
-    hub = HomeAssistantHub(hass, options)
+    hub = HomeAssistantHub(hass, options, DOMAIN)
     hass.data[DOMAIN]["hub"] = hub
     await hub.setup()
 

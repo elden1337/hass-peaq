@@ -13,8 +13,6 @@ from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 
-DOMAIN = "peaqev"
-
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import ChargeControllerFactory
@@ -52,9 +50,11 @@ class HomeAssistantHub:
     def __init__(
             self,
             hass: HomeAssistant,
-            options: HubOptions
+            options: HubOptions,
+            domain:str
     ):
-        self.hubname = DOMAIN.capitalize()
+        self.hubname = domain.capitalize()
+        self.domain = domain
         self.state_machine = hass
         self.options: HubOptions = options
         self._is_initialized = False
@@ -67,7 +67,7 @@ class HomeAssistantHub:
         self.chargecontroller: IChargeController = await ChargeControllerFactory.async_create(self,
                                                                                               charger_states=self.chargertype.chargerstates,
                                                                                               charger_type=self.chargertype.type)  # charger
-        self.sensors: IHubSensors = await HubSensorsFactory.async_create(self.options)  # top level
+        self.sensors: IHubSensors = await HubSensorsFactory.async_create(hub=self)  # top level
         self.hours: Hours = await HourselectionFactory.async_create(self)  # top level
         self.threshold: ThresholdBase = await ThresholdFactory.async_create(self)  # top level
         self.prediction = Prediction(self)  # threshold
@@ -147,7 +147,7 @@ class HomeAssistantHub:
         return tracker_entities
 
     async def async_set_chargingtracker_entities(self) -> list:
-        ret = [f"sensor.{DOMAIN}_{nametoid(CHARGERCONTROLLER)}"]
+        ret = [f"sensor.{self.domain}_{nametoid(CHARGERCONTROLLER)}"]
         if hasattr(self.sensors, "chargerobject_switch"):
             ret.append(self.sensors.chargerobject_switch.entity)
         if hasattr(self.sensors, "carpowersensor"):
