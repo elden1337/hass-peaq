@@ -39,7 +39,7 @@ class HubInitializer:
 
         if all(init_types.values()):
             self._initialized = True
-            _LOGGER.info(f"Hub is ready to use.")
+            _LOGGER.info("Hub is ready to use.")
             _LOGGER.debug(f"Hub is initialized with {self.parent.options.price.cautionhour_type} as cautionhourtype.")
             return True
         return self._scramble_not_initialized(init_types)

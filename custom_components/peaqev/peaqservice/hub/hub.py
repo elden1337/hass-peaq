@@ -51,7 +51,7 @@ class HomeAssistantHub:
             self,
             hass: HomeAssistant,
             options: HubOptions,
-            domain:str
+            domain: str
     ):
         self.hubname = domain.capitalize()
         self.domain = domain
@@ -64,9 +64,9 @@ class HomeAssistantHub:
 
     async def setup(self):
         self.chargertype = await ChargerTypeFactory.async_create(self.state_machine, self.options)  # chargecontroller
-        self.chargecontroller: IChargeController = await ChargeControllerFactory.async_create(self,
-                                                                                              charger_states=self.chargertype.chargerstates,
-                                                                                              charger_type=self.chargertype.type)  # charger
+        self.chargecontroller = await ChargeControllerFactory.async_create(
+                                self, charger_states=self.chargertype.chargerstates, charger_type=self.chargertype.type
+                                )  # charger
         self.sensors: IHubSensors = await HubSensorsFactory.async_create(hub=self)  # top level
         self.hours: Hours = await HourselectionFactory.async_create(self)  # top level
         self.threshold: ThresholdBase = await ThresholdFactory.async_create(self)  # top level
@@ -123,7 +123,8 @@ class HomeAssistantHub:
         if self.options.price.price_aware:
             try:
                 return int(round(float(self.sensors.power.total.value) * float(self.nordpool.state), 0))
-            except:
+            except Exception as e:
+                _LOGGER.error(f"Unable to calculate watt cost. Exception: {e}")
                 return 0
         return 0
 
@@ -185,7 +186,8 @@ class HomeAssistantHub:
         if ret is not None:
             try:
                 return float(ret.state)
-            except:
+            except TypeError as e:
+                _LOGGER.error(f"Unable to convert power sensor to float: {e}")
                 return None
         return ret
 
