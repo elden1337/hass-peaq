@@ -12,7 +12,7 @@ jobs:
       - name: Format code with black
         run: |
           pip install black
-          black .
+          black --line-length 110.
       - name: Sort imports with isort
         run: |
           pip install isort

@@ -1,3 +1,10 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
+
 import logging
 import time
 from abc import abstractmethod
@@ -6,16 +13,11 @@ from typing import Tuple
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import \
-    Charger
-from custom_components.peaqev.peaqservice.chargecontroller.chargercontroller_model import \
-    ChargeControllerModel
-from custom_components.peaqev.peaqservice.chargecontroller.const import (
-    DEBUGLOG_TIMEOUT, DONETIMEOUT)
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
-from custom_components.peaqev.peaqservice.util.constants import \
-    CHARGERCONTROLLER
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import Charger
+from custom_components.peaqev.peaqservice.chargecontroller.chargercontroller_model import ChargeControllerModel
+from custom_components.peaqev.peaqservice.chargecontroller.const import (DEBUGLOG_TIMEOUT, DONETIMEOUT)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
+from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,7 +28,7 @@ class IChargeController:
 
     # charger_type: ChargerType
 
-    def __init__(self, hub, charger_states, charger_type):
+    def __init__(self, hub: HomeAssistantHub, charger_states, charger_type):
         self.hub = hub
         self.name: str = f"{self.hub.hubname} {CHARGERCONTROLLER}"
         self.model = ChargeControllerModel(
@@ -169,12 +171,12 @@ class IChargeController:
             if charger_state in self.model.charger_states.get(
                 ChargeControllerStates.Done
             ):
-                self.__debug_log(
+                await self.async_debug_log(
                     f"'is_done' reported that charger is Done based on current charger state"
                 )
                 return await self.async_is_done_return(True)
         elif time.time() - self.model.latest_charger_start > DONETIMEOUT:
-            self.__debug_log(
+            await self.async_debug_log(
                 f"'is_done' reported that charger is Done because of idle-charging for more than {DONETIMEOUT} seconds."
             )
             return await self.async_is_done_return(True)
@@ -185,7 +187,7 @@ class IChargeController:
             await self.hub.observer.async_broadcast("update charger done", True)
         return state
 
-    def __debug_log(self, message: str):
+    async def async_debug_log(self, message: str):
         if time.time() - self.model.latest_debuglog > DEBUGLOG_TIMEOUT:
             _LOGGER.debug(message)
             self.model.latest_debuglog = time.time()

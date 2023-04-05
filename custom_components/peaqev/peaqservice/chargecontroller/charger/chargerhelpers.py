@@ -1,8 +1,13 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import Charger
+
 import time
 from datetime import datetime
-
-from custom_components.peaqev.peaqservice.chargecontroller.charger.const import (
-    LOOP_RELEASE_TIMER, LOOP_WAIT)
+from custom_components.peaqev.peaqservice.chargecontroller.charger.const import (LOOP_RELEASE_TIMER, LOOP_WAIT)
 from custom_components.peaqev.peaqservice.util.constants import (CHARGER,
                                                                  CHARGERID,
                                                                  CURRENT,
@@ -22,7 +27,7 @@ async def async_set_chargerparams(calls, amps: int) -> dict:
 
 
 class ChargerHelpers:
-    def __init__(self, charger):
+    def __init__(self, charger: Charger):
         self.charger = charger
 
     def wait_turn_on(self) -> bool:
