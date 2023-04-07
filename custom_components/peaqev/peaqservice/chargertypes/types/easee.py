@@ -64,7 +64,7 @@ class Easee(IChargerType):
 
         try:
             await self.async_set_sensors()
-        except Exception as e:
+        except Exception:
             return False
 
         await self.async_set_servicecalls(

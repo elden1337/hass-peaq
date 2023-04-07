@@ -6,7 +6,8 @@ from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_help
     async_defer_start
 from custom_components.peaqev.peaqservice.chargecontroller.const import \
     INITIALIZING
-from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
+from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
+    IChargeController
 
 _LOGGER = logging.getLogger(__name__)
 

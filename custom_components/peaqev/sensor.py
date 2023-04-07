@@ -37,12 +37,12 @@ from custom_components.peaqev.sensors.session_sensor import (
 from custom_components.peaqev.sensors.sql_sensor import PeaqPeakSensor
 from custom_components.peaqev.sensors.threshold_sensor import \
     PeaqThresholdSensor
-from custom_components.peaqev.sensors.utility_sensor import PeaqUtilitySensor, UtilityMeterDTO
+from custom_components.peaqev.sensors.utility_sensor import (PeaqUtilitySensor,
+                                                             UtilityMeterDTO)
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(seconds=4)
 ENERGY_COST_INTEGRAL = "energy_cost_integral"
-
 
 
 async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_entities):
@@ -52,16 +52,19 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
     hass.async_create_task(async_setup(hub, config, hass, async_add_entities))
 
 
-async def async_setup_utility_meters(hub, hass, utility_meters:list) -> list:
-
+async def async_setup_utility_meters(hub, hass, utility_meters: list) -> list:
     ret = []
     for meter in utility_meters:
-        ret.append(PeaqUtilitySensor(hub, hass, meter.sensor, meter.meter_type, meter.entry_id, meter.visible_default))
+        ret.append(
+            PeaqUtilitySensor(
+                hub, hass, meter.sensor, meter.meter_type, meter.entry_id, meter.visible_default
+            )
+        )
 
     entity_registry = er.async_get(hass)
     for r in ret:
         existing_entity_id = entity_registry.async_get_entity_id(
-        domain="sensor", platform=DOMAIN, unique_id=r.unique_id
+            domain="sensor", platform=DOMAIN, unique_id=r.unique_id
         )
         if existing_entity_id and hass.states.get(existing_entity_id):
             _LOGGER.debug(f"already found {r} in er. removing from setup.")
@@ -87,8 +90,22 @@ async def async_setup(hub, config, hass, async_add_entities):
         ret.append(GainLossSensor(hub, config.entry_id, TimePeriods.Monthly))
         ret.append(PeaqPowerCostSensor(hub, config.entry_id))
         ret.append(PeaqIntegrationCostSensor(hub, ENERGY_COST_INTEGRAL, config.entry_id))
-        utility_meters.append(UtilityMeterDTO(visible_default=False, sensor=ENERGY_COST_INTEGRAL, meter_type=TimePeriods.Daily, entry_id=config.entry_id))
-        utility_meters.append(UtilityMeterDTO(visible_default=False, sensor=ENERGY_COST_INTEGRAL, meter_type=TimePeriods.Monthly, entry_id=config.entry_id))
+        utility_meters.append(
+            UtilityMeterDTO(
+                visible_default=False,
+                sensor=ENERGY_COST_INTEGRAL,
+                meter_type=TimePeriods.Daily,
+                entry_id=config.entry_id,
+            )
+        )
+        utility_meters.append(
+            UtilityMeterDTO(
+                visible_default=False,
+                sensor=ENERGY_COST_INTEGRAL,
+                meter_type=TimePeriods.Monthly,
+                entry_id=config.entry_id,
+            )
+        )
 
     if hub.options.price.price_aware:
         ret.append(PeaqMoneySensor(hub, config.entry_id))
@@ -96,11 +113,21 @@ async def async_setup(hub, config, hass, async_add_entities):
             ret.append(PeaqSessionCostSensor(hub, config.entry_id))
         if not hub.options.peaqev_lite:
             utility_meters.append(
-                UtilityMeterDTO(visible_default=False, sensor=ex.nametoid(CONSUMPTION_TOTAL_NAME), meter_type=TimePeriods.Daily,
-                                entry_id=config.entry_id))
+                UtilityMeterDTO(
+                    visible_default=False,
+                    sensor=ex.nametoid(CONSUMPTION_TOTAL_NAME),
+                    meter_type=TimePeriods.Daily,
+                    entry_id=config.entry_id,
+                )
+            )
             utility_meters.append(
-                UtilityMeterDTO(visible_default=False, sensor=ex.nametoid(CONSUMPTION_TOTAL_NAME),
-                                meter_type=TimePeriods.Monthly, entry_id=config.entry_id))
+                UtilityMeterDTO(
+                    visible_default=False,
+                    sensor=ex.nametoid(CONSUMPTION_TOTAL_NAME),
+                    meter_type=TimePeriods.Monthly,
+                    entry_id=config.entry_id,
+                )
+            )
 
     if not hub.options.peaqev_lite:
         integrationsensors.append(ex.nametoid(CONSUMPTION_TOTAL_NAME))
@@ -175,8 +202,13 @@ async def async_setup(hub, config, hass, async_add_entities):
 
     for i in integrationsensors:
         utility_meters.append(
-            UtilityMeterDTO(visible_default=True, sensor=i,
-                            meter_type=hub.sensors.locale.data.peak_cycle, entry_id=config.entry_id))
+            UtilityMeterDTO(
+                visible_default=True,
+                sensor=i,
+                meter_type=hub.sensors.locale.data.peak_cycle,
+                entry_id=config.entry_id,
+            )
+        )
 
     ret.extend(await async_setup_utility_meters(hub, hass, utility_meters))
 
