@@ -33,6 +33,7 @@ def set_entitiesmodel(
             _LOGGER.debug(f"entityschema is: {candidate} at {time.time()}")
             return EntitiesModel(entityschema=candidate, imported_entities=entities)
 
+
 def get_entities_from_hass(hass: HomeAssistant, domain_name: str) -> list:
     try:
         return [
@@ -46,6 +47,7 @@ def get_entities_from_hass(hass: HomeAssistant, domain_name: str) -> list:
     except Exception as e:
         _LOGGER.exception(f"Could not get charger-entities from Home Assistant: {e}")
         return []
+
 
 async def async_set_entitiesmodel(
     hass: HomeAssistant, domain: str, entity_endings: list, entity_schema: str
@@ -67,6 +69,7 @@ async def async_set_entitiesmodel(
                     break
             _LOGGER.debug(f"entityschema is: {candidate} at {time.time()}")
             return EntitiesModel(entityschema=candidate, imported_entities=entities)
+
 
 async def async_get_entities_from_hass(hass: HomeAssistant, domain_name: str) -> list:
     try:

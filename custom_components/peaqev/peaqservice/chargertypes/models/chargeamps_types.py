@@ -22,7 +22,7 @@ class ChargeAmpsTypes(Enum):
         except:
             _LOGGER.warning("Unable to identify Chargeamps type.")
             return ChargeAmpsTypes.Unknown
-        
+
     @staticmethod
     async def async_get_type(type_string: str):
         types = {

@@ -212,7 +212,7 @@ class ChargeAmps(ChargerBase):
                 if isinstance(amps, int):
                     return e
         raise Exception
-    
+
     async def async_determine_entities(self) -> list:
         ret = []
         for e in self.entities.imported_entities:
@@ -223,7 +223,5 @@ class ChargeAmps(ChargerBase):
 
     async def async_set_chargeamps_type(self, main_sensor_entity) -> ChargeAmpsTypes:
         if self._hass.states.get(main_sensor_entity) is not None:
-            chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get(
-                "chargepoint_type"
-            )
+            chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get("chargepoint_type")
             return await ChargeAmpsTypes.async_get_type(chargeampstype)
