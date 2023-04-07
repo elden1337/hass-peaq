@@ -35,7 +35,7 @@ class SmartOutlet(ChargerBase):
             model=ServiceCallsDTO(on=self.call_on, off=self.call_off),
             options=self.servicecalls_options,
         )
-    
+
     async def async_setup(self):
         await self.async_validate_setup()
 

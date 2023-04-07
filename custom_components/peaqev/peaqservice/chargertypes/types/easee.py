@@ -47,7 +47,6 @@ class Easee(ChargerBase):
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
         self.chargerstates[ChargeControllerStates.Done] = ["completed"]
 
-        
     async def async_setup(self):
         try:
             entitiesobj = await helper.async_set_entitiesmodel(

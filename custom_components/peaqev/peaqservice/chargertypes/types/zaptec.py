@@ -39,8 +39,6 @@ class Zaptec(ChargerBase):
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
         self.chargerstates[ChargeControllerStates.Done] = ["charge_done"]
 
-
-
     async def async_setup(self):
         try:
             entitiesobj = await helper.async_set_entitiesmodel(
@@ -65,7 +63,7 @@ class Zaptec(ChargerBase):
             ),
             options=self.servicecalls_options,
         )
-    
+
     @property
     def type(self) -> ChargerType:
         """type returns the implemented chargertype."""
