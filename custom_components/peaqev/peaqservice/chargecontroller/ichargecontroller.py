@@ -52,6 +52,7 @@ class IChargeController:
     def _do_initialize(self) -> bool:
         self.model.is_initialized = True
         log_once("Chargecontroller is initialized and ready to work.")
+        self.model.latest_charger_start = time.time()
         return self.model.is_initialized
 
     def _check_initialized(self) -> bool:
