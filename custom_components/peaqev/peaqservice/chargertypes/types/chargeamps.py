@@ -6,8 +6,10 @@ from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
-from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
+
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
+    IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargeamps_types import \
     ChargeAmpsTypes
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \

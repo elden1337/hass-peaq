@@ -211,8 +211,8 @@ class HomeAssistantHub:
         if ret is not None:
             try:
                 return float(ret.state)
-            except Exception as e:
-                #_LOGGER.error(f"Unable to convert power sensor to float: {e}")
+            except Exception:
+                # _LOGGER.error(f"Unable to convert power sensor to float: {e}")
                 return None
         return ret
 

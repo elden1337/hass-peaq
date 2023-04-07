@@ -1,35 +1,39 @@
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
-from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
+
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
-from peaqevcore.models.chargertype.charger_options import ChargerOptions
 from peaqevcore.models.chargertype.calltype import CallType
-from peaqevcore.models.chargertype.charger_entities_model import ChargerEntitiesModel
+from peaqevcore.models.chargertype.charger_entities_model import \
+    ChargerEntitiesModel
+from peaqevcore.models.chargertype.charger_options import ChargerOptions
+from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
+from peaqevcore.models.chargertype.servicecalls_options import \
+    ServiceCallsOptions
 from peaqevcore.services.chargertype.servicecalls import ServiceCalls
 
 CHARGERSTATES_BASE = {
     ChargeControllerStates.Idle: [],
     ChargeControllerStates.Connected: [],
     ChargeControllerStates.Charging: [],
-    ChargeControllerStates.Done: []
+    ChargeControllerStates.Done: [],
 }
+
 
 @dataclass
 class IChargerType:
-    domainname:str = ""
+    domainname: str = ""
     _max_amps = None
-    native_chargerstates:list = field(default_factory=lambda: [])
-    servicecalls:ServiceCalls = None
+    native_chargerstates: list = field(default_factory=lambda: [])
+    servicecalls: ServiceCalls = None
     chargerstates = CHARGERSTATES_BASE
     entities = ChargerEntitiesModel
     options = ChargerOptions
 
     async def async_set_servicecalls(
-            self,
-            domain: str,
-            model: ServiceCallsDTO,
-            options: ServiceCallsOptions,
+        self,
+        domain: str,
+        model: ServiceCallsDTO,
+        options: ServiceCallsOptions,
     ) -> bool:
         self.servicecalls = ServiceCalls(domain, model, options)
         return True
@@ -48,7 +52,6 @@ class IChargerType:
     @abstractmethod
     def type(self):
         """type returns the implemented chargertype."""
-        pass
 
     @abstractmethod
     def get_allowed_amps(self) -> int:
@@ -70,19 +73,16 @@ class IChargerType:
     @abstractmethod
     def domain_name(self) -> str:
         """declare the domain name as stated in HA"""
-        pass
 
     @property
     @abstractmethod
     def entity_endings(self) -> list:
         """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
-        pass
 
     @property
     @abstractmethod
     def native_chargerstates(self) -> list:
         """declare a list of the native-charger states available for the type."""
-        pass
 
     @property
     @abstractmethod
@@ -113,4 +113,3 @@ class IChargerType:
     @abstractmethod
     def servicecalls_options(self) -> ServiceCallsOptions:
         pass
-    

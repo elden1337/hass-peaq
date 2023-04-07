@@ -74,8 +74,6 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
         _LOGGER.debug("Calling {} service".format(ServiceCalls.SCHEDULER_CANCEL.value))
         await hub.servicecalls.async_call_scheduler_cancel()
 
-
-
     # Register services
     SERVICES = {
         ServiceCalls.ENABLE: async_servicehandler_enable,

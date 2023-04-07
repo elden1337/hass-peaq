@@ -7,8 +7,9 @@ from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
-from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
 
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
+    IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
@@ -30,8 +31,6 @@ class SmartOutlet(IChargerType):
         self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
 
-        
-    
     async def async_setup(self):
         await self.async_validate_setup()
         await self.async_set_servicecalls(
