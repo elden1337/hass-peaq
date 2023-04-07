@@ -30,6 +30,7 @@ CONNECTOR = "connector"
 class ChargeAmps(IChargerType):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
         self._hass = hass
+        self._is_initialized = False
         self._type = chargertype
         self._chargeramps_type = ""
         self._chargerid = huboptions.charger.chargerid
@@ -40,7 +41,7 @@ class ChargeAmps(IChargerType):
         self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
 
-    async def async_setup(self):
+    async def async_setup(self) -> bool:
         try:
             entitiesobj = await helper.async_set_entitiesmodel(
                 hass=self._hass,
@@ -52,8 +53,12 @@ class ChargeAmps(IChargerType):
             self.entities.entityschema = entitiesobj.entityschema
         except:
             _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
+            return False
 
-        await self.async_set_sensors()
+        try:
+            await self.async_set_sensors()
+        except Exception as e:
+            return False
 
         await self.async_set_servicecalls(
             domain=self.domain_name,
@@ -66,6 +71,7 @@ class ChargeAmps(IChargerType):
             ),
             options=self.servicecalls_options,
         )
+        return True
 
     @property
     def type(self) -> ChargerType:

@@ -11,6 +11,7 @@ class InitializerTypes(Enum):
     ChargerObjectSwitch = "Chargerobject switch"
     Power = "Power"
     ChargerObject = "Chargerobject"
+    ChargerType = "Chargertype"
 
 
 class HubInitializer:
@@ -24,7 +25,10 @@ class HubInitializer:
     def check(self):
         if self._initialized:
             return True
+        else:
+            return self._check
 
+    def _check(self) -> bool:
         init_types = {InitializerTypes.Hours: self.parent.hours.is_initialized}
         if hasattr(self.parent.sensors, "carpowersensor"):
             init_types[InitializerTypes.CarPowerSensor] = self.parent.sensors.carpowersensor.is_initialized
@@ -36,7 +40,7 @@ class HubInitializer:
             init_types[InitializerTypes.Power] = self.parent.sensors.power.is_initialized
         if hasattr(self.parent.sensors, "chargerobject"):
             init_types[InitializerTypes.ChargerObject] = self.parent.sensors.chargerobject.is_initialized
-
+        init_types[InitializerTypes.ChargerType] = self.parent.chargertype.is_initialized
         if all(init_types.values()):
             self._initialized = True
             _LOGGER.info("Hub is ready to use.")
@@ -44,9 +48,9 @@ class HubInitializer:
                 f"Hub is initialized with {self.parent.options.price.cautionhour_type} as cautionhourtype."
             )
             return True
-        return self._scramble_not_initialized(init_types)
+        return self.scramble_not_initialized(init_types)
 
-    def _scramble_not_initialized(self, init_types) -> bool:
+    def scramble_not_initialized(self, init_types) -> bool:
         not_ready = [r.value for r in init_types if init_types[r] is False]
         if any(
             [
@@ -57,6 +61,7 @@ class HubInitializer:
             _LOGGER.info(f"Hub is awaiting {not_ready} before being ready to use.")
             self.not_ready_list_old_state = len(not_ready)
             self.initialized_log_last_logged = time.time()
-        if InitializerTypes.ChargerObject in not_ready:
-            self.parent.chargertype.helper.set_entitiesmodel()
+        if [InitializerTypes.ChargerObject, InitializerTypes.ChargerType] in not_ready:
+            if self.parent.chargertype.async_setup():
+                self.parent.chargertype.is_initialized = True
         return False

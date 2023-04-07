@@ -28,6 +28,7 @@ class IChargerType:
     chargerstates = CHARGERSTATES_BASE
     entities = ChargerEntitiesModel
     options = ChargerOptions
+    _is_initialized = False
 
     async def async_set_servicecalls(
         self,
@@ -37,6 +38,14 @@ class IChargerType:
     ) -> bool:
         self.servicecalls = ServiceCalls(domain, model, options)
         return True
+
+    @property
+    def is_initialized(self) -> bool:
+        return self._is_initialized
+
+    @is_initialized.setter
+    def is_initialized(self, val: bool) -> None:
+        self._is_initialized = val
 
     @property
     def max_amps(self) -> int:
@@ -52,6 +61,7 @@ class IChargerType:
     @abstractmethod
     def type(self):
         """type returns the implemented chargertype."""
+        pass
 
     @abstractmethod
     def get_allowed_amps(self) -> int:
@@ -69,20 +79,27 @@ class IChargerType:
     async def async_set_sensors(self):
         pass
 
+    @abstractmethod
+    async def async_setup(self) -> bool:
+        pass
+
     @property
     @abstractmethod
     def domain_name(self) -> str:
         """declare the domain name as stated in HA"""
+        pass
 
     @property
     @abstractmethod
     def entity_endings(self) -> list:
         """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
+        pass
 
     @property
     @abstractmethod
     def native_chargerstates(self) -> list:
         """declare a list of the native-charger states available for the type."""
+        pass
 
     @property
     @abstractmethod

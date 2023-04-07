@@ -48,7 +48,7 @@ class Easee(IChargerType):
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
         self.chargerstates[ChargeControllerStates.Done] = ["completed"]
 
-    async def async_setup(self):
+    async def async_setup(self) -> bool:
         try:
             entitiesobj = await helper.async_set_entitiesmodel(
                 hass=self._hass,
@@ -60,8 +60,13 @@ class Easee(IChargerType):
             self.entities.entityschema = entitiesobj.entityschema
         except:
             _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
+            return False
 
-        await self.async_set_sensors()
+        try:
+            await self.async_set_sensors()
+        except Exception as e:
+            return False
+
         await self.async_set_servicecalls(
             domain=self.domain_name,
             model=ServiceCallsDTO(
@@ -73,6 +78,7 @@ class Easee(IChargerType):
             ),
             options=self.servicecalls_options,
         )
+        return True
 
     @property
     def max_amps(self) -> int:

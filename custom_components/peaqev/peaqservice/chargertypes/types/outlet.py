@@ -31,13 +31,18 @@ class SmartOutlet(IChargerType):
         self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
 
-    async def async_setup(self):
-        await self.async_validate_setup()
-        await self.async_set_servicecalls(
-            domain=self.domain_name,
-            model=ServiceCallsDTO(on=self.call_on, off=self.call_off),
-            options=self.servicecalls_options,
-        )
+    async def async_setup(self) -> bool:
+        try:
+            await self.async_validate_setup()
+            await self.async_set_servicecalls(
+                domain=self.domain_name,
+                model=ServiceCallsDTO(on=self.call_on, off=self.call_off),
+                options=self.servicecalls_options,
+            )
+            return True
+        except Exception as e:
+            _LOGGER.error(f"Could not validate setup for {self.domain_name}.")
+        return False
 
     @property
     def type(self) -> ChargerType:

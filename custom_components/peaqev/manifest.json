@@ -9,16 +9,13 @@
       "nordpool",
       "tibber",
       "filter",
-      "integration"
+      "integration",
+      "utility_meter"
     ],
     "codeowners": [
       "@elden1337"
     ],
     "config_flow": true,
-    "dependencies": [
-      "recorder",
-      "utility_meter"
-    ],
     "documentation": "https://github.com/elden1337/hass-peaq",
     "integration_type": "hub",
     "iot_class": "calculated",
