@@ -47,8 +47,10 @@ class Easee(ChargerBase):
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
         self.chargerstates[ChargeControllerStates.Done] = ["completed"]
 
+        
+    async def async_setup(self):
         try:
-            entitiesobj = helper.set_entitiesmodel(
+            entitiesobj = await helper.async_set_entitiesmodel(
                 hass=self._hass,
                 domain=self.domain_name,
                 entity_endings=self.entity_endings,
@@ -59,7 +61,7 @@ class Easee(ChargerBase):
         except:
             _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
 
-        self.set_sensors()
+        await self.async_set_sensors()
         self._set_servicecalls(
             domain=self.domain_name,
             model=ServiceCallsDTO(
@@ -153,9 +155,9 @@ class Easee(ChargerBase):
             switch_controls_charger=False,
         )
 
-    def set_sensors(self):
+    async def async_set_sensors(self):
         amp_sensor = f"sensor.{self.entities.entityschema}_dynamic_charger_limit"
-        if not self._validate_sensor(amp_sensor):
+        if not await self.async_validate_sensor(amp_sensor):
             amp_sensor = f"sensor.{self.entities.entityschema}_max_charger_limit"
         self.entities.maxamps = f"sensor.{self.entities.entityschema}_max_charger_limit"
         self.entities.chargerentity = f"sensor.{self.entities.entityschema}_status"
@@ -175,7 +177,7 @@ class Easee(ChargerBase):
             )
         return 16
 
-    def _validate_sensor(self, sensor: str) -> bool:
+    async def async_validate_sensor(self, sensor: str) -> bool:
         ret = self._hass.states.get(sensor)
         if ret is None:
             return False

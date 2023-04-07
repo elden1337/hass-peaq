@@ -29,13 +29,15 @@ class SmartOutlet(ChargerBase):
         self.chargerstates[ChargeControllerStates.Idle] = ["idle"]
         self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
-        self._hass.async_add_executor_job(self._validate_setup)
 
         self._set_servicecalls(
             domain=self.domain_name,
             model=ServiceCallsDTO(on=self.call_on, off=self.call_off),
             options=self.servicecalls_options,
         )
+    
+    async def async_setup(self):
+        await self.async_validate_setup()
 
     @property
     def type(self) -> ChargerType:
@@ -68,8 +70,8 @@ class SmartOutlet(ChargerBase):
             switch_controls_charger=True,
         )
 
-    def _validate_setup(self):
-        def check_states(entity: str, type_format: type) -> bool:
+    async def async_validate_setup(self):
+        async def async_check_states(entity: str, type_format: type) -> bool:
             try:
                 s = self._hass.states.get(entity)
                 if s is not None:
@@ -81,7 +83,7 @@ class SmartOutlet(ChargerBase):
 
         return all(
             [
-                check_states(self.entities.powerswitch, str),
-                check_states(self.entities.powermeter, float),
+                await async_check_states(self.entities.powerswitch, str),
+                await async_check_states(self.entities.powermeter, float),
             ]
         )

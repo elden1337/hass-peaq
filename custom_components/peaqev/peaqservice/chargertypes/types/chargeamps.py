@@ -39,34 +39,6 @@ class ChargeAmps(ChargerBase):
         self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
 
-        # try:
-        #     entitiesobj = helper.set_entitiesmodel(
-        #         hass=self._hass,
-        #         domain=self.domain_name,
-        #         entity_endings=self.entity_endings,
-        #         entity_schema=self.entities.entityschema,
-        #     )
-        #     self.entities.imported_entities = entitiesobj.imported_entities
-        #     self.entities.entityschema = entitiesobj.entityschema
-        # except:
-        #     _LOGGER.debug(
-        #         f"Could not get a proper entityschema for {self.domain_name}."
-        #     )
-
-        # self.set_sensors()
-
-        # self._set_servicecalls(
-        #     domain=self.domain_name,
-        #     model=ServiceCallsDTO(
-        #         on=self.call_on,
-        #         off=self.call_off,
-        #         pause=self.call_pause,
-        #         resume=self.call_resume,
-        #         update_current=self.call_update_current,
-        #     ),
-        #     options=self.servicecalls_options,
-        # )
-
     async def async_setup(self):
         try:
             entitiesobj = await helper.async_set_entitiesmodel(

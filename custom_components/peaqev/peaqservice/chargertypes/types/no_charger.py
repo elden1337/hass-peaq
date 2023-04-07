@@ -28,6 +28,9 @@ class NoCharger(ChargerBase):
             options=self.servicecalls_options,
         )
 
+    async def async_setup(self):
+        pass
+
     @property
     def type(self):
         """type returns the implemented chargertype."""

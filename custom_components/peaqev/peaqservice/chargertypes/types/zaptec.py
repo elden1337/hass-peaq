@@ -39,8 +39,11 @@ class Zaptec(ChargerBase):
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
         self.chargerstates[ChargeControllerStates.Done] = ["charge_done"]
 
+
+
+    async def async_setup(self):
         try:
-            entitiesobj = helper.set_entitiesmodel(
+            entitiesobj = await helper.async_set_entitiesmodel(
                 hass=self._hass,
                 domain=self.domain_name,
                 entity_endings=self.entity_endings,
@@ -51,7 +54,7 @@ class Zaptec(ChargerBase):
         except:
             _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
 
-        self.set_sensors()
+        await self.async_set_sensors()
         self._set_servicecalls(
             domain=self.domain_name,
             model=ServiceCallsDTO(
@@ -62,7 +65,7 @@ class Zaptec(ChargerBase):
             ),
             options=self.servicecalls_options,
         )
-
+    
     @property
     def type(self) -> ChargerType:
         """type returns the implemented chargertype."""
@@ -115,7 +118,7 @@ class Zaptec(ChargerBase):
             switch_controls_charger=False,
         )
 
-    def set_sensors(self):
+    async def async_set_sensors(self):
         try:
             self.entities.chargerentity = f"sensor.zaptec_{self.entities.entityschema}"
             self.entities.powermeter = f"{self.entities.chargerentity}|total_charge_power"
@@ -126,6 +129,14 @@ class Zaptec(ChargerBase):
             _LOGGER.exception(f"Could not set needed sensors for Zaptec. {e}")
 
     def _validate_sensor(self, sensor: str) -> bool:
+        ret = self._hass.states.get(sensor)
+        if ret is None:
+            return False
+        elif ret.state == "Null":
+            return False
+        return True
+
+    async def async_validate_sensor(self, sensor: str) -> bool:
         ret = self._hass.states.get(sensor)
         if ret is None:
             return False
