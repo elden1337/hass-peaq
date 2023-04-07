@@ -39,6 +39,7 @@ class PeaqUtilityCostSensor(UtilityMeterSensor):
             tariff_entity=None,
             tariff=None,
             unique_id=self.unique_id,
+            periodically_resetting=False
         )
         hass.data[DATA_UTILITY][self._parent] = {DATA_TARIFF_SENSORS: [self]}
 
@@ -84,6 +85,7 @@ class PeaqUtilitySensor(UtilityMeterSensor):
             tariff_entity=None,
             tariff=None,
             unique_id=self.unique_id,
+            periodically_resetting=False
         )
         hass.data[DATA_UTILITY][self._parent] = {DATA_TARIFF_SENSORS: [self]}
 
