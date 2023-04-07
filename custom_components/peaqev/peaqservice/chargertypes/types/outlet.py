@@ -7,7 +7,7 @@ from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
-from peaqevcore.services.chargertype.chargertype_base import ChargerBase
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
 
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
@@ -18,7 +18,7 @@ from custom_components.peaqev.peaqservice.util.constants import SMARTOUTLET
 _LOGGER = logging.getLogger(__name__)
 
 
-class SmartOutlet(ChargerBase):
+class SmartOutlet(IChargerType):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
         self._hass = hass
         self._type = chargertype
@@ -30,14 +30,15 @@ class SmartOutlet(ChargerBase):
         self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
 
-        self._set_servicecalls(
+        
+    
+    async def async_setup(self):
+        await self.async_validate_setup()
+        await self.async_set_servicecalls(
             domain=self.domain_name,
             model=ServiceCallsDTO(on=self.call_on, off=self.call_off),
             options=self.servicecalls_options,
         )
-
-    async def async_setup(self):
-        await self.async_validate_setup()
 
     @property
     def type(self) -> ChargerType:

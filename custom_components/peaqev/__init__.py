@@ -74,8 +74,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
         _LOGGER.debug("Calling {} service".format(ServiceCalls.SCHEDULER_CANCEL.value))
         await hub.servicecalls.async_call_scheduler_cancel()
 
-    for platform in PLATFORMS:
-        hass.async_create_task(hass.config_entries.async_forward_entry_setup(conf, platform))
+
 
     # Register services
     SERVICES = {
@@ -88,6 +87,11 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
 
     for service, handler in SERVICES.items():
         hass.services.async_register(DOMAIN, service.value, handler)
+
+    # for platform in PLATFORMS:
+    #     hass.async_create_task(hass.config_entries.async_forward_entry_setup(conf, platform))
+
+    await hass.config_entries.async_forward_entry_setups(conf, PLATFORMS)
 
     return True
 

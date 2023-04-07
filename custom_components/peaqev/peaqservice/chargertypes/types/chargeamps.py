@@ -6,8 +6,7 @@ from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
-from peaqevcore.services.chargertype.chargertype_base import ChargerBase
-
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
 from custom_components.peaqev.peaqservice.chargertypes.models.chargeamps_types import \
     ChargeAmpsTypes
@@ -26,7 +25,7 @@ CHARGEPOINT = "chargepoint"
 CONNECTOR = "connector"
 
 
-class ChargeAmps(ChargerBase):
+class ChargeAmps(IChargerType):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
         self._hass = hass
         self._type = chargertype
@@ -54,7 +53,7 @@ class ChargeAmps(ChargerBase):
 
         await self.async_set_sensors()
 
-        self._set_servicecalls(
+        await self.async_set_servicecalls(
             domain=self.domain_name,
             model=ServiceCallsDTO(
                 on=self.call_on,

@@ -6,7 +6,7 @@ from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
-from peaqevcore.services.chargertype.chargertype_base import ChargerBase
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
@@ -19,7 +19,7 @@ _LOGGER = logging.getLogger(__name__)
 # docs: https://github.com/custom-components/zaptec
 
 
-class Zaptec(ChargerBase):
+class Zaptec(IChargerType):
     def __init__(
         self,
         hass: HomeAssistant,
@@ -53,7 +53,7 @@ class Zaptec(ChargerBase):
             _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
 
         await self.async_set_sensors()
-        self._set_servicecalls(
+        await self.async_set_servicecalls(
             domain=self.domain_name,
             model=ServiceCallsDTO(
                 on=self.call_on,

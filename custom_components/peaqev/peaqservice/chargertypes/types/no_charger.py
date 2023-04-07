@@ -4,7 +4,7 @@ from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
-from peaqevcore.services.chargertype.chargertype_base import ChargerBase
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
 
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
@@ -12,11 +12,14 @@ from custom_components.peaqev.peaqservice.hub.models.hub_options import \
 _LOGGER = logging.getLogger(__name__)
 
 
-class NoCharger(ChargerBase):
+class NoCharger(IChargerType):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
         self._type = chargertype
 
-        self._set_servicecalls(
+        
+
+    async def async_setup(self):
+        await self.async_set_servicecalls(
             domain=self.domain_name,
             model=ServiceCallsDTO(
                 on=self.call_on,
@@ -27,9 +30,6 @@ class NoCharger(ChargerBase):
             ),
             options=self.servicecalls_options,
         )
-
-    async def async_setup(self):
-        pass
 
     @property
     def type(self):
