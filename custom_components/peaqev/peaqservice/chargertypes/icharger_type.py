@@ -61,7 +61,6 @@ class IChargerType:
     @abstractmethod
     def type(self):
         """type returns the implemented chargertype."""
-        pass
 
     @abstractmethod
     def get_allowed_amps(self) -> int:
@@ -87,19 +86,16 @@ class IChargerType:
     @abstractmethod
     def domain_name(self) -> str:
         """declare the domain name as stated in HA"""
-        pass
 
     @property
     @abstractmethod
     def entity_endings(self) -> list:
         """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
-        pass
 
     @property
     @abstractmethod
     def native_chargerstates(self) -> list:
         """declare a list of the native-charger states available for the type."""
-        pass
 
     @property
     @abstractmethod
