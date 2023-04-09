@@ -11,6 +11,7 @@ from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 class Object:
     pass
 
+
 METER_OFFSET = Object()
 METER_OFFSET.seconds = 0  # pylint:disable=attribute-defined-outside-init
 METER_OFFSET.minutes = 0  # pylint:disable=attribute-defined-outside-init
@@ -31,14 +32,14 @@ async def async_create_single_utility(hub, sensor: any, meter_type: TimePeriods,
     parent = f"{source}_{meter_type.value.lower()}"
     unique_id = f"{DOMAIN}_{entry_id}_{nametoid(name)}"
     params = {
-        "source_entity":   source,
-        "name":            name,
-        "meter_type":      meter_type.value,
-        "meter_offset":    METER_OFFSET,
+        "source_entity": source,
+        "name": name,
+        "meter_type": meter_type.value,
+        "meter_offset": METER_OFFSET,
         "net_consumption": True,
-        "tariff":          None,
-        "tariff_entity":   None,
-        "periodically_resetting": False
+        "tariff": None,
+        "tariff_entity": None,
+        "periodically_resetting": False,
     }
 
     signature = inspect.signature(UtilityMeterSensor.__init__)

@@ -15,7 +15,8 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
     ChargerType
 from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_INTEGRAL_NAME, CONSUMPTION_TOTAL_NAME)
-from custom_components.peaqev.sensors.average_sensor import PeaqAverageSensor, async_set_filters
+from custom_components.peaqev.sensors.average_sensor import (PeaqAverageSensor,
+                                                             async_set_filters)
 from custom_components.peaqev.sensors.gain_loss_sensor import GainLossSensor
 from custom_components.peaqev.sensors.integration_sensor import (
     PeaqIntegrationCostSensor, PeaqIntegrationSensor)
@@ -37,8 +38,8 @@ from custom_components.peaqev.sensors.session_sensor import (
 from custom_components.peaqev.sensors.sql_sensor import PeaqPeakSensor
 from custom_components.peaqev.sensors.threshold_sensor import \
     PeaqThresholdSensor
-from custom_components.peaqev.sensors.utility_sensor import \
-    (async_create_single_utility, UtilityMeterDTO)
+from custom_components.peaqev.sensors.utility_sensor import (
+    UtilityMeterDTO, async_create_single_utility)
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(seconds=4)
@@ -55,9 +56,7 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
 async def async_setup_utility_meters(hub, hass, utility_meters: list) -> list:
     ret = []
     for meter in utility_meters:
-        ret.append(
-            await async_create_single_utility(hub, meter.sensor, meter.meter_type, meter.entry_id)
-        )
+        ret.append(await async_create_single_utility(hub, meter.sensor, meter.meter_type, meter.entry_id))
 
     return ret
 
@@ -127,14 +126,7 @@ async def async_setup(hub, config, hass, async_add_entities):
             ret.append(PeaqPowerSensor(hub, config.entry_id))
         average_delta = 2 if hub.sensors.locale.data.is_quarterly(hub.sensors.locale.data) else 5
         filters_min = await async_set_filters(hub, timedelta(minutes=average_delta))
-        ret.append(
-            PeaqAverageSensor(
-                hub,
-                config.entry_id,
-                AVERAGECONSUMPTION,
-                filters_min
-            )
-        )
+        ret.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION, filters_min))
         filters24 = await async_set_filters(hub, timedelta(hours=24))
         ret.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION_24H, filters24))
         ret.append(PeaqPredictionSensor(hub, config.entry_id))
