@@ -46,7 +46,7 @@ class PowerCanaryStatusSensor(PowerCanaryDevice):
     def state(self) -> int:
         return self._state
 
-    def update(self) -> None:
+    async def async_update(self) -> None:
         if self.hub.is_initialized:
             self._state = self.hub.power.power_canary.state_string  # todo: composition
 
@@ -69,6 +69,8 @@ class PowerCanaryPercentageSensor(PowerCanaryDevice):
         return PERCENTAGE
 
     async def async_update(self) -> None:
+        if not self.hub.is_initialized:
+            return
         if int(self.hub.power.power_canary.current_percentage * 100) != self._state:  # todo: composition
             self._state = int(self.hub.power.power_canary.current_percentage * 100)  # todo: composition
         self._warning = round(
@@ -97,6 +99,8 @@ class PowerCanaryMaxAmpSensor(PowerCanaryDevice):
         return self._state
 
     async def async_update(self) -> None:
+        if not self.hub.is_initialized:
+            return
         if self.phases == 1:
             ret = getattr(self.hub.power.power_canary, "onephase_amps", {})
             self._state = max(ret.values())

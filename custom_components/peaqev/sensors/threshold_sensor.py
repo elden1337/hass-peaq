@@ -30,6 +30,8 @@ class PeaqThresholdSensor(PowerDevice):
         return "mdi:chart-bell-curve"
 
     async def async_update(self) -> None:
+        if not self.hub.is_initialized:
+            return
         self._state = getattr(self.hub.prediction, "predictedpercentageofpeak")
         _start = getattr(self.hub.threshold, "start")
         _stop = getattr(self.hub.threshold, "stop")

@@ -23,7 +23,7 @@ class PeaqPowerCostSensor(PowerDevice):
     def state(self) -> int:
         return self._state
 
-    def update(self) -> None:
+    async def async_update(self) -> None:
         if self.hub.is_initialized:
             self._state = self.hub.watt_cost
 

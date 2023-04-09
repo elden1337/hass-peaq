@@ -30,7 +30,15 @@ class UtilityMeterDTO:
 
 
 class PeaqUtilitySensor(UtilityMeterSensor):
-    def __init__(self, hub, hass, sensor: any, meter_type: TimePeriods, entry_id: any, visible_default: bool):
+    def __init__(
+            self,
+            hub,
+            hass,
+            sensor: any,
+            meter_type: TimePeriods,
+            entry_id: any,
+            visible_default: bool
+    ):
         self._entry_id = entry_id
         self.hub = hub
         self._visible_default = visible_default
@@ -67,7 +75,6 @@ class PeaqUtilitySensor(UtilityMeterSensor):
     @property
     def device_info(self):
         return {"identifiers": {(DOMAIN, self.hub.hub_id, POWERCONTROLS)}}
-
 
 # class PeaqUtilityCostSensor(UtilityMeterSensor):
 #     def __init__(self, hub, sensor: any, meter_type: str, meter_offset: str, entry_id: any, hass):

@@ -32,4 +32,5 @@ class PeaqPredictionSensor(PowerDevice):
         return "mdi:magic-staff"
 
     async def async_update(self) -> None:
-        self._state = getattr(self.hub.prediction, "predictedenergy")
+        if self.hub.is_initialized:
+            self._state = getattr(self.hub.prediction, "predictedenergy")

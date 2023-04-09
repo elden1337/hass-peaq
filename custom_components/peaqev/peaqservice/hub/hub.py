@@ -221,6 +221,8 @@ class HomeAssistantHub:
             setattr(self.sensors.chargerobject, "value", value)
 
     async def async_request_sensor_data(self, *args) -> dict | any:
+        if not self.is_initialized:
+            return {}
         lookup = {
             "charger_done": getattr(self.sensors.charger_done, "value"),
             "chargerobject_value": getattr(self.sensors.chargerobject, "value"),

@@ -23,5 +23,5 @@ class PeaqPowerSensor(PowerDevice):
     def state(self) -> int:
         return self._state
 
-    def update(self) -> None:
+    async def async_update(self) -> None:
         self._state = self.hub.sensors.power.total.value  # todo: composition

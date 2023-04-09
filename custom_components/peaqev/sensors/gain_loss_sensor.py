@@ -27,6 +27,8 @@ class GainLossSensor(SensorEntity):
         return PERCENTAGE
 
     async def async_update(self) -> None:
+        if not self.hub.is_initialized:
+            return
         ret = await self.hub.power.gain_loss.async_state(self._timeperiod)
         if self._state != round(ret * 100, 1):
             self._state = round(ret * 100, 1)

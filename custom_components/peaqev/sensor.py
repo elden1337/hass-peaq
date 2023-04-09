@@ -4,6 +4,7 @@ from datetime import timedelta
 
 import homeassistant.helpers.entity_registry as er
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EVENT_COMPONENT_LOADED
 from homeassistant.core import HomeAssistant
 from peaqevcore.models.hub.const import (AVERAGECONSUMPTION,
                                          AVERAGECONSUMPTION_24H)
@@ -76,6 +77,7 @@ async def async_setup_utility_meters(hub, hass, utility_meters: list) -> list:
 async def async_setup(hub, config, hass, async_add_entities):
     integrationsensors = []
     utility_meters = []
+    integration_sensors = []
     ret = [PeaqSensor(hub, config.entry_id)]
 
     if all(
@@ -147,6 +149,7 @@ async def async_setup(hub, config, hass, async_add_entities):
         ret.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION_24H, timedelta(hours=24)))
         ret.append(PeaqPredictionSensor(hub, config.entry_id))
         ret.append(PeaqThresholdSensor(hub, config.entry_id))
+
         if any(
             [
                 hub.options.powersensor_includes_car,
@@ -154,7 +157,7 @@ async def async_setup(hub, config, hass, async_add_entities):
             ]
         ):
             if hub.chargertype.type is not ChargerType.NoCharger:
-                ret.append(
+                integration_sensors.append(
                     PeaqIntegrationSensor(
                         hub,
                         f"sensor.{DOMAIN}_{hub.sensors.power.house.id}",
@@ -162,7 +165,7 @@ async def async_setup(hub, config, hass, async_add_entities):
                         config.entry_id,
                     )
                 )
-            ret.append(
+            integration_sensors.append(
                 PeaqIntegrationSensor(
                     hub,
                     hub.sensors.power.total.entity,
@@ -171,7 +174,7 @@ async def async_setup(hub, config, hass, async_add_entities):
                 )
             )
         else:
-            ret.append(
+            integration_sensors.append(
                 PeaqIntegrationSensor(
                     hub,
                     hub.sensors.power.house.entity,
@@ -179,7 +182,7 @@ async def async_setup(hub, config, hass, async_add_entities):
                     config.entry_id,
                 )
             )
-            ret.append(
+            integration_sensors.append(
                 PeaqIntegrationSensor(
                     hub,
                     f"sensor.{DOMAIN}_{hub.sensors.power.total.id}",
@@ -209,7 +212,7 @@ async def async_setup(hub, config, hass, async_add_entities):
                 entry_id=config.entry_id,
             )
         )
-
-    ret.extend(await async_setup_utility_meters(hub, hass, utility_meters))
-
     async_add_entities(ret)
+    async_add_entities(integration_sensors)
+    async_add_entities(await async_setup_utility_meters(hub, hass, utility_meters))
+    hass.bus.async_fire(EVENT_COMPONENT_LOADED, {"domain": DOMAIN})
