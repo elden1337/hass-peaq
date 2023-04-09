@@ -5,7 +5,7 @@ from homeassistant.components.integration.sensor import \
 from homeassistant.components.sensor import \
     SensorDeviceClass  # pylint: disable=import-error
 from homeassistant.const import (  # pylint: disable=import-error
-    ENERGY_KILO_WATT_HOUR, TIME_HOURS)
+    ENERGY_KILO_WATT_HOUR, UnitOfTime)
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
@@ -26,7 +26,7 @@ class PeaqIntegrationCostSensor(IntegrationSensor):
             source_entity=f"sensor.{hub.hubname.lower()}_wattage_cost",
             unique_id=self.unique_id,
             unit_prefix="k",
-            unit_time=TIME_HOURS,
+            unit_time=UnitOfTime.HOURS
         )
 
     @property
@@ -67,7 +67,7 @@ class PeaqIntegrationSensor(IntegrationSensor):
             source_entity=sensor,
             unique_id=self.unique_id,
             unit_prefix="k",
-            unit_time=TIME_HOURS,
+            unit_time=UnitOfTime.HOURS,
         )
 
     @property

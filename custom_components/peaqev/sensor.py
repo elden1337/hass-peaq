@@ -2,7 +2,6 @@
 import logging
 from datetime import timedelta
 
-import homeassistant.helpers.entity_registry as er
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_COMPONENT_LOADED
 from homeassistant.core import HomeAssistant
@@ -16,7 +15,7 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
     ChargerType
 from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_INTEGRAL_NAME, CONSUMPTION_TOTAL_NAME)
-from custom_components.peaqev.sensors.average_sensor import PeaqAverageSensor
+from custom_components.peaqev.sensors.average_sensor import PeaqAverageSensor, async_set_filters
 from custom_components.peaqev.sensors.gain_loss_sensor import GainLossSensor
 from custom_components.peaqev.sensors.integration_sensor import (
     PeaqIntegrationCostSensor, PeaqIntegrationSensor)
@@ -38,8 +37,8 @@ from custom_components.peaqev.sensors.session_sensor import (
 from custom_components.peaqev.sensors.sql_sensor import PeaqPeakSensor
 from custom_components.peaqev.sensors.threshold_sensor import \
     PeaqThresholdSensor
-from custom_components.peaqev.sensors.utility_sensor import (PeaqUtilitySensor,
-                                                             UtilityMeterDTO)
+from custom_components.peaqev.sensors.utility_sensor import \
+    (async_create_single_utility, UtilityMeterDTO)
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(seconds=4)
@@ -57,19 +56,8 @@ async def async_setup_utility_meters(hub, hass, utility_meters: list) -> list:
     ret = []
     for meter in utility_meters:
         ret.append(
-            PeaqUtilitySensor(
-                hub, hass, meter.sensor, meter.meter_type, meter.entry_id, meter.visible_default
-            )
+            await async_create_single_utility(hub, meter.sensor, meter.meter_type, meter.entry_id)
         )
-
-    entity_registry = er.async_get(hass)
-    for r in ret:
-        existing_entity_id = entity_registry.async_get_entity_id(
-            domain="sensor", platform=DOMAIN, unique_id=r.unique_id
-        )
-        if existing_entity_id and hass.states.get(existing_entity_id):
-            _LOGGER.debug(f"already found {r} in er. removing from setup.")
-            ret.remove(r)
 
     return ret
 
@@ -138,15 +126,17 @@ async def async_setup(hub, config, hass, async_add_entities):
         else:
             ret.append(PeaqPowerSensor(hub, config.entry_id))
         average_delta = 2 if hub.sensors.locale.data.is_quarterly(hub.sensors.locale.data) else 5
+        filters_min = await async_set_filters(hub, timedelta(minutes=average_delta))
         ret.append(
             PeaqAverageSensor(
                 hub,
                 config.entry_id,
                 AVERAGECONSUMPTION,
-                timedelta(minutes=average_delta),
+                filters_min
             )
         )
-        ret.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION_24H, timedelta(hours=24)))
+        filters24 = await async_set_filters(hub, timedelta(hours=24))
+        ret.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION_24H, filters24))
         ret.append(PeaqPredictionSensor(hub, config.entry_id))
         ret.append(PeaqThresholdSensor(hub, config.entry_id))
 
