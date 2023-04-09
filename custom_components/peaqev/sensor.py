@@ -14,7 +14,8 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
     ChargerType
 from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_INTEGRAL_NAME, CONSUMPTION_TOTAL_NAME)
-from custom_components.peaqev.sensors.average_sensor import PeaqAverageSensor, async_set_filters
+from custom_components.peaqev.sensors.average_sensor import (PeaqAverageSensor,
+                                                             async_set_filters)
 from custom_components.peaqev.sensors.gain_loss_sensor import GainLossSensor
 from custom_components.peaqev.sensors.integration_sensor import (
     PeaqIntegrationCostSensor, PeaqIntegrationSensor)
@@ -36,8 +37,8 @@ from custom_components.peaqev.sensors.session_sensor import (
 from custom_components.peaqev.sensors.sql_sensor import PeaqPeakSensor
 from custom_components.peaqev.sensors.threshold_sensor import \
     PeaqThresholdSensor
-from custom_components.peaqev.sensors.utility_sensor import \
-    (async_create_single_utility, UtilityMeterDTO)
+from custom_components.peaqev.sensors.utility_sensor import (
+    UtilityMeterDTO, async_create_single_utility)
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(seconds=4)
@@ -54,15 +55,12 @@ async def async_setup_entry(hass: HomeAssistant, config: ConfigEntry, async_add_
 async def async_setup_utility_meters(hub, hass, utility_meters: list) -> list:
     ret = []
     for meter in utility_meters:
-        ret.append(
-            await async_create_single_utility(hub, meter.sensor, meter.meter_type, meter.entry_id)
-        )
+        ret.append(await async_create_single_utility(hub, meter.sensor, meter.meter_type, meter.entry_id))
 
     return ret
 
 
 async def async_setup(hub, config, hass, async_add_entities):
-
     integrationsensors = []
     utility_meters = []
     integration_sensors = []
@@ -103,21 +101,13 @@ async def async_setup(hub, config, hass, async_add_entities):
             sensors.append(PeaqPowerSensor(hub, config.entry_id))
         average_delta = 2 if hub.sensors.locale.data.is_quarterly(hub.sensors.locale.data) else 5
         filters_min = await async_set_filters(hub, timedelta(minutes=average_delta))
-        average_sensors.append(
-            PeaqAverageSensor(
-                hub,
-                config.entry_id,
-                AVERAGECONSUMPTION,
-                filters_min
-            )
-        )
+        average_sensors.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION, filters_min))
         filters24 = await async_set_filters(hub, timedelta(hours=24))
         average_sensors.append(PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION_24H, filters24))
         async_add_entities(average_sensors)
 
         sensors.append(PeaqPredictionSensor(hub, config.entry_id))
         sensors.append(PeaqThresholdSensor(hub, config.entry_id))
-
 
         if any(
             [
@@ -182,6 +172,7 @@ async def async_setup(hub, config, hass, async_add_entities):
     async_add_entities(integration_sensors)
     async_add_entities(await async_setup_utility_meters(hub, hass, utility_meters))
 
+
 async def async_add_power_canary_sensors(hub, config) -> list:
     ret = []
     if hub.power.power_canary.enabled:
@@ -191,15 +182,16 @@ async def async_add_power_canary_sensors(hub, config) -> list:
         ret.append(PowerCanaryMaxAmpSensor(hub, config.entry_id, 3))
     return ret
 
+
 async def async_add_gainloss_sensors(hub, config) -> dict:
     """implement gainloss sensors"""
     ret = {"sensors": [], "utility_meters": []}
     if all(
-            [
-                hub.options.gainloss,
-                hub.options.price.price_aware,
-                hub.options.peaqev_lite is False,
-            ]
+        [
+            hub.options.gainloss,
+            hub.options.price.price_aware,
+            hub.options.peaqev_lite is False,
+        ]
     ):
         ret["sensors"].append(GainLossSensor(hub, config.entry_id, TimePeriods.Daily))
         ret["sensors"].append(GainLossSensor(hub, config.entry_id, TimePeriods.Monthly))
