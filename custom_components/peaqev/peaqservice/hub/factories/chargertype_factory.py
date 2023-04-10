@@ -1,8 +1,8 @@
 import logging
 
 from homeassistant.core import HomeAssistant
-from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.chargertypes.types.chargeamps import \
@@ -41,7 +41,7 @@ class ChargerTypeFactory:
             raise ValueError
 
     @staticmethod
-    async def async_create(hass: HomeAssistant, options: HubOptions) -> ChargerBase:
+    async def async_create(hass: HomeAssistant, options: HubOptions) -> IChargerType:
         input_type = options.charger.chargertype
         try:
             charger = await ChargerTypeFactory.async_get_class(input_type)
