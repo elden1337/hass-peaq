@@ -5,13 +5,13 @@ from datetime import datetime
 
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_state_change
-from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
     IChargeController
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import \
@@ -50,7 +50,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class HomeAssistantHub:
     hub_id = 1337
-    chargertype: ChargerBase
+    chargertype: IChargerType
     sensors: IHubSensors
     hours: Hours
     threshold: ThresholdBase
@@ -184,7 +184,10 @@ class HomeAssistantHub:
         return ret
 
     def _set_observers(self) -> None:
-        self.observer.add("prices changed", self._update_prices)
+        self.observer.add(
+            "prices changed",
+            self.async_update_prices,
+            _async=True)
         self.observer.add(
             "monthly average price changed",
             self.async_update_average_monthly_price,
@@ -286,8 +289,9 @@ class HomeAssistantHub:
             return self.sensors.charger_done.value
         return False
 
-    def _update_prices(self, prices: list) -> None:
-        self.hours.update_prices(prices[0], prices[1])
+    async def async_update_prices(self, prices: list) -> None:
+        _LOGGER.debug("going to update prices in core with: %s", prices)
+        await self.hours.async_update_prices(prices[0], prices[1])
 
     async def async_update_average_monthly_price(self, val) -> None:
         if self.options.price.price_aware and isinstance(val, float):
@@ -295,7 +299,7 @@ class HomeAssistantHub:
 
     async def async_update_average_weekly_price(self, val) -> None:
         if self.options.price.price_aware and isinstance(val, float):
-            setattr(self.hours, "adjusted_average", val)
+            await self.hours.async_update_adjusted_average(val)
 
     async def async_update_charger_done(self, val):
         setattr(self.sensors.charger_done, "value", bool(val))
