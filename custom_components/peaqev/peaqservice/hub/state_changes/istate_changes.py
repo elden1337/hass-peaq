@@ -47,7 +47,7 @@ class IStateChanges:
                 self.hub.chargecontroller.charger.session.session_price = float(self.hub.nordpool.state)
         if self.hub.hours.scheduler.schedule_created:
             try:
-                await self.hub.hours.scheduler.async_update()
+                await self.hub.hours.scheduler.async_update_facade()
             except Exception as e:
                 _LOGGER.error(f"5: {e}")
         if entity in self.hub.chargingtracker_entities and self.hub.is_initialized:
