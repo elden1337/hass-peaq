@@ -51,10 +51,10 @@ class ServiceCalls:
             await self.hub.hours.scheduler.async_create_schedule(
                 charge_amount, dep_time, start_time, override_settings
             )
-            await self.hub.hours.scheduler.async_update()
+            await self.hub.hours.scheduler.async_update_facade()
             await self.hub.observer.async_broadcast("scheduler created")
 
     async def async_call_scheduler_cancel(self):
         if self.hub.hours.price_aware:
-            await self.hub.hours.hub.scheduler.async_cancel()
+            await self.hub.hours.hub.scheduler.async_cancel_facade()
             await self.hub.observer.async_broadcast("scheduler cancelled")
