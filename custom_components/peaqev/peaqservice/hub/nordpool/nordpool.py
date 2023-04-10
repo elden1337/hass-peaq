@@ -62,10 +62,7 @@ class NordPoolUpdater:
                 await _result.set_model(ret)
                 if await self.async_update_set_prices(_result):
                     if initial:
-                        await self.state_machine.async_add_executor_job(
-                            self.hub._update_prices,
-                            [self.model.prices, self.model.prices_tomorrow],
-                        )
+                        await self.hub.async_update_prices([self.model.prices, self.model.prices_tomorrow])
                     else:
                         await self.hub.observer.async_broadcast(
                             "prices changed",
