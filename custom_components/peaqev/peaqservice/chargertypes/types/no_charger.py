@@ -17,20 +17,6 @@ class NoCharger(IChargerType):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
         self._type = chargertype
 
-    async def async_setup(self) -> bool:
-        await self.async_set_servicecalls(
-            domain=self.domain_name,
-            model=ServiceCallsDTO(
-                on=self.call_on,
-                off=self.call_off,
-                pause=self.call_pause,
-                resume=self.call_resume,
-                update_current=self.call_update_current,
-            ),
-            options=self.servicecalls_options,
-        )
-        return True
-
     @property
     def type(self):
         """type returns the implemented chargertype."""

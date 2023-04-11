@@ -11,8 +11,7 @@ from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
     IChargeController
-from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
-    IChargerType
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import \
@@ -100,16 +99,10 @@ class HomeAssistantHub:
 
     @property
     def non_hours(self) -> list:
-        if self.options.price.price_aware:
-            if self.hours.scheduler.scheduler_active:
-                return self.hours.scheduler.non_hours
         return self.hours.non_hours
 
     @property
     def dynamic_caution_hours(self) -> dict:
-        if self.options.price.price_aware:
-            if self.hours.scheduler.scheduler_active:
-                return self.hours.scheduler.caution_hours
         return self.hours.dynamic_caution_hours
 
     @property
