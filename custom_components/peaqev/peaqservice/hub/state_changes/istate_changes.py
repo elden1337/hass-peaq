@@ -45,7 +45,7 @@ class IStateChanges:
             )
             if self.hub.options.price.price_aware:
                 self.hub.chargecontroller.charger.session.session_price = float(self.hub.nordpool.state)
-        if self.hub.hours.scheduler.schedule_created:
+        if getattr(self.hub.hours.scheduler, "schedule_created", False):
             try:
                 await self.hub.hours.scheduler.async_update_facade()
             except Exception as e:
