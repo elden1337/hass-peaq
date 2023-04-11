@@ -72,6 +72,7 @@ async def async_set_options(conf) -> HubOptions:
     options.price.top_price = await async_get_existing_param(conf, "absolute_top_price", 0)
     options.price.dynamic_top_price = await async_get_existing_param(conf, "dynamic_top_price", False)
     options.price.cautionhour_type = await async_get_existing_param(conf, "cautionhour_type", "intermediate")
+    options.max_charge = conf.options.get("max_charge", 0)
     options.fuse_type = await async_get_existing_param(conf, "mains", "")
     options.blocknocturnal = await async_get_existing_param(conf, "blocknocturnal", False)
     options.gainloss = await async_get_existing_param(conf, "gainloss", False)

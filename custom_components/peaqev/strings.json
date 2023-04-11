@@ -7,7 +7,8 @@
           "absolute_top_price": "[%key:common::config_flow::data::absolute_top_price%]",
           "dynamic_top_price": "[%key:common::config_flow::data::dynamic_top_price%]",
           "min_priceaware_threshold_price": "[%key:common::config_flow::data::min_priceaware_threshold_price%]",
-          "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]"
+          "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]",
+          "max_charge": "[%key:common::config_flow::data::max_charge%]"
         },
         "description": "Select price-aware if you wish to adhere to Nordpool-prices (requires integration)"
       },

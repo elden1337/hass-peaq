@@ -220,7 +220,11 @@ class HomeAssistantHub:
         if hasattr(self.sensors, "chargerobject"):
             setattr(self.sensors.chargerobject, "value", value)
 
-    async def async_update_charge_limit(self, max_charge: int) -> None:
+    async def async_update_charge_limit(self, max_charge:int) -> None:
+        #call hours and update this. 
+        #set user_changed to True
+        #don't decrease max-charge by the hour anymore, but only when session adds energy
+        #if disabled or disconnected or done, set user_changed to False
         pass
 
     async def async_request_sensor_data(self, *args) -> dict | any:
