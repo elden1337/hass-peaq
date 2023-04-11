@@ -2,7 +2,8 @@ import logging
 
 from homeassistant.core import HomeAssistant
 
-from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
+    IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.chargertypes.types.chargeamps import \
