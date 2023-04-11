@@ -3,12 +3,10 @@ from dataclasses import dataclass, field
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
-from peaqevcore.models.chargertype.charger_entities_model import \
-    ChargerEntitiesModel
+from peaqevcore.models.chargertype.charger_entities_model import ChargerEntitiesModel
 from peaqevcore.models.chargertype.charger_options import ChargerOptions
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
-from peaqevcore.models.chargertype.servicecalls_options import \
-    ServiceCallsOptions
+from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
 from peaqevcore.services.chargertype.servicecalls import ServiceCalls
 
 CHARGERSTATES_BASE = {
@@ -23,7 +21,7 @@ CHARGERSTATES_BASE = {
 class IChargerType:
     domainname: str = ""
     _max_amps = None
-    native_chargerstates: list = field(default_factory=lambda: [])
+    native_chargerstates: list = field(default_factory=lambda: [])  # type: ignore
     servicecalls: ServiceCalls = None
     chargerstates = CHARGERSTATES_BASE
     entities = ChargerEntitiesModel
