@@ -1,5 +1,5 @@
 import logging
-
+import asyncio
 from homeassistant.core import HomeAssistant
 
 from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
@@ -54,6 +54,8 @@ class ChargerTypeFactory:
                 if ret.is_initialized:
                     _LOGGER.info(f"Set up charger-class for chargertype {input_type} is done. attempts:{_counter}")
                     return ret
+                await asyncio.sleep(1)
+            _LOGGER.exception(f"Did not manage to set up charge-class for {input_type} after {_counter} attempts. No entities found. The integration is probably not loaded.")
             raise Exception
         except Exception as e:
             _LOGGER.debug(f"Exception. Did not manage to set up charge-class for {input_type}: {e}")

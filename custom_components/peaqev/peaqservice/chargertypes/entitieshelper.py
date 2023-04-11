@@ -57,7 +57,6 @@ async def async_set_entitiesmodel(
         entities = await async_get_entities_from_hass(hass=hass, domain_name=domain)
 
         if len(entities) < 1:
-            _LOGGER.error(f"no entities found for {domain} at {time.time()}")
             return EntitiesModel()
         else:
             candidate = ""
@@ -69,7 +68,7 @@ async def async_set_entitiesmodel(
                         break
                 if len(candidate) > 1:
                     break
-            _LOGGER.debug(f"entityschema is: {candidate} at {time.time()}")
+            _LOGGER.debug(f"Charger-entityschema is: {candidate}")
             return EntitiesModel(entityschema=candidate, imported_entities=entities, valid=True)
 
 
