@@ -26,9 +26,7 @@ class UtilityMeterDTO:
     entry_id: any
 
 
-async def async_create_single_utility(
-    hub, sensor: any, meter_type: TimePeriods, entry_id: any
-):
+async def async_create_single_utility(hub, sensor: any, meter_type: TimePeriods, entry_id: any):
     name = f"{hub.hubname} {sensor} {meter_type.value.lower()}"
     source = f"sensor.{DOMAIN.lower()}_{sensor}"
     parent = f"{source}_{meter_type.value.lower()}"
