@@ -7,7 +7,7 @@ from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
 
-import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
+
 from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
     IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargeamps_types import \
@@ -40,39 +40,6 @@ class ChargeAmps(IChargerType):
         self.chargerstates[ChargeControllerStates.Idle] = ["available"]
         self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
-
-    async def async_setup(self) -> bool:
-        try:
-            entitiesobj = await helper.async_set_entitiesmodel(
-                hass=self._hass,
-                domain=self.domain_name,
-                entity_endings=self.entity_endings,
-                entity_schema=self.entities.entityschema,
-            )
-            if entitiesobj.valid:
-                self.entities.imported_entities = entitiesobj.imported_entities
-                self.entities.entityschema = entitiesobj.entityschema
-        except:
-            _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
-            return False
-
-        try:
-            await self.async_set_sensors()
-        except Exception:
-            return False
-
-        await self.async_set_servicecalls(
-            domain=self.domain_name,
-            model=ServiceCallsDTO(
-                on=self.call_on,
-                off=self.call_off,
-                pause=self.call_pause,
-                resume=self.call_resume,
-                update_current=self.call_update_current,
-            ),
-            options=self.servicecalls_options,
-        )
-        return True
 
     @property
     def type(self) -> ChargerType:
