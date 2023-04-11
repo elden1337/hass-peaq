@@ -18,6 +18,7 @@ def set_entitiesmodel(
 
         if len(entities) < 1:
             _LOGGER.error(f"no entities found for {domain} at {time.time()}")
+            return EntitiesModel()
         else:
             # _endings = model.endings
             candidate = ""
@@ -31,7 +32,7 @@ def set_entitiesmodel(
                 if len(candidate) > 1:
                     break
             _LOGGER.debug(f"entityschema is: {candidate} at {time.time()}")
-            return EntitiesModel(entityschema=candidate, imported_entities=entities)
+            return EntitiesModel(entityschema=candidate, imported_entities=entities, valid=True)
 
 
 def get_entities_from_hass(hass: HomeAssistant, domain_name: str) -> list:
@@ -56,7 +57,7 @@ async def async_set_entitiesmodel(
         entities = await async_get_entities_from_hass(hass=hass, domain_name=domain)
 
         if len(entities) < 1:
-            _LOGGER.error(f"no entities found for {domain} at {time.time()}")
+            return EntitiesModel()
         else:
             candidate = ""
             for e in entities:
@@ -67,8 +68,8 @@ async def async_set_entitiesmodel(
                         break
                 if len(candidate) > 1:
                     break
-            _LOGGER.debug(f"entityschema is: {candidate} at {time.time()}")
-            return EntitiesModel(entityschema=candidate, imported_entities=entities)
+            _LOGGER.debug(f"Charger-entityschema is: {candidate}")
+            return EntitiesModel(entityschema=candidate, imported_entities=entities, valid=True)
 
 
 async def async_get_entities_from_hass(hass: HomeAssistant, domain_name: str) -> list:

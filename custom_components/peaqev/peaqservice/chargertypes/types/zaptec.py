@@ -40,37 +40,6 @@ class Zaptec(IChargerType):
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
         self.chargerstates[ChargeControllerStates.Done] = ["charge_done"]
 
-    async def async_setup(self) -> bool:
-        try:
-            entitiesobj = await helper.async_set_entitiesmodel(
-                hass=self._hass,
-                domain=self.domain_name,
-                entity_endings=self.entity_endings,
-                entity_schema=self.entities.entityschema,
-            )
-            self.entities.imported_entities = entitiesobj.imported_entities
-            self.entities.entityschema = entitiesobj.entityschema
-        except:
-            _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
-            return False
-
-        try:
-            await self.async_set_sensors()
-        except Exception:
-            return False
-
-        await self.async_set_servicecalls(
-            domain=self.domain_name,
-            model=ServiceCallsDTO(
-                on=self.call_on,
-                off=self.call_off,
-                resume=self.call_resume,
-                pause=self.call_pause,
-            ),
-            options=self.servicecalls_options,
-        )
-        return True
-
     @property
     def type(self) -> ChargerType:
         """type returns the implemented chargertype."""
