@@ -220,6 +220,9 @@ class HomeAssistantHub:
         if hasattr(self.sensors, "chargerobject"):
             setattr(self.sensors.chargerobject, "value", value)
 
+    async def async_update_charge_limit(self, max_charge:int) -> None:
+        pass
+
     async def async_request_sensor_data(self, *args) -> dict | any:
         if not self.is_initialized:
             return {}
