@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-
+from functools import partial
+import inspect
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_state_change
 from peaqevcore.services.hourselection.initializers.hoursbase import Hours
@@ -221,30 +222,34 @@ class HomeAssistantHub:
         if not self.is_initialized:
             return {}
         lookup = {
-            "charger_done": getattr(self.sensors.charger_done, "value"),
-            "chargerobject_value": getattr(self.sensors.chargerobject, "value"),
-            "hour_state": getattr(self.hours, "state", "unknown"),
-            "prices": getattr(self.hours, "prices", []),
-            "prices_tomorrow": getattr(self.hours, "prices_tomorrow", []),
-            "non_hours": getattr(self, "non_hours", []),
-            "caution_hours": getattr(self.hours, "caution_hours", []),
-            "dynamic_caution_hours": getattr(self, "dynamic_caution_hours", {}),
-            "currency": getattr(self.nordpool, "currency"),
-            "offsets": getattr(self.hours, "offsets", {}),
-            "average_nordpool_data": getattr(self.nordpool, "average_data"),
-            "use_cent": getattr(self.nordpool.model, "use_cent"),
-            "current_peak": getattr(self.sensors.current_peak, "value"),
-            "avg_kwh_price": await self.hours.async_get_average_kwh_price(),
-            "max_charge": await self.hours.async_get_total_charge(),
-            "average_weekly": getattr(self.nordpool, "average_weekly"),
-            "average_monthly": getattr(self.nordpool, "average_month"),
-            "is_price_aware": getattr(self.options.price, "price_aware"),
-            "is_scheduler_active": getattr(self.hours.scheduler, "scheduler_active", False),
-            "chargecontroller_status": getattr(self.chargecontroller, "status_string"),
+            "charger_done": partial(getattr,self.sensors.charger_done, "value"),
+            "chargerobject_value": partial(getattr,self.sensors.chargerobject, "value"),
+            "hour_state": partial(getattr,self.hours, "state", "unknown"),
+            "prices": partial(getattr,self.hours, "prices", []),
+            "prices_tomorrow": partial(getattr,self.hours, "prices_tomorrow", []),
+            "non_hours": partial(getattr,self, "non_hours", []),
+            "caution_hours": partial(getattr,self.hours, "caution_hours", []),
+            "dynamic_caution_hours": partial(getattr,self, "dynamic_caution_hours", {}),
+            "average_nordpool_data": partial(getattr,self.nordpool, "average_data"),
+            "use_cent": partial(getattr,self.nordpool.model, "use_cent"),
+            "current_peak": partial(getattr,self.sensors.current_peak, "value"),
+            "avg_kwh_price": partial(self.hours.async_get_average_kwh_price),
+            "max_charge": partial(self.hours.async_get_total_charge),
+            "average_weekly": partial(getattr,self.nordpool, "average_weekly"),
+            "average_monthly": partial(getattr,self.nordpool, "average_month"),
+            "currency": partial(getattr,self.nordpool, "currency"),
+            "offsets": partial(getattr,self.hours, "offsets", {}),
+            "is_price_aware": partial(getattr,self.options.price, "price_aware"),
+            "is_scheduler_active": partial(getattr,self.hours.scheduler, "scheduler_active", False),
+            "chargecontroller_status": partial(getattr,self.chargecontroller, "status_string"),
         }
         ret = {}
         for arg in args:
-            ret[arg] = lookup.get(arg, None)
+            data = lookup.get(arg, None)
+            if await self.iscoroutine(data):
+                ret[arg] = await data()
+            else:
+                    ret[arg] = data()
         if len(ret) == 1:
             rr = list(ret.values())[0]
             if isinstance(rr, str):
@@ -252,6 +257,11 @@ class HomeAssistantHub:
             return rr
         return ret
 
+    async def async_iscoroutine(self, object):
+        while isinstance(object, partial):
+            object = object.func
+        return inspect.iscoroutinefunction(object)
+    
     @property
     def prices(self) -> list:
         if self.options.price.price_aware:
