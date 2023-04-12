@@ -11,7 +11,8 @@ from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
     IChargeController
-from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
+    IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import \

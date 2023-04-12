@@ -1,7 +1,6 @@
 import logging
 
 from homeassistant.core import HomeAssistant
-from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
 
