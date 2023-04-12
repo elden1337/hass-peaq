@@ -277,8 +277,8 @@ class HomeAssistantHub:
         return False
 
     async def async_update_prices(self, prices: list) -> None:
-        _LOGGER.debug("going to update prices in core with: %s", prices)
-        await self.hours.async_update_prices(prices[0], prices[1])
+        if self.options.price.price_aware:
+            await self.hours.async_update_prices(prices[0], prices[1])
 
     async def async_update_average_monthly_price(self, val) -> None:
         if self.options.price.price_aware and isinstance(val, float):
