@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import inspect
 import logging
 from datetime import datetime
 from functools import partial
-import inspect
+
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_state_change
 from peaqevcore.services.hourselection.initializers.hoursbase import Hours
@@ -111,7 +112,7 @@ class HomeAssistantHub:
     def current_peak_dynamic(self):
         """Dynamically calculated peak to adhere to caution-hours"""
         if self.options.price.price_aware and len(self.dynamic_caution_hours) > 0:
-            if datetime.now().hour in self.dynamic_caution_hours.keys() and not self.hours.timer.is_override:
+            if datetime.now().hour in self.dynamic_caution_hours.keys() and not getattr(self.hours.timer, "is_override", False):
                 return self.sensors.current_peak.value * self.dynamic_caution_hours[datetime.now().hour]
         return self.sensors.current_peak.value
 
@@ -194,8 +195,16 @@ class HomeAssistantHub:
             self.async_update_average_weekly_price,
             _async=True,
         )
-        self.observer.add("update charger done", self.async_update_charger_done, _async=True)
-        self.observer.add("update charger enabled", self.async_update_charger_enabled, _async=True)
+        self.observer.add(
+            "update charger done",
+            self.async_update_charger_done,
+            _async=True
+        )
+        self.observer.add(
+            "update charger enabled",
+            self.async_update_charger_enabled,
+            _async=True
+        )
 
     """Composition below here"""
 
@@ -254,7 +263,7 @@ class HomeAssistantHub:
         ret = {}
         for arg in args:
             data = lookup.get(arg, None)
-            if await self.iscoroutine(data):
+            if await self.async_iscoroutine(data):
                 ret[arg] = await data()
             else:
                     ret[arg] = data()
