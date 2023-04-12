@@ -4,10 +4,14 @@ import asyncio
 import logging
 import time
 
-from custom_components.peaqev.peaqservice.hub.observer.const import (COMMAND_WAIT, TIMEOUT)
-from custom_components.peaqev.peaqservice.hub.observer.models.command import Command
-from custom_components.peaqev.peaqservice.hub.observer.models.function_call import FunctionCall
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_model import ObserverModel
+from custom_components.peaqev.peaqservice.hub.observer.const import (
+    COMMAND_WAIT, TIMEOUT)
+from custom_components.peaqev.peaqservice.hub.observer.models.command import \
+    Command
+from custom_components.peaqev.peaqservice.hub.observer.models.function_call import \
+    FunctionCall
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_model import \
+    ObserverModel
 
 _LOGGER = logging.getLogger(__name__)
 
