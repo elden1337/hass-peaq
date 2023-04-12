@@ -239,7 +239,7 @@ class HomeAssistantHub:
             "average_weekly": getattr(self.nordpool, "average_weekly"),
             "average_monthly": getattr(self.nordpool, "average_month"),
             "is_price_aware": getattr(self.options.price, "price_aware"),
-            "is_scheduler_active": getattr(self.hours.scheduler, "scheduler_active"),
+            "is_scheduler_active": getattr(self.hours.scheduler, "scheduler_active", False),
             "chargecontroller_status": getattr(self.chargecontroller, "status_string"),
         }
         ret = {}
