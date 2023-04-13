@@ -69,6 +69,7 @@ class HomeAssistantHub:
         self.state_machine = hass
         self.options: HubOptions = options
         self._is_initialized = False
+        self._max_charge = None
         self.observer = Observer(self)
         self._set_observers()
         self.initializer = HubInitializer(self)
@@ -116,6 +117,29 @@ class HomeAssistantHub:
                 return self.sensors.current_peak.value * self.dynamic_caution_hours[datetime.now().hour]
         return self.sensors.current_peak.value
 
+    @property
+    def max_charge(self) -> int:
+        """
+        Only applicable if price-aware. 
+        This property is the static max-charge or the overriden one from frontend
+        """
+        if self._max_charge is not None:
+            return self._max_charge
+        return self.options.max_charge
+
+    async def async_override_max_charge(self, max_charge: int):
+        """Overrides the max-charge with the input from frontend"""
+        if self.options.price.price_aware:
+            self._max_charge = max_charge
+            await self.hours.async_update_max_min(self, self.hub.max_charge)
+
+    async def async_null_max_charge(self, val=None):
+        """Resets the max-charge to the static value, listens to charger done and charger disconnected"""
+        if val is None:
+            self._max_charge = None
+        elif val is False:
+            self._max_charge = None
+        
     @property
     def is_initialized(self) -> bool:
         if hasattr(self, "initializer"):
@@ -203,6 +227,21 @@ class HomeAssistantHub:
         self.observer.add(
             "update charger enabled",
             self.async_update_charger_enabled,
+            _async=True
+        )
+        self.observer.add(
+            "car disconnected",
+            self.async_null_max_charge,
+            _async=True
+        )
+        self.observer.add(
+            "car done",
+            self.async_null_max_charge,
+            _async=True
+        )
+        self.observer.add(
+            "update charger enabled",
+            self.async_null_max_charge,
             _async=True
         )
 

@@ -74,6 +74,8 @@ class IStateChanges:
         self.hub.sensors.totalhourlyenergy.value = value
         self.hub.sensors.current_peak.value = self.hub.sensors.locale.data.query_model.observed_peak
         self.hub.sensors.locale.data.query_model.try_update(new_val=float(value), timestamp=datetime.now())
+        if self.hub.options.price.price_aware:
+            await self.hub.hours.async_update_max_min(self, self.hub.max_charge)
 
     @abstractmethod
     async def async_update_sensor_internal(self, entity, value) -> bool:
