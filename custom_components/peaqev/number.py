@@ -53,7 +53,7 @@ class PeaqNumber(NumberEntity, RestoreEntity):
 
     @property
     def mode(self) -> str:
-        return "auto"
+        return "slider"
 
     @property
     def unique_id(self) -> str:
@@ -61,11 +61,15 @@ class PeaqNumber(NumberEntity, RestoreEntity):
 
     async def async_set_native_value(self, value: float) -> None:
         self._state = value
-        await self.hub.async_update_charge_limit(int(value))
+        if int(value) != self.hub.max_charge:        
+            await self.hub.async_override_max_charge(int(value))
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
         if state:
-            await self.async_set_native_value(float(state.state))
+            if state.state != self.hub.max_charge:
+                await self.async_set_native_value(float(state.state))
+            else:
+                self._state = self.hub.max_charge
         else:
-            await self.async_set_native_value(100)
+            self._state = self.hub.max_charge
