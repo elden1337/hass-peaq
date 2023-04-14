@@ -154,19 +154,24 @@ class HomeAssistantHub:
             await self.async_reset_max_charge_sensor()
 
     async def async_reset_max_charge_sensor(self) -> None:  # todo: 247
-        state = self.state_machine.states.get("number.peaqev_max_charge")
-        if state is not None:
-            if state == self.max_charge or self.max_charge == 0:
-                return
-        await self.state_machine.services.async_call(
-            "number",
-            "set_value",
-            {
-                "entity_id": "number.peaqev_max_charge",
-                "value": self.max_charge,
-            },
-        )
-        _LOGGER.debug(f"Resetting max charge to static value {self.max_charge}")
+        try:
+            state = self.state_machine.states.get("number.peaqev_max_charge")
+            if state is not None:
+                if state == self.max_charge or self.max_charge == 0:
+                    return
+            await self.state_machine.services.async_call(
+                "number",
+                "set_value",
+                {
+                    "entity_id": "number.peaqev_max_charge",
+                    "value": int(self.max_charge),
+                },
+            )
+            _LOGGER.debug(
+                f"Resetting max charge to static value {int(self.max_charge)}"
+            )
+        except Exception as e:
+            return
 
     @property
     def is_initialized(self) -> bool:
