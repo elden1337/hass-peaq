@@ -4,9 +4,8 @@ import time
 from homeassistant.core import HomeAssistant  # type: ignore
 from homeassistant.helpers.entity import entity_sources  # type: ignore
 
-from custom_components.peaqev.peaqservice.chargertypes.models.entities_model import (
-    EntitiesModel,
-)
+from custom_components.peaqev.peaqservice.chargertypes.models.entities_model import \
+    EntitiesModel
 
 _LOGGER = logging.getLogger(__name__)
 
