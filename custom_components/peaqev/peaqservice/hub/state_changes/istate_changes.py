@@ -19,9 +19,9 @@ class IStateChanges:
         if time.time() - self.latest_chargecontroller_update > 3:
             self.latest_chargecontroller_update = time.time()
             await self.hub.chargecontroller.async_set_status()
-            if self.hub.options.price.price_aware:  # todo: 247
-                if not self.hub.override_max_charge:  # todo: 247
-                    await self.hub.async_reset_max_charge_sensor()  # todo: 247
+            if self.hub.options.price.price_aware:
+                if not self.hub.max_min_controller.override_max_charge:
+                    await self.hub.max_min_controller.async_reset_max_charge_sensor()
         if self.hub.options.price.price_aware:
             if entity != self.hub.nordpool.nordpool_entity and (
                 not self.hub.hours.is_initialized

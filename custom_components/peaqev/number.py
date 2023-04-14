@@ -65,31 +65,31 @@ class PeaqNumber(NumberEntity, RestoreEntity):
         return f"{DOMAIN}_{self.hub.hubname}_{self._number['entity']}"
 
     async def async_set_native_value(self, value: float) -> None:
-        if int(value) != self.hub.max_charge and self.hub.max_charge > 0:
+        if int(value) != self.hub.max_min_controller.max_charge and self.hub.max_min_controller.max_charge > 0:
             """Overriding default"""
-            await self.hub.async_override_max_charge(int(value))
-            self.hub.override_max_charge = True
+            await self.hub.max_min_controller.async_override_max_charge(int(value))
+            self.hub.max_min_controller.override_max_charge = True
             self._state = value
         else:
-            self.hub.override_max_charge = False
-            self._state = int(self.hub.max_charge)
+            self.hub.max_min_controller.override_max_charge = False
+            self._state = int(self.hub.max_min_controller.max_charge)
 
     async def async_added_to_hass(self):
+        _set_max = self.hub.max_min_controller.max_charge
         if not self.hub.enabled or self.hub.chargecontroller.status_type in [
             ChargeControllerStates.Done,
             ChargeControllerStates.Idle,
             ChargeControllerStates.Disabled
         ]:
-            self._state = self.hub.max_charge
+            self._state = _set_max
+            self.hub.max_min_controller.override_max_charge = False
         else:
             state = await super().async_get_last_state()
             if state:
-                if state.state != self.hub.max_charge:
-                    _LOGGER.debug(
-                        f"Restoring state {state.state} for {self.name}. hub reports: {self.hub.max_charge}"
-                    )
+                if state.state != _set_max:
+                    _LOGGER.debug(f"Restoring state {state.state} for {self.name}. hub reports: {_set_max}")
                     await self.async_set_native_value(float(state.state))
                 else:
-                    self._state = self.hub.max_charge
+                    self._state = _set_max
             else:
-                self._state = self.hub.max_charge
+                self._state = _set_max

@@ -33,6 +33,7 @@ from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import
     ThresholdFactory
 from custom_components.peaqev.peaqservice.hub.hub_initializer import \
     HubInitializer
+from custom_components.peaqev.peaqservice.hub.max_min_controller import MaxMinController
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import \
@@ -69,12 +70,10 @@ class HomeAssistantHub:
         self.state_machine = hass
         self.options: HubOptions = options
         self._is_initialized = False
-        self._override_max_charge = None  # todo: 247
-        self._original_total_charge = 0  # todo: 247
-        self.override_max_charge: bool = False  # todo: 247
         self.observer = Observer(self)
         self._set_observers()
         self.initializer = HubInitializer(self)
+        self.max_min_controller = MaxMinController(self)
 
     async def setup(self):
         self.chargertype = await ChargerTypeFactory.async_create(
@@ -129,51 +128,6 @@ class HomeAssistantHub:
                     * self.dynamic_caution_hours[datetime.now().hour]
                 )
         return self.sensors.current_peak.value
-
-    @property
-    def max_charge(self) -> int:  # todo: 247
-        if self._override_max_charge is not None:
-            """overridden by frontend"""
-            return self._override_max_charge
-        if self.options.max_charge > 0:
-            """set in config flow"""
-            return self.options.max_charge
-        return self._original_total_charge
-
-    async def async_override_max_charge(self, max_charge: int):  # todo: 247
-        """Overrides the max-charge with the input from frontend"""
-        if self.options.price.price_aware:
-            self._override_max_charge = max_charge
-            await self.hours.async_update_max_min(self.max_charge)
-
-    async def async_null_max_charge(self, val=None):  # todo: 247
-        """Resets the max-charge to the static value, listens to charger done and charger disconnected"""
-        if val is None:
-            self._override_max_charge = None
-        elif val is False:
-            self._override_max_charge = None
-        if self._override_max_charge is None:
-            await self.async_reset_max_charge_sensor()
-
-    async def async_reset_max_charge_sensor(self) -> None:  # todo: 247
-        try:
-            state = self.state_machine.states.get("number.peaqev_max_charge")
-            if state is not None:
-                if state == self.max_charge or self.max_charge == 0:
-                    return
-            await self.state_machine.services.async_call(
-                "number",
-                "set_value",
-                {
-                    "entity_id": "number.peaqev_max_charge",
-                    "value": int(self.max_charge),
-                },
-            )
-            _LOGGER.debug(
-                f"Resetting max charge to static value {int(self.max_charge)}"
-            )
-        except Exception:
-            return
 
     @property
     def is_initialized(self) -> bool:
@@ -258,11 +212,7 @@ class HomeAssistantHub:
         self.observer.add(
             "update charger enabled", self.async_update_charger_enabled, _async=True
         )
-        self.observer.add("car disconnected", self.async_null_max_charge, _async=True)
-        self.observer.add("car done", self.async_null_max_charge, _async=True)
-        self.observer.add(
-            "update charger enabled", self.async_null_max_charge, _async=True
-        )
+
 
     """Composition below here"""
     async def async_set_init_dict(self, init_dict):
@@ -327,7 +277,7 @@ class HomeAssistantHub:
             else:
                 ret[arg] = data()
         if "max_charge" in ret.keys():
-            self._original_total_charge = ret["max_charge"][0]  # todo: 247
+            self.max_min_controller._original_total_charge = ret["max_charge"][0]  # todo: 247
         if len(ret) == 1:
             rr = list(ret.values())[0]
             if isinstance(rr, str):
