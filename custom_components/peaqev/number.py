@@ -30,10 +30,11 @@ class PeaqNumber(NumberEntity, RestoreEntity):
         self.hub = hub
         self._attr_device_class = None
         self._state = None
+        self._icon = "mdi:image-auto-adjust"
 
     @property
     def native_max_value(self) -> float:
-        return 100
+        return 70
 
     @property
     def native_min_value(self) -> float:
@@ -56,6 +57,10 @@ class PeaqNumber(NumberEntity, RestoreEntity):
         return "slider"
 
     @property
+    def icon(self) -> str:
+        return self._icon
+
+    @property
     def unique_id(self) -> str:
         return f"{DOMAIN}_{self.hub.hubname}_{self._number['entity']}"
 
@@ -64,6 +69,9 @@ class PeaqNumber(NumberEntity, RestoreEntity):
         if int(value) != self.hub.max_charge:
             """Overriding default"""
             await self.hub.async_override_max_charge(int(value))
+            self._icon = "mdi:adjust"
+        else:
+            self._icon = "mdi:image-auto-adjust"
 
     async def async_added_to_hass(self):
         # if the state is different from hub.max_charge

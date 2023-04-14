@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+import asyncio
 import logging
 from datetime import datetime
 from functools import partial
@@ -141,7 +142,11 @@ class HomeAssistantHub:
         """
         if self._max_charge is not None:
             return self._max_charge
-        return self.options.max_charge
+        if self.options.max_charge > 0:
+            return self.options.max_charge
+        return asyncio.run_coroutine_threadsafe(
+            self.hours.async_get_total_charge(), self.state_machine.loop
+        ).result()
 
     async def async_override_max_charge(self, max_charge: int):
         """Overrides the max-charge with the input from frontend"""
