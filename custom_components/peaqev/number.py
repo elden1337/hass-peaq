@@ -5,6 +5,7 @@ import logging
 from homeassistant.components.number import NumberEntity  # type: ignore
 from homeassistant.core import HomeAssistant  # type: ignore
 from homeassistant.helpers.restore_state import RestoreEntity  # type: ignore
+from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
 from .const import DOMAIN
 
@@ -74,17 +75,21 @@ class PeaqNumber(NumberEntity, RestoreEntity):
             self._state = int(self.hub.max_charge)
 
     async def async_added_to_hass(self):
-        # if the state is different from hub.max_charge
-        # do stuff
-
-        state = await super().async_get_last_state()
-        if state:
-            if state.state != self.hub.max_charge:
-                _LOGGER.debug(
-                    f"Restoring state {state.state} for {self.name}. hub reports: {self.hub.max_charge}"
-                )
-                await self.async_set_native_value(float(state.state))
+        if not self.hub.enabled or self.hub.chargecontroller.status_type in [
+            ChargeControllerStates.Done,
+            ChargeControllerStates.Idle,
+            ChargeControllerStates.Disabled
+        ]:
+            self._state = self.hub.max_charge
+        else:
+            state = await super().async_get_last_state()
+            if state:
+                if state.state != self.hub.max_charge:
+                    _LOGGER.debug(
+                        f"Restoring state {state.state} for {self.name}. hub reports: {self.hub.max_charge}"
+                    )
+                    await self.async_set_native_value(float(state.state))
+                else:
+                    self._state = self.hub.max_charge
             else:
                 self._state = self.hub.max_charge
-        else:
-            self._state = self.hub.max_charge

@@ -69,8 +69,8 @@ class HomeAssistantHub:
         self.state_machine = hass
         self.options: HubOptions = options
         self._is_initialized = False
-        self._max_charge = None  # todo: 247
-        self._temp_total_charge = 0  # todo: 247
+        self._override_max_charge = None  # todo: 247
+        self._original_total_charge = 0  # todo: 247
         self.override_max_charge: bool = False  # todo: 247
         self.observer = Observer(self)
         self._set_observers()
@@ -132,25 +132,27 @@ class HomeAssistantHub:
 
     @property
     def max_charge(self) -> int:  # todo: 247
-        if self._max_charge is not None:
-            return self._max_charge
+        if self._override_max_charge is not None:
+            """overridden by frontend"""
+            return self._override_max_charge
         if self.options.max_charge > 0:
+            """set in config flow"""
             return self.options.max_charge
-        return self._temp_total_charge
+        return self._original_total_charge
 
     async def async_override_max_charge(self, max_charge: int):  # todo: 247
         """Overrides the max-charge with the input from frontend"""
         if self.options.price.price_aware:
-            self._max_charge = max_charge
+            self._override_max_charge = max_charge
             await self.hours.async_update_max_min(self.max_charge)
 
     async def async_null_max_charge(self, val=None):  # todo: 247
         """Resets the max-charge to the static value, listens to charger done and charger disconnected"""
         if val is None:
-            self._max_charge = None
+            self._override_max_charge = None
         elif val is False:
-            self._max_charge = None
-        if self._max_charge is None:
+            self._override_max_charge = None
+        if self._override_max_charge is None:
             await self.async_reset_max_charge_sensor()
 
     async def async_reset_max_charge_sensor(self) -> None:  # todo: 247
@@ -263,7 +265,6 @@ class HomeAssistantHub:
         )
 
     """Composition below here"""
-
     async def async_set_init_dict(self, init_dict):
         ret = await self.sensors.locale.data.query_model.peaks.async_set_init_dict(
             init_dict
@@ -278,20 +279,12 @@ class HomeAssistantHub:
             try:
                 return float(ret.state)
             except Exception:
-                # _LOGGER.error(f"Unable to convert power sensor to float: {e}")
                 return None
         return ret
 
     async def async_set_chargerobject_value(self, value) -> None:
         if hasattr(self.sensors, "chargerobject"):
             setattr(self.sensors.chargerobject, "value", value)
-
-    async def async_update_charge_limit(self, max_charge: int) -> None:
-        # call hours and update this.
-        # set user_changed to True
-        # don't decrease max-charge by the hour anymore, but only when session adds energy
-        # if disabled or disconnected or done, set user_changed to False
-        pass
 
     async def async_request_sensor_data(self, *args) -> dict | any:
         if not self.is_initialized:
@@ -334,7 +327,7 @@ class HomeAssistantHub:
             else:
                 ret[arg] = data()
         if "max_charge" in ret.keys():
-            self._temp_total_charge = ret["max_charge"]  # todo: fix this
+            self._original_total_charge = ret["max_charge"][0]  # todo: 247
         if len(ret) == 1:
             rr = list(ret.values())[0]
             if isinstance(rr, str):
