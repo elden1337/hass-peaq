@@ -65,15 +65,16 @@ class PeaqNumber(NumberEntity, RestoreEntity):
         return f"{DOMAIN}_{self.hub.hubname}_{self._number['entity']}"
 
     async def async_set_native_value(self, value: float) -> None:
-        self._state = value
-        if int(value) != self.hub.max_charge:
+        if int(value) != self.hub.max_charge and self.hub.max_charge > 0:
             """Overriding default"""
             await self.hub.async_override_max_charge(int(value))
             self._icon = "mdi:adjust"
             self.hub.override_max_charge = True
+            self._state = value
         else:
             self._icon = "mdi:image-auto-adjust"
             self.hub.override_max_charge = False
+            self._state = int(self.hub.max_charge)
 
     async def async_added_to_hass(self):
         # if the state is different from hub.max_charge
@@ -82,6 +83,9 @@ class PeaqNumber(NumberEntity, RestoreEntity):
         state = await super().async_get_last_state()
         if state:
             if state.state != self.hub.max_charge:
+                _LOGGER.debug(
+                    f"Restoring state {state.state} for {self.name}. hub reports: {self.hub.max_charge}"
+                )
                 await self.async_set_native_value(float(state.state))
             else:
                 self._state = self.hub.max_charge
