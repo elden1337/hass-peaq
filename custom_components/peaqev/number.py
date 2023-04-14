@@ -27,7 +27,7 @@ class PeaqNumber(NumberEntity, RestoreEntity):
     def __init__(self, number, hub) -> None:
         self._number = number
         self._attr_name = f"{hub.hubname} {self._number['name']}"
-        self._hub = hub
+        self.hub = hub
         self._attr_device_class = None
         self._state = None
 
@@ -57,17 +57,17 @@ class PeaqNumber(NumberEntity, RestoreEntity):
 
     @property
     def unique_id(self) -> str:
-        return f"{DOMAIN}_{self._hub.hubname}_{self._number['entity']}"
+        return f"{DOMAIN}_{self.hub.hubname}_{self._number['entity']}"
 
     async def async_set_native_value(self, value: float) -> None:
         self._state = value
-        if int(value) != self.hub.max_charge:        
+        if int(value) != self.hub.max_charge:
             """Overriding default"""
             await self.hub.async_override_max_charge(int(value))
 
     async def async_added_to_hass(self):
-        #if the state is different from hub.max_charge
-        #do stuff
+        # if the state is different from hub.max_charge
+        # do stuff
 
         state = await super().async_get_last_state()
         if state:
