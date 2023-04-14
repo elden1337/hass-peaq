@@ -76,6 +76,7 @@ class HomeAssistantHub:
         self.options: HubOptions = options
         self._is_initialized = False
         self._max_charge = None
+        self._temp_total_charge = 0  # todo: fix this later
         self.observer = Observer(self)
         self._set_observers()
         self.initializer = HubInitializer(self)
@@ -144,9 +145,7 @@ class HomeAssistantHub:
             return self._max_charge
         if self.options.max_charge > 0:
             return self.options.max_charge
-        return asyncio.run_coroutine_threadsafe(
-            self.hours.async_get_total_charge(), self.state_machine.loop
-        ).result()
+        return self._temp_total_charge
 
     async def async_override_max_charge(self, max_charge: int):
         """Overrides the max-charge with the input from frontend"""
@@ -331,6 +330,8 @@ class HomeAssistantHub:
                 ret[arg] = await data()
             else:
                 ret[arg] = data()
+        if "max_charge" in ret.keys():
+            self._temp_total_charge = ret["max_charge"]  # todo: fix this
         if len(ret) == 1:
             rr = list(ret.values())[0]
             if isinstance(rr, str):
