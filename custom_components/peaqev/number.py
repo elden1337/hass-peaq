@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import logging
 
-from homeassistant.components.number import NumberEntity
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.restore_state import RestoreEntity
+from homeassistant.components.number import NumberEntity  # type: ignore
+from homeassistant.core import HomeAssistant  # type: ignore
+from homeassistant.helpers.restore_state import RestoreEntity  # type: ignore
 
 from .const import DOMAIN
 
