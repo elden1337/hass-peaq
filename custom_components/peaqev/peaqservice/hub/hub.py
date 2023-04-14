@@ -69,8 +69,9 @@ class HomeAssistantHub:
         self.state_machine = hass
         self.options: HubOptions = options
         self._is_initialized = False
-        self._max_charge = None
-        self._temp_total_charge = 0  # todo: fix this later
+        self._max_charge = None  # todo: 247
+        self._temp_total_charge = 0  # todo: 247
+        self.override_max_charge: bool = False  # todo: 247
         self.observer = Observer(self)
         self._set_observers()
         self.initializer = HubInitializer(self)
@@ -130,39 +131,42 @@ class HomeAssistantHub:
         return self.sensors.current_peak.value
 
     @property
-    def max_charge(self) -> int:
-        """
-        Only applicable if price-aware.
-        This property is the static max-charge or the overriden one from frontend
-        """
+    def max_charge(self) -> int:  # todo: 247
         if self._max_charge is not None:
             return self._max_charge
         if self.options.max_charge > 0:
             return self.options.max_charge
         return self._temp_total_charge
 
-    async def async_override_max_charge(self, max_charge: int):
+    async def async_override_max_charge(self, max_charge: int):  # todo: 247
         """Overrides the max-charge with the input from frontend"""
         if self.options.price.price_aware:
             self._max_charge = max_charge
             await self.hours.async_update_max_min(self.max_charge)
 
-    async def async_null_max_charge(self, val=None):
+    async def async_null_max_charge(self, val=None):  # todo: 247
         """Resets the max-charge to the static value, listens to charger done and charger disconnected"""
         if val is None:
             self._max_charge = None
         elif val is False:
             self._max_charge = None
         if self._max_charge is None:
-            await self.state_machine.services.async_call(
-                "number",
-                "set_value",
-                {
-                    "entity_id": "number.peaqev_max_charge",
-                    "value": self.max_charge,
-                },
-            )
-            _LOGGER.debug(f"Resetting max charge to static value {self.max_charge}")
+            await self.async_reset_max_charge_sensor()
+
+    async def async_reset_max_charge_sensor(self) -> None:  # todo: 247
+        state = self.state_machine.states.get("number.peaqev_max_charge")
+        if state is not None:
+            if state == self.max_charge:
+                return
+        await self.state_machine.services.async_call(
+            "number",
+            "set_value",
+            {
+                "entity_id": "number.peaqev_max_charge",
+                "value": self.max_charge,
+            },
+        )
+        _LOGGER.debug(f"Resetting max charge to static value {self.max_charge}")
 
     @property
     def is_initialized(self) -> bool:

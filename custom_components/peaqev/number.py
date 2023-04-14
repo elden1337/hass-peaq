@@ -70,8 +70,10 @@ class PeaqNumber(NumberEntity, RestoreEntity):
             """Overriding default"""
             await self.hub.async_override_max_charge(int(value))
             self._icon = "mdi:adjust"
+            self.hub.override_max_charge = True
         else:
             self._icon = "mdi:image-auto-adjust"
+            self.hub.override_max_charge = False
 
     async def async_added_to_hass(self):
         # if the state is different from hub.max_charge
