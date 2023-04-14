@@ -170,7 +170,7 @@ class HomeAssistantHub:
             _LOGGER.debug(
                 f"Resetting max charge to static value {int(self.max_charge)}"
             )
-        except Exception as e:
+        except Exception:
             return
 
     @property
