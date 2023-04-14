@@ -19,8 +19,8 @@ async def async_setup_entry(
     hub = hass.data[DOMAIN]["hub"]
 
     inputnumbers = [{"name": MAX_CHARGE, "entity": "_max_charge"}]
-
-    async_add_entities(PeaqNumber(i, hub) for i in inputnumbers)
+    if hub.options.price.price_aware:
+        async_add_entities(PeaqNumber(i, hub) for i in inputnumbers)
 
 
 class PeaqNumber(NumberEntity, RestoreEntity):
@@ -62,9 +62,13 @@ class PeaqNumber(NumberEntity, RestoreEntity):
     async def async_set_native_value(self, value: float) -> None:
         self._state = value
         if int(value) != self.hub.max_charge:        
+            """Overriding default"""
             await self.hub.async_override_max_charge(int(value))
 
     async def async_added_to_hass(self):
+        #if the state is different from hub.max_charge
+        #do stuff
+
         state = await super().async_get_last_state()
         if state:
             if state.state != self.hub.max_charge:

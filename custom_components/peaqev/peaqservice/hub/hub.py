@@ -139,6 +139,12 @@ class HomeAssistantHub:
             self._max_charge = None
         elif val is False:
             self._max_charge = None
+        if self._max_charge is None:
+            await self.state_machine.services.async_call(
+                "input_number", 
+                "set_value", 
+                {"entity_id": "input_number.peaqev_max_charge", "value": self.max_charge}
+                )
         
     @property
     def is_initialized(self) -> bool:
