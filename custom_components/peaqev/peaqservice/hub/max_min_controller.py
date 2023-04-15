@@ -43,14 +43,7 @@ class MaxMinController:
 
     async def async_servicecall_override_charge_amount(self, amount: int):
         await self.async_servicecall_override_charge_amount(amount)
-        await self.hub.state_machine.services.async_call(
-            "number",
-            "set_value",
-            {
-                "entity_id": "number.peaqev_max_charge",
-                "value":     amount,
-            },
-        )
+        await self.async_update_sensor(amount)
 
     async def async_servicecall_reset_charge_amount(self):
         self._override_max_charge = None
@@ -71,17 +64,20 @@ class MaxMinController:
             if state is not None:
                 if state == self.max_charge or self.max_charge == 0:
                     return
-            await self.hub.state_machine.services.async_call(
-                "number",
-                "set_value",
-                {
-                    "entity_id": "number.peaqev_max_charge",
-                    "value":     int(self.max_charge),
-                },
-            )
+            await self.async_update_sensor(self.max_charge)
             _LOGGER.debug(
                 f"Resetting max charge to static value {int(self.max_charge)}"
             )
         except Exception as e:
             _LOGGER.error(f"Encountered problem when trying to reset max charge to normal: {e}")
             return
+
+    async def async_update_sensor(self, val):
+        await self.hub.state_machine.services.async_call(
+            "number",
+            "set_value",
+            {
+                "entity_id": "number.peaqev_max_charge",
+                "value":     int(val),
+            },
+        )
