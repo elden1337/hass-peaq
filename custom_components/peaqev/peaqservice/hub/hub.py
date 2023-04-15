@@ -1,54 +1,60 @@
 from __future__ import annotations
 
-import inspect
 import logging
 from datetime import datetime
 from functools import partial
-
+from typing import Callable
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_state_change
 from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 
-from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
-    IChargeController
-from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
-    IChargerType
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
-from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import \
-    ChargeControllerFactory
-from custom_components.peaqev.peaqservice.hub.factories.chargertype_factory import \
-    ChargerTypeFactory
-from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import \
-    HourselectionFactory
-from custom_components.peaqev.peaqservice.hub.factories.hubsensors_factory import \
-    HubSensorsFactory
-from custom_components.peaqev.peaqservice.hub.factories.powertools_factory import \
-    PowerToolsFactory
-from custom_components.peaqev.peaqservice.hub.factories.state_changes_factory import \
-    StateChangesFactory
-from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import \
-    ThresholdFactory
-from custom_components.peaqev.peaqservice.hub.hub_initializer import \
-    HubInitializer
-from custom_components.peaqev.peaqservice.hub.max_min_controller import \
-    MaxMinController
-from custom_components.peaqev.peaqservice.hub.models.hub_options import \
-    HubOptions
-from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import \
-    NordPoolUpdater
-from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
-    Observer
-from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import \
-    IHubSensors
+from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import (
+    IChargeController,
+)
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
+from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import (
+    ChargeControllerFactory,
+)
+from custom_components.peaqev.peaqservice.hub.factories.chargertype_factory import (
+    ChargerTypeFactory,
+)
+from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import (
+    HourselectionFactory,
+)
+from custom_components.peaqev.peaqservice.hub.factories.hubsensors_factory import (
+    HubSensorsFactory,
+)
+from custom_components.peaqev.peaqservice.hub.factories.powertools_factory import (
+    PowerToolsFactory,
+)
+from custom_components.peaqev.peaqservice.hub.factories.state_changes_factory import (
+    StateChangesFactory,
+)
+from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import (
+    ThresholdFactory,
+)
+from custom_components.peaqev.peaqservice.hub.hub_initializer import HubInitializer
+from custom_components.peaqev.peaqservice.hub.max_min_controller import MaxMinController
+from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
+from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import NordPoolUpdater
+from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import (
+    Observer,
+)
+from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import IHubSensors
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
-from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
-    IStateChanges
-from custom_components.peaqev.peaqservice.util.constants import \
-    CHARGERCONTROLLER
-from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
+from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import (
+    IStateChanges,
+)
+from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
+from custom_components.peaqev.peaqservice.util.extensionmethods import (
+    nametoid,
+    async_iscoroutine,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -214,8 +220,8 @@ class HomeAssistantHub:
             "update charger enabled", self.async_update_charger_enabled, _async=True
         )
 
-
     """Composition below here"""
+
     async def async_set_init_dict(self, init_dict):
         ret = await self.sensors.locale.data.query_model.peaks.async_set_init_dict(
             init_dict
@@ -272,13 +278,15 @@ class HomeAssistantHub:
         }
         ret = {}
         for arg in args:
-            data = lookup.get(arg, None)
-            if await self.async_iscoroutine(data):
-                ret[arg] = await data()
+            func: Callable = lookup.get(arg, None)
+            if await async_iscoroutine(func):
+                ret[arg] = await func()
             else:
-                ret[arg] = data()
+                ret[arg] = func()
         if "max_charge" in ret.keys():
-            self.max_min_controller._original_total_charge = ret["max_charge"][0]  # todo: 247
+            self.max_min_controller._original_total_charge = ret["max_charge"][
+                0
+            ]  # todo: 247
         if len(ret) == 1:
             rr = list(ret.values())[0]
             if isinstance(rr, str):
@@ -286,10 +294,10 @@ class HomeAssistantHub:
             return rr
         return ret
 
-    async def async_iscoroutine(self, object):
-        while isinstance(object, partial):
-            object = object.func
-        return inspect.iscoroutinefunction(object)
+    # async def async_iscoroutine(self, object):
+    #     while isinstance(object, partial):
+    #         object = object.func
+    #     return inspect.iscoroutinefunction(object)
 
     @property
     def prices(self) -> list:

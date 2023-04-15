@@ -22,7 +22,6 @@ class MaxMinController:
         self.hub.observer.add(
             "update charger enabled", self.async_null_max_charge, _async=True
         )
-        self.hub.observer.add("prices changed", self.async_re_initialize, _async=True)
 
     @property
     def max_charge(self) -> int:
@@ -88,8 +87,3 @@ class MaxMinController:
                 "value": int(val),
             },
         )
-
-    async def async_re_initialize(self):
-        await self.hub.hours._core.max_min.async_setup(
-            max_charge=self.max_charge
-        )  # todo: composition

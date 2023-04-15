@@ -1,5 +1,7 @@
 import logging
 import time
+import inspect
+from functools import partial
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,3 +26,9 @@ def log_once(msg):
             _LOGGER.debug(msg)
     except Exception as e:
         _LOGGER.error(f"Error in log_once_per_minute: {e}")
+
+
+async def async_iscoroutine(object):
+    while isinstance(object, partial):
+        object = object.func
+    return inspect.iscoroutinefunction(object)
