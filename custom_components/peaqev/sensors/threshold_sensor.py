@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 from homeassistant.const import PERCENTAGE
 
 from custom_components.peaqev.peaqservice.util.constants import THRESHOLD
@@ -5,7 +11,7 @@ from custom_components.peaqev.sensors.sensorbase import PowerDevice
 
 
 class PeaqThresholdSensor(PowerDevice):
-    def __init__(self, hub, entry_id):
+    def __init__(self, hub:HomeAssistantHub, entry_id):
         name = f"{hub.hubname} {THRESHOLD}"
         super().__init__(hub, name, entry_id)
 

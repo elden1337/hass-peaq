@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 import logging
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
@@ -6,6 +12,8 @@ from homeassistant.helpers.restore_state import RestoreEntity
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
+
+
 from custom_components.peaqev.peaqservice.util.constants import SESSION
 
 _LOGGER = logging.getLogger(__name__)
@@ -14,7 +22,7 @@ _LOGGER = logging.getLogger(__name__)
 class SessionDevice(SensorEntity):
     should_poll = True
 
-    def __init__(self, hub, name: str, entry_id):
+    def __init__(self, hub: HomeAssistantHub, name: str, entry_id):
         self.hub = hub
         self._entry_id = entry_id
         self._attr_name = name
@@ -39,7 +47,7 @@ class PeaqSessionSensor(SessionDevice, RestoreEntity):
     device_class = SensorDeviceClass.ENERGY
     unit_of_measurement = ENERGY_KILO_WATT_HOUR
 
-    def __init__(self, hub, entry_id):
+    def __init__(self, hub: HomeAssistantHub, entry_id):
         name = f"{hub.hubname} Session energy"
         super().__init__(hub, name, entry_id)
         self._attr_name = name
@@ -57,9 +65,9 @@ class PeaqSessionSensor(SessionDevice, RestoreEntity):
 
     @property
     def extra_state_attributes(self) -> dict:
-        attr_dict = {}
-        attr_dict["average_session"] = self._average_session
-        attr_dict["average_weekly"] = self._average_weekly
+        attr_dict = {"average_session": self._average_session, "average_weekly": self._average_weekly}
+        if self.hub.options.price.price_aware:
+
         return attr_dict
 
     async def async_update(self) -> None:
@@ -82,7 +90,7 @@ class PeaqSessionSensor(SessionDevice, RestoreEntity):
 class PeaqSessionCostSensor(SessionDevice, RestoreEntity):
     device_class = SensorDeviceClass.MONETARY
 
-    def __init__(self, hub, entry_id):
+    def __init__(self, hub:HomeAssistantHub, entry_id):
         name = f"{hub.hubname} Session energy cost"
         super().__init__(hub, name, entry_id)
         self._attr_name = name

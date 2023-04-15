@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import PERCENTAGE
 from peaqevcore.models.locale.enums.time_periods import TimePeriods
@@ -8,7 +14,7 @@ from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 
 
 class GainLossSensor(SensorEntity):
-    def __init__(self, hub, entry_id, timeperiod: TimePeriods):
+    def __init__(self, hub: HomeAssistantHub, entry_id, timeperiod: TimePeriods):
         self.hub = hub
         self._entry_id = entry_id
         self._attr_name = f"{self.hub.hubname} gain/loss {timeperiod.value.lower()}"

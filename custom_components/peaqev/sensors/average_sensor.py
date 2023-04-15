@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 from datetime import timedelta
 
 from homeassistant.components.filter.sensor import (TIME_SMA_LAST,
@@ -11,7 +17,7 @@ from custom_components.peaqev.const import DOMAIN
 from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
 
 
-async def async_set_filters(hub, filtertimedelta: timedelta) -> list:
+async def async_set_filters(hub: HomeAssistantHub, filtertimedelta: timedelta) -> list:
     return [
         LowPassFilter(
             window_size=1,
@@ -35,7 +41,7 @@ async def async_set_filters(hub, filtertimedelta: timedelta) -> list:
 
 
 class PeaqAverageSensor(SensorFilter):
-    def __init__(self, hub, entry_id, name, filters):
+    def __init__(self, hub: HomeAssistantHub, entry_id, name, filters):
         self.hub = hub
         self._entry_id = entry_id
         self._attr_name = f"{hub.hubname} {name}"

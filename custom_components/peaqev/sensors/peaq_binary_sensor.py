@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 import logging
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
@@ -9,7 +15,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class PeaqBinarySensorDone(BinarySensorEntity):
-    def __init__(self, hub) -> None:
+    def __init__(self, hub: HomeAssistantHub) -> None:
         """Initialize a Peaq Binary sensor."""
         self._attr_name = f"{hub.hubname} {CHARGERDONE}"
         self.hub = hub
