@@ -67,7 +67,7 @@ class PeaqSessionSensor(SessionDevice, RestoreEntity):
     def extra_state_attributes(self) -> dict:
         attr_dict = {"average_session": self._average_session, "average_weekly": self._average_weekly}
         if self.hub.options.price.price_aware:
-
+            attr_dict["remaining charge"] = self.hub.max_min_controller.remaining_charge
         return attr_dict
 
     async def async_update(self) -> None:

@@ -133,9 +133,9 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
     async def async_state_display(self, non_hours: list, dynamic_caution_hours: dict) -> str:
         hour = datetime.now().hour
         ret = CHARGING_ALLOWED.capitalize()
-        if self.hub.hours.timer.is_override:  # todo: composition
+        if getattr(self.hub.hours.timer, "is_override", False):  # todo: composition
             self._icon = "mdi:car-electric-outline"
-            return self.hub.hours.timer.override_string  # todo: composition
+            return getattr(self.hub.hours.timer, "override_string", "")  # todo: composition
         if hour in non_hours:
             self._icon = "mdi:car-clock"
             ret = calculate_stop_len(non_hours)

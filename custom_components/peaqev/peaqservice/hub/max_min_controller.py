@@ -31,6 +31,10 @@ class MaxMinController:
             return self.hub.options.max_charge
         return self._original_total_charge
 
+    @property
+    def remaining_charge(self) -> float:
+        return self.max_charge - getattr(self.hub.chargecontroller.charger.session, "session_energy", 0) #todo: composition
+
     async def async_override_max_charge(self, max_charge: int):
         """Overrides the max-charge with the input from frontend"""
         if self.hub.options.price.price_aware:

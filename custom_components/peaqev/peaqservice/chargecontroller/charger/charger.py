@@ -204,7 +204,7 @@ class Charger:
                     self.helpers.wait_update_current
                 ):
                     serviceparams = await async_set_chargerparams(
-                        calls, self.controller.hub.threshold.allowedcurrent
+                        calls, await self.controller.hub.threshold.async_allowed_current()
                     )
                     if (
                         not self.model.disable_current_updates
