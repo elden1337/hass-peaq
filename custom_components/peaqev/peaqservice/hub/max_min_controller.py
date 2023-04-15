@@ -41,6 +41,21 @@ class MaxMinController:
             self._override_max_charge = max_charge
             await self.hub.hours.async_update_max_min(self.max_charge)
 
+    async def async_servicecall_override_charge_amount(self, amount: int):
+        await self.async_servicecall_override_charge_amount(amount)
+        await self.hub.state_machine.services.async_call(
+            "number",
+            "set_value",
+            {
+                "entity_id": "number.peaqev_max_charge",
+                "value":     amount,
+            },
+        )
+
+    async def async_servicecall_reset_charge_amount(self):
+        self._override_max_charge = None
+        await self.async_reset_max_charge_sensor()
+
     async def async_null_max_charge(self, val=None):
         """Resets the max-charge to the static value, listens to charger done and charger disconnected"""
         if val is None:
