@@ -197,23 +197,19 @@ class HomeAssistantHub:
         return ret
 
     def _set_observers(self) -> None:
-        self.observer.add("prices changed", self.async_update_prices, _async=True)
+        self.observer.add("prices changed", self.async_update_prices)
         self.observer.add(
             "monthly average price changed",
-            self.async_update_average_monthly_price,
-            _async=True,
+            self.async_update_average_monthly_price
         )
         self.observer.add(
             "weekly average price changed",
-            self.async_update_average_weekly_price,
-            _async=True,
+            self.async_update_average_weekly_price
         )
         self.observer.add(
-            "update charger done", self.async_update_charger_done, _async=True
-        )
+            "update charger done", self.async_update_charger_done)
         self.observer.add(
-            "update charger enabled", self.async_update_charger_enabled, _async=True
-        )
+            "update charger enabled", self.async_update_charger_enabled)
 
     """Composition below here"""
 

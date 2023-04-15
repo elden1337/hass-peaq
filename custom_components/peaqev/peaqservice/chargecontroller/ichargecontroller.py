@@ -196,16 +196,10 @@ class IChargeController:
             self.model.latest_debuglog = time.time()
 
     def _setup_observers(self) -> None:
-        self.hub.observer.add(
-            "update latest charger start", self.async_update_latest_charger_start
-        )
-        self.hub.observer.add(
-            "update charger enabled",
-            self.async_update_latest_charger_start,
-            _async=True,
-        )
+        self.hub.observer.add("update latest charger start", self.async_update_latest_charger_start)
+        self.hub.observer.add("update charger enabled",self.async_update_latest_charger_start)
         self.hub.observer.add("hub initialized", self._check_initialized)
-        self.hub.observer.add("timer activated", self.async_set_status, _async=True)
+        self.hub.observer.add("timer activated", self.async_set_status)
 
     @property
     @abstractmethod
