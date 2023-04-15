@@ -15,11 +15,14 @@ class MaxMinController:
         self._override_max_charge = None
         self._original_total_charge = 0
         self.override_max_charge: bool = False
-        self.hub.observer.add("car disconnected", self.async_null_max_charge, _async=True)
+        self.hub.observer.add(
+            "car disconnected", self.async_null_max_charge, _async=True
+        )
         self.hub.observer.add("car done", self.async_null_max_charge, _async=True)
         self.hub.observer.add(
             "update charger enabled", self.async_null_max_charge, _async=True
         )
+        self.hub.observer.add("prices changed", self.async_re_initialize, _async=True)
 
     @property
     def max_charge(self) -> int:
@@ -33,7 +36,9 @@ class MaxMinController:
 
     @property
     def remaining_charge(self) -> float:
-        return self.max_charge - getattr(self.hub.chargecontroller.charger.session, "session_energy", 0) #todo: composition
+        return self.max_charge - getattr(
+            self.hub.chargecontroller.charger.session, "session_energy", 0
+        )  # todo: composition
 
     async def async_override_max_charge(self, max_charge: int):
         """Overrides the max-charge with the input from frontend"""
@@ -69,7 +74,9 @@ class MaxMinController:
                 f"Resetting max charge to static value {int(self.max_charge)}"
             )
         except Exception as e:
-            _LOGGER.error(f"Encountered problem when trying to reset max charge to normal: {e}")
+            _LOGGER.error(
+                f"Encountered problem when trying to reset max charge to normal: {e}"
+            )
             return
 
     async def async_update_sensor(self, val):
@@ -78,6 +85,11 @@ class MaxMinController:
             "set_value",
             {
                 "entity_id": "number.peaqev_max_charge",
-                "value":     int(val),
+                "value": int(val),
             },
         )
+
+    async def async_re_initialize(self):
+        await self.hub.hours._core.max_min.async_setup(
+            max_charge=self.max_charge
+        )  # todo: composition
