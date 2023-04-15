@@ -1,5 +1,6 @@
 from datetime import datetime
 
+
 def calculate_stop_len(nonhours) -> str:
     ret = ""
     for idx, h in enumerate(nonhours):

@@ -33,7 +33,8 @@ from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import
     ThresholdFactory
 from custom_components.peaqev.peaqservice.hub.hub_initializer import \
     HubInitializer
-from custom_components.peaqev.peaqservice.hub.max_min_controller import MaxMinController
+from custom_components.peaqev.peaqservice.hub.max_min_controller import \
+    MaxMinController
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import \
