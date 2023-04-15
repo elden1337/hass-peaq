@@ -89,7 +89,7 @@ class IStateChanges:
             new_val=float(value), timestamp=datetime.now()
         )
         if self.hub.options.price.price_aware:
-            await self.hub.hours.async_update_max_min(self.hub.max_charge)
+            await self.hub.hours.async_update_max_min(self.hub.max_min_controller.max_charge)
 
     @abstractmethod
     async def async_update_sensor_internal(self, entity, value) -> bool:

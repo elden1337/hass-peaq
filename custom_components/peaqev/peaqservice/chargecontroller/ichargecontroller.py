@@ -125,7 +125,7 @@ class IChargeController:
                 return ChargeControllerStates.Done, False
             elif (
                 datetime.now().hour in self.hub.non_hours
-                and not self.hub.hours.timer.is_override
+                and not getattr(self.hub.hours.timer, "is_override", False)
             ):  # todo: composition
                 return ChargeControllerStates.Stop, True
             elif _state in self.model.charger_states.get(
