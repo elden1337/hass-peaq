@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 
-from custom_components.peaqev.peaqservice.hub.observer.models.command import Command
+from custom_components.peaqev.peaqservice.hub.observer.models.command import \
+    Command
 
 
 @dataclass

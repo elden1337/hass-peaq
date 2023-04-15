@@ -1,6 +1,6 @@
+import inspect
 import logging
 import time
-import inspect
 from functools import partial
 
 _LOGGER = logging.getLogger(__name__)
