@@ -3,12 +3,11 @@ import logging
 from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
-from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
-from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
-import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
+    IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
@@ -25,7 +24,7 @@ CHARGER_ID = "charger_id"
 ACTION_COMMAND = "action_command"
 
 
-class Easee(ChargerBase):
+class Easee(IChargerType):
     def __init__(
         self,
         hass: HomeAssistant,
@@ -46,33 +45,6 @@ class Easee(ChargerBase):
         ]
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
         self.chargerstates[ChargeControllerStates.Done] = ["completed"]
-
-        try:
-            entitiesobj = helper.set_entitiesmodel(
-                hass=self._hass,
-                domain=self.domain_name,
-                entity_endings=self.entity_endings,
-                entity_schema=self.entities.entityschema,
-            )
-            self.entities.imported_entities = entitiesobj.imported_entities
-            self.entities.entityschema = entitiesobj.entityschema
-        except:
-            _LOGGER.debug(
-                f"Could not get a proper entityschema for {self.domain_name}."
-            )
-
-        self.set_sensors()
-        self._set_servicecalls(
-            domain=self.domain_name,
-            model=ServiceCallsDTO(
-                on=self.call_on if self._auth_required is True else self.call_resume,
-                off=self.call_off if self._auth_required is True else self.call_pause,
-                pause=self.call_pause,
-                resume=self.call_resume,
-                update_current=self.call_update_current,
-            ),
-            options=self.servicecalls_options,
-        )
 
     @property
     def max_amps(self) -> int:
@@ -126,27 +98,19 @@ class Easee(ChargerBase):
 
     @property
     def call_on(self) -> CallType:
-        return CallType(
-            ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "start"}
-        )
+        return CallType(ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "start"})
 
     @property
     def call_off(self) -> CallType:
-        return CallType(
-            ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "stop"}
-        )
+        return CallType(ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "stop"})
 
     @property
     def call_resume(self) -> CallType:
-        return CallType(
-            ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "resume"}
-        )
+        return CallType(ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "resume"})
 
     @property
     def call_pause(self) -> CallType:
-        return CallType(
-            ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "pause"}
-        )
+        return CallType(ACTION_COMMAND, {CHARGER_ID: self._chargerid, ACTION_COMMAND: "pause"})
 
     @property
     def call_update_current(self) -> CallType:
@@ -163,9 +127,9 @@ class Easee(ChargerBase):
             switch_controls_charger=False,
         )
 
-    def set_sensors(self):
+    async def async_set_sensors(self):
         amp_sensor = f"sensor.{self.entities.entityschema}_dynamic_charger_limit"
-        if not self._validate_sensor(amp_sensor):
+        if not await self.async_validate_sensor(amp_sensor):
             amp_sensor = f"sensor.{self.entities.entityschema}_max_charger_limit"
         self.entities.maxamps = f"sensor.{self.entities.entityschema}_max_charger_limit"
         self.entities.chargerentity = f"sensor.{self.entities.entityschema}_status"
@@ -185,7 +149,7 @@ class Easee(ChargerBase):
             )
         return 16
 
-    def _validate_sensor(self, sensor: str) -> bool:
+    async def async_validate_sensor(self, sensor: str) -> bool:
         ret = self._hass.states.get(sensor)
         if ret is None:
             return False

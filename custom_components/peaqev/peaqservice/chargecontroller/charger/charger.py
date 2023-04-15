@@ -33,9 +33,7 @@ class Charger:
         self.session = Session(self)
         self._lock = asyncio.Lock()
         self.helpers = ChargerHelpers(self)
-        self.controller.hub.observer.add(
-            "power canary dead", self.async_pause_charger, _async=True
-        )
+        self.controller.hub.observer.add("power canary dead", self.async_pause_charger)
 
     @property
     def session_active(self) -> bool:
@@ -204,7 +202,7 @@ class Charger:
                     self.helpers.wait_update_current
                 ):
                     serviceparams = await async_set_chargerparams(
-                        calls, self.controller.hub.threshold.allowedcurrent
+                        calls, await self.controller.hub.threshold.async_allowed_current()
                     )
                     if (
                         not self.model.disable_current_updates

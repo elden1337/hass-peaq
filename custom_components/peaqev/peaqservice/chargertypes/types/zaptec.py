@@ -3,12 +3,11 @@ import logging
 from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
-from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
-from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
-import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
+    IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
@@ -19,7 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 # docs: https://github.com/custom-components/zaptec
 
 
-class Zaptec(ChargerBase):
+class Zaptec(IChargerType):
     def __init__(
         self,
         hass: HomeAssistant,
@@ -38,32 +37,6 @@ class Zaptec(ChargerBase):
         self.chargerstates[ChargeControllerStates.Connected] = ["waiting"]
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
         self.chargerstates[ChargeControllerStates.Done] = ["charge_done"]
-
-        try:
-            entitiesobj = helper.set_entitiesmodel(
-                hass=self._hass,
-                domain=self.domain_name,
-                entity_endings=self.entity_endings,
-                entity_schema=self.entities.entityschema,
-            )
-            self.entities.imported_entities = entitiesobj.imported_entities
-            self.entities.entityschema = entitiesobj.entityschema
-        except:
-            _LOGGER.debug(
-                f"Could not get a proper entityschema for {self.domain_name}."
-            )
-
-        self.set_sensors()
-        self._set_servicecalls(
-            domain=self.domain_name,
-            model=ServiceCallsDTO(
-                on=self.call_on,
-                off=self.call_off,
-                resume=self.call_resume,
-                pause=self.call_pause,
-            ),
-            options=self.servicecalls_options,
-        )
 
     @property
     def type(self) -> ChargerType:
@@ -117,21 +90,25 @@ class Zaptec(ChargerBase):
             switch_controls_charger=False,
         )
 
-    def set_sensors(self):
+    async def async_set_sensors(self):
         try:
             self.entities.chargerentity = f"sensor.zaptec_{self.entities.entityschema}"
-            self.entities.powermeter = (
-                f"{self.entities.chargerentity}|total_charge_power"
-            )
+            self.entities.powermeter = f"{self.entities.chargerentity}|total_charge_power"
             self.options.powermeter_factor = 1
-            self.entities.powerswitch = (
-                f"switch.zaptec_{self.entities.entityschema}_switch"
-            )
+            self.entities.powerswitch = f"switch.zaptec_{self.entities.entityschema}_switch"
             _LOGGER.debug("Sensors for Zaptec have been set up.")
         except Exception as e:
             _LOGGER.exception(f"Could not set needed sensors for Zaptec. {e}")
 
     def _validate_sensor(self, sensor: str) -> bool:
+        ret = self._hass.states.get(sensor)
+        if ret is None:
+            return False
+        elif ret.state == "Null":
+            return False
+        return True
+
+    async def async_validate_sensor(self, sensor: str) -> bool:
         ret = self._hass.states.get(sensor)
         if ret is None:
             return False

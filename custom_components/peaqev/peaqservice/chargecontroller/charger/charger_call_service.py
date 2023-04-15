@@ -13,9 +13,7 @@ async def async_do_update(
     # if switch_controls_charger:
     #     return await _async_do_outlet_update(calls_command, state_machine)
     # else:
-    return await async_do_service_call(
-        calls_domain, calls_command, calls_params, state_machine
-    )
+    return await async_do_service_call(calls_domain, calls_command, calls_params, state_machine)
 
 
 # async def _async_do_outlet_update(call, state_machine) -> bool:
@@ -29,9 +27,7 @@ async def async_do_update(
 
 
 async def async_do_service_call(domain, command, params, state_machine) -> bool:
-    _LOGGER.debug(
-        f"Calling charger {command} for domain '{domain}' with parameters: {params}"
-    )
+    _LOGGER.debug(f"Calling charger {command} for domain '{domain}' with parameters: {params}")
     try:
         await state_machine.services.async_call(domain, command, params)
     except Exception as e:

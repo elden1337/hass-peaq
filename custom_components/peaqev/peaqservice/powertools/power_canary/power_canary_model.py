@@ -24,12 +24,8 @@ class PowerCanaryModel:
 
     def __post_init__(self):
         self.fuse_max = FUSES_DICT.get(self.fuse) if self.fuse is not None else 0
-        self.threephase_amps = self._set_allowed_amps(
-            CURRENTS_THREEPHASE_1_32, CURRENTS_THREEPHASE_1_16
-        )
-        self.onephase_amps = self._set_allowed_amps(
-            CURRENTS_ONEPHASE_1_32, CURRENTS_ONEPHASE_1_16
-        )
+        self.threephase_amps = self._set_allowed_amps(CURRENTS_THREEPHASE_1_32, CURRENTS_THREEPHASE_1_16)
+        self.onephase_amps = self._set_allowed_amps(CURRENTS_ONEPHASE_1_32, CURRENTS_ONEPHASE_1_16)
 
     def _set_allowed_amps(self, amps_dict, default_amps) -> dict:
         """only allow amps if user has set this value high enough"""

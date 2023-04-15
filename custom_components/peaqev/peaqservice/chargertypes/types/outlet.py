@@ -7,8 +7,9 @@ from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
-from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
+    IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
@@ -18,7 +19,7 @@ from custom_components.peaqev.peaqservice.util.constants import SMARTOUTLET
 _LOGGER = logging.getLogger(__name__)
 
 
-class SmartOutlet(ChargerBase):
+class SmartOutlet(IChargerType):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
         self._hass = hass
         self._type = chargertype
@@ -29,13 +30,19 @@ class SmartOutlet(ChargerBase):
         self.chargerstates[ChargeControllerStates.Idle] = ["idle"]
         self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
-        self._hass.async_add_executor_job(self._validate_setup)
 
-        self._set_servicecalls(
-            domain=self.domain_name,
-            model=ServiceCallsDTO(on=self.call_on, off=self.call_off),
-            options=self.servicecalls_options,
-        )
+    async def async_setup(self) -> bool:
+        try:
+            await self.async_validate_setup()
+            await self.async_set_servicecalls(
+                domain=self.domain_name,
+                model=ServiceCallsDTO(on=self.call_on, off=self.call_off),
+                options=self.servicecalls_options,
+            )
+            return True
+        except Exception:
+            _LOGGER.error(f"Could not validate setup for {self.domain_name}.")
+        return False
 
     @property
     def type(self) -> ChargerType:
@@ -68,8 +75,8 @@ class SmartOutlet(ChargerBase):
             switch_controls_charger=True,
         )
 
-    def _validate_setup(self):
-        def check_states(entity: str, type_format: type) -> bool:
+    async def async_validate_setup(self):
+        async def async_check_states(entity: str, type_format: type) -> bool:
             try:
                 s = self._hass.states.get(entity)
                 if s is not None:
@@ -81,7 +88,7 @@ class SmartOutlet(ChargerBase):
 
         return all(
             [
-                check_states(self.entities.powerswitch, str),
-                check_states(self.entities.powermeter, float),
+                await async_check_states(self.entities.powerswitch, str),
+                await async_check_states(self.entities.powermeter, float),
             ]
         )

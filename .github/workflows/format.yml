@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Format code with black
-        run: |
-          pip install black
-          black --line-length 110 .
+#      - name: Format code with black
+#        run: |
+#          pip install black
+#          black --line-length 110 .
       - name: Sort imports with isort
         run: |
           pip install isort
@@ -26,6 +26,6 @@ jobs:
         with:
           author_name: ${{ github.actor }}
           author_email: ${{ github.actor }}@users.noreply.github.com
-          message: "Format code with black"
+          message: "Format and sort imports"
           add: "."
           branch: ${{ github.ref }}

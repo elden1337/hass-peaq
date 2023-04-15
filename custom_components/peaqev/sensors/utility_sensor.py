@@ -1,8 +1,16 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
+import inspect
+from dataclasses import dataclass
+
 from homeassistant.components.utility_meter.sensor import UtilityMeterSensor
 from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
 from custom_components.peaqev.const import DOMAIN
-from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 
 
@@ -15,89 +23,57 @@ METER_OFFSET.seconds = 0  # pylint:disable=attribute-defined-outside-init
 METER_OFFSET.minutes = 0  # pylint:disable=attribute-defined-outside-init
 METER_OFFSET.days = 0  # pylint:disable=attribute-defined-outside-init
 
-DATA_UTILITY = "utility_meter_data"
-DATA_TARIFF_SENSORS = "utility_meter_sensors"
+
+@dataclass(frozen=True)
+class UtilityMeterDTO:
+    visible_default: bool
+    sensor: str
+    meter_type: TimePeriods
+    entry_id: any
 
 
-class PeaqUtilityCostSensor(UtilityMeterSensor):
-    def __init__(
-        self, hub, sensor: any, meter_type: str, meter_offset: str, entry_id: any, hass
-    ):
-        self._entry_id = entry_id
-        self.hub = hub
-        self._attr_name = f"{self.hub.hubname} {sensor} {meter_type.lower()}"
-        self._unit_of_measurement = "kWh"
-        self._parent = f"sensor.{DOMAIN.lower()}_{sensor}"
+async def async_create_single_utility(hub: HomeAssistantHub, sensor: any, meter_type: TimePeriods, entry_id: any):
+    name = f"{hub.hubname} {sensor} {meter_type.value.lower()}"
+    source = f"sensor.{DOMAIN.lower()}_{sensor}"
+    parent = f"{source}_{meter_type.value.lower()}"
+    unique_id = f"{DOMAIN}_{entry_id}_{nametoid(name)}"
+    params = {
+        "source_entity": source,
+        "name": name,
+        "meter_type": meter_type.value,
+        "meter_offset": METER_OFFSET,
+        "net_consumption": True,
+        "tariff": None,
+        "tariff_entity": None,
+        "periodically_resetting": False,
+    }
 
-        super().__init__(
-            cron_pattern="{minute} * * * *",
-            delta_values=0,
-            meter_offset=meter_offset,
-            meter_type=meter_type,
-            name=self._attr_name,
-            net_consumption=True,
-            parent_meter=self._parent,
-            source_entity=self._parent,
-            tariff_entity=None,
-            tariff=None,
-            unique_id=self.unique_id,
-        )
-        hass.data[DATA_UTILITY][self._parent] = {DATA_TARIFF_SENSORS: [self]}
+    signature = inspect.signature(UtilityMeterSensor.__init__)
+    if "parent_meter" in signature.parameters:
+        params["parent_meter"] = parent
+    if "delta_values" in signature.parameters:
+        params["delta_values"] = False
+    if "unique_id" in signature.parameters:
+        params["unique_id"] = unique_id
+    if "cron_pattern" in signature.parameters:
+        params["cron_pattern"] = None
 
-    @property
-    def entity_registry_visible_default(self) -> bool:
-        return False
-
-    @property
-    def unique_id(self):
-        """Return a unique ID to use for this sensor."""
-        return f"{DOMAIN}_{self._entry_id}_{nametoid(self._attr_name)}"
-
-    @property
-    def device_info(self):
-        return {"identifiers": {(DOMAIN, self.hub.hub_id, POWERCONTROLS)}}
+    utility_meter = PeaqUtilitySensor(**params)
+    utility_meter.entity_id = parent
+    return utility_meter
 
 
 class PeaqUtilitySensor(UtilityMeterSensor):
-    def __init__(
-        self,
-        hub,
-        sensor: any,
-        meter_type: TimePeriods,
-        meter_offset: str,
-        entry_id: any,
-        hass,
-    ):
-        self._entry_id = entry_id
-        self.hub = hub
-        self._attr_name = f"{self.hub.hubname} {sensor} {meter_type.value.lower()}"
-        self._unit_of_measurement = "kWh"
-        self._parent = f"sensor.{DOMAIN.lower()}_{sensor}"
-
-        super().__init__(
-            cron_pattern="{minute} * * * *",
-            delta_values=0,
-            meter_offset=meter_offset,
-            meter_type=meter_type.value,
-            name=self._attr_name,
-            net_consumption=True,
-            parent_meter=self._parent,
-            source_entity=self._parent,
-            tariff_entity=None,
-            tariff=None,
-            unique_id=self.unique_id,
-        )
-        hass.data[DATA_UTILITY][self._parent] = {DATA_TARIFF_SENSORS: [self]}
-
     @property
     def entity_registry_visible_default(self) -> bool:
         return False
 
     @property
     def unique_id(self):
-        """Return a unique ID to use for this sensor."""
-        return f"{DOMAIN}_{self._entry_id}_{nametoid(self._attr_name)}"
+        """Return the unique id."""
+        return self._attr_unique_id
 
     @property
-    def device_info(self):
-        return {"identifiers": {(DOMAIN, self.hub.hub_id, POWERCONTROLS)}}
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self._state

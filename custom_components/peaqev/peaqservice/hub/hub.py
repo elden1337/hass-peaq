@@ -2,16 +2,19 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
+from functools import partial
+from typing import Callable
 
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_state_change
-from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
     IChargeController
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
+    IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import \
@@ -30,6 +33,8 @@ from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import
     ThresholdFactory
 from custom_components.peaqev.peaqservice.hub.hub_initializer import \
     HubInitializer
+from custom_components.peaqev.peaqservice.hub.max_min_controller import \
+    MaxMinController
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import \
@@ -43,14 +48,15 @@ from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes impor
     IStateChanges
 from custom_components.peaqev.peaqservice.util.constants import \
     CHARGERCONTROLLER
-from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
+from custom_components.peaqev.peaqservice.util.extensionmethods import (
+    async_iscoroutine, nametoid)
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class HomeAssistantHub:
     hub_id = 1337
-    chargertype: ChargerBase
+    chargertype: IChargerType
     sensors: IHubSensors
     hours: Hours
     threshold: ThresholdBase
@@ -69,6 +75,7 @@ class HomeAssistantHub:
         self.observer = Observer(self)
         self._set_observers()
         self.initializer = HubInitializer(self)
+        self.max_min_controller = MaxMinController(self)
 
     async def setup(self):
         self.chargertype = await ChargerTypeFactory.async_create(
@@ -105,25 +112,18 @@ class HomeAssistantHub:
 
     @property
     def non_hours(self) -> list:
-        if self.options.price.price_aware:
-            if self.hours.scheduler.scheduler_active:
-                return self.hours.scheduler.non_hours
         return self.hours.non_hours
 
     @property
     def dynamic_caution_hours(self) -> dict:
-        if self.options.price.price_aware:
-            if self.hours.scheduler.scheduler_active:
-                return self.hours.scheduler.caution_hours
         return self.hours.dynamic_caution_hours
 
     @property
     def current_peak_dynamic(self):
         """Dynamically calculated peak to adhere to caution-hours"""
         if self.options.price.price_aware and len(self.dynamic_caution_hours) > 0:
-            if (
-                datetime.now().hour in self.dynamic_caution_hours.keys()
-                and not self.hours.timer.is_override
+            if datetime.now().hour in self.dynamic_caution_hours.keys() and not getattr(
+                self.hours.timer, "is_override", False
             ):
                 return (
                     self.sensors.current_peak.value
@@ -197,23 +197,19 @@ class HomeAssistantHub:
         return ret
 
     def _set_observers(self) -> None:
-        self.observer.add("prices changed", self._update_prices)
+        self.observer.add("prices changed", self.async_update_prices)
         self.observer.add(
             "monthly average price changed",
-            self.async_update_average_monthly_price,
-            _async=True,
+            self.async_update_average_monthly_price
         )
         self.observer.add(
             "weekly average price changed",
-            self.async_update_average_weekly_price,
-            _async=True,
+            self.async_update_average_weekly_price
         )
         self.observer.add(
-            "update charger done", self.async_update_charger_done, _async=True
-        )
+            "update charger done", self.async_update_charger_done)
         self.observer.add(
-            "update charger enabled", self.async_update_charger_enabled, _async=True
-        )
+            "update charger enabled", self.async_update_charger_enabled)
 
     """Composition below here"""
 
@@ -230,8 +226,7 @@ class HomeAssistantHub:
         if ret is not None:
             try:
                 return float(ret.state)
-            except TypeError as e:
-                _LOGGER.error(f"Unable to convert power sensor to float: {e}")
+            except Exception:
                 return None
         return ret
 
@@ -240,37 +235,60 @@ class HomeAssistantHub:
             setattr(self.sensors.chargerobject, "value", value)
 
     async def async_request_sensor_data(self, *args) -> dict | any:
+        if not self.is_initialized:
+            return {}
         lookup = {
-            "charger_done": getattr(self.sensors.charger_done, "value"),
-            "chargerobject_value": getattr(self.sensors.chargerobject, "value"),
-            "hour_state": getattr(self.hours, "state", "unknown"),
-            "prices": getattr(self.hours, "prices", []),
-            "prices_tomorrow": getattr(self.hours, "prices_tomorrow", []),
-            "non_hours": getattr(self.hours, "non_hours", []),
-            "caution_hours": getattr(self.hours, "caution_hours", []),
-            "dynamic_caution_hours": getattr(self.hours, "dynamic_caution_hours", {}),
-            "currency": getattr(self.nordpool, "currency"),
-            "offsets": getattr(self.hours, "offsets", {}),
-            "average_nordpool_data": getattr(self.nordpool, "average_data"),
-            "use_cent": getattr(self.nordpool.model, "use_cent"),
-            "current_peak": getattr(self.sensors.current_peak, "value"),
-            "avg_kwh_price": await self.hours.async_get_average_kwh_price(),
-            "max_charge": await self.hours.async_get_total_charge(),
-            "average_weekly": getattr(self.nordpool, "average_weekly"),
-            "average_monthly": getattr(self.nordpool, "average_month"),
-            "is_price_aware": getattr(self.options.price, "price_aware"),
-            "is_scheduler_active": getattr(self.hours.scheduler, "scheduler_active"),
-            "chargecontroller_status": getattr(self.chargecontroller, "status_string"),
+            "charger_done": partial(getattr, self.sensors.charger_done, "value"),
+            "chargerobject_value": partial(
+                getattr, self.sensors.chargerobject, "value"
+            ),
+            "hour_state": partial(getattr, self.hours, "state", "unknown"),
+            "prices": partial(getattr, self.hours, "prices", []),
+            "prices_tomorrow": partial(getattr, self.hours, "prices_tomorrow", []),
+            "non_hours": partial(getattr, self, "non_hours", []),
+            "caution_hours": partial(getattr, self.hours, "caution_hours", []),
+            "dynamic_caution_hours": partial(
+                getattr, self, "dynamic_caution_hours", {}
+            ),
+            "average_nordpool_data": partial(getattr, self.nordpool, "average_data"),
+            "use_cent": partial(getattr, self.nordpool.model, "use_cent"),
+            "current_peak": partial(getattr, self.sensors.current_peak, "value"),
+            "avg_kwh_price": partial(self.hours.async_get_average_kwh_price),
+            "max_charge": partial(self.hours.async_get_total_charge),
+            "average_weekly": partial(getattr, self.nordpool, "average_weekly"),
+            "average_monthly": partial(getattr, self.nordpool, "average_month"),
+            "currency": partial(getattr, self.nordpool, "currency"),
+            "offsets": partial(getattr, self.hours, "offsets", {}),
+            "is_price_aware": partial(getattr, self.options.price, "price_aware"),
+            "is_scheduler_active": partial(
+                getattr, self.hours.scheduler, "scheduler_active", False
+            ),
+            "chargecontroller_status": partial(
+                getattr, self.chargecontroller, "status_string"
+            ),
         }
         ret = {}
         for arg in args:
-            ret[arg] = lookup.get(arg, None)
+            func: Callable = lookup.get(arg, None)
+            if await async_iscoroutine(func):
+                ret[arg] = await func()
+            else:
+                ret[arg] = func()
+        if "max_charge" in ret.keys():
+            self.max_min_controller._original_total_charge = ret["max_charge"][
+                0
+            ]  # todo: 247
         if len(ret) == 1:
             rr = list(ret.values())[0]
             if isinstance(rr, str):
                 return rr.lower()
             return rr
         return ret
+
+    # async def async_iscoroutine(self, object):
+    #     while isinstance(object, partial):
+    #         object = object.func
+    #     return inspect.iscoroutinefunction(object)
 
     @property
     def prices(self) -> list:
@@ -296,8 +314,9 @@ class HomeAssistantHub:
             return self.sensors.charger_done.value
         return False
 
-    def _update_prices(self, prices: list) -> None:
-        self.hours.update_prices(prices[0], prices[1])
+    async def async_update_prices(self, prices: list) -> None:
+        if self.options.price.price_aware:
+            await self.hours.async_update_prices(prices[0], prices[1])
 
     async def async_update_average_monthly_price(self, val) -> None:
         if self.options.price.price_aware and isinstance(val, float):
@@ -305,7 +324,7 @@ class HomeAssistantHub:
 
     async def async_update_average_weekly_price(self, val) -> None:
         if self.options.price.price_aware and isinstance(val, float):
-            setattr(self.hours, "adjusted_average", val)
+            await self.hours.async_update_adjusted_average(val)
 
     async def async_update_charger_done(self, val):
         setattr(self.sensors.charger_done, "value", bool(val))

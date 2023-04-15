@@ -1,8 +1,10 @@
+import asyncio
 import logging
 
 from homeassistant.core import HomeAssistant
-from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
+    IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.chargertypes.types.chargeamps import \
@@ -41,19 +43,22 @@ class ChargerTypeFactory:
             raise ValueError
 
     @staticmethod
-    async def async_create(hass: HomeAssistant, options: HubOptions) -> ChargerBase:
+    async def async_create(hass: HomeAssistant, options: HubOptions) -> IChargerType:
         input_type = options.charger.chargertype
         try:
             charger = await ChargerTypeFactory.async_get_class(input_type)
-            _LOGGER.debug(
-                f"Managed to set up charger-class for chargertype {input_type}"
-            )
-            # charger.validatecharger()
-            return charger(
-                hass=hass, huboptions=options, chargertype=ChargerType(input_type)
-            )
+            ret = charger(hass=hass, huboptions=options, chargertype=ChargerType(input_type))
+
+            _counter = 0
+            while not ret.is_initialized and _counter < 10:
+                _counter += 1
+                ret.is_initialized = await ret.async_setup()
+                if ret.is_initialized:
+                    _LOGGER.info(f"Set up charger-class for chargertype {input_type} is done. attempts:{_counter}")
+                    return ret
+                await asyncio.sleep(1)
+            _LOGGER.exception(f"Did not manage to set up charge-class for {input_type} after {_counter} attempts. No entities found. The integration is probably not loaded.")
+            raise Exception
         except Exception as e:
-            _LOGGER.debug(
-                f"Exception. Did not manage to set up charge-class for {input_type}: {e}"
-            )
+            _LOGGER.debug(f"Exception. Did not manage to set up charge-class for {input_type}: {e}")
             raise Exception

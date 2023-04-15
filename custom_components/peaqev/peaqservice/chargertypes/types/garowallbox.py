@@ -7,9 +7,10 @@ from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
-from peaqevcore.services.chargertype.chargertype_base import ChargerBase
 
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
+    IChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.constants import (CHARGER,
@@ -55,10 +56,8 @@ states:
 """
 
 
-class GaroWallbox(ChargerBase):
-    def __init__(
-        self, hass: HomeAssistant, huboptions: HubOptions, auth_required: bool = False
-    ):
+class GaroWallbox(IChargerType):
+    def __init__(self, hass: HomeAssistant, huboptions: HubOptions, auth_required: bool = False):
         _LOGGER.warning(
             "You are initiating GaroWallbox as Chargertype. Bare in mind that this chargertype is not finalized and may be very unstable."
         )
@@ -74,14 +73,10 @@ class GaroWallbox(ChargerBase):
         self.chargerstates[ChargeControllerStates.Done] = ["CHARGING_FINISHED"]
         self.chargerstates[ChargeControllerStates.Charging] = ["CHARGING"]
         self.entities.chargerentity = f"sensor.{self.entities.entityschema}-status"
-        self.entities.powermeter = (
-            f"sensor.{self.entities.entityschema}-current_charging_power"
-        )
+        self.entities.powermeter = f"sensor.{self.entities.entityschema}-current_charging_power"
         self.options.powermeter_factor = 1
 
-        self.entities.ampmeter = (
-            f"sensor.{self.entities.entityschema}-current_charging_current"
-        )
+        self.entities.ampmeter = f"sensor.{self.entities.entityschema}-current_charging_current"
         self.options.powerswitch_controls_charging = False
         self._auth_required = auth_required
         self.entities.powerswitch = "n/a"
@@ -92,14 +87,10 @@ class GaroWallbox(ChargerBase):
             CURRENT: "limit",
         }
 
-        _on = CallType(
-            "set_mode", {"mode": "on", "entity_id": self.entities.chargerentity}
-        )
-        _off = CallType(
-            "set_mode", {"mode": "off", "entity_id": self.entities.chargerentity}
-        )
+        _on = CallType("set_mode", {"mode": "on", "entity_id": self.entities.chargerentity})
+        _off = CallType("set_mode", {"mode": "off", "entity_id": self.entities.chargerentity})
 
-        self._set_servicecalls(
+        self.async_set_servicecalls(
             domain=DOMAINNAME,
             model=ServiceCallsDTO(
                 on=_on,
@@ -115,9 +106,7 @@ class GaroWallbox(ChargerBase):
     def getentities(self, domain: str = None, endings: list = None):
         if len(self.entities.entityschema) < 1:
             domain = self.domainname if domain is None else domain
-            endings = (
-                self.entities.imported_entityendings if endings is None else endings
-            )
+            endings = self.entities.imported_entityendings if endings is None else endings
 
             entities = helper.get_entities_from_hass(self._hass, domain)
 
@@ -137,7 +126,5 @@ class GaroWallbox(ChargerBase):
                         break
 
                 self.entities.entityschema = candidate
-                _LOGGER.debug(
-                    f"entityschema is: {self.entities.entityschema} at {time.time()}"
-                )
+                _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
                 self.entities.imported_entities = entities

@@ -56,6 +56,7 @@ class IChargeController:
     def _do_initialize(self) -> bool:
         self.model.is_initialized = True
         log_once("Chargecontroller is initialized and ready to work.")
+        self.model.latest_charger_start = time.time()
         return self.model.is_initialized
 
     def _check_initialized(self) -> bool:
@@ -65,7 +66,8 @@ class IChargeController:
             _state = self.hub.get_power_sensor_from_hass()
             if _state is not None:
                 if isinstance(_state, (float, int)):
-                    return self._do_initialize()
+                    if _state > 0:
+                        return self._do_initialize()
             return False
         return self._do_initialize()
 
@@ -107,12 +109,14 @@ class IChargeController:
                 return ChargeControllerStates.Disabled, True
             elif _state in self.model.charger_states.get(ChargeControllerStates.Done):
                 await self.hub.observer.async_broadcast("update charger done", True)
+                await self.hub.observer.async_broadcast("car done")
                 return ChargeControllerStates.Done, False
             elif _state in self.model.charger_states.get(ChargeControllerStates.Idle):
                 if self.hub.charger_done:
                     await self.hub.observer.async_broadcast(
                         "update charger done", False
                     )
+                    await self.hub.observer.async_broadcast("car disconnected")
                 return ChargeControllerStates.Idle, True
             elif self.hub.sensors.power.killswitch.is_dead:  # todo: composition
                 return ChargeControllerStates.Error, True
@@ -123,7 +127,7 @@ class IChargeController:
                 return ChargeControllerStates.Done, False
             elif (
                 datetime.now().hour in self.hub.non_hours
-                and not self.hub.hours.timer.is_override
+                and not getattr(self.hub.hours.timer, "is_override", False)
             ):  # todo: composition
                 return ChargeControllerStates.Stop, True
             elif _state in self.model.charger_states.get(
@@ -136,6 +140,7 @@ class IChargeController:
                 return await self.async_get_status_charging(), True
         except Exception as e:
             _LOGGER.debug(f"Error in async_get_status: {e}")
+        return ChargeControllerStates.Error, True
 
     async def async_get_status_outlet(self) -> Tuple[ChargeControllerStates, bool]:
         if not self.hub.enabled:
@@ -193,16 +198,10 @@ class IChargeController:
             self.model.latest_debuglog = time.time()
 
     def _setup_observers(self) -> None:
-        self.hub.observer.add(
-            "update latest charger start", self.async_update_latest_charger_start
-        )
-        self.hub.observer.add(
-            "update charger enabled",
-            self.async_update_latest_charger_start,
-            _async=True,
-        )
+        self.hub.observer.add("update latest charger start", self.async_update_latest_charger_start)
+        self.hub.observer.add("update charger enabled",self.async_update_latest_charger_start)
         self.hub.observer.add("hub initialized", self._check_initialized)
-        self.hub.observer.add("timer activated", self.async_set_status, _async=True)
+        self.hub.observer.add("timer activated", self.async_set_status)
 
     @property
     @abstractmethod

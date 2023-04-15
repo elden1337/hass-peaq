@@ -33,4 +33,5 @@ class HubOptions:
     fuse_type: str = ""
     blocknocturnal: bool = False
     gainloss: bool = False
+    max_charge: int = 0
     """blocks charging during the night for safety concern reasons."""
