@@ -68,19 +68,19 @@ class Observer:
     async def async_dequeue_and_broadcast(self, command: Command):
         if await self.async_ok_to_broadcast(command.command):
             async with self._lock:
-                if command.expiration > time.time():
-                    _LOGGER.debug(f"ready to broadcast: {command.command} with params: {command.argument}")
-                    for func in self.model.subscribers[command.command]:
-                        if await async_iscoroutine(func):
-                            await self.async_call_func(func=func, command=command),
-                        else:
-                            self.hub.state_machine.async_add_executor_job(
-                                self._call_func, func, command
-                            )
-                    self.model.broadcast_queue.remove(command)
-                else:
-                    _LOGGER.debug(f"broadcast timed out: {command}. Expired {int(time.time() - command.expiration)}s ago.}}")
-                    self.model.broadcast_queue.remove(command)
+                # if command.expiration > time.time():
+                _LOGGER.debug(f"ready to broadcast: {command.command} with params: {command.argument}")
+                for func in self.model.subscribers[command.command]:
+                    if await async_iscoroutine(func):
+                        await self.async_call_func(func=func, command=command),
+                    else:
+                        await self.hub.state_machine.async_add_executor_job(
+                            self._call_func, func, command
+                        )
+                self.model.broadcast_queue.remove(command)
+                # else:
+                #     _LOGGER.debug(f"broadcast timed out: {command}. Expired {int(time.time() - command.expiration)}s ago.}}")
+                #     self.model.broadcast_queue.remove(command)
 
     @staticmethod
     def _call_func(func: Callable, command: Command) -> None:
