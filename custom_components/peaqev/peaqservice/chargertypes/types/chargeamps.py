@@ -1,21 +1,22 @@
 import logging
 
 from homeassistant.core import HomeAssistant
-from peaqevcore.hub.hub_options import HubOptions
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
-from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
-from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
-from peaqevcore.services.chargertype.chargertype_base import ChargerBase
+from peaqevcore.models.chargertype.servicecalls_options import \
+    ServiceCallsOptions
 
-import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
-from custom_components.peaqev.peaqservice.chargertypes.models.chargeamps_types import ChargeAmpsTypes
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
-from custom_components.peaqev.peaqservice.util.constants import (
-    CHARGER,
-    CHARGERID,
-    CURRENT,
-)
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
+    IChargerType
+from custom_components.peaqev.peaqservice.chargertypes.models.chargeamps_types import \
+    ChargeAmpsTypes
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
+    ChargerType
+from custom_components.peaqev.peaqservice.hub.models.hub_options import \
+    HubOptions
+from custom_components.peaqev.peaqservice.util.constants import (CHARGER,
+                                                                 CHARGERID,
+                                                                 CURRENT)
 
 _LOGGER = logging.getLogger(__name__)
 # docs: https://github.com/kirei/hass-chargeamps
@@ -24,7 +25,7 @@ CHARGEPOINT = "chargepoint"
 CONNECTOR = "connector"
 
 
-class ChargeAmps(ChargerBase):
+class ChargeAmps(IChargerType):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
         #self._hass = hass
         #self._type = chargertype
@@ -37,32 +38,6 @@ class ChargeAmps(ChargerBase):
         # self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
         # self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
 
-        try:
-            entitiesobj = helper.set_entitiesmodel(
-                hass=self._hass,
-                domain=self.domain_name,
-                entity_endings=self.entity_endings,
-                entity_schema=self.entities.entityschema
-            )
-            self.entities.imported_entities = entitiesobj.imported_entities
-            self.entities.entityschema = entitiesobj.entityschema
-        except:
-            _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
-
-        self.set_sensors()
-
-        self._set_servicecalls(
-            domain=self.domain_name,
-            model=ServiceCallsDTO(
-                on=self.call_on,
-                off=self.call_off,
-                pause=self.call_pause,
-                resume=self.call_resume,
-                update_current=self.call_update_current
-            ),
-            options=self.servicecalls_options
-        )
-
     @property
     def type(self) -> ChargerType:
         """type returns the implemented chargertype."""
@@ -72,6 +47,10 @@ class ChargeAmps(ChargerBase):
     def domain_name(self) -> str:
         """declare the domain name as stated in HA"""
         return "chargeamps"
+
+    @property
+    def max_amps(self) -> int:
+        return self.get_allowed_amps()
 
     @property
     def entity_endings(self) -> list:
@@ -123,7 +102,7 @@ class ChargeAmps(ChargerBase):
 
     def get_allowed_amps(self) -> int:
         """no such method for chargeamps available right now."""
-        pass
+        return 16
 
     # def set_sensors(self) -> None:
     #     self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"
@@ -154,3 +133,32 @@ class ChargeAmps(ChargerBase):
                 if isinstance(amps, int):
                     return e
         raise Exception
+
+    async def async_set_sensors(self) -> None:
+        self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"
+        self.entities.powermeter = f"sensor.{self.entities.entityschema}_1_power"
+        self.entities.powerswitch = await self.async_determine_switch_entity()
+        self.entities.ampmeter = f"{self.entities.powerswitch}|max_current"
+        self._chargeramps_type = await self.async_set_chargeamps_type(self.entities.chargerentity)
+
+    async def async_determine_switch_entity(self) -> str:
+        ent = await self.async_determine_entities()
+        for e in ent:
+            if e.startswith("switch."):
+                amps = self._hass.states.get(e).attributes.get("max_current")
+                if isinstance(amps, int):
+                    return e
+        raise Exception
+
+    async def async_determine_entities(self) -> list:
+        ret = []
+        for e in self.entities.imported_entities:
+            entity_state = self._hass.states.get(e)
+            if entity_state != "unavailable":
+                ret.append(e)
+        return ret
+
+    async def async_set_chargeamps_type(self, main_sensor_entity) -> ChargeAmpsTypes:
+        if self._hass.states.get(main_sensor_entity) is not None:
+            chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get("chargepoint_type")
+            return await ChargeAmpsTypes.async_get_type(chargeampstype)

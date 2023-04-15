@@ -1,9 +1,22 @@
-from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
+import logging
+
+from peaqevcore.models.chargecontroller_states import ChargeControllerStates
+
+from custom_components.peaqev.peaqservice.util.constants import \
+    CHARGERCONTROLLER
 from custom_components.peaqev.sensors.sensorbase import SensorBase
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class PeaqSensor(SensorBase):
-    def __init__(self, hub, entry_id):
+    def __init__(self, hub: HomeAssistantHub, entry_id):
         name = f"{hub.hubname} {CHARGERCONTROLLER}"
         super().__init__(hub, name, entry_id)
 
@@ -14,31 +27,44 @@ class PeaqSensor(SensorBase):
         self._current_hour = None
         self._price_aware: bool = False
         self._scheduler_active: bool = False
-        self._latest_charger_start = None
 
     @property
     def state(self):
-        if self.hub.scheduler.scheduler_active:  #todo: composition
+        if self._scheduler_active:
             return f"(schedule) {self._state}"
         return self._state
 
     @property
     def icon(self) -> str:
-        ret = "mdi:electric-switch-closed"
-        if self.state == "Idle":
-            ret = "mdi:electric-switch"
-        elif self.state == "Done":
-            ret = "mdi:check"
+        ret = "mdi:battery"
+        if self.state is ChargeControllerStates.Idle.value:
+            ret = "mdi:ev-plug-type2"
+        elif self.state == "Disabled":
+            ret = "mdi:battery-off"
+        elif self.state is ChargeControllerStates.Start.value:
+            ret = "mdi:battery-charging"
+        elif self.state is ChargeControllerStates.Stop.value:
+            ret = "mdi:battery-clock"
+        elif self.state is ChargeControllerStates.Done.value:
+            ret = "mdi:battery-charging-100"
         return ret
 
-    def update(self) -> None:
-        self._state = self.hub.chargecontroller.status_string  #todo: composition
-        self._nonhours = self.hub.hours.non_hours  #todo: composition
-        self._cautionhours = self.hub.hours.caution_hours  #todo: composition
-        self._current_hour = self.hub.hours.state  #todo: composition
-        self._price_aware = self.hub.hours.price_aware  #todo: composition
-        self._latest_charger_start = self.hub.chargecontroller.latest_charger_start
-        self._scheduler_active = self.hub.scheduler.scheduler_active
+    async def async_update(self) -> None:
+        ret = await self.hub.async_request_sensor_data(
+            "non_hours",
+            "caution_hours",
+            "chargecontroller_status",
+            "hour_state",
+            "is_price_aware",
+            "is_scheduler_active",
+        )
+        if ret is not None:
+            self._state = ret.get("chargecontroller_status")
+            self._nonhours = ret.get("non_hours")
+            self._cautionhours = ret.get("caution_hours")
+            self._current_hour = ret.get("hour_state")
+            self._price_aware = ret.get("is_price_aware")
+            self._scheduler_active = ret.get("is_scheduler_active")
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -50,5 +76,4 @@ class PeaqSensor(SensorBase):
 
         attr_dict["current_hour state"] = self._current_hour
         attr_dict["scheduler_active"] = self._scheduler_active
-        attr_dict["latest_internal_chargerstart"] = self._latest_charger_start
         return attr_dict

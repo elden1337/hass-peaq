@@ -7,24 +7,21 @@
       "garo_wallbox",
       "zaptec",
       "nordpool",
+      "tibber",
       "filter",
       "integration",
-      "tibber"
+      "utility_meter"
     ],
     "codeowners": [
       "@elden1337"
     ],
     "config_flow": true,
-    "dependencies": [
-      "recorder",
-      "utility_meter"
-    ],
     "documentation": "https://github.com/elden1337/hass-peaq",
     "integration_type": "hub",
     "iot_class": "calculated",
     "issue_tracker": "https://github.com/elden1337/hass-peaq/issues",
     "requirements": [
-      "peaqevcore==13.4.1"
+      "peaqevcore==15.3.1"
     ],
-    "version": "2.9.0a1"
+    "version": "2.10.0b0"
 }

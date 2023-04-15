@@ -1,9 +1,13 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 import logging
 
 from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.const import (
-    ENERGY_KILO_WATT_HOUR
-)
+from homeassistant.const import ENERGY_KILO_WATT_HOUR
 from homeassistant.helpers.restore_state import RestoreEntity
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
@@ -16,7 +20,8 @@ _LOGGER = logging.getLogger(__name__)
 class PeaqPeakSensor(SensorBase, RestoreEntity):
     device_class = SensorDeviceClass.ENERGY
     unit_of_measurement = ENERGY_KILO_WATT_HOUR
-    def __init__(self, hub, entry_id):
+
+    def __init__(self, hub:HomeAssistantHub, entry_id):
         self._name = f"{hub.hubname} peak"
         self._charged_peak = 0
         self._peaks_dict: dict = {}
@@ -25,18 +30,21 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
 
     @property
     def state(self) -> float:
-        return float(self._charged_peak)
+        try:
+            return round(float(self._charged_peak), 1)
+        except:
+            return 0
 
-    def update(self) -> None:
-        self._charged_peak = self.hub.sensors.locale.data.query_model.charged_peak  #todo: composition
-        self._peaks_dict = self.hub.sensors.locale.data.query_model.peaks.export_peaks  #todo: composition
-        self._observed_peak = self.hub.sensors.locale.data.query_model.observed_peak  #todo: composition
+    async def async_update(self) -> None:
+        self._charged_peak = getattr(self.hub.sensors.locale.data.query_model, "charged_peak")
+        self._peaks_dict = getattr(self.hub.sensors.locale.data.query_model.peaks, "export_peaks")
+        self._observed_peak = getattr(self.hub.sensors.locale.data.query_model, "observed_peak")
 
     @property
     def extra_state_attributes(self) -> dict:
         attr_dict = {
             "observed_peak": float(self._observed_peak),
-            "peaks_dictionary": self.set_peaksdict()
+            "peaks_dictionary": self.set_peaksdict(),
         }
         return attr_dict
 
@@ -65,9 +73,9 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
         if state:
             _LOGGER.debug("last state of %s = %s", self._name, state)
             self._charged_peak = state.state
-            self._peaks_dict = state.attributes.get('peaks_dictionary', 50)
-            self.hub.sensors.locale.data.query_model.peaks.set_init_dict(self._peaks_dict)  #todo: composition
-            self._observed_peak = state.attributes.get('observed_peak', 50)
+            self._peaks_dict = state.attributes.get("peaks_dictionary", 50)
+            await self.hub.async_set_init_dict(self._peaks_dict)
+            self._observed_peak = state.attributes.get("observed_peak", 50)
         else:
             self._charged_peak = 0
             self._peaks_dict = {}

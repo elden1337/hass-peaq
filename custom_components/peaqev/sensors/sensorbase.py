@@ -1,14 +1,21 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 from homeassistant.components.sensor import SensorEntity
 
 from custom_components.peaqev.const import DOMAIN
-from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS, HUB
+from custom_components.peaqev.peaqservice.util.constants import (HUB,
+                                                                 POWERCONTROLS)
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 
 
 class PowerDevice(SensorEntity):
     should_poll = True
 
-    def __init__(self, hub, name: str, entry_id):
+    def __init__(self, hub:HomeAssistantHub, name: str, entry_id):
         self.hub = hub
         self._entry_id = entry_id
         self._attr_name = name
@@ -32,7 +39,7 @@ class PowerDevice(SensorEntity):
 class SensorBase(SensorEntity):
     should_poll = True
 
-    def __init__(self, hub, name: str, entry_id):
+    def __init__(self, hub:HomeAssistantHub, name: str, entry_id):
         """Initialize the sensor."""
         self.hub = hub
         self._entry_id = entry_id
@@ -45,7 +52,7 @@ class SensorBase(SensorEntity):
             "identifiers": {(DOMAIN, self.hub.hub_id)},
             "name": f"{DOMAIN} {HUB}",
             "sw_version": 1,
-            "model": f"{self.hub.sensors.locale.type} ({self.hub.chargertype.type.value})",  #todo: composition
+            "model": f"{self.hub.sensors.locale.type} ({self.hub.chargertype.type.value})",  # todo: composition
             "manufacturer": "Peaq systems",
         }
 

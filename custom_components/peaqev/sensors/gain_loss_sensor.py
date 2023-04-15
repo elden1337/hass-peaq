@@ -1,7 +1,11 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 from homeassistant.components.sensor import SensorEntity
-from homeassistant.const import (
-    PERCENTAGE
-)
+from homeassistant.const import PERCENTAGE
 from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
 from custom_components.peaqev.const import DOMAIN
@@ -10,16 +14,15 @@ from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 
 
 class GainLossSensor(SensorEntity):
-    def __init__(self, hub, entry_id, timeperiod: TimePeriods):
-        self._hub = hub
+    def __init__(self, hub: HomeAssistantHub, entry_id, timeperiod: TimePeriods):
+        self.hub = hub
         self._entry_id = entry_id
-        self._attr_name = f"{self._hub.hubname} gain/loss {timeperiod.value.lower()}"
+        self._attr_name = f"{self.hub.hubname} gain/loss {timeperiod.value.lower()}"
         self._state = None
         self._raw_state = None
         self._timeperiod = timeperiod
         self._attr_icon = "mdi:cash-clock"
         self._attr_available = True
-        self.update()
 
     @property
     def state(self) -> float:
@@ -29,23 +32,23 @@ class GainLossSensor(SensorEntity):
     def native_unit_of_measurement(self):
         return PERCENTAGE
 
-    def update(self) -> None:
-        ret = self._hub.gainloss.state(self._timeperiod)
-        if self._state != round(ret * 100,1):
+    async def async_update(self) -> None:
+        if not self.hub.is_initialized:
+            return
+        ret = await self.hub.power.gain_loss.async_state(self._timeperiod)
+        if self._state != round(ret * 100, 1):
             self._state = round(ret * 100, 1)
             self._raw_state = ret
 
     @property
     def unique_id(self):
         """Return a unique ID to use for this sensor."""
-        return f"{DOMAIN}_{self._entry_id}_{nametoid(self._attr_name)}" 
+        return f"{DOMAIN}_{self._entry_id}_{nametoid(self._attr_name)}"
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self._hub.hub_id, POWERCONTROLS)}}
+        return {"identifiers": {(DOMAIN, self.hub.hub_id, POWERCONTROLS)}}
 
     @property
     def extra_state_attributes(self) -> dict:
-        return {
-            "raw_state": self._raw_state
-        }
+        return {"raw_state": self._raw_state}

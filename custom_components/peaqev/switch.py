@@ -10,17 +10,16 @@ from .const import DOMAIN
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(seconds=4)
 
-async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities): # pylint:disable=unused-argument
+
+async def async_setup_entry(
+    hass: HomeAssistant, config_entry, async_add_entities
+):  # pylint:disable=unused-argument
     hub = hass.data[DOMAIN]["hub"]
 
-    switches = [
-        {
-            "name": "Charger enabled",
-            "entity": "charger_enabled"
-        }
-    ]
+    switches = [{"name": "Charger enabled", "entity": "charger_enabled"}]
 
     async_add_entities(PeaqSwitch(s, hub) for s in switches)
+
 
 class PeaqSwitch(SwitchEntity, RestoreEntity):
     def __init__(self, switch, hub) -> None:
@@ -42,25 +41,20 @@ class PeaqSwitch(SwitchEntity, RestoreEntity):
 
     @property
     def is_on(self) -> bool:
-        return self._state is True
+        return True if self._state == "on" else False
 
     @property
     def state(self) -> str:
         return self._state
 
-    @state.setter
-    def state(self, value):
-        self._state = value
+    async def async_turn_on(self):
+        await self.hub.observer.async_broadcast("update charger enabled", True)
 
-    def turn_on(self):
-        self.hub.observer.broadcast("update charger enabled", True)
+    async def async_turn_off(self):
+        await self.hub.observer.async_broadcast("update charger enabled", False)
 
-    def turn_off(self):
-        self.hub.observer.broadcast("update charger enabled", False)
-
-    def update(self):
-        new_state = self.hub.enabled
-        self.state = "on" if new_state is True else "off"
+    async def async_update(self):
+        self._state = "on" if self.hub.enabled else "off"
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()

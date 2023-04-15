@@ -11,6 +11,7 @@ class NordpoolDTO:
     tomorrow: list = field(default_factory=lambda: [])
     average: float = 0
     currency: str = ""
+    price_in_cent: bool = False
 
     async def set_model(self, ret):
         try:
@@ -22,3 +23,4 @@ class NordpoolDTO:
         self.currency = str(ret.attributes.get("currency", ""))
         self.state = ret.state
         self.average = float(str(ret.attributes.get("average", 0)))
+        self.price_in_cent = bool(ret.attributes.get("price_in_cent", False))

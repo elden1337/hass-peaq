@@ -1,1 +1,4 @@
-peaqevcore~=9.0.0
+peaqevcore~=13.0.0
+black
+isort
+autoflake

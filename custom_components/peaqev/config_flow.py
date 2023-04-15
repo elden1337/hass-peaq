@@ -9,20 +9,18 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 
-from custom_components.peaqev.configflow.config_flow_helpers import set_startpeak_dict
+from custom_components.peaqev.configflow.config_flow_helpers import \
+    async_set_startpeak_dict
 from custom_components.peaqev.configflow.config_flow_schemas import (
-    SENSOR_SCHEMA,
-    PRICEAWARE_SCHEMA,
-    HOURS_SCHEMA,
-    MONTHS_SCHEMA,
-    CHARGER_SCHEMA,
-    TYPE_SCHEMA,
-    OUTLET_DETAILS_SCHEMA,
-    CHARGER_DETAILS_SCHEMA
-)
-from custom_components.peaqev.configflow.config_flow_validation import ConfigFlowValidation
-from custom_components.peaqev.peaqservice.power_canary.power_canary import FUSES_LIST
-from custom_components.peaqev.peaqservice.util.constants import CautionHourType, TYPELITE, CAUTIONHOURTYPE_NAMES
+    CHARGER_DETAILS_SCHEMA, CHARGER_SCHEMA, HOURS_SCHEMA, MONTHS_SCHEMA,
+    OUTLET_DETAILS_SCHEMA, PRICEAWARE_SCHEMA, SENSOR_SCHEMA, TYPE_SCHEMA)
+from custom_components.peaqev.configflow.config_flow_validation import \
+    ConfigFlowValidation
+from custom_components.peaqev.peaqservice.powertools.power_canary.const import \
+    FUSES_LIST
+from custom_components.peaqev.peaqservice.util.constants import (
+    CAUTIONHOURTYPE_NAMES, TYPELITE, CautionHourType)
+
 from .const import DOMAIN  # pylint:disable=unused-import
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
@@ -51,12 +49,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return await self.async_step_charger()
             return await self.async_step_sensor()
 
-        return self.async_show_form(
-            step_id="user",
-            data_schema=TYPE_SCHEMA,
-            errors=errors,
-            last_step=False
-        )
+        return self.async_show_form(step_id="user", data_schema=TYPE_SCHEMA, errors=errors, last_step=False)
 
     async def async_step_sensor(self, user_input=None):
         errors = {}
@@ -71,10 +64,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return await self.async_step_charger()
 
         return self.async_show_form(
-            step_id="sensor",
-            data_schema=SENSOR_SCHEMA,
-            errors=errors,
-            last_step=False
+            step_id="sensor", data_schema=SENSOR_SCHEMA, errors=errors, last_step=False
         )
 
     async def async_step_charger(self, user_input=None):
@@ -93,7 +83,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="charger",
             data_schema=CHARGER_SCHEMA,
             errors=errors,
-            last_step=False
+            last_step=False,
         )
 
     async def async_step_chargerdetails(self, user_input=None):
@@ -106,7 +96,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="chargerdetails",
             data_schema=CHARGER_DETAILS_SCHEMA,
             errors=errors,
-            last_step=False
+            last_step=False,
         )
 
     async def async_step_outletdetails(self, user_input=None):
@@ -119,7 +109,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="outletdetails",
             data_schema=OUTLET_DETAILS_SCHEMA,
             errors=errors,
-            last_step=False
+            last_step=False,
         )
 
     async def async_step_priceaware(self, user_input=None):
@@ -150,7 +140,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_months(self, user_input=None):
         if user_input is not None:
-            months_dict = await set_startpeak_dict(user_input)
+            months_dict = await async_set_startpeak_dict(user_input)
             self.data["startpeaks"] = months_dict
             return await self.async_step_misc()
 
@@ -165,22 +155,21 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             self.data["mains"] = user_input["mains"]
             self.data["blocknocturnal"] = user_input["blocknocturnal"]
+            self.data["gainloss"] = user_input["gainloss"]
             return self.async_create_entry(title=self.info["title"], data=self.data)
 
         schema = vol.Schema(
-                {
-                    vol.Optional(
-                        "mains",
-                        default="",
-                    ): vol.In(FUSES_LIST),
-                    vol.Optional("blocknocturnal", default=False): cv.boolean,
-                })
-
-        return self.async_show_form(
-            step_id="misc",
-            last_step=True,
-            data_schema=schema
+            {
+                vol.Optional(
+                    "mains",
+                    default="",
+                ): vol.In(FUSES_LIST),
+                vol.Optional("blocknocturnal", default=False): cv.boolean,
+                vol.Optional("gainloss", default=True): cv.boolean,
+            }
         )
+
+        return self.async_show_form(step_id="misc", last_step=True, data_schema=schema)
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
@@ -209,6 +198,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         _minprice = await self._get_existing_param("min_priceaware_threshold_price", 0)
         _hourtype = await self._get_existing_param("cautionhour_type", CautionHourType.INTERMEDIATE.value)
         _dynamic_top_price = await self._get_existing_param("dynamic_top_price", False)
+        _max_charge = await self._get_existing_param("max_charge", 0)
 
         return self.async_show_form(
             step_id="init",
@@ -223,7 +213,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         "cautionhour_type",
                         default=_hourtype,
                     ): vol.In(CAUTIONHOURTYPE_NAMES),
-                }),
+                    vol.Optional("max_charge", default=_max_charge): cv.positive_float,
+                }
+            ),
         )
 
     async def async_step_hours(self, user_input=None):
@@ -239,20 +231,17 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             step_id="hours",
             last_step=False,
             data_schema=vol.Schema(
-            {
-                vol.Optional("nonhours", default=_nonhours): cv.multi_select(
-                    list(range(0, 24))
-                ),
-                vol.Optional("cautionhours", default=_cautionhours): cv.multi_select(
-                    list(range(0, 24))
-                )
-            }),
+                {
+                    vol.Optional("nonhours", default=_nonhours): cv.multi_select(list(range(0, 24))),
+                    vol.Optional("cautionhours", default=_cautionhours): cv.multi_select(list(range(0, 24))),
+                }
+            ),
         )
 
     async def async_step_months(self, user_input=None):
         """Months"""
         if user_input is not None:
-            months_dict = await set_startpeak_dict(user_input)
+            months_dict = await async_set_startpeak_dict(user_input)
             self.options["startpeaks"] = months_dict
             return await self.async_step_misc()
 
@@ -275,8 +264,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Optional("sep", default=defaultvalues[9]): cv.positive_float,
                     vol.Optional("oct", default=defaultvalues[10]): cv.positive_float,
                     vol.Optional("nov", default=defaultvalues[11]): cv.positive_float,
-                    vol.Optional("dec", default=defaultvalues[12]): cv.positive_float
-                })
+                    vol.Optional("dec", default=defaultvalues[12]): cv.positive_float,
+                }
+            ),
         )
 
     async def async_step_misc(self, user_input=None):
@@ -284,10 +274,12 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             self.options["mains"] = user_input["mains"]
             self.options["blocknocturnal"] = user_input["blocknocturnal"]
+            self.options["gainloss"] = user_input["gainloss"]
             return self.async_create_entry(title="", data=self.options)
 
         mainsvalue = await self._get_existing_param("mains", "")
         blocknocturnal = await self._get_existing_param("blocknocturnal", False)
+        gainloss = await self._get_existing_param("gainloss", True)
 
         schema = vol.Schema(
             {
@@ -296,10 +288,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     default=mainsvalue,
                 ): vol.In(FUSES_LIST),
                 vol.Optional("blocknocturnal", default=blocknocturnal): cv.boolean,
-            })
-
-        return self.async_show_form(
-            step_id="misc",
-            last_step=True,
-            data_schema=schema
+                vol.Optional("gainloss", default=gainloss): cv.boolean,
+            }
         )
+
+        return self.async_show_form(step_id="misc", last_step=True, data_schema=schema)

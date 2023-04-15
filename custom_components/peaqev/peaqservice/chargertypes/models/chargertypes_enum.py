@@ -11,6 +11,7 @@ class ChargerType(Enum):
     Outlet = "Smart outdoor plug"
     Zaptec = "Zaptec"
     NoCharger = "None"
+    Unknown = "Unknown"
 
 
 CHARGERTYPES = [
@@ -19,5 +20,5 @@ CHARGERTYPES = [
     ChargerType.Outlet.value,
     # Charger_type.GaroWallbox.value,
     ChargerType.Zaptec.value,
-    ChargerType.NoCharger.value
+    ChargerType.NoCharger.value,
 ]

@@ -1,8 +1,23 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
+
 import logging
+from datetime import datetime
 
 from homeassistant.helpers.restore_state import RestoreEntity
 
+from custom_components.peaqev.peaqservice.chargecontroller.const import \
+    CHARGING_ALLOWED
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
+from custom_components.peaqev.sensors.money_sensor_helpers import (
+    async_currency_translation, async_set_avg_cost,
+    async_set_caution_hours_display,
+    async_set_current_charge_permittance_display, async_set_non_hours_display,
+    async_set_total_charge, calculate_stop_len)
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -10,7 +25,8 @@ _LOGGER = logging.getLogger(__name__)
 
 class PeaqMoneySensor(SensorBase, RestoreEntity):
     """Special sensor which is only created if priceaware is true"""
-    def __init__(self, hub, entry_id):
+
+    def __init__(self, hub: HomeAssistantHub, entry_id):
         name = f"{hub.hubname} {HOURCONTROLLER}"
         super().__init__(hub, name, entry_id)
 
@@ -20,6 +36,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._current_hour = None
         self._currency = None
         self._current_peak = None
+        self._state = None
         self._avg_cost = None
         self._max_charge = None
         self._average_nordpool = None
@@ -30,24 +47,62 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
 
     @property
     def state(self):
-        return self.hub.chargecontroller.state_display_model  #todo: composition
+        return self._state
 
     @property
     def icon(self) -> str:
         return "mdi:car-clock"
 
-    def update(self) -> None:
-        self._nonhours = self.hub.chargecontroller.non_hours_display_model  #todo: composition
-        self._dynamic_caution_hours = self.hub.chargecontroller.caution_hours_display_model  #todo: composition
-        self._currency = self.hub.nordpool.currency  #todo: composition
-        self._offsets = self.hub.hours.offsets if self.hub.hours.offsets is not None else {}  #todo: composition
-        self._current_peak = self.hub.sensors.current_peak.value  #todo: composition
-        self._avg_cost = self.currency_translation(value=self.hub.hours.get_average_kwh_price(), currency=self._currency)  #todo: composition
-        self._max_charge = f"{self.hub.hours.get_total_charge()} kWh"  #todo: composition
-        self._average_nordpool = self.currency_translation(value=self.hub.nordpool.average_weekly, currency=self._currency) #todo: composition
-        self._average_data_current_month = self.currency_translation(value=self.hub.nordpool.average_month, currency=self._currency)  #todo: composition
-        self._average_nordpool_data = self.hub.nordpool.average_data  #todo: composition
-        self._charge_permittance = self.hub.chargecontroller.current_charge_permittance_display_model  #todo: composition
+    async def async_update(self) -> None:
+        ret = await self.hub.async_request_sensor_data(
+            "prices_tomorrow",
+            "non_hours",
+            "dynamic_caution_hours",
+            "currency",
+            "offsets",
+            "average_nordpool_data",
+            "use_cent",
+            "current_peak",
+            "avg_kwh_price",
+            "max_charge",
+            "average_weekly",
+            "average_monthly",
+        )
+        if ret is not None:
+            self._state = await self.async_state_display(
+                ret.get("non_hours"), ret.get("dynamic_caution_hours")
+            )
+            self._nonhours = await async_set_non_hours_display(
+                ret.get("non_hours"), ret.get("prices_tomorrow")
+            )
+            self._dynamic_caution_hours = await async_set_caution_hours_display(
+                ret.get("dynamic_caution_hours")
+            )
+            self._currency = ret.get("currency")
+            self._offsets = ret.get("offsets", {})
+            self._current_peak = ret.get("current_peak")
+            self._max_charge = await async_set_total_charge(ret.get('max_charge'))
+            self._average_nordpool_data = ret.get("average_nordpool_data", [])
+            self._charge_permittance = await async_set_current_charge_permittance_display(
+                ret.get("non_hours"), ret.get("dynamic_caution_hours")
+            )
+
+            self._avg_cost = await async_set_avg_cost(
+                avg_cost=ret.get("avg_kwh_price"),
+                currency=ret.get("currency"),
+                use_cent=ret.get("use_cent"),
+            )
+
+            self._average_nordpool = await async_currency_translation(
+                value=ret.get("average_weekly"),
+                currency=ret.get("currency"),
+                use_cent=ret.get("use_cent"),
+            )
+            self._average_data_current_month = await async_currency_translation(
+                value=ret.get("average_monthly"),
+                currency=ret.get("currency"),
+                use_cent=ret.get("use_cent"),
+            )
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -60,24 +115,33 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "Nordpool average 7 days": self._average_nordpool,
             "nordpool_average_this_month": self._average_data_current_month,
             "Nordpool average data": self._average_nordpool_data,
-            "offsets": self._offsets
+            "offsets": self._offsets,
         }
         return attr_dict
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
+        _LOGGER.debug("last state of %s = %s", self._attr_name, state)
         if state:
-            await self.hub.nordpool.import_average_data(state.attributes.get('Nordpool average data', 50))
+            await self.hub.nordpool.async_import_average_data(
+                state.attributes.get("Nordpool average data", 50)
+            )
+            self._average_nordpool_data = list(state.attributes.get("Nordpool average data", 50))
             self._average_nordpool = f"{self.hub.nordpool.average_weekly} {self._currency}"
             self._average_data_current_month = f"{self.hub.nordpool.average_month} {self._currency}"
         else:
             self._average_nordpool = f"- {self._currency}"
 
-    @staticmethod
-    def currency_translation(value, currency) -> str:
-        match currency:
-            case "EUR":
-                ret = f"{value}c"
-            case _:
-                ret = f"{value} {currency}"
+    async def async_state_display(self, non_hours: list, dynamic_caution_hours: dict) -> str:
+        hour = datetime.now().hour
+        ret = CHARGING_ALLOWED.capitalize()
+        if getattr(self.hub.hours.timer, "is_override", False):  # todo: composition
+            self._icon = "mdi:car-electric-outline"
+            return getattr(self.hub.hours.timer, "override_string", "")  # todo: composition
+        if hour in non_hours:
+            self._icon = "mdi:car-clock"
+            ret = calculate_stop_len(non_hours)
+        elif hour in dynamic_caution_hours.keys():
+            val = dynamic_caution_hours.get(hour)
+            ret += f" at {int(val * 100)}% of peak"
         return ret

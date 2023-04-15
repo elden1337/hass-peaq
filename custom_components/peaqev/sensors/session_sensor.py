@@ -1,9 +1,14 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
+
 import logging
 
-from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
-from homeassistant.const import (
-    ENERGY_KILO_WATT_HOUR,
-)
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.const import ENERGY_KILO_WATT_HOUR
 from homeassistant.helpers.restore_state import RestoreEntity
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
@@ -16,7 +21,7 @@ _LOGGER = logging.getLogger(__name__)
 class SessionDevice(SensorEntity):
     should_poll = True
 
-    def __init__(self, hub, name: str, entry_id):
+    def __init__(self, hub: HomeAssistantHub, name: str, entry_id):
         self.hub = hub
         self._entry_id = entry_id
         self._attr_name = name
@@ -41,7 +46,7 @@ class PeaqSessionSensor(SessionDevice, RestoreEntity):
     device_class = SensorDeviceClass.ENERGY
     unit_of_measurement = ENERGY_KILO_WATT_HOUR
 
-    def __init__(self, hub, entry_id):
+    def __init__(self, hub: HomeAssistantHub, entry_id):
         name = f"{hub.hubname} Session energy"
         super().__init__(hub, name, entry_id)
         self._attr_name = name
@@ -59,33 +64,36 @@ class PeaqSessionSensor(SessionDevice, RestoreEntity):
 
     @property
     def extra_state_attributes(self) -> dict:
-        attr_dict = {}
-        attr_dict["average_session"] = self._average_session
-        attr_dict["average_weekly"] = self._average_weekly
+        attr_dict = {"average_session": self._average_session, "average_weekly": self._average_weekly}
+        if self.hub.options.price.price_aware:
+            attr_dict["remaining charge"] = self.hub.max_min_controller.remaining_charge
         return attr_dict
 
-    def update(self) -> None:
-        self._state = self.hub.charger.session.session_energy
-        self._average_session = self.hub.charger.session.energy_average
-        self._average_weekly = self.hub.charger.session.core.average_data.export
+    async def async_update(self) -> None:
+        self._state = getattr(self.hub.chargecontroller.charger.session, "session_energy")
+        self._average_session = getattr(self.hub.chargecontroller.charger.session, "energy_average")
+        self._average_weekly = getattr(self.hub.chargecontroller.charger.session.core.average_data, "export")
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
         if state:
             _LOGGER.debug("last state of %s = %s", self._attr_name, state)
             self._state = state.state
-            self.hub.charger.session.core.average_data.unpack(state.attributes.get('average_weekly', 50))
+            self.hub.chargecontroller.charger.session.core.average_data.unpack(
+                state.attributes.get("average_weekly", 50)
+            )
         else:
-            self.hub.charger.session.core.average_data.set_init_model()
+            self.hub.chargecontroller.charger.session.core.average_data.set_init_model()
+
 
 class PeaqSessionCostSensor(SessionDevice, RestoreEntity):
     device_class = SensorDeviceClass.MONETARY
 
-    def __init__(self, hub, entry_id):
+    def __init__(self, hub:HomeAssistantHub, entry_id):
         name = f"{hub.hubname} Session energy cost"
         super().__init__(hub, name, entry_id)
         self._attr_name = name
-        self._attr_unit_of_measurement = self.hub.nordpool.currency
+        self._attr_unit_of_measurement = None
         self._state = 0
 
     @property
@@ -100,9 +108,9 @@ class PeaqSessionCostSensor(SessionDevice, RestoreEntity):
     def unit_of_measurement(self):
         return self._attr_unit_of_measurement
 
-    def update(self) -> None:
-        self._state = self.hub.charger.session.session_price
-        self._attr_unit_of_measurement = self.hub.nordpool.currency
+    async def async_update(self) -> None:
+        self._state = getattr(self.hub.chargecontroller.charger.session, "session_price")
+        self._attr_unit_of_measurement = getattr(self.hub.nordpool, "currency")
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
