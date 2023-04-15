@@ -52,7 +52,7 @@ class PeaqSessionSensor(SessionDevice, RestoreEntity):
         self._attr_name = name
         self._state = 0
         self._average_session = 0
-        self._average_weekly = {}
+        #self._average_weekly = {}
 
     @property
     def state(self):
@@ -64,7 +64,10 @@ class PeaqSessionSensor(SessionDevice, RestoreEntity):
 
     @property
     def extra_state_attributes(self) -> dict:
-        attr_dict = {"average_session": self._average_session, "average_weekly": self._average_weekly}
+        attr_dict = {
+            "average_session": self._average_session
+            #"average_weekly": self._average_weekly
+        }
         if self.hub.options.price.price_aware:
             attr_dict["remaining charge"] = self.hub.max_min_controller.remaining_charge
         return attr_dict
@@ -72,7 +75,7 @@ class PeaqSessionSensor(SessionDevice, RestoreEntity):
     async def async_update(self) -> None:
         self._state = getattr(self.hub.chargecontroller.charger.session, "session_energy")
         self._average_session = getattr(self.hub.chargecontroller.charger.session, "energy_average")
-        self._average_weekly = getattr(self.hub.chargecontroller.charger.session.core.average_data, "export")
+        #self._average_weekly = getattr(self.hub.chargecontroller.charger.session.core.average_data, "export")
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
