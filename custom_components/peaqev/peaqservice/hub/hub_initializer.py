@@ -1,6 +1,14 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub import HomeAssistantHub
 import logging
 import time
 from enum import Enum
+
+from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import HourselectionFactory
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,8 +26,8 @@ class HubInitializer:
     initialized_log_last_logged = 0
     not_ready_list_old_state = 0
 
-    def __init__(self, hub):
-        self.parent = hub
+    def __init__(self, hub: HomeAssistantHub):
+        self.parent:HomeAssistantHub = hub
         self._initialized: bool = False
 
     def check(self):
@@ -65,3 +73,12 @@ class HubInitializer:
             if self.parent.chargertype.async_setup():
                 self.parent.chargertype.is_initialized = True
         return False
+
+
+    async def async_init_hours(self):
+        self.parent.hours = await HourselectionFactory.async_create(self.parent)
+        if self.parent.options.price.price_aware:
+            await self.parent.hours.async_update_prices(
+                self.parent.nordpool.model.prices,
+                self.parent.nordpool.model.prices_tomorrow)
+        _LOGGER.debug("Re-initializing Hoursclasses.")

@@ -12,7 +12,6 @@ from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.constants import TYPELITE
 from custom_components.peaqev.services import async_prepare_register_services
-
 from .const import DOMAIN, PLATFORMS
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
@@ -37,10 +36,32 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
 
     return True
 
+PRICE_CHANGES = [
+    "min_price",
+    "top_price",
+    "cautionhour_type",
+    "dynamic_top_price",
+    "blocknocturnal",
+    "max_charge",
+    "cautionhours",
+    "_startpeaks",
+    "nonhours"]
+
+RELOAD_CHANGES = ["fuse_type", "gain_loss", "price_aware"]
 
 async def async_update_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     """Reload Peaqev component when options changed."""
-    await hass.config_entries.async_reload(config_entry.entry_id)
+    _LOGGER.debug("Reloading Peaqev component")
+    new_options = await async_set_options(config_entry)
+    old_options = hass.data[DOMAIN]["hub"].options
+    diff = old_options.compare(new_options)
+    hass.data[DOMAIN]["hub"].options = new_options
+    if len(diff) == 0:
+        return
+    if [i for i in diff if i in RELOAD_CHANGES]:
+        return await hass.config_entries.async_reload(config_entry.entry_id)
+    if [i for i in diff if i in PRICE_CHANGES]:
+        await hass.data[DOMAIN]["hub"].async_init_hours()
 
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
