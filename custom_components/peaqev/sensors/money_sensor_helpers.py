@@ -47,16 +47,18 @@ async def async_set_avg_cost(avg_cost, currency, use_cent) -> str:
         use_cent=use_cent,
     )
     if avg_cost[1] is not None:
-        override = await async_currency_translation(
-            value=avg_cost[1], currency=currency, use_cent=use_cent
-        )
-        return f"{override} ({standard})"
+        if avg_cost[1] != avg_cost[0]:
+            override = await async_currency_translation(
+                value=avg_cost[1], currency=currency, use_cent=use_cent
+            )
+            return f"{override} ({standard})"
     return f"{standard}"
 
 
 async def async_set_total_charge(max_charge) -> str:
     if max_charge[1] is not None:
-        return f"{max_charge[1]} kWh ({max_charge[0]} kWh)"
+        if max_charge[1] != max_charge[0]:
+            return f"{max_charge[1]} kWh ({max_charge[0]} kWh)"
     return f"{max_charge[0]} kWh"
 
 
