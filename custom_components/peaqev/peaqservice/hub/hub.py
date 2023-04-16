@@ -135,9 +135,7 @@ class HomeAssistantHub:
     def is_initialized(self) -> bool:
         if hasattr(self, "initializer"):
             if self.initializer.check():
-                del self.initializer
                 self.observer.activate("hub initialized")
-                # self.observer.broadcast("hub initialized")
                 return True
             return False
         return True
