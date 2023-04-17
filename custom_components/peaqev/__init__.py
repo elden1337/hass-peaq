@@ -3,11 +3,13 @@ from __future__ import annotations
 
 import logging
 
-from homeassistant.config_entries import ConfigEntry  # pylint: disable=import-error
+from homeassistant.config_entries import \
+    ConfigEntry  # pylint: disable=import-error
 from homeassistant.core import HomeAssistant  # pylint: disable=import-error
 
 from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
-from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
+from custom_components.peaqev.peaqservice.hub.models.hub_options import \
+    HubOptions
 from custom_components.peaqev.peaqservice.util.constants import TYPELITE
 from custom_components.peaqev.services import async_prepare_register_services
 
