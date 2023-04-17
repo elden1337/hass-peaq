@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import logging
@@ -10,13 +9,14 @@ from typing import Callable
 from homeassistant.helpers.event import async_track_time_interval
 
 from custom_components.peaqev.peaqservice.hub.observer.const import (
-    COMMAND_WAIT, TIMEOUT)
-from custom_components.peaqev.peaqservice.hub.observer.models.command import \
-    Command
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_model import \
-    ObserverModel
-from custom_components.peaqev.peaqservice.util.extensionmethods import \
-    async_iscoroutine
+    COMMAND_WAIT,
+    TIMEOUT,
+)
+from custom_components.peaqev.peaqservice.hub.observer.models.command import Command
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_model import (
+    ObserverModel,
+)
+from custom_components.peaqev.peaqservice.util.extensionmethods import async_iscoroutine
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,7 +32,9 @@ class Observer:
         self.model = ObserverModel()
         self.hub = hub
         self._lock = Lock()
-        async_track_time_interval(self.hub.state_machine, self.async_dispatch, timedelta(seconds=1))
+        async_track_time_interval(
+            self.hub.state_machine, self.async_dispatch, timedelta(seconds=1)
+        )
 
     def activate(self, init_broadcast: str = None) -> None:
         self.model.active = True
@@ -68,8 +70,9 @@ class Observer:
     async def async_dequeue_and_broadcast(self, command: Command):
         if await self.async_ok_to_broadcast(command.command):
             async with self._lock:
-                # if command.expiration > time.time():
-                _LOGGER.debug(f"ready to broadcast: {command.command} with params: {command.argument}")
+                _LOGGER.debug(
+                    f"ready to broadcast: {command.command} with params: {command.argument}"
+                )
                 for func in self.model.subscribers[command.command]:
                     if await async_iscoroutine(func):
                         await self.async_call_func(func=func, command=command),
@@ -78,9 +81,6 @@ class Observer:
                             self._call_func, func, command
                         )
                 self.model.broadcast_queue.remove(command)
-                # else:
-                #     _LOGGER.debug(f"broadcast timed out: {command}. Expired {int(time.time() - command.expiration)}s ago.}}")
-                #     self.model.broadcast_queue.remove(command)
 
     @staticmethod
     def _call_func(func: Callable, command: Command) -> None:
