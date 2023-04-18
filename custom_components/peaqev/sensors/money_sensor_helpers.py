@@ -27,7 +27,11 @@ def _getuneven(first, second) -> bool:
     return first - second != 1
 
 
-async def async_currency_translation(value, currency, use_cent: bool = False) -> str:
+async def async_currency_translation(
+    value: float | str | None, currency, use_cent: bool = False
+) -> str:
+    if value is None:
+        return ""
     match currency:
         case "EUR":
             ret = f"{value}¢" if use_cent else f"€ {value}"
@@ -84,7 +88,9 @@ async def async_set_caution_hours_display(dynamic_caution_hours: dict) -> dict:
     return ret
 
 
-async def async_set_current_charge_permittance_display(non_hours, dynamic_caution_hours) -> str:
+async def async_set_current_charge_permittance_display(
+    non_hours, dynamic_caution_hours
+) -> str:
     ret = 100
     hour = datetime.now().hour
     if hour in non_hours:

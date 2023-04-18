@@ -108,7 +108,17 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
                 use_cent=ret.get("use_cent", False),
             )
             if self.hub.options.price.dynamic_top_price:
-                self._max_min_price = ("0kr, 2kr",)  # todo: fix this
+                _maxp = await async_currency_translation(
+                    value=None,
+                    currency=ret.get("currency"),
+                    use_cent=ret.get("use_cent", False),
+                )
+                _minp = await async_currency_translation(
+                    value=3.2,
+                    currency=ret.get("currency"),
+                    use_cent=ret.get("use_cent", False),
+                )
+                self._max_min_price = f"{_maxp} {_minp}"
                 self._max_price_based_on = (
                     self.hub.nordpool.model.dynamic_top_price_type
                 )
