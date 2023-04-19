@@ -273,7 +273,7 @@ class Charger:
 
     async def async_do_service_call(self, domain, command, params) -> bool:
         _domain = domain
-        if params.get('domain', False):
+        if params.get('domain', None) is not None:
             _domain = params.pop('domain')
 
         _LOGGER.debug(
