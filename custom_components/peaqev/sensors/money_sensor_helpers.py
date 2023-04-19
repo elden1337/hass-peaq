@@ -30,7 +30,7 @@ def _getuneven(first, second) -> bool:
 async def async_currency_translation(
     value: float | str | None, currency, use_cent: bool = False
 ) -> str:
-    value = "-" if value is None else round(float(value), 2)
+    value = "-" if value is None or float(value) == 0 else value
     match currency:
         case "EUR":
             ret = f"{value}¢" if use_cent else f"€ {value}"

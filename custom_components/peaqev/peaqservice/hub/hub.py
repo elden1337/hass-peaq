@@ -264,8 +264,8 @@ class HomeAssistantHub:
             "chargecontroller_status": partial(
                 getattr, self.chargecontroller, "status_string"
             ),
-            "max_price": partial(getattr, self.hours, "absolute_top_price", None),
-            "min_price": partial(getattr, self.hours, "min_price", None),
+            "max_price": partial(getattr, self.hours, "absolute_top_price"),
+            "min_price": partial(getattr, self.hours, "min_price"),
         }
         ret = {}
         for arg in args:

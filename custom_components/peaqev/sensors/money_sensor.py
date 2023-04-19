@@ -69,6 +69,8 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "max_charge",
             "average_weekly",
             "average_monthly",
+            "max_price",
+            "min_price",
         )
         if ret is not None:
             self._state = await self.async_state_display(
