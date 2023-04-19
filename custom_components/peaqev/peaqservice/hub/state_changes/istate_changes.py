@@ -19,24 +19,29 @@ class IStateChanges:
         if time.time() - self.latest_chargecontroller_update > 3:
             self.latest_chargecontroller_update = time.time()
             await self.hub.chargecontroller.async_set_status()
+            if self.hub.options.price.price_aware:
+                if not self.hub.max_min_controller.override_max_charge:
+                    await self.hub.max_min_controller.async_reset_max_charge_sensor()
         if self.hub.options.price.price_aware:
             if entity != self.hub.nordpool.nordpool_entity and (
-                not self.hub.hours.is_initialized or time.time() - self.latest_nordpool_update > 60
+                not self.hub.hours.is_initialized
+                or time.time() - self.latest_nordpool_update > 60
             ):
                 """tweak to provoke nordpool to update more often"""
                 self.latest_nordpool_update = time.time()
-                try:
-                    await self.hub.nordpool.async_update_nordpool()
-                except Exception as e:
-                    _LOGGER.error(f"3: {e}")
-        try:
-            await self.async_handle_sensor_attribute()
-        except Exception as e:
-            _LOGGER.error(f"4: {e}")
-        if (
-            self.hub.chargecontroller.charger.session_active
-            and update_session
-            and hasattr(self.hub.sensors, "carpowersensor")
+                await self.hub.nordpool.async_update_nordpool()
+        await self.async_handle_sensor_attribute()
+        await self.async_update_session_parameters(update_session)
+        if entity in self.hub.chargingtracker_entities and self.hub.is_initialized:
+            await self.hub.chargecontroller.charger.async_charge()
+
+    async def async_update_session_parameters(self, update_session: bool) -> None:
+        if all(
+            [
+                self.hub.chargecontroller.charger.session_active,
+                update_session,
+                hasattr(self.hub.sensors, "carpowersensor"),
+            ]
         ):
             setattr(
                 self.hub.chargecontroller.charger.session,
@@ -44,32 +49,20 @@ class IStateChanges:
                 getattr(self.hub.sensors.carpowersensor, "value"),
             )
             if self.hub.options.price.price_aware:
-                self.hub.chargecontroller.charger.session.session_price = float(self.hub.nordpool.state)
-        if getattr(self.hub.hours.scheduler, "schedule_created", False):
-            try:
-                await self.hub.hours.scheduler.async_update_facade()
-            except Exception as e:
-                _LOGGER.error(f"5: {e}")
-        if entity in self.hub.chargingtracker_entities and self.hub.is_initialized:
-            try:
-                await self.hub.chargecontroller.charger.async_charge()
-            except Exception as e:
-                _LOGGER.error(f"6: {e}")
-
-    @abstractmethod
-    async def async_update_sensor_internal(self, entity, value) -> bool:
-        pass
-
-    @abstractmethod
-    async def async_handle_outlet_updates(self):
-        pass
+                self.hub.chargecontroller.charger.session.session_price = float(
+                    self.hub.nordpool.state
+                )
+                if getattr(self.hub.hours.scheduler, "schedule_created", False):
+                    await self.hub.hours.scheduler.async_update_facade()
 
     async def async_handle_sensor_attribute(self) -> None:
         if hasattr(self.hub.sensors, "carpowersensor"):
             if self.hub.sensors.carpowersensor.use_attribute:
                 entity = self.hub.sensors.carpowersensor
                 try:
-                    val = self.hub.hass.states.get(entity.entity).attributes.get(entity.attribute)
+                    val = self.hub.hass.states.get(entity.entity).attributes.get(
+                        entity.attribute
+                    )
                     if val is not None:
                         self.hub.sensors.carpowersensor.value = val
                         await self.hub.sensors.power.async_update(
@@ -89,5 +82,19 @@ class IStateChanges:
 
     async def async_update_total_energy_and_peak(self, value) -> None:
         self.hub.sensors.totalhourlyenergy.value = value
-        self.hub.sensors.current_peak.value = self.hub.sensors.locale.data.query_model.observed_peak
-        self.hub.sensors.locale.data.query_model.try_update(new_val=float(value), timestamp=datetime.now())
+        self.hub.sensors.current_peak.value = (
+            self.hub.sensors.locale.data.query_model.observed_peak
+        )
+        self.hub.sensors.locale.data.query_model.try_update(
+            new_val=float(value), timestamp=datetime.now()
+        )
+        if self.hub.options.price.price_aware:
+            await self.hub.hours.async_update_max_min(self.hub.max_min_controller.max_charge)
+
+    @abstractmethod
+    async def async_update_sensor_internal(self, entity, value) -> bool:
+        pass
+
+    @abstractmethod
+    async def async_handle_outlet_updates(self):
+        pass

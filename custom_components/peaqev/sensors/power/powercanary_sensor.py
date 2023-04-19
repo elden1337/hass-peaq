@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 import logging
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
@@ -13,7 +19,7 @@ _LOGGER = logging.getLogger(__name__)
 class PowerCanaryDevice(SensorEntity):
     should_poll = True
 
-    def __init__(self, hub, name: str, entry_id):
+    def __init__(self, hub: HomeAssistantHub, name: str, entry_id):
         self.hub = hub
         self._entry_id = entry_id
         self._attr_name = name
@@ -36,7 +42,7 @@ class PowerCanaryDevice(SensorEntity):
 
 
 class PowerCanaryStatusSensor(PowerCanaryDevice):
-    def __init__(self, hub, entry_id):
+    def __init__(self, hub: HomeAssistantHub, entry_id):
         name = f"{hub.hubname} {POWERCANARY} status"
         super().__init__(hub, name, entry_id)
         self._state = None
@@ -52,7 +58,7 @@ class PowerCanaryStatusSensor(PowerCanaryDevice):
 
 
 class PowerCanaryPercentageSensor(PowerCanaryDevice):
-    def __init__(self, hub, entry_id):
+    def __init__(self, hub: HomeAssistantHub, entry_id):
         name = f"{hub.hubname} {POWERCANARY} current percentage"
         super().__init__(hub, name, entry_id)
         self._state = None
@@ -87,7 +93,7 @@ class PowerCanaryMaxAmpSensor(PowerCanaryDevice):
     device_class = SensorDeviceClass.ENERGY
     unit_of_measurement = ELECTRIC_CURRENT_AMPERE
 
-    def __init__(self, hub, entry_id, phases: int):
+    def __init__(self, hub: HomeAssistantHub, entry_id, phases: int):
         name = f"{hub.hubname} {POWERCANARY} allowed amps {phases}-phase"
         super().__init__(hub, name, entry_id)
         self._state = None

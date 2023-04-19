@@ -3,10 +3,8 @@ import logging
 from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
-from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
-
 
 from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
     IChargerType

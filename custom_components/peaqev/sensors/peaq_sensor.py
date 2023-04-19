@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 import logging
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
@@ -10,7 +16,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class PeaqSensor(SensorBase):
-    def __init__(self, hub, entry_id):
+    def __init__(self, hub: HomeAssistantHub, entry_id):
         name = f"{hub.hubname} {CHARGERCONTROLLER}"
         super().__init__(hub, name, entry_id)
 

@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 import logging
 
 from homeassistant.components.sensor import SensorDeviceClass
@@ -15,7 +21,7 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
     device_class = SensorDeviceClass.ENERGY
     unit_of_measurement = ENERGY_KILO_WATT_HOUR
 
-    def __init__(self, hub, entry_id):
+    def __init__(self, hub:HomeAssistantHub, entry_id):
         self._name = f"{hub.hubname} peak"
         self._charged_peak = 0
         self._peaks_dict: dict = {}
@@ -66,9 +72,6 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
         state = await super().async_get_last_state()
         if state:
             _LOGGER.debug("last state of %s = %s", self._name, state)
-            # self._charged_peak = 2.84
-            # self._peaks_dict = {"m":3,"p":{"16h4":2.93,"7h4":2.72,"26h0":2.87}}
-            # self._observed_peak = 2.72
             self._charged_peak = state.state
             self._peaks_dict = state.attributes.get("peaks_dictionary", 50)
             await self.hub.async_set_init_dict(self._peaks_dict)

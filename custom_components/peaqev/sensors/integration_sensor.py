@@ -1,3 +1,10 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
+
 from homeassistant.components.integration.const import \
     METHOD_TRAPEZOIDAL  # pylint: disable=import-error
 from homeassistant.components.integration.sensor import \
@@ -13,7 +20,7 @@ from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
 
 
 class PeaqIntegrationCostSensor(IntegrationSensor):
-    def __init__(self, hub, name, entry_id):
+    def __init__(self, hub: HomeAssistantHub, name, entry_id):
         self._entry_id = entry_id
         self.hub = hub
         self._attr_name = f"{self.hub.hubname} {name}"

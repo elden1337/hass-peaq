@@ -1,8 +1,8 @@
 import logging
 import time
 
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import entity_sources
+from homeassistant.core import HomeAssistant  # type: ignore
+from homeassistant.helpers.entity import entity_sources  # type: ignore
 
 from custom_components.peaqev.peaqservice.chargertypes.models.entities_model import \
     EntitiesModel
@@ -15,14 +15,10 @@ def set_entitiesmodel(
 ) -> EntitiesModel:
     if len(entity_schema) < 1:
         entities = get_entities_from_hass(hass=hass, domain_name=domain)
-
         if len(entities) < 1:
             _LOGGER.error(f"no entities found for {domain} at {time.time()}")
-            return EntitiesModel()
         else:
-            # _endings = model.endings
             candidate = ""
-
             for e in entities:
                 splitted = e.split(".")
                 for ending in entity_endings:
@@ -32,7 +28,10 @@ def set_entitiesmodel(
                 if len(candidate) > 1:
                     break
             _LOGGER.debug(f"entityschema is: {candidate} at {time.time()}")
-            return EntitiesModel(entityschema=candidate, imported_entities=entities, valid=True)
+            return EntitiesModel(
+                entityschema=candidate, imported_entities=entities, valid=True
+            )
+    return EntitiesModel()
 
 
 def get_entities_from_hass(hass: HomeAssistant, domain_name: str) -> list:
@@ -56,9 +55,7 @@ async def async_set_entitiesmodel(
     if len(entity_schema) < 1:
         entities = await async_get_entities_from_hass(hass=hass, domain_name=domain)
 
-        if len(entities) < 1:
-            return EntitiesModel()
-        else:
+        if len(entities) >= 1:
             candidate = ""
             for e in entities:
                 splitted = e.split(".")
@@ -69,7 +66,10 @@ async def async_set_entitiesmodel(
                 if len(candidate) > 1:
                     break
             _LOGGER.debug(f"Charger-entityschema is: {candidate}")
-            return EntitiesModel(entityschema=candidate, imported_entities=entities, valid=True)
+            return EntitiesModel(
+                entityschema=candidate, imported_entities=entities, valid=True
+            )
+    return EntitiesModel()
 
 
 async def async_get_entities_from_hass(hass: HomeAssistant, domain_name: str) -> list:

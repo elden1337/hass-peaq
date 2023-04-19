@@ -1,27 +1,27 @@
 {
-    "domain": "peaqev",
-    "name": "peaqev ev-charging",
-    "after_dependencies": [
-      "chargeamps",
-      "easee",
-      "garo_wallbox",
-      "zaptec",
-      "nordpool",
-      "tibber",
-      "filter",
-      "integration",
-      "utility_meter"
-    ],
-    "codeowners": [
-      "@elden1337"
-    ],
-    "config_flow": true,
-    "documentation": "https://github.com/elden1337/hass-peaq",
-    "integration_type": "hub",
-    "iot_class": "calculated",
-    "issue_tracker": "https://github.com/elden1337/hass-peaq/issues",
-    "requirements": [
-      "peaqevcore==15.2.4"
-    ],
-    "version": "2.9.3"
+  "domain": "peaqev",
+  "name": "peaqev ev-charging",
+  "after_dependencies": [
+    "chargeamps",
+    "easee",
+    "garo_wallbox",
+    "zaptec",
+    "nordpool",
+    "tibber",
+    "filter",
+    "integration",
+    "utility_meter"
+  ],
+  "codeowners": [
+    "@elden1337"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/elden1337/hass-peaq",
+  "integration_type": "hub",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/elden1337/hass-peaq/issues",
+  "requirements": [
+    "peaqevcore==15.3.4"
+  ],
+  "version": "2.10.0b1"
 }

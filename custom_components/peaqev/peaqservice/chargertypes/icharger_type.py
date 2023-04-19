@@ -1,11 +1,10 @@
+import logging
 from abc import abstractmethod
 from dataclasses import dataclass, field
 
-import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
+from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
 from peaqevcore.models.chargertype.charger_entities_model import \
     ChargerEntitiesModel
 from peaqevcore.models.chargertype.charger_options import ChargerOptions
@@ -13,8 +12,10 @@ from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
 from peaqevcore.services.chargertype.servicecalls import ServiceCalls
-import logging
-from homeassistant.core import HomeAssistant
+
+import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
+    ChargerType
 
 CHARGERSTATES_BASE = {
     ChargeControllerStates.Idle: [],
@@ -30,7 +31,7 @@ class IChargerType:
     domainname: str = ""
     _hass: HomeAssistant = None
     _max_amps = None
-    native_chargerstates: list = field(default_factory=lambda: [])
+    native_chargerstates: list = field(default_factory=lambda: [])  # type: ignore
     servicecalls: ServiceCalls = None
     chargerstates = CHARGERSTATES_BASE
     entities = ChargerEntitiesModel

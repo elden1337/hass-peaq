@@ -1,8 +1,10 @@
-import logging
 import asyncio
+import logging
+
 from homeassistant.core import HomeAssistant
 
-from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
+    IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.chargertypes.types.chargeamps import \
@@ -46,7 +48,7 @@ class ChargerTypeFactory:
         try:
             charger = await ChargerTypeFactory.async_get_class(input_type)
             ret = charger(hass=hass, huboptions=options, chargertype=ChargerType(input_type))
-            
+
             _counter = 0
             while not ret.is_initialized and _counter < 10:
                 _counter += 1
