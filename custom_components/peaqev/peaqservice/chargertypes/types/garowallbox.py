@@ -1,16 +1,15 @@
 import logging
-import time
 
 from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
-from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
 
-import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
 from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
     IChargerType
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
+    ChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.constants import (CHARGER,
@@ -18,52 +17,150 @@ from custom_components.peaqev.peaqservice.util.constants import (CHARGER,
                                                                  CURRENT)
 
 _LOGGER = logging.getLogger(__name__)
-
-ENTITYENDINGS = [
-    "_current_temperature",
-    "_latest_reading_k",
-    "_latest_reading",
-    "_acc_session_energy",
-    "_pilot_level",
-    "_current_limit",
-    "_nr_of_phases",
-    "_current_charging_power",
-    "_current_charging_current",
-    "_status",
-]
-
-DOMAINNAME = "garo_wallbox"
-UPDATECURRENT = True
-UPDATECURRENT_ON_TERMINATION = True
 # docs: https://github.com/sockless-coding/garo_wallbox/
 
-"""
-states:
-'CHANGING'
-'SEARCH_COMM'
-'INITIALIZATION'
-'RCD_FAULT'
-'DISABLED'
-'OVERHEAT'
-'CRITICAL_TEMPERATURE'
-'CABLE_FAULT'
-'LOCK_FAULT'
-'CONTACTOR_FAULT'
-'VENT_FAULT'
-'DC_ERROR'
-'UNKNOWN'
-'UNAVAILABLE'
-"""
+SET_MODE = "set_mode"
+MODE = "mode"
+ENTITY_ID = "entity_id"
+LIMIT = "limit"
 
 
-class GaroWallbox(IChargerType):
-    def __init__(self, hass: HomeAssistant, huboptions: HubOptions, auth_required: bool = False):
+class GaroWallBox(IChargerType):
+    def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
         _LOGGER.warning(
-            "You are initiating GaroWallbox as Chargertype. Bare in mind that this chargertype is not finalized and may be very unstable."
+            "You are initiating GaroWallbox as Chargertype. Bare in mind that this chargertype has not been signed off in testing and may be very unstable."
         )
         self._hass = hass
+        self._is_initialized = False
+        self._type = chargertype
         self._chargerid = huboptions.charger.chargerid
-        self.getentities(DOMAINNAME, ENTITYENDINGS)
+        self.entities.imported_entityendings = self.entity_endings
+        self.options.powerswitch_controls_charging = False
+        self._set_charger_states()
+
+    @property
+    def type(self) -> ChargerType:
+        """type returns the implemented chargertype."""
+        return self._type
+
+    @property
+    def domain_name(self) -> str:
+        """declare the domain name as stated in HA"""
+        return "garo_wallbox"
+
+    @property
+    def max_amps(self) -> int:
+        return self.get_allowed_amps()
+
+    @property
+    def entity_endings(self) -> list:
+        """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
+        return [
+            "_current_temperature",
+            "_latest_reading_k",
+            "_latest_reading",
+            "_acc_session_energy",
+            "_pilot_level",
+            "_current_limit",
+            "_nr_of_phases",
+            "_current_charging_power",
+            "_current_charging_current",
+            "_status",
+        ]
+
+    @property
+    def native_chargerstates(self) -> list:
+        """declare a list of the native-charger states available for the type."""
+        return ['CHANGING'
+            'SEARCH_COMM'
+            'INITIALIZATION'
+            'RCD_FAULT'
+            'DISABLED'
+            'OVERHEAT'
+            'CRITICAL_TEMPERATURE'
+            'CABLE_FAULT'
+            'LOCK_FAULT'
+            'CONTACTOR_FAULT'
+            'VENT_FAULT'
+            'DC_ERROR'
+            'UNKNOWN'
+            'UNAVAILABLE'
+            ]
+
+    @property
+    def call_on(self) -> CallType:
+        return CallType(SET_MODE, {MODE: "on", ENTITY_ID: self.entities.chargerentity})
+
+    @property
+    def call_off(self) -> CallType:
+        return CallType(SET_MODE, {MODE: "off", ENTITY_ID: self.entities.chargerentity})
+
+    @property
+    def call_resume(self) -> CallType:
+        return self.call_on
+
+    @property
+    def call_pause(self) -> CallType:
+        return self.call_off
+
+    @property
+    def call_update_current(self) -> CallType:
+        return CallType("set_current_limit", {
+            CHARGER: ENTITY_ID,
+            CHARGERID: self._chargerid,  # sensor for garo, not id
+            CURRENT: LIMIT,
+        })
+
+    @property
+    def servicecalls_options(self) -> ServiceCallsOptions:
+        return ServiceCallsOptions(
+            allowupdatecurrent=True,
+            update_current_on_termination=True,
+            switch_controls_charger=False,
+        )
+
+    def get_allowed_amps(self) -> int:
+        return 16
+
+    def set_sensors(self) -> None:
+        self.entities.chargerentity = f"sensor.{self.entities.entityschema}-status"
+        self.entities.powermeter = f"sensor.{self.entities.entityschema}-current_charging_power"
+        self.options.powermeter_factor = 1
+        self.entities.ampmeter = f"sensor.{self.entities.entityschema}-current_charging_current"
+        self.entities.powerswitch = "n/a"
+
+    def _determine_entities(self) -> list:
+        ret = []
+        for e in self.entities.imported_entities:
+            entity_state = self._hass.states.get(e)
+            if entity_state != "unavailable":
+                ret.append(e)
+        return ret
+
+    async def async_set_sensors(self) -> None:
+        self.entities.chargerentity = f"sensor.{self.entities.entityschema}-status"
+        self.entities.powermeter = f"sensor.{self.entities.entityschema}-current_charging_power"
+        self.options.powermeter_factor = 1
+        self.entities.ampmeter = f"sensor.{self.entities.entityschema}-current_charging_current"
+
+    async def async_determine_switch_entity(self) -> str:
+        ent = await self.async_determine_entities()
+        for e in ent:
+            if e.startswith("switch."):
+                amps = self._hass.states.get(e).attributes.get("max_current")
+                if isinstance(amps, int):
+                    return e
+        raise Exception
+
+    async def async_determine_entities(self) -> list:
+        ret = []
+        for e in self.entities.imported_entities:
+            entity_state = self._hass.states.get(e)
+            if entity_state != "unavailable":
+                ret.append(e)
+        return ret
+
+    def _set_charger_states(self) -> None:
         self.chargerstates[ChargeControllerStates.Idle] = ["NOT_CONNECTED"]
         self.chargerstates[ChargeControllerStates.Connected] = [
             "CONNECTED",
@@ -72,59 +169,3 @@ class GaroWallbox(IChargerType):
         ]
         self.chargerstates[ChargeControllerStates.Done] = ["CHARGING_FINISHED"]
         self.chargerstates[ChargeControllerStates.Charging] = ["CHARGING"]
-        self.entities.chargerentity = f"sensor.{self.entities.entityschema}-status"
-        self.entities.powermeter = f"sensor.{self.entities.entityschema}-current_charging_power"
-        self.options.powermeter_factor = 1
-
-        self.entities.ampmeter = f"sensor.{self.entities.entityschema}-current_charging_current"
-        self.options.powerswitch_controls_charging = False
-        self._auth_required = auth_required
-        self.entities.powerswitch = "n/a"
-
-        servicecall_params = {
-            CHARGER: "entity_id",
-            CHARGERID: self._chargerid,  # sensor for garo, not id
-            CURRENT: "limit",
-        }
-
-        _on = CallType("set_mode", {"mode": "on", "entity_id": self.entities.chargerentity})
-        _off = CallType("set_mode", {"mode": "off", "entity_id": self.entities.chargerentity})
-
-        self.async_set_servicecalls(
-            domain=DOMAINNAME,
-            model=ServiceCallsDTO(
-                on=_on,
-                off=_off,
-                update_current=CallType("set_current_limit", servicecall_params),
-            ),
-            options=ServiceCallsOptions(
-                allowupdatecurrent=UPDATECURRENT,
-                update_current_on_termination=UPDATECURRENT_ON_TERMINATION,
-            ),
-        )
-
-    def getentities(self, domain: str = None, endings: list = None):
-        if len(self.entities.entityschema) < 1:
-            domain = self.domainname if domain is None else domain
-            endings = self.entities.imported_entityendings if endings is None else endings
-
-            entities = helper.get_entities_from_hass(self._hass, domain)
-
-            if len(entities) < 1:
-                _LOGGER.error(f"no entities found for {domain} at {time.time()}")
-            else:
-                _endings = endings
-                candidate = ""
-
-                for e in entities:
-                    splitted = e.split(".")
-                    for ending in _endings:
-                        if splitted[1].endswith(ending):
-                            candidate = splitted[1].replace(ending, "")
-                            break
-                    if len(candidate) > 1:
-                        break
-
-                self.entities.entityschema = candidate
-                _LOGGER.debug(f"entityschema is: {self.entities.entityschema} at {time.time()}")
-                self.entities.imported_entities = entities
