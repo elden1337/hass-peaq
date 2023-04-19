@@ -5,7 +5,6 @@ from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
-
 from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
     IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
@@ -71,19 +70,26 @@ class GaroWallBox(IChargerType):
     @property
     def native_chargerstates(self) -> list:
         """declare a list of the native-charger states available for the type."""
-        return ['CHANGING'
-            'SEARCH_COMM'
-            'INITIALIZATION'
-            'RCD_FAULT'
-            'DISABLED'
-            'OVERHEAT'
-            'CRITICAL_TEMPERATURE'
-            'CABLE_FAULT'
-            'LOCK_FAULT'
-            'CONTACTOR_FAULT'
-            'VENT_FAULT'
-            'DC_ERROR'
-            'UNKNOWN'
+        return [
+            'CHANGING',
+            'NOT_CONNECTED',
+            'CONNECTED',
+            'SEARCH_COMM',
+            'RCD_FAULT',
+            'CHARGING',
+            'CHARGING_PAUSED',
+            'CHARGING_FINISHED',
+            'CHARGING_CANCELLED',
+            'DISABLED',
+            'OVERHEAT',
+            'CRITICAL_TEMPERATURE',
+            'INITIALIZATION',
+            'CABLE_FAULT',
+            'LOCK_FAULT',
+            'CONTACTOR_FAULT',
+            'VENT_FAULT',
+            'DC_ERROR',
+            'UNKNOWN',
             'UNAVAILABLE'
             ]
 
@@ -122,13 +128,6 @@ class GaroWallBox(IChargerType):
     def get_allowed_amps(self) -> int:
         return 16
 
-    def set_sensors(self) -> None:
-        self.entities.chargerentity = f"sensor.{self.entities.entityschema}-status"
-        self.entities.powermeter = f"sensor.{self.entities.entityschema}-current_charging_power"
-        self.options.powermeter_factor = 1
-        self.entities.ampmeter = f"sensor.{self.entities.entityschema}-current_charging_current"
-        self.entities.powerswitch = "n/a"
-
     def _determine_entities(self) -> list:
         ret = []
         for e in self.entities.imported_entities:
@@ -142,6 +141,7 @@ class GaroWallBox(IChargerType):
         self.entities.powermeter = f"sensor.{self.entities.entityschema}-current_charging_power"
         self.options.powermeter_factor = 1
         self.entities.ampmeter = f"sensor.{self.entities.entityschema}-current_charging_current"
+        self.entities.powerswitch = "n/a"
 
     async def async_determine_switch_entity(self) -> str:
         ent = await self.async_determine_entities()
