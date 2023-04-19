@@ -3,8 +3,7 @@ from datetime import datetime
 from statistics import mean
 from typing import Tuple
 
-from custom_components.peaqev.peaqservice.hub.nordpool.average_type import \
-    AverageType
+from custom_components.peaqev.peaqservice.hub.nordpool.average_type import AverageType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -14,7 +13,7 @@ class DynamicTopPrice:
         self._three = []
         self._seven = []
         self._month = []
-        self.filterlen = {AverageType.SEVEN: 14, AverageType.THREE: 6}
+        self.filterlen = {AverageType.SEVEN: 7, AverageType.THREE: 2}
 
     async def async_get_max(self, prices: list) -> Tuple[float, AverageType]:
         if not len(prices):
@@ -57,7 +56,6 @@ class DynamicTopPrice:
     async def async_get_current_month(prices: list = []):
         rolling = []
         if not len(prices):
-            print("bad")
             return []
         listlen = len(prices)
         start_at = listlen - datetime.now().day

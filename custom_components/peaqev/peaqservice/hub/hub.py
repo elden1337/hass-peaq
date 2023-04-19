@@ -205,6 +205,9 @@ class HomeAssistantHub:
         )
         self.observer.add("update charger done", self.async_update_charger_done)
         self.observer.add("update charger enabled", self.async_update_charger_enabled)
+        self.observer.add(
+            "dynamic max price changed", self.async_update_average_monthly_price
+        )
 
     """Composition below here"""
 
@@ -281,11 +284,6 @@ class HomeAssistantHub:
                 return rr.lower()
             return rr
         return ret
-
-    # async def async_iscoroutine(self, object):
-    #     while isinstance(object, partial):
-    #         object = object.func
-    #     return inspect.iscoroutinefunction(object)
 
     @property
     def prices(self) -> list:
