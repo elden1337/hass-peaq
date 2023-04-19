@@ -26,6 +26,9 @@ class Zaptec(IChargerType):
         chargertype,
         auth_required: bool = False,
     ):
+        _LOGGER.warning(
+            "You are initiating Zaptec as Chargertype. Bare in mind that this chargertype has not been signed off in testing and may be very unstable."
+        )
         self._hass = hass
         self._type = chargertype
         self._chargerid = huboptions.charger.chargerid
