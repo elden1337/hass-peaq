@@ -272,12 +272,16 @@ class Charger:
         return True
 
     async def async_do_service_call(self, domain, command, params) -> bool:
+        _domain = domain
+        if params.get('domain', False):
+            _domain = params.pop('domain')
+
         _LOGGER.debug(
             f"Calling charger {command} for domain '{domain}' with parameters: {params}"
         )
         try:
             await self.controller.hub.state_machine.services.async_call(
-                domain, command, params
+                _domain, command, params
             )
         except Exception as e:
             _LOGGER.error(f"Error in async_do_service_call: {e}")
