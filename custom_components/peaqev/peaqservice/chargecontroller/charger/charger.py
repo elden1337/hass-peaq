@@ -15,7 +15,6 @@ from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelper
     ChargerHelpers, async_set_chargerparams)
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import \
     ChargerModel
-from custom_components.peaqev.peaqservice.chargecontroller.charger.savings_controller import SavingsController
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
@@ -32,7 +31,7 @@ class Charger:
         )  # todo: should not have direct access. route through chargecontroller
         self.model = ChargerModel()
         self.session = Session(self)
-        self.savings = SavingsController()
+        #self.savings = SavingsController()
         self._lock = asyncio.Lock()
         self.helpers = ChargerHelpers(self)
         self.controller.hub.observer.add("power canary dead", self.async_pause_charger)
@@ -218,7 +217,6 @@ class Charger:
                     await self.controller.hub.state_machine.async_add_executor_job(
                         self.helpers.wait_loop_cycle
                     )
-
             if self._charger.servicecalls.options.update_current_on_termination is True:
                 final_service_params = await async_set_chargerparams(calls, 6)
                 await self.async_do_service_call(
