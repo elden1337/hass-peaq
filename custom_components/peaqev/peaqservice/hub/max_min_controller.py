@@ -63,11 +63,11 @@ class MaxMinController:
         try:
             state = self.hub.state_machine.states.get("number.peaqev_max_charge")
             if state is not None:
-                if state == self.max_charge or self.max_charge == 0:
+                if state.state == self.max_charge or self.max_charge == 0:
                     return
-            else:
-                await self.async_update_sensor(self.max_charge)
-                _LOGGER.debug(f"Resetting max charge to static value {int(self.max_charge)}")
+                else:
+                    await self.async_update_sensor(self.max_charge)
+                    _LOGGER.debug(f"Resetting max charge to static value {int(self.max_charge)}")
         except Exception as e:
             _LOGGER.error(
                 f"Encountered problem when trying to reset max charge to normal: {e}"
