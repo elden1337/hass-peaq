@@ -30,7 +30,7 @@ from custom_components.peaqev.sensors.power.power_sensor import PeaqPowerSensor
 from custom_components.peaqev.sensors.power.powercanary_sensor import (
     PowerCanaryMaxAmpSensor, PowerCanaryPercentageSensor,
     PowerCanaryStatusSensor)
-from custom_components.peaqev.sensors.prediction_sensor import \
+from custom_components.peaqev.sensors.power.prediction_sensor import \
     PeaqPredictionSensor
 from custom_components.peaqev.sensors.session_sensor import (
     PeaqSessionCostSensor, PeaqSessionSensor)
