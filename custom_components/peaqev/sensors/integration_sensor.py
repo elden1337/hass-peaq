@@ -2,15 +2,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from custom_components.peaqev.sensors.sensorbase import SensorBase
+
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
-from homeassistant.components.integration.const import \
-    METHOD_TRAPEZOIDAL  # pylint: disable=import-error
-from homeassistant.components.integration.sensor import \
-    IntegrationSensor  # pylint: disable=import-error
-from homeassistant.components.sensor import \
-    SensorDeviceClass  # pylint: disable=import-error
+from homeassistant.components.integration.const import METHOD_TRAPEZOIDAL, METHOD_LEFT  # pylint: disable=import-error
+from homeassistant.components.integration.sensor import IntegrationSensor  # pylint: disable=import-error
+from homeassistant.components.sensor import SensorDeviceClass  # pylint: disable=import-error
 from homeassistant.const import (  # pylint: disable=import-error
     ENERGY_KILO_WATT_HOUR, UnitOfTime)
 
@@ -99,3 +98,26 @@ class PeaqIntegrationSensor(IntegrationSensor):
     def device_info(self):
         """Return information to link this entity with the correct device."""
         return {"identifiers": {(DOMAIN, self.hub.hub_id, POWERCONTROLS)}}
+
+
+class PeaqSavingsIntegrationSensor(IntegrationSensor, SensorBase):
+    def __init__(self, hub, sensor, name, entry_id):
+        self._entry_id = entry_id
+        self.hub = hub
+        self._attr_name = f"{self.hub.hubname} {name}"
+
+        IntegrationSensor.__init__(
+            integration_method=METHOD_LEFT,
+            name=self._attr_name,
+            round_digits=2,
+            source_entity=sensor,
+            unique_id=self.unique_id,
+            #unit_prefix="k",
+            unit_time=UnitOfTime.HOURS,
+        )
+        SensorBase.__init__(self.hub, self._attr_name, self._entry_id)
+
+    @property
+    def name(self):
+        return self._attr_name
+
