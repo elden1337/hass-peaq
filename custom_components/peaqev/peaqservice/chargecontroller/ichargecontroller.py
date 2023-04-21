@@ -114,7 +114,7 @@ class IChargeController:
                     await self.hub.observer.async_broadcast(
                         "update charger done", False
                     )
-                    await self.hub.observer.async_broadcast("car disconnected")
+                await self.hub.observer.async_broadcast("car disconnected")
                 return ChargeControllerStates.Idle, True
             elif self.hub.sensors.power.killswitch.is_dead:  # todo: composition
                 return ChargeControllerStates.Error, True
@@ -131,6 +131,7 @@ class IChargeController:
             elif _state in self.model.charger_states.get(
                 ChargeControllerStates.Connected
             ):
+                await self.hub.observer.async_broadcast("car connected")
                 return await self.async_get_status_connected(_state)
             elif _state in self.model.charger_states.get(
                 ChargeControllerStates.Charging
