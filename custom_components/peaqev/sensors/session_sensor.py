@@ -82,11 +82,11 @@ class PeaqSessionSensor(SessionDevice, RestoreEntity):
         if state:
             _LOGGER.debug("last state of %s = %s", self._attr_name, state)
             self._state = state.state
-            self.hub.chargecontroller.charger.session.core.average_data.unpack(
+            await self.hub.chargecontroller.charger.session.async_unpack(
                 state.attributes.get("average_weekly", 50)
             )
         else:
-            self.hub.chargecontroller.charger.session.core.average_data.set_init_model()
+            await self.hub.chargecontroller.charger.session.async_setup_fresh()
 
 
 class PeaqSessionCostSensor(SessionDevice, RestoreEntity):

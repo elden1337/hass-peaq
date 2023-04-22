@@ -35,6 +35,9 @@ class IChargeController:
         self.charger = Charger(controller=self)
         self._setup_observers()
 
+    async def async_setup(self):
+        await self.charger.async_setup()
+
     @property
     def status_type(self) -> ChargeControllerStates:
         return self.model.status_type
