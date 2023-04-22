@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Tuple
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
+from peaqevcore.services.session.session import Session
 
 from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import \
     Charger
@@ -33,9 +34,11 @@ class IChargeController:
             charger_type=charger_type, charger_states=charger_states
         )
         self.charger = Charger(controller=self)
+        self.session = Session(self.charger)
         self._setup_observers()
 
     async def async_setup(self):
+        await self.session.async_setup()
         await self.charger.async_setup()
 
     @property

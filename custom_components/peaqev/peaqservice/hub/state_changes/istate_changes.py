@@ -38,14 +38,14 @@ class IStateChanges:
     async def async_update_session_parameters(self, update_session: bool) -> None:
         if all(
             [
-                self.hub.chargecontroller.charger.session_active,
+                self.hub.chargecontroller.session_active,
                 update_session,
                 hasattr(self.hub.sensors, "carpowersensor"),
             ]
         ):
-            await self.hub.chargecontroller.charger.session.async_set_session_energy(getattr(self.hub.sensors.carpowersensor, "value"))
+            await self.hub.chargecontroller.session.async_set_session_energy(getattr(self.hub.sensors.carpowersensor, "value"))
             if self.hub.options.price.price_aware:
-                await self.hub.chargecontroller.charger.session.async_set_session_price(float(
+                await self.hub.chargecontroller.session.async_set_session_price(float(
                     self.hub.nordpool.state
                 ))
                 if getattr(self.hub.hours.scheduler, "schedule_created", False):

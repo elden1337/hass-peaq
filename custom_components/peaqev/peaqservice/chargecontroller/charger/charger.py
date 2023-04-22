@@ -5,7 +5,6 @@ import time
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.services.chargertype.const import DOMAIN, PARAMS
-from peaqevcore.services.session.session import Session
 
 from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import \
     async_call_ok
@@ -31,14 +30,13 @@ class Charger:
             controller.hub.chargertype
         )  # todo: should not have direct access. route through chargecontroller
         self.model = ChargerModel()
-        self.session = Session(self)
         self.savings = SavingsController()
         self._lock = asyncio.Lock()
         self.helpers = ChargerHelpers(self)
         self.controller.hub.observer.add("power canary dead", self.async_pause_charger)
 
     async def async_setup(self):
-        await self.session.async_setup()
+        pass
 
     @property
     def session_active(self) -> bool:
