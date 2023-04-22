@@ -43,15 +43,11 @@ class IStateChanges:
                 hasattr(self.hub.sensors, "carpowersensor"),
             ]
         ):
-            setattr(
-                self.hub.chargecontroller.charger.session,
-                "session_energy",
-                getattr(self.hub.sensors.carpowersensor, "value"),
-            )
+            await self.hub.chargecontroller.charger.session.async_set_session_energy(getattr(self.hub.sensors.carpowersensor, "value"))
             if self.hub.options.price.price_aware:
-                self.hub.chargecontroller.charger.session.session_price = float(
+                await self.hub.chargecontroller.charger.session.async_set_session_price(float(
                     self.hub.nordpool.state
-                )
+                ))
                 if getattr(self.hub.hours.scheduler, "schedule_created", False):
                     await self.hub.hours.scheduler.async_update_facade()
 
