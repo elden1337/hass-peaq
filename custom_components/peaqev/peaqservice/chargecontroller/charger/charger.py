@@ -6,17 +6,12 @@ from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.services.chargertype.const import DOMAIN, PARAMS
 
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import \
-    async_call_ok
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import \
-    ChargerStates
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import async_call_ok
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import ChargerStates
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelpers import (
     ChargerHelpers, async_set_chargerparams)
-from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import \
-    ChargerModel
-from custom_components.peaqev.peaqservice.chargecontroller.charger.savings_controller import SavingsController
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
+from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import ChargerModel
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
@@ -30,7 +25,6 @@ class Charger:
             controller.hub.chargertype
         )  # todo: should not have direct access. route through chargecontroller
         self.model = ChargerModel()
-        self.savings = SavingsController()
         self._lock = asyncio.Lock()
         self.helpers = ChargerHelpers(self)
         self.controller.hub.observer.add("power canary dead", self.async_pause_charger)
@@ -127,7 +121,7 @@ class Charger:
             not self.session_active
             and self.controller.status_type is not ChargeControllerStates.Done
         ):
-            await self.session.async_reset()
+            await self.controller.session.async_reset()
             self.model.session_active = True
 
     async def async_overtake_charger(self) -> None:
@@ -157,7 +151,7 @@ class Charger:
 
     async def async_terminate_charger(self) -> None:
         if await async_call_ok(self.model.latest_charger_call):
-            await self.session.async_terminate()
+            await self.controller.session.async_terminate()
             await self.async_internal_state(ChargerStates.Stop)
             self.model.session_active = False
             await self.async_call_charger(CallTypes.Off)

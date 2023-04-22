@@ -3,17 +3,17 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import Charger
+    from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
 from peaqevcore.services.savings.savings_service import SavingsService
 from peaqevcore.services.savings.savings_status import SavingsStatus
 
 
 class SavingsController:
-    def __init__(self, charger: Charger):
-        self.charger = charger
+    def __init__(self, chargecontroller: IChargeController):
+        self.controller = chargecontroller
         self.service = SavingsService()
-        self.charger.controller.hub.observer.add("car connected", self.async_enter)
-        self.charger.controller.hub.observer.add("car disconnected", self.async_exit)
+        self.controller.hub.observer.add("car connected", self.async_enter)
+        self.controller.hub.observer.add("car disconnected", self.async_exit)
 
     @property
     def is_on(self) -> bool:

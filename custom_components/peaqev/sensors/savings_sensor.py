@@ -17,9 +17,7 @@ from custom_components.peaqev.sensors.sensorbase import SensorBase
 _LOGGER = logging.getLogger(__name__)
 
 
-class PeaqMoneySensor(SensorBase, RestoreEntity):
-    """Special sensor which is only created if priceaware is true"""
-
+class PeaqSavingsSensor(SensorBase, RestoreEntity):
     def __init__(self, hub: HomeAssistantHub, entry_id):
         name = f"{hub.hubname} {HOURCONTROLLER}"
         super().__init__(hub, name, entry_id)
@@ -46,6 +44,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "savings_trade",
             "savings_total"
         )
+
         if ret is not None:
             self._currency = ret.get("currency")
             self._savings_peak = await async_currency_translation(

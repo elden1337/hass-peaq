@@ -266,6 +266,9 @@ class HomeAssistantHub:
             ),
             "max_price": partial(getattr, self.hours, "absolute_top_price"),
             "min_price": partial(getattr, self.hours, "min_price"),
+            "savings_peak": partial(getattr, self.chargecontroller.savings, "savings_peak"),
+            "savings_trade": partial(getattr, self.chargecontroller.savings, "savings_trade"),
+            "savings_total": partial(getattr, self.chargecontroller.savings, "savings_total")
         }
         ret = {}
         for arg in args:
