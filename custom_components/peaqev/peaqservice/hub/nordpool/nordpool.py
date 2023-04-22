@@ -121,6 +121,10 @@ class NordPoolUpdater:
             if self.model.prices_tomorrow != tomorrow:
                 self.model.prices_tomorrow = tomorrow
                 ret = True
+        else:
+            if self.model.prices_tomorrow:
+                self.model.prices_tomorrow = []
+                ret = True
         await self.async_update_average_week()
         self.model.currency = result.currency
         self.model.use_cent = result.price_in_cent
