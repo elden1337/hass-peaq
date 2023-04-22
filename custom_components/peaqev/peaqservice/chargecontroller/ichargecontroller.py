@@ -9,7 +9,8 @@ from peaqevcore.services.session.session import Session
 
 from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import \
     Charger
-from custom_components.peaqev.peaqservice.chargecontroller.charger.savings_controller import SavingsController
+from custom_components.peaqev.peaqservice.chargecontroller.charger.savings_controller import \
+    SavingsController
 from custom_components.peaqev.peaqservice.chargecontroller.chargercontroller_model import \
     ChargeControllerModel
 from custom_components.peaqev.peaqservice.chargecontroller.const import (
