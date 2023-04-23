@@ -7,7 +7,7 @@ from peaqevcore.models.hub.chargerswitch import ChargerSwitch
 from peaqevcore.models.hub.currentpeak import CurrentPeak
 from peaqevcore.models.hub.hubmember import HubMember
 from peaqevcore.models.hub.power import Power
-from peaqevcore.services.locale.Locale import LocaleData
+from peaqevcore.services.locale.Locale import LocaleData, LocaleFactory
 
 from custom_components.peaqev.peaqservice.hub.const import (
     CHARGERDONE, CHARGERENABLED, CONSUMPTION_TOTAL_NAME, HOURLY)
@@ -52,7 +52,7 @@ class IHubSensors:
                 listenerentity=f"binary_sensor.{domain}_{nametoid(CHARGERDONE)}",
                 initval=False,
             )
-        self.locale = LocaleData(options.locale, domain)
+        self.locale = await LocaleFactory.async_create(options.locale, domain)
         self.current_peak = CurrentPeak(
             data_type=float,
             initval=0,

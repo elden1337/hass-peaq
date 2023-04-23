@@ -81,9 +81,10 @@ class IStateChanges:
         self.hub.sensors.current_peak.value = (
             self.hub.sensors.locale.data.query_model.observed_peak
         )
-        self.hub.sensors.locale.data.query_model.try_update(
+        await self.hub.sensors.locale.async_try_update_peak(
             new_val=float(value), timestamp=datetime.now()
         )
+
         await self.hub.chargecontroller.savings.async_add_consumption(value)
         if self.hub.options.price.price_aware:
             await self.hub.hours.async_update_max_min(self.hub.max_min_controller.max_charge)
