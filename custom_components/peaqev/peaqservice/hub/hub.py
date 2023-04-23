@@ -278,9 +278,8 @@ class HomeAssistantHub:
             else:
                 ret[arg] = func()
         if "max_charge" in ret.keys():
-            self.max_min_controller._original_total_charge = ret["max_charge"][
-                0
-            ]  # todo: 247
+            self.max_min_controller._original_total_charge = ret["max_charge"][0]
+            #todo: 247
         if len(ret) == 1:
             rr = list(ret.values())[0]
             if isinstance(rr, str):
