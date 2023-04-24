@@ -13,17 +13,29 @@ from peaqevcore.services.savings.savings_status import SavingsStatus
 class SavingsController:
     def __init__(self, chargecontroller: IChargeController):
         self.controller = chargecontroller
-        self.service = SavingsService(peak_price=36.25)
-        self.controller.hub.observer.add("car connected", self.async_enter)
-        self.controller.hub.observer.add("car disconnected", self.async_exit)
+        self.service = SavingsService(
+            peak_price=self.controller.hub.sensors.locale.data.price.value
+        )  # todo: must be dynamic to adhere to tiered prices.
+        if self.controller.hub.sensors.locale.data.price.is_active:
+            self.controller.hub.observer.add("car connected", self.async_enter)
+            self.controller.hub.observer.add("car disconnected", self.async_exit)
+            self._enabled = True
+        else:
+            self._enabled = False
 
     @property
     def is_on(self) -> bool:
         return self.status == SavingsStatus.Collecting
 
     @property
+    def status(self) -> SavingsStatus:
+        return self.service.status
+
+    @property
     def enabled(self) -> bool:
-        return self.service.enabled
+        if self._enabled:
+            return self.service.enabled
+        return self._enabled
 
     @property
     def savings_peak(self) -> float:
@@ -37,12 +49,11 @@ class SavingsController:
     def savings_total(self) -> float:
         return self.service.savings_total
 
-    @property
-    def status(self) -> SavingsStatus:
-        return self.service.status
-
     async def async_export_data(self) -> dict:
         return await self.service.async_export_data()
+
+    async def async_import_data(self, data: dict) -> None:
+        await self.service.async_import_data(data)
 
     async def async_enter(self):
         # if car is being  connected to charger

@@ -15,8 +15,7 @@ class MaxMinController:
         self._override_max_charge = None
         self._original_total_charge = 0
         self.override_max_charge: bool = False
-        self.hub.observer.add(
-            "car disconnected", self.async_null_max_charge)
+        self.hub.observer.add("car disconnected", self.async_null_max_charge)
         self.hub.observer.add("car done", self.async_null_max_charge)
         self.hub.observer.add("update charger enabled", self.async_null_max_charge)
 
@@ -63,11 +62,13 @@ class MaxMinController:
         try:
             state = self.hub.state_machine.states.get("number.peaqev_max_charge")
             if state is not None:
-                if state.state == self.max_charge or self.max_charge == 0:
+                if int(state.state) == int(self.max_charge) or self.max_charge == 0:
                     return
                 else:
                     await self.async_update_sensor(self.max_charge)
-                    _LOGGER.debug(f"Resetting max charge to static value {int(self.max_charge)}")
+                    _LOGGER.debug(
+                        f"Resetting max charge to static value {int(self.max_charge)} because of {state.state}"
+                    )
         except Exception as e:
             _LOGGER.error(
                 f"Encountered problem when trying to reset max charge to normal: {e}"

@@ -10,8 +10,9 @@ import logging
 from homeassistant.helpers.restore_state import RestoreEntity
 
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
-from custom_components.peaqev.sensors.money_sensor_helpers import \
-    async_currency_translation
+from custom_components.peaqev.sensors.money_sensor_helpers import (
+    async_currency_translation,
+)
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -27,6 +28,7 @@ class PeaqSavingsSensor(SensorBase, RestoreEntity):
         self._state = None
         self._savings_peak = None
         self._savings_trade = None
+        self._data_dump = None
 
     @property
     def state(self):
@@ -42,11 +44,13 @@ class PeaqSavingsSensor(SensorBase, RestoreEntity):
             "use_cent",
             "savings_peak",
             "savings_trade",
-            "savings_total"
+            "savings_total",
+            "export_savings_data",
         )
 
         if ret is not None:
             self._currency = ret.get("currency")
+            self._data_dump = ret.get("export_savings_data")
             self._savings_peak = await async_currency_translation(
                 value=ret.get("savings_peak"),
                 currency=ret.get("currency"),
@@ -59,32 +63,30 @@ class PeaqSavingsSensor(SensorBase, RestoreEntity):
             )
             if self.hub.options.price.price_aware:
                 self._state = await async_currency_translation(
-                value=ret.get("savings_total"),
-                currency=ret.get("currency"),
-                use_cent=ret.get("use_cent", False),
-            )
+                    value=ret.get("savings_total"),
+                    currency=ret.get("currency"),
+                    use_cent=ret.get("use_cent", False),
+                )
             else:
                 self._state = self._savings_peak
 
-
     @property
     def extra_state_attributes(self) -> dict:
-        #todo: fix attr for persisting the consumption-dict and connected-at
-        attr_dict = {
-            "Savings peak": self._savings_peak
-        }
+        # todo: fix attr for persisting the consumption-dict and connected-at
+        attr_dict = {"Savings peak": self._savings_peak}
         if self.hub.options.price.price_aware:
             attr_dict["Savings trade"] = self._savings_trade
-
+        attr_dict["Data"] = self._data_dump
         return attr_dict
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
         _LOGGER.debug("last state of %s = %s", self._attr_name, state)
         if state:
-            pass
-            #todo add restore state
+            self._data_dump = state.attributes.get("Data")
+            self._savings_peak = state.attributes.get("Savings peak")
+            self._savings_trade = state.attributes.get("Savings trade")
+            self._state = state.state
+            await self.hub.chargecontroller.savings.async_import_data(self._data_dump)
         else:
             pass
-            # todo add restore state
-
