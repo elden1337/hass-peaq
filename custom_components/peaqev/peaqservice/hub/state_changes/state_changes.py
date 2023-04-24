@@ -1,12 +1,10 @@
 import logging
 import time
 
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
-    ChargerType,
-)
-from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import (
-    IStateChanges,
-)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
+    ChargerType
+from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
+    IStateChanges
 
 _LOGGER = logging.getLogger(__name__)
 
