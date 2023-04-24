@@ -24,7 +24,7 @@ class PeaqSavingsSensor(SensorBase, RestoreEntity):
         self._attr_name = name
         self._listen_status = None
         self._currency = None
-        self._state = None
+        self._state = 0
         self._savings_peak = None
         self._savings_trade = None
         self._data_dump = None
@@ -52,18 +52,18 @@ class PeaqSavingsSensor(SensorBase, RestoreEntity):
             self._listen_status = self.hub.chargecontroller.savings.status.value
             self._data_dump = ret.get("export_savings_data")
             self._savings_peak = await async_currency_translation(
-                value=ret.get("savings_peak"),
+                value=ret.get("savings_peak", 0),
                 currency=ret.get("currency"),
                 use_cent=ret.get("use_cent", False),
             )
             self._savings_trade = await async_currency_translation(
-                value=ret.get("savings_trade"),
+                value=ret.get("savings_trade", 0),
                 currency=ret.get("currency"),
                 use_cent=ret.get("use_cent", False),
             )
             if self.hub.options.price.price_aware:
                 self._state = await async_currency_translation(
-                    value=ret.get("savings_total"),
+                    value=ret.get("savings_total", 0),
                     currency=ret.get("currency"),
                     use_cent=ret.get("use_cent", False),
                 )

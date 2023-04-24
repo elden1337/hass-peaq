@@ -10,14 +10,17 @@ from datetime import datetime
 
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from custom_components.peaqev.peaqservice.chargecontroller.const import \
-    CHARGING_ALLOWED
+from custom_components.peaqev.peaqservice.chargecontroller.const import CHARGING_ALLOWED
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
 from custom_components.peaqev.sensors.money_sensor_helpers import (
-    async_currency_translation, async_set_avg_cost,
+    async_currency_translation,
+    async_set_avg_cost,
     async_set_caution_hours_display,
-    async_set_current_charge_permittance_display, async_set_non_hours_display,
-    async_set_total_charge, calculate_stop_len)
+    async_set_current_charge_permittance_display,
+    async_set_non_hours_display,
+    async_set_total_charge,
+    calculate_stop_len,
+)
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -111,12 +114,12 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             )
             if self.hub.options.price.dynamic_top_price:
                 _maxp = await async_currency_translation(
-                    value=ret.get("max_price"),
+                    value=ret.get("max_price") if ret.get("max_price", 0) > 0 else None,
                     currency=ret.get("currency"),
                     use_cent=ret.get("use_cent", False),
                 )
                 _minp = await async_currency_translation(
-                    value=ret.get("min_price"),
+                    value=ret.get("min_price") if ret.get("min_price", 0) > 0 else None,
                     currency=ret.get("currency"),
                     use_cent=ret.get("use_cent", False),
                 )

@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -8,6 +8,8 @@ if TYPE_CHECKING:
     )
 from peaqevcore.services.savings.savings_service import SavingsService
 from peaqevcore.services.savings.savings_status import SavingsStatus
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class SavingsController:
@@ -58,6 +60,7 @@ class SavingsController:
         await self.service.async_import_data(data)
 
     async def async_enter(self):
+        _LOGGER.debug("SavingsController: async_enter")
         # if car is being  connected to charger
         if self.status is SavingsStatus.Off:
             await self.service.async_start_listen()
