@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING
 
@@ -6,6 +7,7 @@ if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import (
         IChargeController,
     )
+
 from peaqevcore.services.savings.savings_service import SavingsService
 from peaqevcore.services.savings.savings_status import SavingsStatus
 
