@@ -9,9 +9,8 @@ import logging
 
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from custom_components.peaqev.sensors.money_sensor_helpers import (
-    async_currency_translation,
-)
+from custom_components.peaqev.sensors.money_sensor_helpers import \
+    async_currency_translation
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 _LOGGER = logging.getLogger(__name__)
