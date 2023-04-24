@@ -38,16 +38,18 @@ class IStateChanges:
     async def async_update_session_parameters(self, update_session: bool) -> None:
         if all(
             [
-                self.hub.chargecontroller.session_active,
+                self.hub.chargecontroller.charger.session_active,
                 update_session,
                 hasattr(self.hub.sensors, "carpowersensor"),
             ]
         ):
-            await self.hub.chargecontroller.session.async_set_session_energy(getattr(self.hub.sensors.carpowersensor, "value"))
+            await self.hub.chargecontroller.session.async_set_session_energy(
+                getattr(self.hub.sensors.carpowersensor, "value")
+            )
             if self.hub.options.price.price_aware:
-                await self.hub.chargecontroller.session.async_set_session_price(float(
-                    self.hub.nordpool.state
-                ))
+                await self.hub.chargecontroller.session.async_set_session_price(
+                    float(self.hub.nordpool.state)
+                )
                 if getattr(self.hub.hours.scheduler, "schedule_created", False):
                     await self.hub.hours.scheduler.async_update_facade()
 
@@ -81,13 +83,16 @@ class IStateChanges:
         self.hub.sensors.current_peak.value = (
             self.hub.sensors.locale.data.query_model.observed_peak
         )
-        await self.hub.sensors.locale.async_try_update_peak(
-            new_val=float(value), timestamp=datetime.now()
-        )
+        if isinstance(value, float):
+            await self.hub.sensors.locale.async_try_update_peak(
+                new_val=value, timestamp=datetime.now()
+            )
 
         await self.hub.chargecontroller.savings.async_add_consumption(value)
         if self.hub.options.price.price_aware:
-            await self.hub.hours.async_update_max_min(self.hub.max_min_controller.max_charge)
+            await self.hub.hours.async_update_max_min(
+                self.hub.max_min_controller.max_charge
+            )
 
     @abstractmethod
     async def async_update_sensor_internal(self, entity, value) -> bool:

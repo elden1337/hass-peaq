@@ -12,6 +12,7 @@ class ChargerType(Enum):
     Zaptec = "Zaptec"
     NoCharger = "None"
     Unknown = "Unknown"
+    WallBox = "Wallbox"
 
 
 CHARGERTYPES = [
@@ -19,6 +20,7 @@ CHARGERTYPES = [
     ChargerType.Easee.value,
     ChargerType.Outlet.value,
     # Charger_type.GaroWallbox.value,
+    # Charger_type.WallBox.value,
     ChargerType.Zaptec.value,
     ChargerType.NoCharger.value,
 ]

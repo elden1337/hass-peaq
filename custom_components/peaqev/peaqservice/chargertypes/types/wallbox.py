@@ -4,15 +4,13 @@ from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
-from peaqevcore.models.chargertype.servicecalls_options import \
-    ServiceCallsOptions
+from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
 
-from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
-    IChargerType
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
-from custom_components.peaqev.peaqservice.hub.models.hub_options import \
-    HubOptions
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
+from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
@@ -23,7 +21,7 @@ _LOGGER = logging.getLogger(__name__)
 # CONNECTOR = "connector"
 
 
-class Wallbox(IChargerType):
+class WallBox(IChargerType):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
         _LOGGER.warning(
             "You are initiating Wallbox as Chargertype. Bare in mind that this chargertype has not been signed off in testing and may be very unstable."
@@ -31,9 +29,9 @@ class Wallbox(IChargerType):
         self._hass = hass
         self._is_initialized = False
         self._type = chargertype
-        
-        self._chargerid = huboptions.charger.chargerid #needed?
-        
+
+        self._chargerid = huboptions.charger.chargerid  # needed?
+
         self.entities.imported_entityendings = self.entity_endings
         self.options.powerswitch_controls_charging = True
         self.chargerstates[ChargeControllerStates.Idle] = ["available"]
@@ -89,8 +87,8 @@ class Wallbox(IChargerType):
             "Waiting MID failed",
             "Waiting MID safety margin exceeded",
             "Waiting in queue by Eco-Smart",
-            "Unknown"
-            ]
+            "Unknown",
+        ]
 
     @property
     def call_on(self) -> CallType:
@@ -113,8 +111,8 @@ class Wallbox(IChargerType):
         return CallType(
             call="set_value",
             params={"entity_id": self.entities.ampmeter, CURRENT: "value"},
-            domain="number"
-            )
+            domain="number",
+        )
 
     @property
     def servicecalls_options(self) -> ServiceCallsOptions:
@@ -151,13 +149,16 @@ class Wallbox(IChargerType):
     #     raise Exception
 
     async def async_set_sensors(self) -> None:
-        self.entities.maxamps = f"sensor.{self.entities.entityschema}_max_charging_current"
+        self.entities.maxamps = (
+            f"sensor.{self.entities.entityschema}_max_charging_current"
+        )
         self.entities.powermeter = f"sensor.{self.entities.entityschema}_charging_power"
         self.options.powermeter_factor = 1000
         self.entities.powerswitch = f"switch.{self.entities.entityschema}_paused"
-        self.entities.ampmeter = f"number.{self.entities.entityschema}_max_charging_current"
-        #self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"
-        
+        self.entities.ampmeter = (
+            f"number.{self.entities.entityschema}_max_charging_current"
+        )
+        # self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"
 
     def get_allowed_amps(self) -> int:
         ret = self._hass.states.get(self.entities.maxamps)
@@ -169,7 +170,7 @@ class Wallbox(IChargerType):
                 f"Unable to get max amps. The sensor {self.entities.maxamps} returned state {ret}. Setting max amps to 16 til I get a proper state."
             )
         return 16
-    
+
     # async def async_determine_entities(self) -> list:
     #     ret = []
     #     for e in self.entities.imported_entities:
@@ -177,4 +178,3 @@ class Wallbox(IChargerType):
     #         if entity_state != "unavailable":
     #             ret.append(e)
     #     return ret
-

@@ -7,18 +7,23 @@ from typing import Tuple
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.services.session.session import Session
 
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import \
-    Charger
-from custom_components.peaqev.peaqservice.chargecontroller.charger.savings_controller import \
-    SavingsController
-from custom_components.peaqev.peaqservice.chargecontroller.chargercontroller_model import \
-    ChargeControllerModel
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import (
+    Charger,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.charger.savings_controller import (
+    SavingsController,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.chargercontroller_model import (
+    ChargeControllerModel,
+)
 from custom_components.peaqev.peaqservice.chargecontroller.const import (
-    DEBUGLOG_TIMEOUT, DONETIMEOUT)
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
-from custom_components.peaqev.peaqservice.util.constants import \
-    CHARGERCONTROLLER
+    DEBUGLOG_TIMEOUT,
+    DONETIMEOUT,
+)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
+from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,7 +42,7 @@ class IChargeController:
         )
         self.charger = Charger(controller=self)
         self.session = Session(self.charger)
-        self.savings = SavingsController()
+        self.savings = SavingsController(self)
         self._setup_observers()
 
     async def async_setup(self):
@@ -132,9 +137,8 @@ class IChargeController:
                 and self.hub.charger_done
             ):
                 return ChargeControllerStates.Done, False
-            elif (
-                datetime.now().hour in self.hub.non_hours
-                and not getattr(self.hub.hours.timer, "is_override", False)
+            elif datetime.now().hour in self.hub.non_hours and not getattr(
+                self.hub.hours.timer, "is_override", False
             ):  # todo: composition
                 return ChargeControllerStates.Stop, True
             elif _state in self.model.charger_states.get(
@@ -206,8 +210,12 @@ class IChargeController:
             self.model.latest_debuglog = time.time()
 
     def _setup_observers(self) -> None:
-        self.hub.observer.add("update latest charger start", self.async_update_latest_charger_start)
-        self.hub.observer.add("update charger enabled",self.async_update_latest_charger_start)
+        self.hub.observer.add(
+            "update latest charger start", self.async_update_latest_charger_start
+        )
+        self.hub.observer.add(
+            "update charger enabled", self.async_update_latest_charger_start
+        )
         self.hub.observer.add("hub initialized", self._check_initialized)
         self.hub.observer.add("timer activated", self.async_set_status)
 
