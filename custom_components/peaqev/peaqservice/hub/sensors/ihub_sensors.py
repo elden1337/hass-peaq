@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 from abc import abstractmethod
 from dataclasses import dataclass, field
+from functools import partial
+from typing import Tuple
 
 from peaqevcore.models.hub.carpowersensor import CarPowerSensor
 from peaqevcore.models.hub.chargerobject import ChargerObject
@@ -46,69 +50,50 @@ class IHubSensors:
             listenerentity=f"switch.{domain}_{nametoid(CHARGERENABLED)}",
             initval=False,
         )
-        if self.chargertype.type.value != "None":
-            self.charger_done = HubMember(
-                data_type=bool,
-                listenerentity=f"binary_sensor.{domain}_{nametoid(CHARGERDONE)}",
-                initval=False,
-            )
         self.locale = await LocaleFactory.async_create(options.locale, domain)
         self.current_peak = CurrentPeak(
             data_type=float,
             initval=0,
             startpeaks=options.startpeaks,
         )
-        if len(self.chargertype.entities.chargerentity) and self.chargertype.type.value != "None":
-            self.chargerobject = ChargerObject(
-                data_type=self.chargertype.native_chargerstates,
-                listenerentity=self.chargertype.entities.chargerentity,
-            )
-            resultdict[self.chargerobject.entity] = self.chargerobject.is_initialized
 
+        if self.chargertype.type.value != "None":
+            chobj  = await self.async_set_chargerobject_and_switch()
+            self.chargerobject = chobj[0]
+            self.chargerobject_switch = chobj[1]
+            resultdict[self.chargerobject.entity] = chobj[2] or self.chargerobject.is_initialized
+
+            self.charger_done = HubMember(
+                data_type=bool,
+                listenerentity=f"binary_sensor.{domain}_{nametoid(CHARGERDONE)}",
+                initval=False,
+            )
             self.carpowersensor = CarPowerSensor(
                 data_type=int,
                 listenerentity=self.chargertype.entities.powermeter,
                 powermeter_factor=self.chargertype.options.powermeter_factor,
                 hubdata=self,
-                init_override=True,
-            )
-            self.chargerobject_switch = ChargerSwitch(
-                hass=state_machine,
-                data_type=bool,
-                listenerentity=self.chargertype.entities.powerswitch,
-                initval=False,
-                currentname=self.chargertype.entities.ampmeter,
-                hubdata=self,
-                init_override=True,
-            )
-
-        elif self.chargertype.type.value != "None":
-            self.chargerobject = ChargerObject(
-                data_type=self.chargertype.native_chargerstates,
-                listenerentity="no entity",
-                init_override=True,
-            )
-            resultdict[self.chargerobject.entity] = True
-
-            self.carpowersensor = CarPowerSensor(
-                data_type=int,
-                listenerentity=self.chargertype.entities.powermeter,
-                powermeter_factor=self.chargertype.options.powermeter_factor,
-                hubdata=self,
-            )
-            self.chargerobject_switch = ChargerSwitch(
-                hass=state_machine,
-                data_type=bool,
-                listenerentity=self.chargertype.entities.powerswitch,
-                initval=False,
-                currentname=self.chargertype.entities.ampmeter,
-                hubdata=self,
+                init_override=len(self.chargertype.entities.chargerentity) > 0,
             )
         self.totalhourlyenergy = HubMember(
             data_type=float,
             listenerentity=f"sensor.{domain}_{nametoid(CONSUMPTION_TOTAL_NAME)}_{HOURLY}",
             initval=0,
         )
+
+    async def async_set_chargerobject_and_switch(self) -> Tuple[ChargerObject, ChargerSwitch, bool|None]:
+        regular = {
+            "chargerobject": partial(ChargerObject, data_type=self.chargertype.native_chargerstates, listenerentity=self.chargertype.entities.chargerentity),
+            "chargerobject_switch": partial(ChargerSwitch, hass=self.state_machine, data_type=bool, listenerentity=self.chargertype.entities.powerswitch, initval=False, currentname=self.chargertype.entities.ampmeter, hubdata=self, init_override=True),
+        }
+        lite = {
+            "chargerobject": partial(ChargerObject, data_type=self.chargertype.native_chargerstates, listenerentity="no entity", init_override=True),
+            "chargerobject_switch": partial(ChargerSwitch, hass=self.state_machine, data_type=bool, listenerentity=self.chargertype.entities.powerswitch, initval=False, currentname=self.chargertype.entities.ampmeter, hubdata=self),
+        }
+        if len(self.chargertype.entities.chargerentity):
+            return regular["chargerobject"](), regular["chargerobject_switch"](), None
+        else:
+            return lite["chargerobject"](), lite["chargerobject_switch"](), True
 
     async def async_init_hub_values(self):
         """Initialize values from Home Assistant on the set objects"""

@@ -66,6 +66,8 @@ class SavingsController:
         # if car is being  connected to charger
         if self.status is SavingsStatus.Off:
             await self.service.async_start_listen()
+            prices = await self.controller.hub.async_request_sensor_data("prices")
+            await self.service.async_add_prices(prices)
 
     async def async_exit(self):
         # if car is being disconnected from charger
@@ -80,5 +82,5 @@ class SavingsController:
 
     async def async_add_consumption(self, hourly_sum: float):
         if self.is_on:
-            await self.service.async_add_to_registered_consumption(hourly_sum)
+            await self.service.async_add_to_consumption(hourly_sum)
             # await self.service.async_add_to_peaks(hourly_sum)

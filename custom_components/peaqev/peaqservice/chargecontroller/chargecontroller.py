@@ -54,6 +54,8 @@ class ChargeController(IChargeController):
 
     async def async_get_status_connected(self, charger_state=None) -> Tuple[ChargeControllerStates, bool]:
         try:
+            if not self.hub.enabled:
+                return ChargeControllerStates.Connected, True
             if (
                 charger_state is not None
                 and self.hub.sensors.carpowersensor.value < 1

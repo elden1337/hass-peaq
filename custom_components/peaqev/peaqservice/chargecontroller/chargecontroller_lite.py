@@ -33,6 +33,8 @@ class ChargeControllerLite(IChargeController):
         return ret
 
     async def async_get_status_connected(self, charger_state=None) -> ChargeControllerStates:
+        if not self.hub.enabled:
+            return ChargeControllerStates.Connected
         if (
             charger_state is not None
             and self.hub.sensors.carpowersensor.value < 1

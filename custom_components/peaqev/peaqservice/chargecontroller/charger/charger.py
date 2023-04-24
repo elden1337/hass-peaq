@@ -72,7 +72,7 @@ class Charger:
                     await self.async_stop_case()
                 case ChargeControllerStates.Done | ChargeControllerStates.Idle:
                     await self.async_done_idle_case()
-                case ChargeControllerStates.Disabled:
+                case ChargeControllerStates.Connected|ChargeControllerStates.Disabled:
                     pass
                 case _:
                     _LOGGER.debug(
