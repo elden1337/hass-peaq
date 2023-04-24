@@ -13,12 +13,14 @@ from peaqevcore.services.savings.savings_status import SavingsStatus
 class SavingsController:
     def __init__(self, chargecontroller: IChargeController):
         self.controller = chargecontroller
+        self._prices: list = []
         self.service = SavingsService(
             peak_price=self.controller.hub.sensors.locale.data.price.value
         )  # todo: must be dynamic to adhere to tiered prices.
         if self.controller.hub.sensors.locale.data.price.is_active:
             self.controller.hub.observer.add("car connected", self.async_enter)
             self.controller.hub.observer.add("car disconnected", self.async_exit)
+            self.controller.hub.observer.add("prices changed", self.async_update_prices)
             self._enabled = True
         else:
             self._enabled = False
@@ -64,6 +66,12 @@ class SavingsController:
         # if car is being disconnected from charger
         if self.status is SavingsStatus.On:
             await self.service.async_stop_listen()
+
+    async def async_update_prices(self, prices) -> None:
+        if self.is_on:
+            if prices[0] != self._prices:
+                self._prices = prices[0]
+                await self.service.async_add_prices(prices=prices[0])
 
     async def async_add_consumption(self, hourly_sum: float):
         if self.is_on:

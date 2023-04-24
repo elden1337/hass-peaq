@@ -9,9 +9,9 @@ import logging
 
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
-from custom_components.peaqev.sensors.money_sensor_helpers import \
-    async_currency_translation
+from custom_components.peaqev.sensors.money_sensor_helpers import (
+    async_currency_translation,
+)
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -19,10 +19,11 @@ _LOGGER = logging.getLogger(__name__)
 
 class PeaqSavingsSensor(SensorBase, RestoreEntity):
     def __init__(self, hub: HomeAssistantHub, entry_id):
-        name = f"{hub.hubname} {HOURCONTROLLER}"
+        name = f"{hub.hubname} savings"
         super().__init__(hub, name, entry_id)
 
         self._attr_name = name
+        self._listen_status = None
         self._currency = None
         self._state = None
         self._savings_peak = None
@@ -49,6 +50,7 @@ class PeaqSavingsSensor(SensorBase, RestoreEntity):
 
         if ret is not None:
             self._currency = ret.get("currency")
+            self._listen_status = self.hub.chargecontroller.savings.status.value
             self._data_dump = ret.get("export_savings_data")
             self._savings_peak = await async_currency_translation(
                 value=ret.get("savings_peak"),
@@ -72,7 +74,10 @@ class PeaqSavingsSensor(SensorBase, RestoreEntity):
     @property
     def extra_state_attributes(self) -> dict:
         # todo: fix attr for persisting the consumption-dict and connected-at
-        attr_dict = {"Savings peak": self._savings_peak}
+        attr_dict = {
+            "Savings peak": self._savings_peak,
+            "Listen status": self._listen_status,
+        }
         if self.hub.options.price.price_aware:
             attr_dict["Savings trade"] = self._savings_trade
         attr_dict["Data"] = self._data_dump

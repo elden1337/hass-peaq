@@ -81,14 +81,12 @@ class HomeAssistantHub:
         self.chargertype = await ChargerTypeFactory.async_create(
             self.state_machine, self.options
         )  # chargecontroller
+        self.sensors: IHubSensors = await HubSensorsFactory.async_create(hub=self)
         self.chargecontroller = await ChargeControllerFactory.async_create(
             self,
             charger_states=self.chargertype.chargerstates,
             charger_type=self.chargertype.type,
-        )  # charger
-        self.sensors: IHubSensors = await HubSensorsFactory.async_create(
-            hub=self
-        )  # top level
+        )
         self.hours: Hours = await HourselectionFactory.async_create(self)  # top level
         self.threshold: ThresholdBase = await ThresholdFactory.async_create(
             self
