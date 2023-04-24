@@ -8,15 +8,19 @@ if TYPE_CHECKING:
 import logging
 
 from homeassistant.helpers.restore_state import RestoreEntity
+from homeassistant.components.sensor import SensorDeviceClass
 
-from custom_components.peaqev.sensors.money_sensor_helpers import \
-    async_currency_translation
+from custom_components.peaqev.sensors.money_sensor_helpers import (
+    async_currency_translation,
+)
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class PeaqSavingsSensor(SensorBase, RestoreEntity):
+    device_class = SensorDeviceClass.MONETARY
+
     def __init__(self, hub: HomeAssistantHub, entry_id):
         name = f"{hub.hubname} savings"
         super().__init__(hub, name, entry_id)
