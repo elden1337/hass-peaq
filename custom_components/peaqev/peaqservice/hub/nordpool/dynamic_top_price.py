@@ -20,14 +20,18 @@ class DynamicTopPrice:
         if not len(prices):
             _LOGGER.warning("No prices to calculate max from.")
             return 0, AverageType.ERROR
-        await self.async_set_lists(prices)
-        a = self._month[-1]
-        b = self._three[-1]
-        c = self._seven[-1]
-        rets = {a: AverageType.MONTH}
-        rets.update(await self.async_measure_type(a, b, AverageType.THREE))
-        rets.update(await self.async_measure_type(a, c, AverageType.SEVEN))
-        return round(max(rets.keys()), 2), rets[max(rets.keys())]
+        try:
+            await self.async_set_lists(prices)
+            a = self._month[-1]
+            b = self._three[-1]
+            c = self._seven[-1]
+            rets = {a: AverageType.MONTH}
+            rets.update(await self.async_measure_type(a, b, AverageType.THREE))
+            rets.update(await self.async_measure_type(a, c, AverageType.SEVEN))
+            return round(max(rets.keys()), 2), rets[max(rets.keys())]
+        except Exception as e:
+            _LOGGER.debug(f"Error in async_get_max: {e}")
+            return 0, AverageType.ERROR
 
     async def async_set_lists(self, prices: list) -> None:
         self._three = await self.async_get_rolling(prices, 3)

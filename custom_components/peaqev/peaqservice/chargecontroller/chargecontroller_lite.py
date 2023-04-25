@@ -25,7 +25,7 @@ class ChargeControllerLite(IChargeController):
     async def async_get_status_charging(self) -> ChargeControllerStates:
         if (
             self.hub.sensors.totalhourlyenergy.value >= self.hub.current_peak_dynamic
-            and not self.hub.is_free_charge
+            and not await self.hub.async_free_charge()
         ):
             ret = ChargeControllerStates.Stop
         else:
@@ -42,7 +42,7 @@ class ChargeControllerLite(IChargeController):
         ):
             ret = ChargeControllerStates.Done
         else:
-            if (self.hub.totalhourlyenergy.value < self.hub.current_peak_dynamic) or self.hub.is_free_charge:
+            if (self.hub.totalhourlyenergy.value < self.hub.current_peak_dynamic) or await self.hub.async_free_charge():
                 ret = (
                     ChargeControllerStates.Start
                     if not await async_defer_start(self.hub.hours.non_hours)

@@ -233,14 +233,14 @@ class IChargeController:
         self.hub.observer.add("hub initialized", self._check_initialized)
         self.hub.observer.add("timer activated", self.async_set_status)
 
-    @property
+
     @abstractmethod
-    def below_startthreshold(self) -> bool:
+    async def async_below_startthreshold(self) -> bool:
         pass
 
-    @property
+
     @abstractmethod
-    def above_stopthreshold(self) -> bool:
+    async def async_above_stopthreshold(self) -> bool:
         pass
 
     @property

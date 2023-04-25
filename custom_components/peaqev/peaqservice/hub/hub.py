@@ -306,11 +306,11 @@ class HomeAssistantHub:
             return self.hours.prices_tomorrow
         return []
 
-    @property
-    def is_free_charge(self) -> bool:
-        if hasattr(self.sensors, "locale"):
-            return self.sensors.locale.data.free_charge(self.sensors.locale.data)
-        return False
+    async def async_free_charge(self) -> bool:
+        try:
+            return await self.sensors.locale.data.async_free_charge()
+        except Exception:
+            return False
 
     @property
     def charger_done(self) -> bool:

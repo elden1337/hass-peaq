@@ -25,18 +25,23 @@ class ChargeController(IChargeController):
             return WAITING_FOR_POWER
         return self.status_type.name
 
-    @property
-    def below_startthreshold(self) -> bool:
-        predicted_energy = self.hub.prediction.predictedenergy
+    async def async_below_startthreshold(self) -> bool:
+        predicted_energy = await self.hub.prediction.async_predictedenergy(
+            power_avg=self.hub.sensors.powersensormovingaverage.value,
+            total_hourly_energy=self.hub.sensors.totalhourlyenergy.value,
+            is_quarterly=await self.hub.sensors.locale.data.async_is_quarterly())
         current_peak = self.hub.current_peak_dynamic
-        threshold_start = self.hub.threshold.start / 100
+        threshold_start = await self.hub.threshold.async_start() / 100
         return (predicted_energy * 1000) < ((current_peak * 1000) * threshold_start)
 
-    @property
-    def above_stopthreshold(self) -> bool:
-        predicted_energy = self.hub.prediction.predictedenergy
+
+    async def async_above_stopthreshold(self) -> bool:
+        predicted_energy = await self.hub.prediction.async_predictedenergy(
+            power_avg=self.hub.sensors.powersensormovingaverage.value,
+            total_hourly_energy=self.hub.sensors.totalhourlyenergy.value,
+            is_quarterly= await self.hub.sensors.locale.data.async_is_quarterly())
         current_peak = self.hub.current_peak_dynamic
-        threshold_stop = self.hub.threshold.stop / 100
+        threshold_stop = await self.hub.threshold.async_stop() / 100
         return (predicted_energy * 1000) > ((current_peak * 1000) * threshold_stop)
 
     async def async_get_status_charging(self) -> ChargeControllerStates:
@@ -44,9 +49,9 @@ class ChargeController(IChargeController):
             return ChargeControllerStates.Stop
         if all(
             [
-                self.above_stopthreshold,
+                await self.async_above_stopthreshold(),
                 self.hub.sensors.totalhourlyenergy.value > 0,
-                not self.hub.is_free_charge,
+                not await self.hub.async_free_charge(),
             ]
         ):
             return ChargeControllerStates.Stop
@@ -68,8 +73,8 @@ class ChargeController(IChargeController):
                     [
                         any(
                             [
-                                (self.below_startthreshold and self.hub.sensors.totalhourlyenergy.value != 0),
-                                self.hub.is_free_charge,
+                                (await self.async_below_startthreshold and self.hub.sensors.totalhourlyenergy.value != 0),
+                                await self.hub.async_free_charge(),
                             ]
                         ),
                         not await async_defer_start(self.hub.hours.non_hours),

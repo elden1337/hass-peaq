@@ -147,7 +147,7 @@ class Charger:
         await self.controller.async_update_latest_charger_start()
         if (
             self._charger.servicecalls.options.allowupdatecurrent
-            and not self.controller.hub.is_free_charge
+            and not await self.controller.hub.async_free_charge()
         ):
             self.controller.hub.state_machine.async_create_task(
                 self.async_update_max_current()
