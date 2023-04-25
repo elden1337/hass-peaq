@@ -5,13 +5,12 @@ from statistics import mean
 
 import homeassistant.helpers.template as template
 
-from custom_components.peaqev.peaqservice.hub.nordpool.dynamic_top_price import (
-    DynamicTopPrice,
-)
-from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_dto import NordpoolDTO
-from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_model import (
-    NordPoolModel,
-)
+from custom_components.peaqev.peaqservice.hub.nordpool.dynamic_top_price import \
+    DynamicTopPrice
+from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_dto import \
+    NordpoolDTO
+from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_model import \
+    NordPoolModel
 
 _LOGGER = logging.getLogger(__name__)
 
