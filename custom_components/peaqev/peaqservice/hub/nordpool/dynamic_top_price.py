@@ -3,8 +3,7 @@ from datetime import datetime
 from statistics import mean
 from typing import Tuple
 
-from custom_components.peaqev.peaqservice.hub.nordpool.average_type import \
-    AverageType
+from custom_components.peaqev.peaqservice.hub.nordpool.average_type import AverageType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,10 +35,13 @@ class DynamicTopPrice:
 
     async def async_measure_type(self, month, measure, avg_type: AverageType) -> dict:
         ret = {}
-        if measure > month and datetime.now().day >= self.filterlen[avg_type]:
-            gr = await self.async_set_gradient(self._seven)
-            if gr[-1] > 0:
-                ret = {mean([month, measure]): avg_type}
+        try:
+            if measure > month and datetime.now().day >= self.filterlen[avg_type]:
+                gr = await self.async_set_gradient(self._seven)
+                if gr[-1] > 0:
+                    ret = {mean([month, measure]): avg_type}
+        except Exception as e:
+            _LOGGER.debug(f"Error in async_measure_type: {e}")
         return ret
 
     @staticmethod
@@ -48,9 +50,12 @@ class DynamicTopPrice:
         rolling = []
         if not len(prices):
             return []
-        listlen = len(prices)
-        for i in range((listlen - datetime.now().day), listlen):
-            rolling.append(mean(prices[i - days : i]))
+        try:
+            listlen = len(prices)
+            for i in range((listlen - datetime.now().day), listlen):
+                rolling.append(mean(prices[i - days : i]))
+        except Exception as e:
+            _LOGGER.debug(f"Error in async_get_rolling: {e}")
         return rolling
 
     @staticmethod
@@ -58,10 +63,13 @@ class DynamicTopPrice:
         rolling = []
         if not len(prices):
             return []
-        listlen = len(prices)
-        start_at = listlen - datetime.now().day
-        for i in range(start_at, listlen):
-            rolling.append(mean(prices[start_at : i + 1]))
+        try:
+            listlen = len(prices)
+            start_at = listlen - datetime.now().day
+            for i in range(start_at, listlen):
+                rolling.append(mean(prices[start_at : i + 1]))
+        except Exception as e:
+            _LOGGER.debug(f"Error in async_get_current_month: {e}")
         return rolling
 
     @staticmethod

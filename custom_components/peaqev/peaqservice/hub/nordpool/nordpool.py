@@ -5,12 +5,13 @@ from statistics import mean
 
 import homeassistant.helpers.template as template
 
-from custom_components.peaqev.peaqservice.hub.nordpool.dynamic_top_price import \
-    DynamicTopPrice
-from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_dto import \
-    NordpoolDTO
-from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_model import \
-    NordPoolModel
+from custom_components.peaqev.peaqservice.hub.nordpool.dynamic_top_price import (
+    DynamicTopPrice,
+)
+from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_dto import NordpoolDTO
+from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_model import (
+    NordPoolModel,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -74,7 +75,9 @@ class NordPoolUpdater:
                             [self.model.prices, self.model.prices_tomorrow],
                         )
             elif self.hub.is_initialized:
-                _LOGGER.error("Could not get nordpool-prices")
+                _LOGGER.debug(
+                    f"Could not get nordpool-prices. initial: {initial}. Nordpool-entity: {self.nordpool_entity}"
+                )
 
     async def async_update_average_month(self) -> None:
         _new = await self.async_get_average(datetime.now().day)

@@ -71,7 +71,7 @@ class SavingsController:
 
     async def async_exit(self):
         # if car is being disconnected from charger
-        if self.status is SavingsStatus.On:
+        if self.status is SavingsStatus.Collecting:
             await self.service.async_stop_listen()
 
     async def async_update_prices(self, prices) -> None:
