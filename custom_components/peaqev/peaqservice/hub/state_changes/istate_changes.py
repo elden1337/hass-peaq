@@ -104,7 +104,8 @@ class IStateChanges:
         if self.hub.options.price.price_aware:
             try:
                 await self.hub.hours.async_update_max_min(
-                    self.hub.max_min_controller.max_charge
+                    self.hub.max_min_controller.max_charge,
+                    self.hub.chargecontroller.session.session_energy
                 )
             except:
                 _LOGGER.debug(f"Unable to update max_min")
