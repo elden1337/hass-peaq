@@ -6,16 +6,22 @@ from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.services.chargertype.const import DOMAIN, PARAMS
 
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import \
-    async_call_ok
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import \
-    ChargerStates
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import (
+    async_call_ok,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import (
+    ChargerStates,
+)
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelpers import (
-    ChargerHelpers, async_set_chargerparams)
-from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import \
-    ChargerModel
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
+    ChargerHelpers,
+    async_set_chargerparams,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import (
+    ChargerModel,
+)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
@@ -72,7 +78,7 @@ class Charger:
                     await self.async_stop_case()
                 case ChargeControllerStates.Done | ChargeControllerStates.Idle:
                     await self.async_done_idle_case()
-                case ChargeControllerStates.Connected|ChargeControllerStates.Disabled:
+                case ChargeControllerStates.Connected | ChargeControllerStates.Disabled:
                     pass
                 case _:
                     _LOGGER.debug(
@@ -187,9 +193,7 @@ class Charger:
     async def async_update_max_current(self) -> None:
         await self.controller.hub.sensors.chargerobject_switch.async_updatecurrent()
         calls = self._charger.servicecalls.get_call(CallTypes.UpdateCurrent)
-        if await self.controller.hub.state_machine.async_add_executor_job(
-            self.helpers.wait_turn_on
-        ):
+        if await self.helpers.async_wait_turn_on():
             # call here to set amp-list
             while all(
                 [
@@ -197,11 +201,10 @@ class Charger:
                     self.model.running,
                 ]
             ):
-                if await self.controller.hub.state_machine.async_add_executor_job(
-                    self.helpers.wait_update_current
-                ):
+                if await self.helpers.async_wait_update_current():
                     serviceparams = await async_set_chargerparams(
-                        calls, await self.controller.hub.threshold.async_allowed_current()
+                        calls,
+                        await self.controller.hub.threshold.async_allowed_current(),
                     )
                     if (
                         not self.model.disable_current_updates
@@ -212,9 +215,7 @@ class Charger:
                         await self.async_do_service_call(
                             calls[DOMAIN], calls[CallTypes.UpdateCurrent], serviceparams
                         )
-                    await self.controller.hub.state_machine.async_add_executor_job(
-                        self.helpers.wait_loop_cycle
-                    )
+                    await self.helpers.async_wait_loop_cycle()
             if self._charger.servicecalls.options.update_current_on_termination is True:
                 final_service_params = await async_set_chargerparams(calls, 6)
                 await self.async_do_service_call(
@@ -271,8 +272,8 @@ class Charger:
 
     async def async_do_service_call(self, domain, command, params) -> bool:
         _domain = domain
-        if params.get('domain', None) is not None:
-            _domain = params.pop('domain')
+        if params.get("domain", None) is not None:
+            _domain = params.pop("domain")
 
         _LOGGER.debug(
             f"Calling charger {command} for domain '{domain}' with parameters: {params}"
