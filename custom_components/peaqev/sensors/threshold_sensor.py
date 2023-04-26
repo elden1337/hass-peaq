@@ -11,7 +11,7 @@ from custom_components.peaqev.sensors.sensorbase import PowerDevice
 
 
 class PeaqThresholdSensor(PowerDevice):
-    def __init__(self, hub:HomeAssistantHub, entry_id):
+    def __init__(self, hub: HomeAssistantHub, entry_id):
         name = f"{hub.hubname} {THRESHOLD}"
         super().__init__(hub, name, entry_id)
 
@@ -38,9 +38,9 @@ class PeaqThresholdSensor(PowerDevice):
     async def async_update(self) -> None:
         if not self.hub.is_initialized:
             return
-        self._state = getattr(self.hub.prediction, "predictedpercentageofpeak")
-        _start = getattr(self.hub.threshold, "start")
-        _stop = getattr(self.hub.threshold, "stop")
+        self._state = await self.hub.async_predictedpercentageofpeak()
+        _start = await self.hub.async_threshold_start()
+        _stop = await self.hub.async_threshold_stop()
         try:
             self._start_threshold = round(_start, 1)
         except:
