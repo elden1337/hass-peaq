@@ -2,15 +2,11 @@ import time
 from datetime import datetime
 
 from custom_components.peaqev.peaqservice.chargecontroller.charger.const import (
-    LOOP_RELEASE_TIMER,
-    LOOP_WAIT,
-)
-from custom_components.peaqev.peaqservice.util.constants import (
-    CHARGER,
-    CHARGERID,
-    CURRENT,
-    PARAMS,
-)
+    LOOP_RELEASE_TIMER, LOOP_WAIT)
+from custom_components.peaqev.peaqservice.util.constants import (CHARGER,
+                                                                 CHARGERID,
+                                                                 CURRENT,
+                                                                 PARAMS)
 
 
 async def _checkchargerparams(calls) -> bool:
