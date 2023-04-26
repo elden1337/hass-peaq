@@ -32,7 +32,7 @@ class ChargeController(IChargeController):
         return (predicted_energy * 1000) < ((current_peak * 1000) * threshold_start)
 
     async def async_above_stopthreshold(self) -> bool:
-        predicted_energy = await self.hub.async_predicted_energy()
+        predicted_energy = await self.hub.async_get_predicted_energy()
         current_peak = self.hub.current_peak_dynamic
         threshold_stop = await self.hub.threshold.async_stop() / 100
         return (predicted_energy * 1000) > ((current_peak * 1000) * threshold_stop)
