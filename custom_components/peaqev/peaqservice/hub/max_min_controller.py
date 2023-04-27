@@ -16,7 +16,7 @@ class MaxMinController:
         self._original_total_charge = 0
         self.override_max_charge: bool = False
         self.hub.observer.add("car disconnected", self.async_null_max_charge)
-        self.hub.observer.add("car done", self.async_null_max_charge)
+        self.hub.observer.add("update charger done", self.async_null_max_charge_done)
         self.hub.observer.add("update charger enabled", self.async_null_max_charge)
 
     @property
@@ -48,6 +48,10 @@ class MaxMinController:
     async def async_servicecall_reset_charge_amount(self):
         self._override_max_charge = None
         await self.async_reset_max_charge_sensor()
+
+    async def async_null_max_charge_done(self, val):
+        if val:
+            await self.async_null_max_charge()
 
     async def async_null_max_charge(self, val=None):
         """Resets the max-charge to the static value, listens to charger done and charger disconnected"""

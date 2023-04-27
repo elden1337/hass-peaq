@@ -1,20 +1,33 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING, Tuple
 import logging
-from typing import Tuple
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+        ChargerType,
+    )
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import \
-    async_defer_start
+from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import (
+    async_defer_start,
+)
 from custom_components.peaqev.peaqservice.chargecontroller.const import (
-    INITIALIZING, WAITING_FOR_POWER)
-from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
-    IChargeController
+    INITIALIZING,
+    WAITING_FOR_POWER,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import (
+    IChargeController,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class ChargeController(IChargeController):
-    def __init__(self, hub, charger_states, charger_type):
+    def __init__(
+        self, hub: HomeAssistantHub, charger_states: dict, charger_type: ChargerType
+    ):
         super().__init__(hub, charger_states, charger_type)
 
     @property
@@ -26,16 +39,19 @@ class ChargeController(IChargeController):
         return self.status_type.name
 
     async def async_below_startthreshold(self) -> bool:
-        predicted_energy = await self.hub.async_get_predicted_energy()
-        current_peak = self.hub.current_peak_dynamic
+        energy, peak = await self.async_get_energy_and_peak()
         threshold_start = await self.hub.threshold.async_start() / 100
-        return (predicted_energy * 1000) < ((current_peak * 1000) * threshold_start)
+        return (energy * 1000) < ((peak * 1000) * threshold_start)
 
     async def async_above_stopthreshold(self) -> bool:
+        energy, peak = await self.async_get_energy_and_peak()
+        threshold_stop = await self.hub.threshold.async_stop() / 100
+        return (energy * 1000) > ((peak * 1000) * threshold_stop)
+
+    async def async_get_energy_and_peak(self) -> Tuple[float, float]:
         predicted_energy = await self.hub.async_get_predicted_energy()
         current_peak = self.hub.current_peak_dynamic
-        threshold_stop = await self.hub.threshold.async_stop() / 100
-        return (predicted_energy * 1000) > ((current_peak * 1000) * threshold_stop)
+        return predicted_energy, current_peak
 
     async def async_get_status_charging(self) -> ChargeControllerStates:
         if not self.hub.power.power_canary.alive:
@@ -61,7 +77,6 @@ class ChargeController(IChargeController):
                 and self.hub.sensors.carpowersensor.value < 1
                 and await self.async_is_done(charger_state)
             ):
-                await self.hub.observer.async_broadcast("car done")
                 return ChargeControllerStates.Done, False
             else:
                 if all(
@@ -83,3 +98,4 @@ class ChargeController(IChargeController):
                     return ChargeControllerStates.Stop, True
         except Exception as e:
             _LOGGER.error(f"async_get_status_connected for: {e}")
+            return ChargeControllerStates.Error, True

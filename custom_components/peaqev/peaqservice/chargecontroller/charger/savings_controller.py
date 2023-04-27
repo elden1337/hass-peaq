@@ -24,6 +24,7 @@ class SavingsController:
         if self.controller.hub.sensors.locale.data.price.is_active:
             self.controller.hub.observer.add("car connected", self.async_enter)
             self.controller.hub.observer.add("car disconnected", self.async_exit)
+            self.controller.hub.observer.add("update charger done", self.async_exit)
             self.controller.hub.observer.add("prices changed", self.async_update_prices)
             self._enabled = True
         else:
@@ -69,10 +70,15 @@ class SavingsController:
             prices = await self.controller.hub.async_request_sensor_data("prices")
             await self.service.async_add_prices(prices)
 
-    async def async_exit(self):
-        # if car is being disconnected from charger
-        if self.status is SavingsStatus.Collecting:
-            await self.service.async_stop_listen()
+    async def async_exit(self, val=None):
+        # if car is being disconnected from charger or done
+        do = True
+        if val is not None:
+            if not val:
+                do = False
+        if do:
+            if self.status is SavingsStatus.Collecting:
+                await self.service.async_stop_listen()
 
     async def async_update_prices(self, prices) -> None:
         if self.is_on:
