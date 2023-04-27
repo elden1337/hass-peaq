@@ -5,15 +5,13 @@ from typing import Tuple
 
 from custom_components.peaqev.peaqservice.hub.nordpool.average_type import \
     AverageType
+from custom_components.peaqev.peaqservice.hub.nordpool.models.dynamic_top_price_model import DynamicTopPriceModel
 
 _LOGGER = logging.getLogger(__name__)
 
-
 class DynamicTopPrice:
     def __init__(self):
-        self._three = []
-        self._seven = []
-        self._month = []
+        self.model = DynamicTopPriceModel()
         self.filterlen = {AverageType.SEVEN: 7, AverageType.THREE: 2}
 
     async def async_get_max(self, prices: list) -> Tuple[float, AverageType]:
@@ -22,9 +20,9 @@ class DynamicTopPrice:
             return 0, AverageType.ERROR
         try:
             await self.async_set_lists(prices)
-            a = self._month[-1]
-            b = self._three[-1]
-            c = self._seven[-1]
+            a = self.model.month[-1]
+            b = self.model.three[-1]
+            c = self.model.seven[-1]
             rets = {a: AverageType.MONTH}
             rets.update(await self.async_measure_type(a, b, AverageType.THREE))
             rets.update(await self.async_measure_type(a, c, AverageType.SEVEN))
@@ -34,15 +32,22 @@ class DynamicTopPrice:
             return 0, AverageType.ERROR
 
     async def async_set_lists(self, prices: list) -> None:
-        self._three = await self.async_get_rolling(prices, 3)
-        self._seven = await self.async_get_rolling(prices, 7)
-        self._month = await self.async_get_current_month(prices)
+        self.model.three = await self.async_get_rolling(prices, 3)
+        self.model.seven = await self.async_get_rolling(prices, 7)
+        self.model.month = await self.async_get_current_month(prices)
 
     async def async_measure_type(self, month, measure, avg_type: AverageType) -> dict:
         ret = {}
         try:
             if measure > month and datetime.now().day >= self.filterlen[avg_type]:
-                gr = await self.async_set_gradient(self._seven)
+                match avg_type:
+                    case AverageType.THREE:
+                        gradient_measure = self.model.three
+                    case AverageType.SEVEN:
+                        gradient_measure = self.model.seven
+                    case _:
+                        raise KeyError
+                gr = await self.async_set_gradient(gradient_measure)
                 if gr[-1] > 0:
                     ret = {mean([month, measure]): avg_type}
         except Exception as e:

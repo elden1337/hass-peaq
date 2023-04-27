@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 import logging
 import time
 from abc import abstractmethod
@@ -11,7 +17,7 @@ class IStateChanges:
     latest_outlet_update = 0
     latest_chargecontroller_update = 0
 
-    def __init__(self, hub):
+    def __init__(self, hub: HomeAssistantHub):
         self.hub = hub
 
     async def async_update_sensor(self, entity, value):
