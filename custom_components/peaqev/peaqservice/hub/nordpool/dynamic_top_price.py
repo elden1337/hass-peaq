@@ -3,7 +3,7 @@ from datetime import datetime
 from statistics import mean
 from typing import Tuple
 
-from custom_components.peaqev.peaqservice.hub.nordpool.average_type import \
+from custom_components.peaqev.peaqservice.hub.nordpool.models.average_type import \
     AverageType
 from custom_components.peaqev.peaqservice.hub.nordpool.models.dynamic_top_price_model import DynamicTopPriceModel
 
