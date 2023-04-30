@@ -13,13 +13,10 @@ from peaqevcore.models.hub.power import Power
 from peaqevcore.services.locale.Locale import LocaleData, LocaleFactory
 
 from custom_components.peaqev.peaqservice.hub.const import (
-    CHARGERDONE,
-    CHARGERENABLED,
-    HOURLY,
-    AVERAGECONSUMPTION,
-    AVERAGECONSUMPTION_24H
-)
-from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
+    AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H, CHARGERDONE, CHARGERENABLED,
+    HOURLY)
+from custom_components.peaqev.peaqservice.hub.models.hub_options import \
+    HubOptions
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 
 

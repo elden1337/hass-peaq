@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import HubSensors
+from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import \
+    HubSensors
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
