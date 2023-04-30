@@ -25,33 +25,80 @@ class ChargerHelpers:
     def __init__(self, charger):
         self.charger = charger
 
-    async def async_wait_turn_on(self) -> bool:
+    # async def async_wait_turn_on(self) -> bool:
+    #     while not self.charger.charger_active and self.charger.model.running:
+    #         time.sleep(LOOP_WAIT)
+    #     return await self.async_updates_should_continue()
+    #
+    # async def async_wait_update_current(self) -> bool:
+    #     await self.charger.controller.hub.sensors.chargerobject_switch.async_updatecurrent()  # todo: composition
+    #     while all(
+    #             [
+    #                 (
+    #                         await self.async_currents_match()
+    #                         or await self.async_too_late_to_increase()
+    #                 ),
+    #                 self.charger.model.running,
+    #             ]
+    #     ):
+    #         time.sleep(LOOP_WAIT)
+    #     return await self.async_updates_should_continue()
+    #
+    # async def async_wait_loop_cycle(self):
+    #     start_time = time.time()
+    #     await self.charger.controller.hub.sensors.chargerobject_switch.async_updatecurrent()  # todo: composition
+    #     while time.time() - start_time < LOOP_RELEASE_TIMER:
+    #         time.sleep(LOOP_WAIT)
+    #     await self.charger.controller.hub.sensors.chargerobject_switch.async_updatecurrent()  # todo: composition
+
+    # async def async_updates_should_continue(self) -> bool:
+    #     return not any(
+    #         [
+    #             self.charger.model.running is False,
+    #             self.charger.model.disable_current_updates,
+    #         ]
+    #     )
+    #
+    # async def async_currents_match(self) -> bool:
+    #     return (
+    #         self.charger.controller.hub.sensors.chargerobject_switch.current
+    #         == await self.charger.controller.hub.threshold.async_allowed_current()
+    #     )  # todo: composition
+    #
+    # async def async_too_late_to_increase(self) -> bool:
+    #     return (
+    #         datetime.now().minute >= 55
+    #         and await self.charger.controller.hub.threshold.async_allowed_current()
+    #         > self.charger.controller.hub.sensors.chargerobject_switch.current
+    #     )  # todo: composition
+
+    def wait_turn_on(self) -> bool:
         while not self.charger.charger_active and self.charger.model.running:
             time.sleep(LOOP_WAIT)
-        return await self.async_updates_should_continue()
+        return self._updates_should_continue()
 
-    async def async_wait_update_current(self) -> bool:
-        await self.charger.controller.hub.sensors.chargerobject_switch.async_updatecurrent()  # todo: composition
+    def wait_update_current(self) -> bool:
+        self.charger.controller.hub.sensors.chargerobject_switch.updatecurrent()  # todo: composition
         while all(
             [
                 (
-                    await self.async_currents_match()
-                    or await self.async_too_late_to_increase()
+                    self._currents_match()
+                    or self._too_late_to_increase()
                 ),
                 self.charger.model.running,
             ]
         ):
             time.sleep(LOOP_WAIT)
-        return await self.async_updates_should_continue()
+        return self._updates_should_continue()
 
-    async def async_wait_loop_cycle(self):
+    def _wait_loop_cycle(self):
         start_time = time.time()
-        await self.charger.controller.hub.sensors.chargerobject_switch.async_updatecurrent()  # todo: composition
+        self.charger.controller.hub.sensors.chargerobject_switch.updatecurrent()  # todo: composition
         while time.time() - start_time < LOOP_RELEASE_TIMER:
             time.sleep(LOOP_WAIT)
-        await self.charger.controller.hub.sensors.chargerobject_switch.async_updatecurrent()  # todo: composition
+        self.charger.controller.hub.sensors.chargerobject_switch.updatecurrent()  # todo: composition
 
-    async def async_updates_should_continue(self) -> bool:
+    def _updates_should_continue(self) -> bool:
         return not any(
             [
                 self.charger.model.running is False,
@@ -59,15 +106,15 @@ class ChargerHelpers:
             ]
         )
 
-    async def async_currents_match(self) -> bool:
+    def _currents_match(self) -> bool:
         return (
             self.charger.controller.hub.sensors.chargerobject_switch.current
-            == await self.charger.controller.hub.threshold.async_allowed_current()
+            == self.charger.controller.hub.threshold.allowed_current()
         )  # todo: composition
 
-    async def async_too_late_to_increase(self) -> bool:
+    def _too_late_to_increase(self) -> bool:
         return (
             datetime.now().minute >= 55
-            and await self.charger.controller.hub.threshold.async_allowed_current()
+            and self.charger.controller.hub.threshold.allowed_current()
             > self.charger.controller.hub.sensors.chargerobject_switch.current
         )  # todo: composition

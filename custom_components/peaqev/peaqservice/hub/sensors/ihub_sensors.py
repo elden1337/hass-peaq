@@ -14,7 +14,7 @@ from peaqevcore.services.locale.Locale import LocaleData, LocaleFactory
 
 from custom_components.peaqev.peaqservice.hub.const import (
     AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H, CHARGERDONE, CHARGERENABLED,
-    HOURLY)
+    HOURLY, CONSUMPTION_TOTAL_NAME)
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
@@ -92,7 +92,7 @@ class HubSensors:
             "totalhourlyenergy": partial(
                 HubMember,
                 data_type=float,
-                listenerentity=f"sensor.{domain}_{nametoid(HOURLY)}",
+                listenerentity=f"sensor.{domain}_{nametoid(CONSUMPTION_TOTAL_NAME)}_{HOURLY}",
                 initval=0,
             ),
         }

@@ -58,7 +58,7 @@ class DynamicTopPrice:
     async def async_get_rolling(prices: list = [], days: int = 1):
         """get rolling seven day average from prices for each day."""
         rolling = []
-        if not len(prices):
+        if not len(prices) or len(prices) < days:
             return []
         try:
             listlen = len(prices)
