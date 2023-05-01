@@ -97,9 +97,6 @@ class IStateChanges:
         except:
             _LOGGER.debug(f"Unable to update peak to {value}")
         try:
-            _LOGGER.debug(
-                f"updating current_peak to {self.hub.sensors.locale.data.query_model.observed_peak}"
-            )
             self.hub.sensors.current_peak.value = (
                 self.hub.sensors.locale.data.query_model.observed_peak
             )
