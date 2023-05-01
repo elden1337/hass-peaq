@@ -89,13 +89,6 @@ class IStateChanges:
             self.hub.sensors.totalhourlyenergy.value = value
         except:
             _LOGGER.debug(f"Unable to set totalhourlyenergy to {value}")
-        try:
-            self.hub.sensors.current_peak.value = (
-                self.hub.sensors.locale.data.query_model.observed_peak
-            )
-        except:
-            _LOGGER.debug(f"Unable to set current_peak to {value}")
-
         if isinstance(value, float):
             try:
                 await self.hub.sensors.locale.async_try_update_peak(
@@ -104,6 +97,13 @@ class IStateChanges:
             except:
                 _LOGGER.debug(f"Unable to update peak to {value}")
         try:
+            self.hub.sensors.current_peak.value = (
+                self.hub.sensors.locale.data.query_model.observed_peak
+            )
+        except:
+            _LOGGER.debug(f"Unable to set current_peak to {value}")
+
+        try:
             await self.hub.chargecontroller.savings.async_add_consumption(float(value))
         except:
             _LOGGER.debug(f"Unable to add consumption to savings")
@@ -111,7 +111,7 @@ class IStateChanges:
             try:
                 await self.hub.hours.async_update_max_min(
                     self.hub.max_min_controller.max_charge,
-                    self.hub.chargecontroller.session.session_energy
+                    self.hub.chargecontroller.session.session_energy,
                 )
             except:
                 _LOGGER.debug(f"Unable to update max_min")
