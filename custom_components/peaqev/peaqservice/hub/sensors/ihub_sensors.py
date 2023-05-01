@@ -13,10 +13,14 @@ from peaqevcore.models.hub.power import Power
 from peaqevcore.services.locale.Locale import LocaleData, LocaleFactory
 
 from custom_components.peaqev.peaqservice.hub.const import (
-    AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H, CHARGERDONE, CHARGERENABLED,
-    CONSUMPTION_TOTAL_NAME, HOURLY)
-from custom_components.peaqev.peaqservice.hub.models.hub_options import \
-    HubOptions
+    CHARGERDONE,
+    CHARGERENABLED,
+    CONSUMPTION_TOTAL_NAME,
+    HOURLY,
+    AVERAGECONSUMPTION,
+    AVERAGECONSUMPTION_24H,
+)
+from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 
 
@@ -92,7 +96,7 @@ class HubSensors:
             "totalhourlyenergy": partial(
                 HubMember,
                 data_type=float,
-                listenerentity=f"sensor.{domain}_{nametoid(CONSUMPTION_TOTAL_NAME)}_{HOURLY}",
+                listenerentity=f"sensor.{domain}_{nametoid(HOURLY)}",
                 initval=0,
             ),
         }
