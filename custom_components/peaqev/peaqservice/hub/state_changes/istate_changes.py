@@ -64,9 +64,9 @@ class IStateChanges:
             if self.hub.sensors.carpowersensor.use_attribute:
                 entity = self.hub.sensors.carpowersensor
                 try:
-                    val = self.hub.hass.states.get(entity.entity).attributes.get(
-                        entity.attribute
-                    )
+                    val = self.hub.state_machine.states.get(
+                        entity.entity
+                    ).attributes.get(entity.attribute)
                     if val is not None:
                         self.hub.sensors.carpowersensor.value = val
                         await self.hub.sensors.power.async_update(
@@ -89,14 +89,17 @@ class IStateChanges:
             self.hub.sensors.totalhourlyenergy.value = value
         except:
             _LOGGER.debug(f"Unable to set totalhourlyenergy to {value}")
-        if isinstance(value, float):
-            try:
-                await self.hub.sensors.locale.async_try_update_peak(
-                    new_val=value, timestamp=datetime.now()
-                )
-            except:
-                _LOGGER.debug(f"Unable to update peak to {value}")
+
         try:
+            await self.hub.sensors.locale.async_try_update_peak(
+                new_val=float(value), timestamp=datetime.now()
+            )
+        except:
+            _LOGGER.debug(f"Unable to update peak to {value}")
+        try:
+            _LOGGER.debug(
+                f"updating current_peak to {self.hub.sensors.locale.data.query_model.observed_peak}"
+            )
             self.hub.sensors.current_peak.value = (
                 self.hub.sensors.locale.data.query_model.observed_peak
             )
