@@ -11,45 +11,51 @@ from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_factory import \
-    ChargeControllerFactory
-from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
-    IChargeController
-from custom_components.peaqev.peaqservice.chargertypes.chargertype_factory import \
-    ChargerTypeFactory
-from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
-    IChargerType
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
-from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import \
-    HourselectionFactory
-from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import \
-    ThresholdFactory
-from custom_components.peaqev.peaqservice.hub.hub_initializer import \
-    HubInitializer
-from custom_components.peaqev.peaqservice.hub.max_min_controller import \
-    MaxMinController
-from custom_components.peaqev.peaqservice.hub.models.hub_options import \
-    HubOptions
-from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import \
-    NordPoolUpdater
-from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
-    Observer
-from custom_components.peaqev.peaqservice.hub.sensors.hubsensors_factory import \
-    HubSensorsFactory
-from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import \
-    HubSensors
+from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_factory import (
+    ChargeControllerFactory,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import (
+    IChargeController,
+)
+from custom_components.peaqev.peaqservice.chargertypes.chargertype_factory import (
+    ChargerTypeFactory,
+)
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
+from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import (
+    HourselectionFactory,
+)
+from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import (
+    ThresholdFactory,
+)
+from custom_components.peaqev.peaqservice.hub.hub_initializer import HubInitializer
+from custom_components.peaqev.peaqservice.hub.max_min_controller import MaxMinController
+from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
+from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import NordPoolUpdater
+from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import (
+    Observer,
+)
+from custom_components.peaqev.peaqservice.hub.sensors.hubsensors_factory import (
+    HubSensorsFactory,
+)
+from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import HubSensors
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
-from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
-    IStateChanges
-from custom_components.peaqev.peaqservice.hub.state_changes.state_changes_factory import \
-    StateChangesFactory
-from custom_components.peaqev.peaqservice.powertools.powertools_factory import \
-    PowerToolsFactory
-from custom_components.peaqev.peaqservice.util.constants import \
-    CHARGERCONTROLLER
+from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import (
+    IStateChanges,
+)
+from custom_components.peaqev.peaqservice.hub.state_changes.state_changes_factory import (
+    StateChangesFactory,
+)
+from custom_components.peaqev.peaqservice.powertools.powertools_factory import (
+    PowerToolsFactory,
+)
+from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import (
-    async_iscoroutine, nametoid)
+    async_iscoroutine,
+    nametoid,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -253,6 +259,7 @@ class HomeAssistantHub:
             "max_charge": partial(self.hours.async_get_total_charge),
             "average_weekly": partial(getattr, self.nordpool, "average_weekly"),
             "average_monthly": partial(getattr, self.nordpool, "average_month"),
+            "average_30": partial(getattr, self.nordpool, "average_30"),
             "currency": partial(getattr, self.nordpool, "currency"),
             "offsets": partial(getattr, self.hours, "offsets", {}),
             "is_price_aware": partial(getattr, self.options.price, "price_aware"),
