@@ -9,14 +9,13 @@ from typing import Callable
 from homeassistant.helpers.event import async_track_time_interval
 
 from custom_components.peaqev.peaqservice.hub.observer.const import (
-    COMMAND_WAIT,
-    TIMEOUT,
-)
-from custom_components.peaqev.peaqservice.hub.observer.models.command import Command
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_model import (
-    ObserverModel,
-)
-from custom_components.peaqev.peaqservice.util.extensionmethods import async_iscoroutine
+    COMMAND_WAIT, TIMEOUT)
+from custom_components.peaqev.peaqservice.hub.observer.models.command import \
+    Command
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_model import \
+    ObserverModel
+from custom_components.peaqev.peaqservice.util.extensionmethods import \
+    async_iscoroutine
 
 _LOGGER = logging.getLogger(__name__)
 
