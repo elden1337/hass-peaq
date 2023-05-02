@@ -5,12 +5,15 @@ from statistics import mean
 
 import homeassistant.helpers.template as template
 
-from custom_components.peaqev.peaqservice.hub.nordpool.dynamic_top_price import \
-    DynamicTopPrice
-from custom_components.peaqev.peaqservice.hub.nordpool.models.nordpool_dto import \
-    NordpoolDTO
-from custom_components.peaqev.peaqservice.hub.nordpool.models.nordpool_model import \
-    NordPoolModel
+from custom_components.peaqev.peaqservice.hub.nordpool.dynamic_top_price import (
+    DynamicTopPrice,
+)
+from custom_components.peaqev.peaqservice.hub.nordpool.models.nordpool_dto import (
+    NordpoolDTO,
+)
+from custom_components.peaqev.peaqservice.hub.nordpool.models.nordpool_model import (
+    NordPoolModel,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,6 +51,10 @@ class NordPoolUpdater:
     @property
     def average_weekly(self) -> float:
         return self.model.average_weekly
+
+    @property
+    def average_30(self) -> float:
+        return self.model.average_30
 
     @property
     def average_data(self) -> list:
@@ -104,6 +111,7 @@ class NordPoolUpdater:
                 self.model.average_data
             )
             self.model.dynamic_top_price_type = _dynamic_max_price[1].value
+            _LOGGER.debug(_dynamic_max_price)
             await self.hub.observer.async_broadcast(
                 "dynamic max price changed", _dynamic_max_price[0]
             )

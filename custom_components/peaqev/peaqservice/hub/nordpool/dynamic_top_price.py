@@ -3,12 +3,15 @@ from datetime import datetime
 from statistics import mean
 from typing import Tuple
 
-from custom_components.peaqev.peaqservice.hub.nordpool.models.average_type import \
-    AverageType
-from custom_components.peaqev.peaqservice.hub.nordpool.models.dynamic_top_price_model import \
-    DynamicTopPriceModel
+from custom_components.peaqev.peaqservice.hub.nordpool.models.average_type import (
+    AverageType,
+)
+from custom_components.peaqev.peaqservice.hub.nordpool.models.dynamic_top_price_model import (
+    DynamicTopPriceModel,
+)
 
 _LOGGER = logging.getLogger(__name__)
+
 
 class DynamicTopPrice:
     def __init__(self):
@@ -35,7 +38,8 @@ class DynamicTopPrice:
     async def async_set_lists(self, prices: list) -> None:
         self.model.three = await self.async_get_rolling(prices, 3)
         self.model.seven = await self.async_get_rolling(prices, 7)
-        self.model.month = await self.async_get_current_month(prices)
+        self.model.month = await self.async_get_rolling(prices, 30)
+        # self.model.month = await self.async_get_current_month(prices)
 
     async def async_measure_type(self, month, measure, avg_type: AverageType) -> dict:
         ret = {}

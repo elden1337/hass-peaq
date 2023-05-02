@@ -9,13 +9,14 @@ from typing import Callable
 from homeassistant.helpers.event import async_track_time_interval
 
 from custom_components.peaqev.peaqservice.hub.observer.const import (
-    COMMAND_WAIT, TIMEOUT)
-from custom_components.peaqev.peaqservice.hub.observer.models.command import \
-    Command
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_model import \
-    ObserverModel
-from custom_components.peaqev.peaqservice.util.extensionmethods import \
-    async_iscoroutine
+    COMMAND_WAIT,
+    TIMEOUT,
+)
+from custom_components.peaqev.peaqservice.hub.observer.models.command import Command
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_model import (
+    ObserverModel,
+)
+from custom_components.peaqev.peaqservice.util.extensionmethods import async_iscoroutine
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -54,7 +55,7 @@ class Observer:
         cc = Command(command, _expiration, argument)
         if cc not in self.model.broadcast_queue:
             self.model.broadcast_queue.append(cc)
-            _LOGGER.debug(f"added to broadcast queue: {cc.command}")
+            # _LOGGER.debug(f"added to broadcast queue: {cc.command}")
 
     def broadcast(self, command: str, argument=None):
         _expiration = time.time() + TIMEOUT
