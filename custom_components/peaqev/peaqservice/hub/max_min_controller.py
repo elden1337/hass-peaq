@@ -15,9 +15,12 @@ class MaxMinController:
         self._override_max_charge = None
         self._original_total_charge = 0
         self.override_max_charge: bool = False
-        self.hub.observer.add("car disconnected", self.async_null_max_charge)
-        self.hub.observer.add("update charger done", self.async_null_max_charge_done)
-        self.hub.observer.add("update charger enabled", self.async_null_max_charge)
+        if not hub.options.peaqev_lite:
+            self.hub.observer.add("car disconnected", self.async_null_max_charge)
+            self.hub.observer.add(
+                "update charger done", self.async_null_max_charge_done
+            )
+            self.hub.observer.add("update charger enabled", self.async_null_max_charge)
 
     @property
     def max_charge(self) -> int:
