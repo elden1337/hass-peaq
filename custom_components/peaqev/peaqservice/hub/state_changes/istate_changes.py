@@ -107,7 +107,7 @@ class IStateChanges:
             await self.hub.chargecontroller.savings.async_add_consumption(float(value))
         except:
             _LOGGER.debug(f"Unable to add consumption to savings")
-        if self.hub.options.price.price_aware:
+        if self.hub.options.price.price_aware and not self.hub.options.peaqev_lite:
             try:
                 await self.hub.hours.async_update_max_min(
                     self.hub.max_min_controller.max_charge,
