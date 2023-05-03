@@ -78,7 +78,11 @@ class SavingsController:
                 do = False
         if do:
             if self.status is SavingsStatus.Collecting:
-                await self.service.async_stop_listen()
+                await self.service.async_register_charge_session(
+                    charge_session=self.controller.session.session_data,
+                    original_peak=self.controller.session.original_peak,
+                )
+                # await self.service.async_stop_listen()
 
     async def async_update_prices(self, prices) -> None:
         if self.is_on:
