@@ -6,16 +6,22 @@ from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.services.chargertype.const import DOMAIN, PARAMS
 
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import \
-    async_call_ok
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import \
-    ChargerStates
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import (
+    async_call_ok,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import (
+    ChargerStates,
+)
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelpers import (
-    ChargerHelpers, async_set_chargerparams)
-from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import \
-    ChargerModel
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
+    ChargerHelpers,
+    async_set_chargerparams,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import (
+    ChargerModel,
+)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
@@ -125,7 +131,13 @@ class Charger:
             not self.session_active
             and self.controller.status_type is not ChargeControllerStates.Done
         ):
-            await self.controller.session.async_reset()
+            await self.controller.session.async_reset(
+                getattr(
+                    self.controller.hub.sensors.locale.data.query_model,
+                    "charged_peak",
+                    0,
+                )
+            )
             self.model.session_active = True
 
     async def async_overtake_charger(self) -> None:
@@ -220,26 +232,27 @@ class Charger:
         await self.controller.hub.sensors.chargerobject_switch.async_updatecurrent()
         calls = self._charger.servicecalls.get_call(CallTypes.UpdateCurrent)
         if await self.controller.hub.state_machine.async_add_executor_job(
-                self.helpers.wait_turn_on
+            self.helpers.wait_turn_on
         ):
             # call here to set amp-list
             while all(
-                    [
-                        self.controller.hub.sensors.chargerobject_switch.value,
-                        self.model.running,
-                    ]
+                [
+                    self.controller.hub.sensors.chargerobject_switch.value,
+                    self.model.running,
+                ]
             ):
                 if await self.controller.hub.state_machine.async_add_executor_job(
-                        self.helpers.wait_update_current
+                    self.helpers.wait_update_current
                 ):
                     serviceparams = await async_set_chargerparams(
-                        calls, await self.controller.hub.threshold.async_allowed_current()
+                        calls,
+                        await self.controller.hub.threshold.async_allowed_current(),
                     )
                     if (
-                            not self.model.disable_current_updates
-                            and await self.controller.hub.power.power_canary.async_allow_adjustment(
-                        new_amps=serviceparams[calls[PARAMS][CURRENT]]
-                    )
+                        not self.model.disable_current_updates
+                        and await self.controller.hub.power.power_canary.async_allow_adjustment(
+                            new_amps=serviceparams[calls[PARAMS][CURRENT]]
+                        )
                     ):
                         await self.async_do_service_call(
                             calls[DOMAIN], calls[CallTypes.UpdateCurrent], serviceparams
