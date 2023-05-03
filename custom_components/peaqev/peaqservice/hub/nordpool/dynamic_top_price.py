@@ -3,10 +3,12 @@ from datetime import datetime
 from statistics import mean
 from typing import Tuple
 
-from custom_components.peaqev.peaqservice.hub.nordpool.models.average_type import \
-    AverageType
-from custom_components.peaqev.peaqservice.hub.nordpool.models.dynamic_top_price_model import \
-    DynamicTopPriceModel
+from custom_components.peaqev.peaqservice.hub.nordpool.models.average_type import (
+    AverageType,
+)
+from custom_components.peaqev.peaqservice.hub.nordpool.models.dynamic_top_price_model import (
+    DynamicTopPriceModel,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,7 +38,7 @@ class DynamicTopPrice:
     async def async_set_lists(self, prices: list) -> None:
         self.model.three = await self.async_get_rolling(prices, 3)
         self.model.seven = await self.async_get_rolling(prices, 7)
-        self.model.month = await self.async_get_rolling(prices, 30)
+        self.model.month = [mean(prices)]
         # self.model.month = await self.async_get_current_month(prices)
 
     async def async_measure_type(self, month, measure, avg_type: AverageType) -> dict:
@@ -94,12 +96,47 @@ class DynamicTopPrice:
         return gradient
 
 
-# import asyncio
-# prfices = [0.74, 1.14, 1.04, 0.65, 0.52, 0.6, 0.43, 0.73, 0.9, 1.12, 1.48, 1.03, 0.82, 0.63, 0.77, 0.78, 1.49, 1.67, 1.58, 1.36, 0.85, 0.82, 0.79, 0.47, 0.49, 0.61, 0.31, 0.52, 0.64, 1.08, 1.48, 1.26]
-# async def run():
-#     h = DynamicTopPrice()
-#     h.prices = prfices
-#     gg = await h.async_get_max()
-#     print(gg)
+import asyncio
 
-# asyncio.run(run())
+prfices = [
+    1.49,
+    1.67,
+    1.58,
+    1.36,
+    0.85,
+    0.82,
+    0.79,
+    0.47,
+    0.49,
+    0.61,
+    0.31,
+    0.52,
+    0.64,
+    1.08,
+    1.48,
+    1.26,
+    0.85,
+    0.78,
+    0.89,
+    0.56,
+    0.57,
+    1,
+    0.6,
+    0.86,
+    1.53,
+    1.49,
+    0.97,
+    0.4,
+    0.78,
+    1.28,
+    0.8,
+]
+
+
+async def run():
+    h = DynamicTopPrice()
+    gg = await h.async_get_max(prfices)
+    print(gg)
+
+
+asyncio.run(run())
