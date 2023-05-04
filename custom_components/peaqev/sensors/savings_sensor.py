@@ -10,8 +10,9 @@ import logging
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from custom_components.peaqev.sensors.money_sensor_helpers import \
-    async_currency_translation
+from custom_components.peaqev.sensors.money_sensor_helpers import (
+    async_currency_translation,
+)
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -70,7 +71,7 @@ class PeaqSavingsSensor(SensorBase, RestoreEntity):
                 self._state = ret.get("savings_peak", 0)
         if self._state > 0:
             _LOGGER.debug("savings have been registered. resetting savingsservice")
-            await self.service.async_stop_listen()
+            await self.hub.chargecontroller.savings.service.async_stop_listen()
 
     @property
     def extra_state_attributes(self) -> dict:
