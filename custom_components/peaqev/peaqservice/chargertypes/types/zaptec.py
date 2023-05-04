@@ -3,15 +3,13 @@ import logging
 from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
-from peaqevcore.models.chargertype.servicecalls_options import \
-    ServiceCallsOptions
+from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
 
-from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
-    IChargerType
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
-from custom_components.peaqev.peaqservice.hub.models.hub_options import \
-    HubOptions
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
+from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +25,7 @@ class Zaptec(IChargerType):
         auth_required: bool = False,
     ):
         _LOGGER.warning(
-            "You are initiating Zaptec as Chargertype. Bare in mind that this chargertype has not been signed off in testing and may be very unstable."
+            "You are initiating Zaptec as Chargertype. Bare in mind that this chargertype has not been signed off in testing and may be very unstable. Report findings to the developer."
         )
         self._hass = hass
         self._type = chargertype
@@ -96,9 +94,13 @@ class Zaptec(IChargerType):
     async def async_set_sensors(self):
         try:
             self.entities.chargerentity = f"sensor.zaptec_{self.entities.entityschema}"
-            self.entities.powermeter = f"{self.entities.chargerentity}|total_charge_power"
+            self.entities.powermeter = (
+                f"{self.entities.chargerentity}|total_charge_power"
+            )
             self.options.powermeter_factor = 1
-            self.entities.powerswitch = f"switch.zaptec_{self.entities.entityschema}_switch"
+            self.entities.powerswitch = (
+                f"switch.zaptec_{self.entities.entityschema}_switch"
+            )
             _LOGGER.debug("Sensors for Zaptec have been set up.")
         except Exception as e:
             _LOGGER.exception(f"Could not set needed sensors for Zaptec. {e}")

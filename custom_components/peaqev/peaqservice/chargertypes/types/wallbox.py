@@ -4,29 +4,23 @@ from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
-from peaqevcore.models.chargertype.servicecalls_options import \
-    ServiceCallsOptions
+from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
 
-from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
-    IChargerType
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
-from custom_components.peaqev.peaqservice.hub.models.hub_options import \
-    HubOptions
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
+from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
-# docs: https://github.com/kirei/hass-chargeamps
-
-# CHARGEPOINT = "chargepoint"
-# CONNECTOR = "connector"
 
 
 class WallBox(IChargerType):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
         _LOGGER.warning(
-            "You are initiating Wallbox as Chargertype. Bare in mind that this chargertype has not been signed off in testing and may be very unstable."
+            "You are initiating Wallbox as Chargertype. Bare in mind that this chargertype has not been signed off in testing and may be very unstable. Report findings to the developer."
         )
         self._hass = hass
         self._is_initialized = False
@@ -54,19 +48,15 @@ class WallBox(IChargerType):
     # def max_amps(self) -> int:
     #     return self.get_allowed_amps()
 
-    # @property
-    # def entity_endings(self) -> list:
-    #     """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
-    #     return [
-    #         "_power",
-    #         "_1",
-    #         "_2",
-    #         "_status",
-    #         "_dimmer",
-    #         "_downlight",
-    #         "_current",
-    #         "_voltage",
-    #     ]
+    @property
+    def entity_endings(self) -> list:
+        """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
+        return [
+            "_max_charging_current",
+            "_charging_power",
+            "_paused",
+            "_max_charging_current",
+        ]
 
     @property
     def native_chargerstates(self) -> list:
@@ -135,11 +125,6 @@ class WallBox(IChargerType):
     #         if entity_state != "unavailable":
     #             ret.append(e)
     #     return ret
-
-    # def _set_chargeamps_type(self, main_sensor_entity) -> ChargeAmpsTypes:
-    #     if self._hass.states.get(main_sensor_entity) is not None:
-    #         chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get("chargepoint_type")
-    #         return ChargeAmpsTypes.get_type(chargeampstype)
 
     # def _determine_switch_entity(self) -> str:
     #     ent = self._determine_entities()

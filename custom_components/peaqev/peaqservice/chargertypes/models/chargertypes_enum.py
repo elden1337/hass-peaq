@@ -19,8 +19,8 @@ CHARGERTYPES = [
     ChargerType.ChargeAmps.value,
     ChargerType.Easee.value,
     ChargerType.Outlet.value,
-    # Charger_type.GaroWallbox.value,
-    # Charger_type.WallBox.value,
+    ChargerType.GaroWallbox.value,
+    ChargerType.WallBox.value,
     ChargerType.Zaptec.value,
     ChargerType.NoCharger.value,
 ]
