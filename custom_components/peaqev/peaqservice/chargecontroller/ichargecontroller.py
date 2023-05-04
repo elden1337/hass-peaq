@@ -52,7 +52,7 @@ class IChargeController:
     def is_initialized(self) -> bool:
         if not self.hub.is_initialized:
             return False
-        if self.hub.nordpool.is_active and not self.hub.nordpool.is_initialized:
+        if self.hub.options.price.price_aware and not self.hub.nordpool.is_initialized:
             return False
         if self.hub.is_initialized and not self.model.is_initialized:
             return self._check_initialized()
