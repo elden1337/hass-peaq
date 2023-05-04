@@ -4,19 +4,19 @@ from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
-from peaqevcore.models.chargertype.servicecalls_options import \
-    ServiceCallsOptions
+from peaqevcore.models.chargertype.servicecalls_options import ServiceCallsOptions
 
-from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
-    IChargerType
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
-from custom_components.peaqev.peaqservice.hub.models.hub_options import \
-    HubOptions
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
+from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
+
+# docs: https://www.home-assistant.io/integrations/wallbox/
 
 
 class WallBox(IChargerType):
