@@ -5,12 +5,15 @@ from statistics import mean
 
 import homeassistant.helpers.template as template
 
-from custom_components.peaqev.peaqservice.hub.nordpool.dynamic_top_price import \
-    DynamicTopPrice
-from custom_components.peaqev.peaqservice.hub.nordpool.models.nordpool_dto import \
-    NordpoolDTO
-from custom_components.peaqev.peaqservice.hub.nordpool.models.nordpool_model import \
-    NordPoolModel
+from custom_components.peaqev.peaqservice.hub.nordpool.dynamic_top_price import (
+    DynamicTopPrice,
+)
+from custom_components.peaqev.peaqservice.hub.nordpool.models.nordpool_dto import (
+    NordpoolDTO,
+)
+from custom_components.peaqev.peaqservice.hub.nordpool.models.nordpool_model import (
+    NordPoolModel,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -25,8 +28,13 @@ class NordPoolUpdater:
         self.state_machine = hub.state_machine
         self._nordpool_entity: str | None = None
         self._dynamic_top_price = DynamicTopPrice()
+        self._is_initialized: bool = False
         if is_active:
             self._setup_nordpool()
+
+    @property
+    def is_initialized(self) -> bool:
+        return self._is_initialized
 
     @property
     def currency(self) -> str:
@@ -77,6 +85,7 @@ class NordPoolUpdater:
                             "prices changed",
                             [self.model.prices, self.model.prices_tomorrow],
                         )
+                    self._is_initialized = True
             elif self.hub.is_initialized:
                 _LOGGER.debug(
                     f"Could not get nordpool-prices. initial: {initial}. Nordpool-entity: {self.nordpool_entity}"
@@ -92,13 +101,6 @@ class NordPoolUpdater:
             await self.hub.observer.async_broadcast(
                 "monthly average price changed", self.model.average_month
             )
-            # _dynamic_max_price = await self._dynamic_top_price.async_get_max(
-            #     self.model.average_data
-            # )
-            # self.model.dynamic_top_price_type = _dynamic_max_price[1].value
-            # await self.hub.observer.async_broadcast(
-            #     "dynamic max price changed", _dynamic_max_price[0]
-            # )
 
     async def async_update_average_30(self) -> None:
         _new = await self.async_get_average(30)

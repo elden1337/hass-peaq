@@ -7,18 +7,23 @@ from typing import Tuple
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.services.session.session import Session
 
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import \
-    Charger
-from custom_components.peaqev.peaqservice.chargecontroller.charger.savings_controller import \
-    SavingsController
-from custom_components.peaqev.peaqservice.chargecontroller.chargercontroller_model import \
-    ChargeControllerModel
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import (
+    Charger,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.charger.savings_controller import (
+    SavingsController,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.chargercontroller_model import (
+    ChargeControllerModel,
+)
 from custom_components.peaqev.peaqservice.chargecontroller.const import (
-    DEBUGLOG_TIMEOUT, DONETIMEOUT)
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
-from custom_components.peaqev.peaqservice.util.constants import \
-    CHARGERCONTROLLER
+    DEBUGLOG_TIMEOUT,
+    DONETIMEOUT,
+)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
+from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
@@ -51,6 +56,8 @@ class IChargeController:
     @property
     def is_initialized(self) -> bool:
         if not self.hub.is_initialized:
+            return False
+        if self.hub.nordpool.is_active and not self.hub.nordpool.is_initialized:
             return False
         if self.hub.is_initialized and not self.model.is_initialized:
             return self._check_initialized()
@@ -198,15 +205,20 @@ class IChargeController:
                 return ChargeControllerStates.Idle, True
             elif self.hub.sensors.power.killswitch.is_dead:  # todo: composition
                 return ChargeControllerStates.Error, True
-            elif all([
-                _state not in self.model.charger_states.get(ChargeControllerStates.Idle),
-                self.hub.charger_done
-                ]):
+            elif all(
+                [
+                    _state
+                    not in self.model.charger_states.get(ChargeControllerStates.Idle),
+                    self.hub.charger_done,
+                ]
+            ):
                 return ChargeControllerStates.Done, False
-            elif all([
-                datetime.now().hour in self.hub.non_hours,
-                not getattr(self.hub.hours.timer, "is_override", False)
-                ]):
+            elif all(
+                [
+                    datetime.now().hour in self.hub.non_hours,
+                    not getattr(self.hub.hours.timer, "is_override", False),
+                ]
+            ):
                 return ChargeControllerStates.Stop, True
             elif _state in self.model.charger_states.get(
                 ChargeControllerStates.Connected
