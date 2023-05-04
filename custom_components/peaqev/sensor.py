@@ -4,55 +4,41 @@ from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from peaqevcore.models.hub.const import AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H
+from peaqevcore.models.hub.const import (AVERAGECONSUMPTION,
+                                         AVERAGECONSUMPTION_24H)
 from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
-    ChargerType,
-)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
+    ChargerType
 from custom_components.peaqev.peaqservice.util.constants import (
-    CONSUMPTION_INTEGRAL_NAME,
-    CONSUMPTION_TOTAL_NAME,
-)
-from custom_components.peaqev.sensors.average_sensor import (
-    PeaqAverageSensor,
-    async_set_filters,
-)
+    CONSUMPTION_INTEGRAL_NAME, CONSUMPTION_TOTAL_NAME)
+from custom_components.peaqev.sensors.average_sensor import (PeaqAverageSensor,
+                                                             async_set_filters)
 from custom_components.peaqev.sensors.gain_loss_sensor import GainLossSensor
 from custom_components.peaqev.sensors.integration_sensor import (
-    PeaqIntegrationCostSensor,
-    PeaqIntegrationSavingsSensor,
-    PeaqIntegrationSensor,
-)
+    PeaqIntegrationCostSensor, PeaqIntegrationSensor)
 from custom_components.peaqev.sensors.money_sensor import PeaqMoneySensor
 from custom_components.peaqev.sensors.peaq_sensor import PeaqSensor
 from custom_components.peaqev.sensors.power.amp_sensor import PeaqAmpSensor
-from custom_components.peaqev.sensors.power.power_cost_sensor import PeaqPowerCostSensor
-from custom_components.peaqev.sensors.power.power_house_sensor import (
-    PeaqHousePowerSensor,
-)
+from custom_components.peaqev.sensors.power.power_cost_sensor import \
+    PeaqPowerCostSensor
+from custom_components.peaqev.sensors.power.power_house_sensor import \
+    PeaqHousePowerSensor
 from custom_components.peaqev.sensors.power.power_sensor import PeaqPowerSensor
 from custom_components.peaqev.sensors.power.powercanary_sensor import (
-    PowerCanaryMaxAmpSensor,
-    PowerCanaryPercentageSensor,
-    PowerCanaryStatusSensor,
-)
-from custom_components.peaqev.sensors.power.prediction_sensor import (
-    PeaqPredictionSensor,
-)
-from custom_components.peaqev.sensors.savings_sensor import PeaqSavingsSensor
+    PowerCanaryMaxAmpSensor, PowerCanaryPercentageSensor,
+    PowerCanaryStatusSensor)
+from custom_components.peaqev.sensors.power.prediction_sensor import \
+    PeaqPredictionSensor
 from custom_components.peaqev.sensors.session_sensor import (
-    PeaqSessionCostSensor,
-    PeaqSessionSensor,
-)
+    PeaqSessionCostSensor, PeaqSessionSensor)
 from custom_components.peaqev.sensors.sql_sensor import PeaqPeakSensor
-from custom_components.peaqev.sensors.threshold_sensor import PeaqThresholdSensor
+from custom_components.peaqev.sensors.threshold_sensor import \
+    PeaqThresholdSensor
 from custom_components.peaqev.sensors.utility_sensor import (
-    UtilityMeterDTO,
-    async_create_single_utility,
-)
+    UtilityMeterDTO, async_create_single_utility)
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(seconds=4)
