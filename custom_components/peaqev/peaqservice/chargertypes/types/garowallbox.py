@@ -28,7 +28,7 @@ LIMIT = "limit"
 class GaroWallBox(IChargerType):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
         _LOGGER.warning(
-            "You are initiating GaroWallbox as Chargertype. Bare in mind that this chargertype has not been signed off in testing and may be very unstable."
+            "You are initiating GaroWallbox as Chargertype. Bare in mind that this chargertype has not been signed off in testing and may be very unstable. Report findings to the developer."
         )
         self._hass = hass
         self._is_initialized = False
@@ -72,27 +72,27 @@ class GaroWallBox(IChargerType):
     def native_chargerstates(self) -> list:
         """declare a list of the native-charger states available for the type."""
         return [
-            'CHANGING',
-            'NOT_CONNECTED',
-            'CONNECTED',
-            'SEARCH_COMM',
-            'RCD_FAULT',
-            'CHARGING',
-            'CHARGING_PAUSED',
-            'CHARGING_FINISHED',
-            'CHARGING_CANCELLED',
-            'DISABLED',
-            'OVERHEAT',
-            'CRITICAL_TEMPERATURE',
-            'INITIALIZATION',
-            'CABLE_FAULT',
-            'LOCK_FAULT',
-            'CONTACTOR_FAULT',
-            'VENT_FAULT',
-            'DC_ERROR',
-            'UNKNOWN',
-            'UNAVAILABLE'
-            ]
+            "CHANGING",
+            "NOT_CONNECTED",
+            "CONNECTED",
+            "SEARCH_COMM",
+            "RCD_FAULT",
+            "CHARGING",
+            "CHARGING_PAUSED",
+            "CHARGING_FINISHED",
+            "CHARGING_CANCELLED",
+            "DISABLED",
+            "OVERHEAT",
+            "CRITICAL_TEMPERATURE",
+            "INITIALIZATION",
+            "CABLE_FAULT",
+            "LOCK_FAULT",
+            "CONTACTOR_FAULT",
+            "VENT_FAULT",
+            "DC_ERROR",
+            "UNKNOWN",
+            "UNAVAILABLE",
+        ]
 
     @property
     def call_on(self) -> CallType:
@@ -112,11 +112,14 @@ class GaroWallBox(IChargerType):
 
     @property
     def call_update_current(self) -> CallType:
-        return CallType("set_current_limit", {
-            CHARGER: ENTITY_ID,
-            CHARGERID: self._chargerid,  # sensor for garo, not id
-            CURRENT: LIMIT,
-        })
+        return CallType(
+            "set_current_limit",
+            {
+                CHARGER: ENTITY_ID,
+                CHARGERID: self._chargerid,  # sensor for garo, not id
+                CURRENT: LIMIT,
+            },
+        )
 
     @property
     def servicecalls_options(self) -> ServiceCallsOptions:
@@ -139,9 +142,13 @@ class GaroWallBox(IChargerType):
 
     async def async_set_sensors(self) -> None:
         self.entities.chargerentity = f"sensor.{self.entities.entityschema}-status"
-        self.entities.powermeter = f"sensor.{self.entities.entityschema}-current_charging_power"
+        self.entities.powermeter = (
+            f"sensor.{self.entities.entityschema}-current_charging_power"
+        )
         self.options.powermeter_factor = 1
-        self.entities.ampmeter = f"sensor.{self.entities.entityschema}-current_charging_current"
+        self.entities.ampmeter = (
+            f"sensor.{self.entities.entityschema}-current_charging_current"
+        )
         self.entities.powerswitch = "n/a"
 
     async def async_determine_switch_entity(self) -> str:

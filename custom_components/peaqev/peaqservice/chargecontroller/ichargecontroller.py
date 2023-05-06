@@ -52,6 +52,8 @@ class IChargeController:
     def is_initialized(self) -> bool:
         if not self.hub.is_initialized:
             return False
+        if self.hub.options.price.price_aware and not self.hub.nordpool.is_initialized:
+            return False
         if self.hub.is_initialized and not self.model.is_initialized:
             return self._check_initialized()
         return self.model.is_initialized
@@ -198,15 +200,20 @@ class IChargeController:
                 return ChargeControllerStates.Idle, True
             elif self.hub.sensors.power.killswitch.is_dead:  # todo: composition
                 return ChargeControllerStates.Error, True
-            elif all([
-                _state not in self.model.charger_states.get(ChargeControllerStates.Idle),
-                self.hub.charger_done
-                ]):
+            elif all(
+                [
+                    _state
+                    not in self.model.charger_states.get(ChargeControllerStates.Idle),
+                    self.hub.charger_done,
+                ]
+            ):
                 return ChargeControllerStates.Done, False
-            elif all([
-                datetime.now().hour in self.hub.non_hours,
-                not getattr(self.hub.hours.timer, "is_override", False)
-                ]):
+            elif all(
+                [
+                    datetime.now().hour in self.hub.non_hours,
+                    not getattr(self.hub.hours.timer, "is_override", False),
+                ]
+            ):
                 return ChargeControllerStates.Stop, True
             elif _state in self.model.charger_states.get(
                 ChargeControllerStates.Connected

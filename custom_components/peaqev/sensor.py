@@ -18,8 +18,7 @@ from custom_components.peaqev.sensors.average_sensor import (PeaqAverageSensor,
                                                              async_set_filters)
 from custom_components.peaqev.sensors.gain_loss_sensor import GainLossSensor
 from custom_components.peaqev.sensors.integration_sensor import (
-    PeaqIntegrationCostSensor, PeaqIntegrationSavingsSensor,
-    PeaqIntegrationSensor)
+    PeaqIntegrationCostSensor, PeaqIntegrationSensor)
 from custom_components.peaqev.sensors.money_sensor import PeaqMoneySensor
 from custom_components.peaqev.sensors.peaq_sensor import PeaqSensor
 from custom_components.peaqev.sensors.power.amp_sensor import PeaqAmpSensor
@@ -33,7 +32,6 @@ from custom_components.peaqev.sensors.power.powercanary_sensor import (
     PowerCanaryStatusSensor)
 from custom_components.peaqev.sensors.power.prediction_sensor import \
     PeaqPredictionSensor
-from custom_components.peaqev.sensors.savings_sensor import PeaqSavingsSensor
 from custom_components.peaqev.sensors.session_sensor import (
     PeaqSessionCostSensor, PeaqSessionSensor)
 from custom_components.peaqev.sensors.sql_sensor import PeaqPeakSensor
@@ -81,10 +79,10 @@ async def async_setup(hub, config, hass, async_add_entities):
 
     if hub.options.price.price_aware:
         sensors.append(PeaqMoneySensor(hub, config.entry_id))
-        sensors.append(PeaqSavingsSensor(hub, config.entry_id))
-        sensors.append(
-            PeaqIntegrationSavingsSensor(hub, "savings_sum", config.entry_id)
-        )
+        # sensors.append(PeaqSavingsSensor(hub, config.entry_id))
+        # sensors.append(
+        #     PeaqIntegrationSavingsSensor(hub, "savings_sum", config.entry_id)
+        # )
         if hub.chargertype.type != ChargerType.NoCharger:
             sensors.append(PeaqSessionCostSensor(hub, config.entry_id))
         if not hub.options.peaqev_lite:

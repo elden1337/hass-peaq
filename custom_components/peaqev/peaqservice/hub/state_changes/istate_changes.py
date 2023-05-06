@@ -64,9 +64,9 @@ class IStateChanges:
             if self.hub.sensors.carpowersensor.use_attribute:
                 entity = self.hub.sensors.carpowersensor
                 try:
-                    val = self.hub.hass.states.get(entity.entity).attributes.get(
-                        entity.attribute
-                    )
+                    val = self.hub.state_machine.states.get(
+                        entity.entity
+                    ).attributes.get(entity.attribute)
                     if val is not None:
                         self.hub.sensors.carpowersensor.value = val
                         await self.hub.sensors.power.async_update(
@@ -89,6 +89,13 @@ class IStateChanges:
             self.hub.sensors.totalhourlyenergy.value = value
         except:
             _LOGGER.debug(f"Unable to set totalhourlyenergy to {value}")
+
+        try:
+            await self.hub.sensors.locale.async_try_update_peak(
+                new_val=float(value), timestamp=datetime.now()
+            )
+        except:
+            _LOGGER.debug(f"Unable to update peak to {value}")
         try:
             self.hub.sensors.current_peak.value = (
                 self.hub.sensors.locale.data.query_model.observed_peak
@@ -96,22 +103,15 @@ class IStateChanges:
         except:
             _LOGGER.debug(f"Unable to set current_peak to {value}")
 
-        if isinstance(value, float):
-            try:
-                await self.hub.sensors.locale.async_try_update_peak(
-                    new_val=value, timestamp=datetime.now()
-                )
-            except:
-                _LOGGER.debug(f"Unable to update peak to {value}")
         try:
             await self.hub.chargecontroller.savings.async_add_consumption(float(value))
         except:
             _LOGGER.debug(f"Unable to add consumption to savings")
-        if self.hub.options.price.price_aware:
+        if self.hub.options.price.price_aware and not self.hub.options.peaqev_lite:
             try:
                 await self.hub.hours.async_update_max_min(
                     self.hub.max_min_controller.max_charge,
-                    self.hub.chargecontroller.session.session_energy
+                    self.hub.chargecontroller.session.session_energy,
                 )
             except:
                 _LOGGER.debug(f"Unable to update max_min")

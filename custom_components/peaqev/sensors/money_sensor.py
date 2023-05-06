@@ -42,6 +42,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._max_min_price = None
         self._max_price_based_on = None
         self._average_nordpool = None
+        self._average_data_30 = None
         self._average_data_current_month = None
         self._charge_permittance = None
         self._offsets = {}
@@ -71,6 +72,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "average_monthly",
             "max_price",
             "min_price",
+            "average_30",
         )
         if ret is not None:
             self._state = await self.async_state_display(
@@ -109,6 +111,11 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
                 currency=ret.get("currency"),
                 use_cent=ret.get("use_cent", False),
             )
+            self._average_data_30 = await async_currency_translation(
+                value=ret.get("average_30"),
+                currency=ret.get("currency"),
+                use_cent=ret.get("use_cent", False),
+            )
             if self.hub.options.price.dynamic_top_price:
                 _maxp = await async_currency_translation(
                     value=ret.get("max_price") if ret.get("max_price", 0) > 0 else None,
@@ -135,6 +142,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "Avg price per kWh": self._avg_cost,
             "Max charge amount": self._max_charge,
             "Nordpool average 7 days": self._average_nordpool,
+            "Nordpool average 30 days": self._average_data_30,
             "nordpool_average_this_month": self._average_data_current_month,
             "Nordpool average data": self._average_nordpool_data,
             "offsets": self._offsets,

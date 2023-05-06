@@ -81,17 +81,14 @@ class ChargerHelpers:
         self.charger.controller.hub.sensors.chargerobject_switch.updatecurrent()  # todo: composition
         while all(
             [
-                (
-                    self._currents_match()
-                    or self._too_late_to_increase()
-                ),
+                (self._currents_match() or self._too_late_to_increase()),
                 self.charger.model.running,
             ]
         ):
             time.sleep(LOOP_WAIT)
         return self._updates_should_continue()
 
-    def _wait_loop_cycle(self):
+    def wait_loop_cycle(self):
         start_time = time.time()
         self.charger.controller.hub.sensors.chargerobject_switch.updatecurrent()  # todo: composition
         while time.time() - start_time < LOOP_RELEASE_TIMER:

@@ -27,7 +27,7 @@ class Zaptec(IChargerType):
         auth_required: bool = False,
     ):
         _LOGGER.warning(
-            "You are initiating Zaptec as Chargertype. Bare in mind that this chargertype has not been signed off in testing and may be very unstable."
+            "You are initiating Zaptec as Chargertype. Bare in mind that this chargertype has not been signed off in testing and may be very unstable. Report findings to the developer."
         )
         self._hass = hass
         self._type = chargertype
@@ -96,9 +96,13 @@ class Zaptec(IChargerType):
     async def async_set_sensors(self):
         try:
             self.entities.chargerentity = f"sensor.zaptec_{self.entities.entityschema}"
-            self.entities.powermeter = f"{self.entities.chargerentity}|total_charge_power"
+            self.entities.powermeter = (
+                f"{self.entities.chargerentity}|total_charge_power"
+            )
             self.options.powermeter_factor = 1
-            self.entities.powerswitch = f"switch.zaptec_{self.entities.entityschema}_switch"
+            self.entities.powerswitch = (
+                f"switch.zaptec_{self.entities.entityschema}_switch"
+            )
             _LOGGER.debug("Sensors for Zaptec have been set up.")
         except Exception as e:
             _LOGGER.exception(f"Could not set needed sensors for Zaptec. {e}")

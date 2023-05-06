@@ -27,13 +27,13 @@ class PeaqSavingsSensor(SensorBase, RestoreEntity):
         self._attr_name = name
         self._listen_status = None
         self._currency = None
-        self._state = 0
+        self._state: float = 0
         self._savings_peak = None
         self._savings_trade = None
         self._data_dump = None
 
     @property
-    def state(self):
+    def state(self) -> float:
         return self._state
 
     @property
@@ -65,13 +65,12 @@ class PeaqSavingsSensor(SensorBase, RestoreEntity):
                 use_cent=ret.get("use_cent", False),
             )
             if self.hub.options.price.price_aware:
-                self._state = await async_currency_translation(
-                    value=ret.get("savings_total", 0),
-                    currency=ret.get("currency"),
-                    use_cent=ret.get("use_cent", False),
-                )
+                self._state = ret.get("savings_total", 0)
             else:
-                self._state = self._savings_peak
+                self._state = ret.get("savings_peak", 0)
+        if self._state > 0:
+            _LOGGER.debug("savings have been registered. resetting savingsservice")
+            await self.hub.chargecontroller.savings.service.async_stop_listen()
 
     @property
     def extra_state_attributes(self) -> dict:

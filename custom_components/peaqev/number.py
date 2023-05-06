@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
+
 import logging
 
 from homeassistant.components.number import NumberEntity  # type: ignore
@@ -17,10 +22,10 @@ MAX_CHARGE = "Max Charge"
 async def async_setup_entry(
     hass: HomeAssistant, config_entry, async_add_entities
 ):  # pylint:disable=unused-argument
-    hub = hass.data[DOMAIN]["hub"]
+    hub: HomeAssistantHub = hass.data[DOMAIN]["hub"]
 
     inputnumbers = [{"name": MAX_CHARGE, "entity": "_max_charge"}]
-    if hub.options.price.price_aware:
+    if hub.options.price.price_aware and not hub.options.peaqev_lite:
         async_add_entities(PeaqNumber(i, hub) for i in inputnumbers)
 
 
@@ -65,7 +70,10 @@ class PeaqNumber(NumberEntity, RestoreEntity):
         return f"{DOMAIN}_{self.hub.hubname}_{self._number['entity']}"
 
     async def async_set_native_value(self, value: float) -> None:
-        if int(value) != self.hub.max_min_controller.max_charge and self.hub.max_min_controller.max_charge > 0:
+        if (
+            int(value) != self.hub.max_min_controller.max_charge
+            and self.hub.max_min_controller.max_charge > 0
+        ):
             """Overriding default"""
             await self.hub.max_min_controller.async_override_max_charge(int(value))
             self.hub.max_min_controller.override_max_charge = True
@@ -79,7 +87,7 @@ class PeaqNumber(NumberEntity, RestoreEntity):
         if not self.hub.enabled or self.hub.chargecontroller.status_type in [
             ChargeControllerStates.Done,
             ChargeControllerStates.Idle,
-            ChargeControllerStates.Disabled
+            ChargeControllerStates.Disabled,
         ]:
             self._state = _set_max
             self.hub.max_min_controller.override_max_charge = False
@@ -87,7 +95,9 @@ class PeaqNumber(NumberEntity, RestoreEntity):
             state = await super().async_get_last_state()
             if state:
                 if state.state != _set_max:
-                    _LOGGER.debug(f"Restoring state {state.state} for {self.name}. hub reports: {_set_max}")
+                    _LOGGER.debug(
+                        f"Restoring state {state.state} for {self.name}. hub reports: {_set_max}"
+                    )
                     await self.async_set_native_value(float(state.state))
                 else:
                     self._state = _set_max
