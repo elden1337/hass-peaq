@@ -59,8 +59,9 @@ class PeaqSavingsSensor(SensorBase, RestoreEntity):
             else:
                 self._state += ret.get("savings_peak", 0)
         if self._state > 0:
-            _LOGGER.debug("savings have been registered. resetting savingsservice")
-            await self.hub.chargecontroller.savings.service.async_stop_listen()
+            if self.hub.chargecontroller.savings.status.value == "collecting":
+                _LOGGER.debug("savings have been registered. resetting savingsservice")
+                await self.hub.chargecontroller.savings.service.async_stop_listen()
 
     @property
     def extra_state_attributes(self) -> dict:
