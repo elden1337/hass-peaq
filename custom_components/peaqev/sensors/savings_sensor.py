@@ -10,8 +10,9 @@ import logging
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from custom_components.peaqev.sensors.money_sensor_helpers import \
-    async_currency_translation
+from custom_components.peaqev.sensors.money_sensor_helpers import (
+    async_currency_translation,
+)
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,8 +29,8 @@ class PeaqSavingsSensor(SensorBase, RestoreEntity):
         self._listen_status = None
         self._currency = None
         self._state: float = 0
-        self._savings_peak = None
-        self._savings_trade = None
+        self._savings_peak: float = 0
+        self._savings_trade: float = 0
         self._data_dump = None
 
     @property
@@ -54,20 +55,12 @@ class PeaqSavingsSensor(SensorBase, RestoreEntity):
             self._currency = ret.get("currency")
             self._listen_status = self.hub.chargecontroller.savings.status.value
             self._data_dump = ret.get("export_savings_data")
-            self._savings_peak = await async_currency_translation(
-                value=ret.get("savings_peak", 0),
-                currency=ret.get("currency"),
-                use_cent=ret.get("use_cent", False),
-            )
-            self._savings_trade = await async_currency_translation(
-                value=ret.get("savings_trade", 0),
-                currency=ret.get("currency"),
-                use_cent=ret.get("use_cent", False),
-            )
+            self._savings_peak += ret.get("savings_peak", 0)
+            self._savings_trade += ret.get("savings_trade", 0)
             if self.hub.options.price.price_aware:
-                self._state = ret.get("savings_total", 0)
+                self._state += ret.get("savings_total", 0)
             else:
-                self._state = ret.get("savings_peak", 0)
+                self._state += ret.get("savings_peak", 0)
         if self._state > 0:
             _LOGGER.debug("savings have been registered. resetting savingsservice")
             await self.hub.chargecontroller.savings.service.async_stop_listen()

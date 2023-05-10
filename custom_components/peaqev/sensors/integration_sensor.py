@@ -8,13 +8,19 @@ if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
 from homeassistant.components.integration.const import (  # pylint: disable=import-error
-    METHOD_LEFT, METHOD_TRAPEZOIDAL)
-from homeassistant.components.integration.sensor import \
-    IntegrationSensor  # pylint: disable=import-error
-from homeassistant.components.sensor import \
-    SensorDeviceClass  # pylint: disable=import-error
+    METHOD_LEFT,
+    METHOD_TRAPEZOIDAL,
+)
+from homeassistant.components.integration.sensor import (
+    IntegrationSensor,
+)  # pylint: disable=import-error
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+)  # pylint: disable=import-error
 from homeassistant.const import (  # pylint: disable=import-error
-    ENERGY_KILO_WATT_HOUR, UnitOfTime)
+    ENERGY_KILO_WATT_HOUR,
+    UnitOfTime,
+)
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
@@ -101,61 +107,3 @@ class PeaqIntegrationSensor(IntegrationSensor):
     def device_info(self):
         """Return information to link this entity with the correct device."""
         return {"identifiers": {(DOMAIN, self.hub.hub_id, POWERCONTROLS)}}
-
-
-class PeaqSavingsIntegrationSensor(IntegrationSensor, SensorBase):
-    def __init__(self, hub, sensor, name, entry_id):
-        self._entry_id = entry_id
-        self.hub = hub
-        self._attr_name = f"{self.hub.hubname} {name}"
-
-        IntegrationSensor.__init__(
-            integration_method=METHOD_LEFT,
-            name=self._attr_name,
-            round_digits=2,
-            source_entity=sensor,
-            unique_id=self.unique_id,
-            # unit_prefix="k",
-            unit_time=UnitOfTime.HOURS,
-        )
-        SensorBase.__init__(self.hub, self._attr_name, self._entry_id)
-
-    @property
-    def name(self):
-        return self._attr_name
-
-
-class PeaqIntegrationSavingsSensor(IntegrationSensor):
-    def __init__(self, hub: HomeAssistantHub, name, entry_id):
-        self._entry_id = entry_id
-        self.hub = hub
-        self._attr_name = f"{self.hub.hubname} {name}"
-
-        super().__init__(
-            integration_method=METHOD_LEFT,
-            name=self._attr_name,
-            round_digits=2,
-            source_entity=f"sensor.{hub.hubname.lower()}_savings",
-            unique_id=self.unique_id,
-            unit_prefix=None,
-            unit_time=UnitOfTime.HOURS,
-        )
-
-    # @property
-    # def device_class(self):
-    #     """Return the device class of the sensor."""
-    #     return SensorDeviceClass.ENERGY
-
-    @property
-    def name(self):
-        return self._attr_name
-
-    @property
-    def unique_id(self):
-        """Return a unique ID to use for this sensor."""
-        return f"{DOMAIN}_{self._entry_id}_{ex.nametoid(self._attr_name)}"
-
-    # @property
-    # def device_info(self):
-    #     """Return information to link this entity with the correct device."""
-    #     return {"identifiers": {(DOMAIN, self.hub.hub_id, POWERCONTROLS)}}
