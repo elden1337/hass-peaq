@@ -7,18 +7,23 @@ from typing import Tuple
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.services.session.session import Session
 
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import \
-    Charger
-from custom_components.peaqev.peaqservice.chargecontroller.charger.savings_controller import \
-    SavingsController
-from custom_components.peaqev.peaqservice.chargecontroller.chargercontroller_model import \
-    ChargeControllerModel
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import (
+    Charger,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.charger.savings_controller import (
+    SavingsController,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.chargercontroller_model import (
+    ChargeControllerModel,
+)
 from custom_components.peaqev.peaqservice.chargecontroller.const import (
-    DEBUGLOG_TIMEOUT, DONETIMEOUT)
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
-from custom_components.peaqev.peaqservice.util.constants import \
-    CHARGERCONTROLLER
+    DEBUGLOG_TIMEOUT,
+    DONETIMEOUT,
+)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
+from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,6 +52,14 @@ class IChargeController:
     @property
     def status_type(self) -> ChargeControllerStates:
         return self.model.status_type
+
+    @property
+    def connected(self) -> bool:
+        return self.status_type not in [
+            ChargeControllerStates.Idle,
+            ChargeControllerStates.Disabled,
+            ChargeControllerStates.Error,
+        ]
 
     @property
     def is_initialized(self) -> bool:
@@ -135,57 +148,6 @@ class IChargeController:
                     await self.hub.observer.async_broadcast("car connected")
             case _:
                 pass
-
-    # async def async_get_status(self) -> Tuple[ChargeControllerStates, bool]:
-    #     _state = await self.hub.async_request_sensor_data("chargerobject_value")
-    #     try:
-    #         match _state:
-    #             case _ if not self.hub.enabled and _state in self.model.charger_states.get(
-    #                 ChargeControllerStates.Idle
-    #             ):
-    #                 return ChargeControllerStates.Idle, True
-    #             case _ if not self.hub.enabled and _state not in self.model.charger_states.get(
-    #                 ChargeControllerStates.Idle
-    #             ):
-    #                 return ChargeControllerStates.Connected, True
-    #             case _ if all(
-    #                 [
-    #                     datetime.now().hour in self.hub.non_hours,
-    #                     not getattr(self.hub.hours.timer, "is_override", False),
-    #                 ]
-    #             ):
-    #                 return ChargeControllerStates.Stop, True
-    #             case _ if self.hub.sensors.power.killswitch.is_dead:  # todo: composition
-    #                 return ChargeControllerStates.Error, True
-    #             case _state if _state in self.model.charger_states.get(
-    #                 ChargeControllerStates.Done
-    #             ):
-    #                 return ChargeControllerStates.Done, False
-    #             case _state if _state in self.model.charger_states.get(
-    #                 ChargeControllerStates.Idle
-    #             ):
-    #                 return ChargeControllerStates.Idle, True
-    #             case _state as status if all(
-    #                 [
-    #                     status
-    #                     not in self.model.charger_states.get(
-    #                         ChargeControllerStates.Idle
-    #                     ),
-    #                     self.hub.charger_done,
-    #                 ]
-    #             ):
-    #                 return ChargeControllerStates.Done, False
-    #             case _state as status if _state in self.model.charger_states.get(
-    #                 ChargeControllerStates.Connected
-    #             ):
-    #                 return await self.async_get_status_connected(status)
-    #             case _state if _state in self.model.charger_states.get(
-    #                 ChargeControllerStates.Charging
-    #             ):
-    #                 return await self.async_get_status_charging(), True
-    #     except Exception as e:
-    #         _LOGGER.debug(f"Error in async_get_status: {e}")
-    #     return ChargeControllerStates.Error, True
 
     async def async_get_status(self) -> Tuple[ChargeControllerStates, bool]:
         _state = await self.hub.async_request_sensor_data("chargerobject_value")
