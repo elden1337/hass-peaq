@@ -9,6 +9,7 @@ import logging
 
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.helpers.restore_state import RestoreEntity
+from peaqevcore.services.savings.savings_status import SavingsStatus
 
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
@@ -52,15 +53,15 @@ class PeaqSavingsSensor(SensorBase, RestoreEntity):
             self._currency = ret.get("currency")
             self._listen_status = self.hub.chargecontroller.savings.status.value
             self._data_dump = ret.get("export_savings_data")
-            self._savings_peak += ret.get("savings_peak", 0)
-            self._savings_trade += ret.get("savings_trade", 0)
+            self._savings_peak += float(ret.get("savings_peak", 0))
+            self._savings_trade += float(ret.get("savings_trade", 0))
             if self.hub.options.price.price_aware:
-                self._state += ret.get("savings_total", 0)
+                self._state += float(ret.get("savings_total", 0))
             else:
-                self._state += ret.get("savings_peak", 0)
-        if self._state > 0:
+                self._state += float(ret.get("savings_peak", 0))
+        if self.hub.chargecontroller.savings.status == SavingsStatus.Collecting:
             _LOGGER.debug("savings have been registered. resetting savingsservice")
-            await self.hub.chargecontroller.savings.service.async_stop_listen()
+            await self.hub.chargecontroller.savings.async_exit()
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -79,9 +80,20 @@ class PeaqSavingsSensor(SensorBase, RestoreEntity):
         _LOGGER.debug("last state of %s = %s", self._attr_name, state)
         if state:
             self._data_dump = state.attributes.get("Data")
-            self._savings_peak = state.attributes.get("Savings peak")
-            self._savings_trade = state.attributes.get("Savings trade")
-            self._state = state.state
+            self._savings_peak = await self.async_convert_state(
+                state.attributes.get("Savings peak")
+            )
+            self._savings_trade = await self.async_convert_state(
+                state.attributes.get("Savings trade")
+            )
+            self._state = await self.async_convert_state(state.state)
             await self.hub.chargecontroller.savings.async_import_data(self._data_dump)
         else:
             pass
+
+    async def async_convert_state(self, state) -> float:
+        try:
+            return float(state)
+        except ValueError:
+            _ss = state.split(" ")
+            return float(_ss[0])
