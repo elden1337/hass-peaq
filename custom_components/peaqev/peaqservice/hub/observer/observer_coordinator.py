@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import logging
@@ -32,7 +31,9 @@ class Observer:
         self.model = ObserverModel()
         self.hub = hub
         self._lock = Lock()
-        async_track_time_interval(self.hub.state_machine, self.async_dispatch, timedelta(seconds=1))
+        async_track_time_interval(
+            self.hub.state_machine, self.async_dispatch, timedelta(seconds=1)
+        )
 
     def activate(self, init_broadcast: str = None) -> None:
         self.model.active = True
@@ -49,9 +50,11 @@ class Observer:
             self.model.subscribers[command] = [func]
 
     async def async_broadcast(self, command: str, argument=None):
-        await self.hub.state_machine.async_add_executor_job(
-            self.broadcast, command, argument
-        )
+        _expiration = time.time() + TIMEOUT
+        cc = Command(command, _expiration, argument)
+        if cc not in self.model.broadcast_queue:
+            self.model.broadcast_queue.append(cc)
+            # _LOGGER.debug(f"added to broadcast queue: {cc.command}")
 
     def broadcast(self, command: str, argument=None):
         _expiration = time.time() + TIMEOUT
@@ -68,8 +71,9 @@ class Observer:
     async def async_dequeue_and_broadcast(self, command: Command):
         if await self.async_ok_to_broadcast(command.command):
             async with self._lock:
-                # if command.expiration > time.time():
-                _LOGGER.debug(f"ready to broadcast: {command.command} with params: {command.argument}")
+                _LOGGER.debug(
+                    f"ready to broadcast: {command.command} with params: {command.argument}"
+                )
                 for func in self.model.subscribers[command.command]:
                     if await async_iscoroutine(func):
                         await self.async_call_func(func=func, command=command),
@@ -78,9 +82,10 @@ class Observer:
                             self._call_func, func, command
                         )
                 self.model.broadcast_queue.remove(command)
-                # else:
-                #     _LOGGER.debug(f"broadcast timed out: {command}. Expired {int(time.time() - command.expiration)}s ago.}}")
-                #     self.model.broadcast_queue.remove(command)
+        else:
+            _LOGGER.debug(
+                f"not able to broadcast: {command.command} with params: {command.argument}"
+            )
 
     @staticmethod
     def _call_func(func: Callable, command: Command) -> None:

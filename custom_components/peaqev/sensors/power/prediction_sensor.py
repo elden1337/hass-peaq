@@ -39,4 +39,4 @@ class PeaqPredictionSensor(PowerDevice):
 
     async def async_update(self) -> None:
         if self.hub.is_initialized:
-            self._state = getattr(self.hub.prediction, "predictedenergy")
+            self._state = await self.hub.async_get_predicted_energy()

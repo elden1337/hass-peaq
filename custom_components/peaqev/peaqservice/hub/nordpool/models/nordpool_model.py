@@ -11,10 +11,12 @@ class NordPoolModel:
     average_data: list = field(default_factory=lambda: [])
     average_month: float = 0
     average_weekly: float = 0
+    average_30: float = 0
     daily_average: float = 0
     use_cent: bool = False
+    dynamic_top_price_type: str = ""
 
-    async def fix_dst(self, val) -> list:
+    async def fix_dst(self, val) -> list | None:
         if val is None:
             return None
         if len(val) < 1:

@@ -27,7 +27,10 @@ def _getuneven(first, second) -> bool:
     return first - second != 1
 
 
-async def async_currency_translation(value, currency, use_cent: bool = False) -> str:
+async def async_currency_translation(
+    value: float | str | None, currency, use_cent: bool = False
+) -> str:
+    value = "-" if value is None else value
     match currency:
         case "EUR":
             ret = f"{value}¢" if use_cent else f"€ {value}"
@@ -47,16 +50,18 @@ async def async_set_avg_cost(avg_cost, currency, use_cent) -> str:
         use_cent=use_cent,
     )
     if avg_cost[1] is not None:
-        override = await async_currency_translation(
-            value=avg_cost[1], currency=currency, use_cent=use_cent
-        )
-        return f"{override} ({standard})"
+        if avg_cost[1] != avg_cost[0]:
+            override = await async_currency_translation(
+                value=avg_cost[1], currency=currency, use_cent=use_cent
+            )
+            return f"{override} ({standard})"
     return f"{standard}"
 
 
 async def async_set_total_charge(max_charge) -> str:
     if max_charge[1] is not None:
-        return f"{max_charge[1]} kWh ({max_charge[0]} kWh)"
+        if max_charge[1] != max_charge[0]:
+            return f"{max_charge[1]} kWh ({max_charge[0]} kWh)"
     return f"{max_charge[0]} kWh"
 
 
@@ -82,7 +87,9 @@ async def async_set_caution_hours_display(dynamic_caution_hours: dict) -> dict:
     return ret
 
 
-async def async_set_current_charge_permittance_display(non_hours, dynamic_caution_hours) -> str:
+async def async_set_current_charge_permittance_display(
+    non_hours, dynamic_caution_hours
+) -> str:
     ret = 100
     hour = datetime.now().hour
     if hour in non_hours:

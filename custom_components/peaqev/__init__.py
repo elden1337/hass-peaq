@@ -12,6 +12,7 @@ from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.constants import TYPELITE
 from custom_components.peaqev.services import async_prepare_register_services
+
 from .const import DOMAIN, PLATFORMS
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
@@ -32,9 +33,12 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     await async_prepare_register_services(hub, hass)
 
     for platform in PLATFORMS:
-        hass.async_create_task(hass.config_entries.async_forward_entry_setup(conf, platform))
+        hass.async_create_task(
+            hass.config_entries.async_forward_entry_setup(conf, platform)
+        )
 
     return True
+
 
 PRICE_CHANGES = [
     "min_price",
@@ -45,9 +49,11 @@ PRICE_CHANGES = [
     "max_charge",
     "cautionhours",
     "_startpeaks",
-    "nonhours"]
+    "nonhours",
+]
 
 RELOAD_CHANGES = ["fuse_type", "gain_loss", "price_aware"]
+
 
 async def async_update_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     """Reload Peaqev component when options changed."""
@@ -61,7 +67,7 @@ async def async_update_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     if [i for i in diff if i in RELOAD_CHANGES]:
         return await hass.config_entries.async_reload(config_entry.entry_id)
     if [i for i in diff if i in PRICE_CHANGES]:
-        await hass.data[DOMAIN]["hub"].async_init_hours()
+        await hass.data[DOMAIN]["hub"].initializer.async_init_hours()
 
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
@@ -84,18 +90,32 @@ async def async_set_options(conf) -> HubOptions:
     if options.charger.chargertype == ChargerType.NoCharger.value:
         options.powersensor_includes_car = True
     else:
-        options.powersensor_includes_car = conf.data.get("powersensorincludescar", False)
+        options.powersensor_includes_car = conf.data.get(
+            "powersensorincludescar", False
+        )
     options.startpeaks = conf.options.get("startpeaks", conf.data.get("startpeaks"))
     options.cautionhours = await async_get_existing_param(conf, "cautionhours", [])
     options.nonhours = await async_get_existing_param(conf, "nonhours", [])
-    options.price.price_aware = await async_get_existing_param(conf, "priceaware", False)
-    options.price.min_price = await async_get_existing_param(conf, "min_priceaware_threshold_price", 0)
-    options.price.top_price = await async_get_existing_param(conf, "absolute_top_price", 0)
-    options.price.dynamic_top_price = await async_get_existing_param(conf, "dynamic_top_price", False)
-    options.price.cautionhour_type = await async_get_existing_param(conf, "cautionhour_type", "intermediate")
+    options.price.price_aware = await async_get_existing_param(
+        conf, "priceaware", False
+    )
+    options.price.min_price = await async_get_existing_param(
+        conf, "min_priceaware_threshold_price", 0
+    )
+    options.price.top_price = await async_get_existing_param(
+        conf, "absolute_top_price", 0
+    )
+    options.price.dynamic_top_price = await async_get_existing_param(
+        conf, "dynamic_top_price", False
+    )
+    options.price.cautionhour_type = await async_get_existing_param(
+        conf, "cautionhour_type", "intermediate"
+    )
     options.max_charge = conf.options.get("max_charge", 0)
     options.fuse_type = await async_get_existing_param(conf, "mains", "")
-    options.blocknocturnal = await async_get_existing_param(conf, "blocknocturnal", False)
+    options.blocknocturnal = await async_get_existing_param(
+        conf, "blocknocturnal", False
+    )
     options.gainloss = await async_get_existing_param(conf, "gainloss", False)
     return options
 

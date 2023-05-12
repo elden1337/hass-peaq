@@ -10,6 +10,9 @@ class ChargeControllerFactory:
     @staticmethod
     async def async_create(hub, charger_states, charger_type) -> IChargeController:
         if hub.options.peaqev_lite:
-            return ChargeControllerLite(hub, charger_states, charger_type)
+            controller = ChargeControllerLite(hub, charger_states, charger_type)
         else:
-            return ChargeController(hub, charger_states, charger_type)
+            controller = ChargeController(hub, charger_states, charger_type)
+
+        await controller.async_setup()
+        return controller

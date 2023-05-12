@@ -113,13 +113,6 @@ class ChargeAmps(IChargerType):
         """no such method for chargeamps available right now."""
         return 16
 
-    def set_sensors(self) -> None:
-        self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"
-        self.entities.powermeter = f"sensor.{self.entities.entityschema}_1_power"
-        self.entities.powerswitch = self._determine_switch_entity()
-        self.entities.ampmeter = f"{self.entities.powerswitch}|max_current"
-        self._chargeramps_type = self._set_chargeamps_type(self.entities.chargerentity)
-
     def _determine_entities(self) -> list:
         ret = []
         for e in self.entities.imported_entities:

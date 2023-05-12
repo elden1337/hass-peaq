@@ -5,9 +5,11 @@ from statistics import mean
 
 import homeassistant.helpers.template as template
 
-from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_dto import \
+from custom_components.peaqev.peaqservice.hub.nordpool.dynamic_top_price import \
+    DynamicTopPrice
+from custom_components.peaqev.peaqservice.hub.nordpool.models.nordpool_dto import \
     NordpoolDTO
-from custom_components.peaqev.peaqservice.hub.nordpool.nordpool_model import \
+from custom_components.peaqev.peaqservice.hub.nordpool.models.nordpool_model import \
     NordPoolModel
 
 _LOGGER = logging.getLogger(__name__)
@@ -21,9 +23,15 @@ class NordPoolUpdater:
         self.model = NordPoolModel()
         self.hub = hub
         self.state_machine = hub.state_machine
-        self._nordpool_entity: str = None
+        self._nordpool_entity: str | None = None
+        self._dynamic_top_price = DynamicTopPrice()
+        self._is_initialized: bool = False
         if is_active:
             self._setup_nordpool()
+
+    @property
+    def is_initialized(self) -> bool:
+        return self._is_initialized
 
     @property
     def currency(self) -> str:
@@ -47,12 +55,16 @@ class NordPoolUpdater:
         return self.model.average_weekly
 
     @property
+    def average_30(self) -> float:
+        return self.model.average_30
+
+    @property
     def average_data(self) -> list:
         return self.model.average_data
 
     @property
     def nordpool_entity(self) -> str:
-        return self._nordpool_entity
+        return getattr(self, "_nordpool_entity", "")
 
     async def async_update_nordpool(self, initial: bool = False) -> None:
         if self.nordpool_entity is not None:
@@ -62,32 +74,59 @@ class NordPoolUpdater:
                 await _result.set_model(ret)
                 if await self.async_update_set_prices(_result):
                     if initial:
-                        await self.hub.async_update_prices([self.model.prices, self.model.prices_tomorrow])
+                        await self.hub.async_update_prices(
+                            [self.model.prices, self.model.prices_tomorrow]
+                        )
                     else:
                         await self.hub.observer.async_broadcast(
                             "prices changed",
                             [self.model.prices, self.model.prices_tomorrow],
                         )
+                    self._is_initialized = True
             elif self.hub.is_initialized:
-                _LOGGER.error("Could not get nordpool-prices")
+                _LOGGER.debug(
+                    f"Could not get nordpool-prices. initial: {initial}. Nordpool-entity: {self.nordpool_entity}"
+                )
 
     async def async_update_average_month(self) -> None:
-        _new = await self.async_get_average_async(datetime.now().day)
-        if len(self.model.average_data) >= int(datetime.now().day) and self.model.average_month != _new:
+        _new = await self.async_get_average(datetime.now().day)
+        if (
+            len(self.model.average_data) >= int(datetime.now().day)
+            and self.model.average_month != _new
+        ):
             self.model.average_month = _new
-            await self.hub.observer.async_broadcast("monthly average price changed", self.model.average_month)
+            await self.hub.observer.async_broadcast(
+                "monthly average price changed", self.model.average_month
+            )
+
+    async def async_update_average_30(self) -> None:
+        _new = await self.async_get_average(30)
+        if self.model.average_30 != _new:
+            self.model.average_30 = _new
+            _dynamic_max_price = await self._dynamic_top_price.async_get_max(
+                self.model.average_data
+            )
+            self.model.dynamic_top_price_type = _dynamic_max_price[1].value
+            _LOGGER.debug(_dynamic_max_price)
+            await self.hub.observer.async_broadcast(
+                "dynamic max price changed", _dynamic_max_price[0]
+            )
 
     async def async_update_average_week(self) -> None:
-        _average7 = await self.async_get_average_async(7)
+        _average7 = await self.async_get_average(7)
         if len(self.model.average_data) >= 7 and self.model.average_weekly != _average7:
             self.model.average_weekly = _average7
-            await self.hub.observer.async_broadcast("weekly average price changed", self.model.average_weekly)
+            await self.hub.observer.async_broadcast(
+                "weekly average price changed", self.model.average_weekly
+            )
 
     async def async_update_average_day(self, average) -> None:
         if average != self.model.daily_average:
             self.model.daily_average = average
             await self.async_add_average_data(average)
-            await self.hub.observer.async_broadcast("daily average price changed", average)
+            await self.hub.observer.async_broadcast(
+                "daily average price changed", average
+            )
 
     async def async_update_set_prices(self, result: NordpoolDTO) -> bool:
         ret = False
@@ -95,16 +134,22 @@ class NordPoolUpdater:
         if self.model.prices != today:
             self.model.prices = today
             ret = True
-        tomorrow = await self.model.fix_dst(result.tomorrow)
-        if self.model.prices_tomorrow != tomorrow:
-            self.model.prices_tomorrow = tomorrow
-            ret = True
+        if result.tomorrow_valid:
+            tomorrow = await self.model.fix_dst(result.tomorrow)
+            if self.model.prices_tomorrow != tomorrow:
+                self.model.prices_tomorrow = tomorrow
+                ret = True
+        else:
+            if self.model.prices_tomorrow:
+                self.model.prices_tomorrow = []
+                ret = True
         await self.async_update_average_week()
         self.model.currency = result.currency
         self.model.use_cent = result.price_in_cent
         self.state = result.state
         await self.async_update_average_day(result.average)
         await self.async_update_average_month()
+        await self.async_update_average_30()
         return ret
 
     def _setup_nordpool(self):
@@ -114,7 +159,9 @@ class NordPoolUpdater:
                 raise Exception("no entities found for Nordpool.")
             if len(list(entities)) == 1:
                 self._nordpool_entity = entities[0]
-                _LOGGER.debug(f"Nordpool has been set up and is ready to be used with {self.nordpool_entity}")
+                _LOGGER.debug(
+                    f"Nordpool has been set up and is ready to be used with {self.nordpool_entity}"
+                )
                 asyncio.run_coroutine_threadsafe(
                     self.async_update_nordpool(initial=True),
                     self.hub.state_machine.loop,
@@ -151,7 +198,7 @@ class NordPoolUpdater:
         while len(self.model.average_data) > AVERAGE_MAX_LEN:
             del self.model.average_data[0]
 
-    async def async_get_average_async(self, days: int) -> float:
+    async def async_get_average(self, days: int) -> float:
         try:
             if len(self.model.average_data) > days:
                 ret = self.model.average_data[-days:]
@@ -161,4 +208,6 @@ class NordPoolUpdater:
                 ret = self.model.average_data
             return round(mean(ret), 2)
         except Exception as e:
-            _LOGGER.debug(f"Could not calculate average. indata: {self.model.average_data}, error: {e}")
+            _LOGGER.debug(
+                f"Could not calculate average. indata: {self.model.average_data}, error: {e}"
+            )

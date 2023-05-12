@@ -4,11 +4,13 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub import HomeAssistantHub
+
 import logging
 import time
 from enum import Enum
 
-from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import HourselectionFactory
+from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import \
+    HourselectionFactory
 
 _LOGGER = logging.getLogger(__name__)
 
