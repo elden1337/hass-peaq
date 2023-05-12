@@ -110,9 +110,9 @@ class IStateChanges:
         if self.hub.options.price.price_aware and not self.hub.options.peaqev_lite:
             try:
                 await self.hub.hours.async_update_max_min(
-                    self.hub.max_min_controller.max_charge,
-                    self.hub.chargecontroller.session.session_energy,
-                    self.hub.chargecontroller.connected,
+                    max_charge=self.hub.max_min_controller.max_charge,
+                    session_energy=self.hub.chargecontroller.session.session_energy,
+                    car_connected=self.hub.chargecontroller.connected,
                 )
             except:
                 _LOGGER.debug(f"Unable to update max_min")
