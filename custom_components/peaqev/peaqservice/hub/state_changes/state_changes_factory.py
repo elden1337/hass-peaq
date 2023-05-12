@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
@@ -9,7 +15,7 @@ from custom_components.peaqev.peaqservice.hub.state_changes.state_changes import
 
 class StateChangesFactory:
     @staticmethod
-    async def async_create(hub) -> IStateChanges:
+    async def async_create(hub: HomeAssistantHub) -> IStateChanges:
         if all(
             [
                 hub.options.peaqev_lite is True,

@@ -11,24 +11,18 @@ from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 
+from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_factory import \
+    ChargeControllerFactory
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
     IChargeController
+from custom_components.peaqev.peaqservice.chargertypes.chargertype_factory import \
+    ChargerTypeFactory
 from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
     IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
-from custom_components.peaqev.peaqservice.hub.factories.chargecontroller_factory import \
-    ChargeControllerFactory
-from custom_components.peaqev.peaqservice.hub.factories.chargertype_factory import \
-    ChargerTypeFactory
 from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import \
     HourselectionFactory
-from custom_components.peaqev.peaqservice.hub.factories.hubsensors_factory import \
-    HubSensorsFactory
-from custom_components.peaqev.peaqservice.hub.factories.powertools_factory import \
-    PowerToolsFactory
-from custom_components.peaqev.peaqservice.hub.factories.state_changes_factory import \
-    StateChangesFactory
 from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import \
     ThresholdFactory
 from custom_components.peaqev.peaqservice.hub.hub_initializer import \
@@ -41,11 +35,17 @@ from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import \
     NordPoolUpdater
 from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
     Observer
+from custom_components.peaqev.peaqservice.hub.sensors.hubsensors_factory import \
+    HubSensorsFactory
 from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import \
-    IHubSensors
+    HubSensors
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
     IStateChanges
+from custom_components.peaqev.peaqservice.hub.state_changes.state_changes_factory import \
+    StateChangesFactory
+from custom_components.peaqev.peaqservice.powertools.powertools_factory import \
+    PowerToolsFactory
 from custom_components.peaqev.peaqservice.util.constants import \
     CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import (
@@ -57,7 +57,7 @@ _LOGGER = logging.getLogger(__name__)
 class HomeAssistantHub:
     hub_id = 1337
     chargertype: IChargerType
-    sensors: IHubSensors
+    sensors: HubSensors
     hours: Hours
     threshold: ThresholdBase
     prediction: Prediction
@@ -81,14 +81,12 @@ class HomeAssistantHub:
         self.chargertype = await ChargerTypeFactory.async_create(
             self.state_machine, self.options
         )  # chargecontroller
+        self.sensors: HubSensors = await HubSensorsFactory.async_create(hub=self)
         self.chargecontroller = await ChargeControllerFactory.async_create(
             self,
             charger_states=self.chargertype.chargerstates,
             charger_type=self.chargertype.type,
-        )  # charger
-        self.sensors: IHubSensors = await HubSensorsFactory.async_create(
-            hub=self
-        )  # top level
+        )
         self.hours: Hours = await HourselectionFactory.async_create(self)  # top level
         self.threshold: ThresholdBase = await ThresholdFactory.async_create(
             self
@@ -98,7 +96,7 @@ class HomeAssistantHub:
         self.states = await StateChangesFactory.async_create(self)  # top level
 
         self.nordpool = NordPoolUpdater(
-            hub=self, is_active=self.hours.price_aware
+            hub=self, is_active=self.options.price.price_aware
         )  # hours
         self.power = await PowerToolsFactory.async_create(self)
 
@@ -197,9 +195,9 @@ class HomeAssistantHub:
 
     def _set_observers(self) -> None:
         self.observer.add("prices changed", self.async_update_prices)
-        self.observer.add(
-            "monthly average price changed", self.async_update_average_monthly_price
-        )
+        # self.observer.add(
+        #     "monthly average price changed", self.async_update_average_monthly_price
+        # )
         self.observer.add(
             "weekly average price changed", self.async_update_average_weekly_price
         )
@@ -255,6 +253,7 @@ class HomeAssistantHub:
             "max_charge": partial(self.hours.async_get_total_charge),
             "average_weekly": partial(getattr, self.nordpool, "average_weekly"),
             "average_monthly": partial(getattr, self.nordpool, "average_month"),
+            "average_30": partial(getattr, self.nordpool, "average_30"),
             "currency": partial(getattr, self.nordpool, "currency"),
             "offsets": partial(getattr, self.hours, "offsets", {}),
             "is_price_aware": partial(getattr, self.options.price, "price_aware"),
@@ -266,6 +265,18 @@ class HomeAssistantHub:
             ),
             "max_price": partial(getattr, self.hours, "absolute_top_price"),
             "min_price": partial(getattr, self.hours, "min_price"),
+            "savings_peak": partial(
+                getattr, self.chargecontroller.savings, "savings_peak"
+            ),
+            "savings_trade": partial(
+                getattr, self.chargecontroller.savings, "savings_trade"
+            ),
+            "savings_total": partial(
+                getattr, self.chargecontroller.savings, "savings_total"
+            ),
+            "export_savings_data": partial(
+                self.chargecontroller.savings.async_export_data
+            ),
         }
         ret = {}
         for arg in args:
@@ -275,9 +286,8 @@ class HomeAssistantHub:
             else:
                 ret[arg] = func()
         if "max_charge" in ret.keys():
-            self.max_min_controller._original_total_charge = ret["max_charge"][
-                0
-            ]  # todo: 247
+            self.max_min_controller._original_total_charge = ret["max_charge"][0]
+            # todo: 247
         if len(ret) == 1:
             rr = list(ret.values())[0]
             if isinstance(rr, str):
@@ -297,11 +307,11 @@ class HomeAssistantHub:
             return self.hours.prices_tomorrow
         return []
 
-    @property
-    def is_free_charge(self) -> bool:
-        if hasattr(self.sensors, "locale"):
-            return self.sensors.locale.data.free_charge(self.sensors.locale.data)
-        return False
+    async def async_free_charge(self) -> bool:
+        try:
+            return await self.sensors.locale.data.async_free_charge()
+        except Exception:
+            return False
 
     @property
     def charger_done(self) -> bool:
@@ -330,3 +340,34 @@ class HomeAssistantHub:
             setattr(self.sensors.charger_enabled, "value", bool(val))
         else:
             raise Exception("Peaqev cannot function without a charger_enabled entity")
+
+    async def async_predictedpercentageofpeak(self):
+        return await self.prediction.async_predicted_percentage_of_peak(
+            predicted_energy=await self.async_get_predicted_energy(),
+            peak=self.sensors.current_peak.value,
+        )
+
+    async def async_threshold_start(self):
+        return await self.threshold.async_start(
+            is_caution_hour=await self.async_is_caution_hour(),
+            is_quarterly=await self.sensors.locale.data.async_is_quarterly(),
+        )
+
+    async def async_threshold_stop(self):
+        return await self.threshold.async_stop(
+            is_caution_hour=await self.async_is_caution_hour(),
+            is_quarterly=await self.sensors.locale.data.async_is_quarterly(),
+        )
+
+    async def async_is_caution_hour(self) -> bool:
+        if self.options.price.price_aware:
+            return False
+        return str(datetime.now().hour) in self.hours.caution_hours
+
+    async def async_get_predicted_energy(self) -> float:
+        ret = await self.prediction.async_predicted_energy(
+            power_avg=self.sensors.powersensormovingaverage.value,
+            total_hourly_energy=self.sensors.totalhourlyenergy.value,
+            is_quarterly=await self.sensors.locale.data.async_is_quarterly(),
+        )
+        return ret

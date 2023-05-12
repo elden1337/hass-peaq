@@ -39,8 +39,8 @@ class PeaqSensor(SensorBase):
         ret = "mdi:battery"
         if self.state is ChargeControllerStates.Idle.value:
             ret = "mdi:ev-plug-type2"
-        elif self.state == "Disabled":
-            ret = "mdi:battery-off"
+        elif self.state is ChargeControllerStates.Connected.value:
+            ret = "mdi:car-connected"
         elif self.state is ChargeControllerStates.Start.value:
             ret = "mdi:battery-charging"
         elif self.state is ChargeControllerStates.Stop.value:

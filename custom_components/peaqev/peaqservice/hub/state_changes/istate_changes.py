@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 import logging
 import time
 from abc import abstractmethod
@@ -11,7 +17,7 @@ class IStateChanges:
     latest_outlet_update = 0
     latest_chargecontroller_update = 0
 
-    def __init__(self, hub):
+    def __init__(self, hub: HomeAssistantHub):
         self.hub = hub
 
     async def async_update_sensor(self, entity, value):
@@ -43,14 +49,12 @@ class IStateChanges:
                 hasattr(self.hub.sensors, "carpowersensor"),
             ]
         ):
-            setattr(
-                self.hub.chargecontroller.charger.session,
-                "session_energy",
-                getattr(self.hub.sensors.carpowersensor, "value"),
+            await self.hub.chargecontroller.session.async_set_session_energy(
+                getattr(self.hub.sensors.carpowersensor, "value")
             )
             if self.hub.options.price.price_aware:
-                self.hub.chargecontroller.charger.session.session_price = float(
-                    self.hub.nordpool.state
+                await self.hub.chargecontroller.session.async_set_session_price(
+                    float(self.hub.nordpool.state)
                 )
                 if getattr(self.hub.hours.scheduler, "schedule_created", False):
                     await self.hub.hours.scheduler.async_update_facade()
@@ -60,9 +64,9 @@ class IStateChanges:
             if self.hub.sensors.carpowersensor.use_attribute:
                 entity = self.hub.sensors.carpowersensor
                 try:
-                    val = self.hub.hass.states.get(entity.entity).attributes.get(
-                        entity.attribute
-                    )
+                    val = self.hub.state_machine.states.get(
+                        entity.entity
+                    ).attributes.get(entity.attribute)
                     if val is not None:
                         self.hub.sensors.carpowersensor.value = val
                         await self.hub.sensors.power.async_update(
@@ -81,15 +85,37 @@ class IStateChanges:
         await self.async_handle_outlet_updates()
 
     async def async_update_total_energy_and_peak(self, value) -> None:
-        self.hub.sensors.totalhourlyenergy.value = value
-        self.hub.sensors.current_peak.value = (
-            self.hub.sensors.locale.data.query_model.observed_peak
-        )
-        self.hub.sensors.locale.data.query_model.try_update(
-            new_val=float(value), timestamp=datetime.now()
-        )
-        if self.hub.options.price.price_aware:
-            await self.hub.hours.async_update_max_min(self.hub.max_min_controller.max_charge)
+        try:
+            self.hub.sensors.totalhourlyenergy.value = value
+        except:
+            _LOGGER.debug(f"Unable to set totalhourlyenergy to {value}")
+
+        try:
+            await self.hub.sensors.locale.async_try_update_peak(
+                new_val=float(value), timestamp=datetime.now()
+            )
+        except:
+            _LOGGER.debug(f"Unable to update peak to {value}")
+        try:
+            self.hub.sensors.current_peak.value = (
+                self.hub.sensors.locale.data.query_model.observed_peak
+            )
+        except:
+            _LOGGER.debug(f"Unable to set current_peak to {value}")
+
+        try:
+            await self.hub.chargecontroller.savings.async_add_consumption(float(value))
+        except:
+            _LOGGER.debug(f"Unable to add consumption to savings")
+        if self.hub.options.price.price_aware and not self.hub.options.peaqev_lite:
+            try:
+                await self.hub.hours.async_update_max_min(
+                    self.hub.max_min_controller.max_charge,
+                    self.hub.chargecontroller.session.session_energy,
+                    self.hub.chargecontroller.connected,
+                )
+            except:
+                _LOGGER.debug(f"Unable to update max_min")
 
     @abstractmethod
     async def async_update_sensor_internal(self, entity, value) -> bool:

@@ -65,6 +65,8 @@ Charger | Required integration                                        | Can upda
 Chargeamps| [hass-chargeamps](https://github.com/kirei/hass-chargeamps) | Yes | Halo |
 Easee| [easee-hass](https://github.com/fondberg/easee_hass/)       | Yes | Robot | _Turn off all smart charging before using peaqev_
 Zaptec| [zaptec](https://github.com/custom-components/zaptec)       | No | Go | _Currently in beta and may not work_
+Garo|[garo_wallbox](https://github.com/sockless-coding/garo_wallbox/)       | No | Wallbox | _Currently in beta and may not work_
+Wallbox|[wallbox](https://www.home-assistant.io/integrations/wallbox/)       | No | * | _Currently in beta and may not work_
 Smart outlet| -                                                           | No | | _Stability depends on the outlet used_
 No charger| - | No | | _For using the sensors and logic_
 

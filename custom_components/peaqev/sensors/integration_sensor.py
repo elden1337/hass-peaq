@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
-from homeassistant.components.integration.const import \
-    METHOD_TRAPEZOIDAL  # pylint: disable=import-error
+from homeassistant.components.integration.const import (  # pylint: disable=import-error
+    METHOD_LEFT, METHOD_TRAPEZOIDAL)
 from homeassistant.components.integration.sensor import \
     IntegrationSensor  # pylint: disable=import-error
 from homeassistant.components.sensor import \

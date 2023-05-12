@@ -50,9 +50,11 @@ class Observer:
             self.model.subscribers[command] = [func]
 
     async def async_broadcast(self, command: str, argument=None):
-        await self.hub.state_machine.async_add_executor_job(
-            self.broadcast, command, argument
-        )
+        _expiration = time.time() + TIMEOUT
+        cc = Command(command, _expiration, argument)
+        if cc not in self.model.broadcast_queue:
+            self.model.broadcast_queue.append(cc)
+            # _LOGGER.debug(f"added to broadcast queue: {cc.command}")
 
     def broadcast(self, command: str, argument=None):
         _expiration = time.time() + TIMEOUT
@@ -80,6 +82,10 @@ class Observer:
                             self._call_func, func, command
                         )
                 self.model.broadcast_queue.remove(command)
+        else:
+            _LOGGER.debug(
+                f"not able to broadcast: {command.command} with params: {command.argument}"
+            )
 
     @staticmethod
     def _call_func(func: Callable, command: Command) -> None:

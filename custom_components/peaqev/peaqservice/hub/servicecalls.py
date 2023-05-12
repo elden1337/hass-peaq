@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 import logging
 from datetime import datetime
 
@@ -5,7 +11,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class ServiceCalls:
-    def __init__(self, hub):
+    def __init__(self, hub: HomeAssistantHub):
         self.hub = hub
 
     async def async_call_enable_peaq(self):

@@ -5,6 +5,7 @@
     "chargeamps",
     "easee",
     "garo_wallbox",
+    "wallbox",
     "zaptec",
     "nordpool",
     "tibber",
@@ -21,7 +22,7 @@
   "iot_class": "calculated",
   "issue_tracker": "https://github.com/elden1337/hass-peaq/issues",
   "requirements": [
-    "peaqevcore==15.3.5"
+    "peaqevcore==17.0.12"
   ],
-  "version": "2.10.0"
+  "version": "2.11.0b1"
 }

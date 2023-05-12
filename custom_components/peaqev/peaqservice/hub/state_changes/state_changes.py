@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 import logging
 import time
 
@@ -10,7 +16,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class StateChanges(IStateChanges):
-    def __init__(self, hub):
+    def __init__(self, hub: HomeAssistantHub):
         self.hub = hub
         super().__init__(hub)
 
@@ -24,7 +30,9 @@ class StateChanges(IStateChanges):
                         config_sensor_value=value,
                     )
                     update_session = True
-                    self.hub.power.power_canary.total_power = self.hub.sensors.power.total.value
+                    self.hub.power.power_canary.total_power = (
+                        self.hub.sensors.power.total.value
+                    )
                 case self.hub.sensors.carpowersensor.entity:
                     if self.hub.sensors.carpowersensor.use_attribute:
                         pass
@@ -36,7 +44,9 @@ class StateChanges(IStateChanges):
                         )
                     update_session = True
                     await self.hub.sensors.chargerobject_switch.async_updatecurrent()
-                    self.hub.power.power_canary.total_power = self.hub.sensors.power.total.value
+                    self.hub.power.power_canary.total_power = (
+                        self.hub.sensors.power.total.value
+                    )
                     await self.async_handle_outlet_updates()
                 case self.hub.sensors.chargerobject.entity:
                     await self.hub.async_set_chargerobject_value(value)
@@ -54,7 +64,8 @@ class StateChanges(IStateChanges):
                         update_session = True
             return update_session
         except Exception as e:
-            _LOGGER.error(f"async_update_sensor_internal: {e}")
+            _LOGGER.error(f"async_update_sensor_internal for {entity}: {e}")
+            return False
 
     async def async_handle_outlet_updates(self):
         if self.hub.chargertype.domainname is ChargerType.Outlet:
@@ -66,7 +77,9 @@ class StateChanges(IStateChanges):
                 await self.hub.async_set_chargerobject_value("charging")
             else:
                 await self.hub.async_set_chargerobject_value("connected")
-            if old_state != await self.hub.async_request_sensor_data("chargerobject_value"):
+            if old_state != await self.hub.async_request_sensor_data(
+                "chargerobject_value"
+            ):
                 _LOGGER.debug(
                     f"smartoutlet is now {await self.hub.async_request_sensor_data('chargerobject_value')}"
                 )
@@ -109,7 +122,9 @@ class StateChangesLite(IStateChanges):
                 await self.hub.async_set_chargerobject_value("charging")
             else:
                 await self.hub.async_set_chargerobject_value("connected")
-            if old_state != await self.hub.async_request_sensor_data("chargerobject_value"):
+            if old_state != await self.hub.async_request_sensor_data(
+                "chargerobject_value"
+            ):
                 _LOGGER.debug(
                     f"smartoutlet is now {await self.hub.async_request_sensor_data('chargerobject_value')}"
                 )
@@ -124,9 +139,13 @@ class StateChangesNoCharger(IStateChanges):
         update_session = False
         match entity:
             case self.hub.options.powersensor:
-                await self.hub.sensors.power.async_update(carpowersensor_value=0, config_sensor_value=value)
+                await self.hub.sensors.power.async_update(
+                    carpowersensor_value=0, config_sensor_value=value
+                )
                 update_session = True
-                self.hub.power.power_canary.total_power = self.hub.sensors.power.total.value
+                self.hub.power.power_canary.total_power = (
+                    self.hub.sensors.power.total.value
+                )
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self.async_update_total_energy_and_peak(value)
             case self.hub.sensors.powersensormovingaverage.entity:
