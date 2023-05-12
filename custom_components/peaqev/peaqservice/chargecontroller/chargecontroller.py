@@ -74,6 +74,7 @@ class ChargeController(IChargeController):
                 and self.hub.sensors.carpowersensor.value < 1
                 and await self.async_is_done(charger_state)
             ):
+                await self.hub.observer.async_broadcast("car done")
                 return ChargeControllerStates.Done, False
             else:
                 if all(

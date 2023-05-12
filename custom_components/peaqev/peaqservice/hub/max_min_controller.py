@@ -43,8 +43,7 @@ class MaxMinController:
         if self.hub.options.price.price_aware:
             self._override_max_charge = max_charge
             await self.hub.hours.async_update_max_min(
-                max_charge=self.max_charge,
-                car_connected=self.hub.chargecontroller.connected,
+                max_charge=self.max_charge
             )
 
     async def async_servicecall_override_charge_amount(self, amount: int):

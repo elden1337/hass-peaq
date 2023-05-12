@@ -80,7 +80,7 @@ async def async_setup(hub, config, hass, async_add_entities):
 
     if hub.options.price.price_aware:
         sensors.append(PeaqMoneySensor(hub, config.entry_id))
-        sensors.append(PeaqSavingsSensor(hub, config.entry_id))
+        # sensors.append(PeaqSavingsSensor(hub, config.entry_id))
         if hub.chargertype.type != ChargerType.NoCharger:
             sensors.append(PeaqSessionCostSensor(hub, config.entry_id))
         if not hub.options.peaqev_lite:
