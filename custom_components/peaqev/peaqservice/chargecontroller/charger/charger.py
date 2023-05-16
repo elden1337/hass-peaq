@@ -6,16 +6,22 @@ from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.services.chargertype.const import DOMAIN, PARAMS
 
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import \
-    async_call_ok
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import \
-    ChargerStates
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import (
+    async_call_ok,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import (
+    ChargerStates,
+)
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelpers import (
-    ChargerHelpers, async_set_chargerparams)
-from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import \
-    ChargerModel
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
+    ChargerHelpers,
+    async_set_chargerparams,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import (
+    ChargerModel,
+)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
@@ -32,6 +38,7 @@ class Charger:
         self._lock = asyncio.Lock()
         self.helpers = ChargerHelpers(self)
         self.controller.hub.observer.add("power canary dead", self.async_pause_charger)
+        self.controller.hub.observer.add("car connected", self.async_reset_session)
 
     async def async_setup(self):
         pass
