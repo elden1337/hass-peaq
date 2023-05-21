@@ -19,7 +19,7 @@ from custom_components.peaqev.sensors.money_sensor_helpers import (
     async_set_current_charge_permittance_display,
     async_set_non_hours_display,
     async_set_total_charge,
-    calculate_stop_len,
+    async_calculate_stop_len,
 )
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
