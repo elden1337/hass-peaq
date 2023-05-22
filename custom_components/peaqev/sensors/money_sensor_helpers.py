@@ -16,7 +16,7 @@ async def async_calculate_stop_len(nonhours) -> str:
 
 async def async_get_stopped_string(h) -> str:
     val = h + 1 if h + 1 < 24 else h + 1 - 24
-    if len(str(val)) == 1:
+    if val < 10:
         return f"Charging stopped until 0{val}:00"
     return f"Charging stopped until {val}:00"
 
