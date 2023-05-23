@@ -10,14 +10,17 @@ from datetime import datetime
 
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from custom_components.peaqev.peaqservice.chargecontroller.const import \
-    CHARGING_ALLOWED
+from custom_components.peaqev.peaqservice.chargecontroller.const import CHARGING_ALLOWED
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
 from custom_components.peaqev.sensors.money_sensor_helpers import (
-    async_currency_translation, async_set_avg_cost,
+    async_currency_translation,
+    async_set_avg_cost,
     async_set_caution_hours_display,
-    async_set_current_charge_permittance_display, async_set_non_hours_display,
-    async_set_total_charge, calculate_stop_len)
+    async_set_current_charge_permittance_display,
+    async_set_non_hours_display,
+    async_set_total_charge,
+    async_calculate_stop_len,
+)
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -183,7 +186,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             )  # todo: composition
         if hour in non_hours:
             self._icon = "mdi:car-clock"
-            ret = calculate_stop_len(non_hours)
+            ret = await async_calculate_stop_len(non_hours)
         elif hour in dynamic_caution_hours.keys():
             val = dynamic_caution_hours.get(hour)
             ret += f" at {int(val * 100)}% of peak"

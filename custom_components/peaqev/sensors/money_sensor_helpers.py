@@ -1,27 +1,27 @@
 from datetime import datetime
 
 
-def calculate_stop_len(nonhours) -> str:
+async def async_calculate_stop_len(nonhours) -> str:
     ret = ""
     for idx, h in enumerate(nonhours):
         if idx + 1 < len(nonhours):
-            if _getuneven(nonhours[idx + 1], nonhours[idx]):
-                ret = _get_stopped_string(h)
+            if await async_getuneven(nonhours[idx + 1], nonhours[idx]):
+                ret = await async_get_stopped_string(h)
                 break
         elif idx + 1 == len(nonhours):
-            ret = _get_stopped_string(h)
+            ret = await async_get_stopped_string(h)
             break
     return ret
 
 
-def _get_stopped_string(h) -> str:
+async def async_get_stopped_string(h) -> str:
     val = h + 1 if h + 1 < 24 else h + 1 - 24
-    if len(str(val)) == 1:
+    if val < 10:
         return f"Charging stopped until 0{val}:00"
     return f"Charging stopped until {val}:00"
 
 
-def _getuneven(first, second) -> bool:
+async def async_getuneven(first, second) -> bool:
     if second > first:
         return first - (second - 24) != 1
     return first - second != 1
