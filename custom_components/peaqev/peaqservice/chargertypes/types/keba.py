@@ -1,6 +1,7 @@
 import logging
 
 from homeassistant.core import HomeAssistant
+from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
@@ -32,8 +33,8 @@ class Keba(IChargerType):
         self.entities.imported_entityendings = self.entity_endings
         self.options.powerswitch_controls_charging = False
         # self.chargerstates[ChargeControllerStates.Idle] = ["available"]
-        # self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
-        # self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
+        self.chargerstates[ChargeControllerStates.Connected] = ["ready for charging"]
+        self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
 
     @property
     def type(self) -> ChargerType:
@@ -44,10 +45,6 @@ class Keba(IChargerType):
     def domain_name(self) -> str:
         """declare the domain name as stated in HA"""
         return "keba"
-
-    # @property
-    # def max_amps(self) -> int:
-    #     return self.get_allowed_amps()
 
     @property
     def entity_endings(self) -> list:
@@ -113,17 +110,7 @@ class Keba(IChargerType):
         self.entities.maxamps = f"sensor.{self.entities.entityschema}_Max_Current"
         self.entities.powermeter = f"sensor.{self.entities.entityschema}_Charging_Power"
         self.options.powermeter_factor = 1000
-        # self.entities.powerswitch = f"switch.{self.entities.entityschema}_paused" #todo: find this.
+        self.entities.powerswitch = f"binary_sensor.{self.entities.entityschema}_Status"
         self.entities.ampmeter = f"sensor.{self.entities.entityschema}_Max_Current"
         self.entities.chargerentity = f"binary_sensor.{self.entities.entityschema}_Charging_State|status"
 
-    # def get_allowed_amps(self) -> int:
-    #     ret = self._hass.states.get(self.entities.maxamps)
-    #     if ret is not None:
-    #         log_once(f"Got max amps from Wallbox. Setting {ret.state}A.")
-    #         return int(ret.state)
-    #     else:
-    #         log_once(
-    #             f"Unable to get max amps. The sensor {self.entities.maxamps} returned state {ret}. Setting max amps to 16 til I get a proper state."
-    #         )
-    #     return 16
