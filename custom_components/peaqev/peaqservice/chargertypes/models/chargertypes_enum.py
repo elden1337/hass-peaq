@@ -13,13 +13,15 @@ class ChargerType(Enum):
     NoCharger = "None"
     Unknown = "Unknown"
     WallBox = "Wallbox"
+    Keba = "Keba"
 
 
 CHARGERTYPES = [
     ChargerType.ChargeAmps.value,
     ChargerType.Easee.value,
-    ChargerType.Outlet.value,
     ChargerType.GaroWallbox.value,
+    ChargerType.Keba.value,
+    ChargerType.Outlet.value,
     ChargerType.WallBox.value,
     ChargerType.Zaptec.value,
     ChargerType.NoCharger.value,

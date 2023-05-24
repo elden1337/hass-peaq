@@ -12,6 +12,7 @@ from custom_components.peaqev.peaqservice.chargertypes.types.chargeamps import \
 from custom_components.peaqev.peaqservice.chargertypes.types.easee import Easee
 from custom_components.peaqev.peaqservice.chargertypes.types.garowallbox import \
     GaroWallBox
+from custom_components.peaqev.peaqservice.chargertypes.types.keba import Keba
 from custom_components.peaqev.peaqservice.chargertypes.types.no_charger import \
     NoCharger
 from custom_components.peaqev.peaqservice.chargertypes.types.outlet import \
@@ -37,6 +38,7 @@ class ChargerTypeFactory:
             ChargerType.Zaptec: Zaptec,
             ChargerType.WallBox: WallBox,
             ChargerType.NoCharger: NoCharger,
+            ChargerType.Keba: Keba,
         }
 
         try:

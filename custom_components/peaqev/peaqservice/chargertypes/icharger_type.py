@@ -50,7 +50,7 @@ class IChargerType:
     async def async_setup(self) -> bool:
         if self.type is not ChargerType.NoCharger:
             try:
-                entitiesobj = await helper.async_set_entitiesmodel(
+                entitiesobj = helper.set_entitiesmodel(
                     hass=self._hass,
                     domain=self.domain_name,
                     entity_endings=self.entity_endings,

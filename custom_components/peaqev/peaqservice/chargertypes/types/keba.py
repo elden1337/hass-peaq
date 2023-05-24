@@ -28,11 +28,11 @@ class Keba(IChargerType):
         self._is_initialized = False
         self._type = chargertype
 
-        self._chargerid = huboptions.charger.chargerid  # needed?
+        #self._chargerid = huboptions.charger.chargerid  # needed?
 
         self.entities.imported_entityendings = self.entity_endings
         self.options.powerswitch_controls_charging = False
-        # self.chargerstates[ChargeControllerStates.Idle] = ["available"]
+        self.chargerstates[ChargeControllerStates.Idle] = ["not ready for charging"]
         self.chargerstates[ChargeControllerStates.Connected] = ["ready for charging"]
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
 
