@@ -185,7 +185,7 @@ class IChargeController:
             ):
                 return await self.async_get_status_charging(), True
         except Exception as e:
-            _LOGGER.debug(f"Error in async_get_status: {e}")
+            _LOGGER.debug(f"Error in async_get_status: {e}. state is {_state}")
         return ChargeControllerStates.Error, True
 
     async def async_get_status_outlet(self) -> Tuple[ChargeControllerStates, bool]:
