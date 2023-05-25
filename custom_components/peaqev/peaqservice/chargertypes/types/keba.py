@@ -34,7 +34,7 @@ class Keba(IChargerType):
         self.options.powerswitch_controls_charging = False
         self.chargerstates[ChargeControllerStates.Idle] = ["not ready for charging"]
         self.chargerstates[ChargeControllerStates.Connected] = ["ready for charging"]
-        self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
+        self.chargerstates[ChargeControllerStates.Charging] = ["starting", "charging"]
 
     @property
     def type(self) -> ChargerType:
