@@ -107,10 +107,10 @@ class Keba(IChargerType):
         )
 
     async def async_set_sensors(self) -> None:
-        self.entities.maxamps = f"sensor.{self.entities.entityschema}_Max_Current"
-        self.entities.powermeter = f"sensor.{self.entities.entityschema}_Charging_Power"
+        self.entities.maxamps = f"sensor.{self.entities.entityschema}_max_current"
+        self.entities.powermeter = f"sensor.{self.entities.entityschema}_charging_power"
         self.options.powermeter_factor = 1000
-        self.entities.powerswitch = f"binary_sensor.{self.entities.entityschema}_Status"
-        self.entities.ampmeter = f"sensor.{self.entities.entityschema}_Max_Current"
-        self.entities.chargerentity = f"binary_sensor.{self.entities.entityschema}_Charging_State|status"
+        self.entities.powerswitch = f"binary_sensor.{self.entities.entityschema}_status"
+        self.entities.ampmeter = f"sensor.{self.entities.entityschema}_max_current"
+        self.entities.chargerentity = f"binary_sensor.{self.entities.entityschema}_charging_state|status"
 
