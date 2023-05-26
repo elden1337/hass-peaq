@@ -27,7 +27,11 @@ class PeaqPowerSensor(PowerDevice):
 
     @property
     def state(self) -> int:
-        return self._state
+        try:
+            return int(self._state)
+        except (ValueError, TypeError):
+            _LOGGER.error("Could not parse state %s for powersensor", self._state)
+            return 0
 
     async def async_update(self) -> None:
         self._state = self.hub.sensors.power.total.value  # todo: composition
