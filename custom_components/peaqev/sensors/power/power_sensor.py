@@ -30,7 +30,8 @@ class PeaqPowerSensor(PowerDevice):
         try:
             return int(self._state)
         except (ValueError, TypeError):
-            _LOGGER.error("Could not parse state %s for powersensor", self._state)
+            if self._state is not None:
+                _LOGGER.error("Could not parse state %s for powersensor", self._state)
             return 0
 
     async def async_update(self) -> None:
