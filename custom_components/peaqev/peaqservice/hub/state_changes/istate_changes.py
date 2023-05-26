@@ -81,7 +81,7 @@ class IStateChanges:
 
     async def async_update_chargerobject_switch(self, value) -> None:
         self.hub.sensors.chargerobject_switch.value = value
-        await self.hub.sensors.chargerobject_switch.async_updatecurrent()
+        await self.hub.sensors.amp_meter.async_update()
         await self.async_handle_outlet_updates()
 
     async def async_update_total_energy_and_peak(self, value) -> None:
