@@ -103,14 +103,7 @@ class NordPoolUpdater:
         _new = await self.async_get_average(30)
         if self.model.average_30 != _new:
             self.model.average_30 = _new
-            _dynamic_max_price = await self._dynamic_top_price.async_get_max(
-                self.model.average_data
-            )
-            self.model.dynamic_top_price_type = _dynamic_max_price[1].value
-            _LOGGER.debug(_dynamic_max_price)
-            await self.hub.observer.async_broadcast(
-                "dynamic max price changed", _dynamic_max_price[0]
-            )
+
 
     async def async_update_average_week(self) -> None:
         _average7 = await self.async_get_average(7)
@@ -150,6 +143,16 @@ class NordPoolUpdater:
         await self.async_update_average_day(result.average)
         await self.async_update_average_month()
         await self.async_update_average_30()
+        if len(self.model.average_data) > 3:
+            _dynamic_max_price = await self._dynamic_top_price.async_get_max(
+                self.model.average_data
+            )
+            if self.model.dynamic_top_price != _dynamic_max_price[0]:
+                self.model.dynamic_top_price_type = _dynamic_max_price[1].value
+                _LOGGER.debug(_dynamic_max_price)
+                await self.hub.observer.async_broadcast(
+                    "dynamic max price changed", _dynamic_max_price[0]
+                )
         return ret
 
     def _setup_nordpool(self):
