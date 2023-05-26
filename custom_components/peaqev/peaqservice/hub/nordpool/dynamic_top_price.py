@@ -76,7 +76,7 @@ class DynamicTopPrice:
             for i in range((listlen - datetime.now().day), listlen):
                 divident = prices[i - days : i]
                 if not len(divident):
-                    break
+                    continue
                 rolling.append(mean(divident))
         except Exception as e:
             _LOGGER.debug(f"Error in async_get_rolling: {e}")
@@ -91,7 +91,10 @@ class DynamicTopPrice:
             listlen = len(prices)
             start_at = listlen - datetime.now().day
             for i in range(start_at, listlen):
-                rolling.append(mean(prices[start_at : i + 1]))
+                divident = prices[start_at : i + 1]
+                if not len(divident):
+                    break
+                rolling.append(mean(divident))
         except Exception as e:
             _LOGGER.debug(f"Error in async_get_current_month: {e}")
         return rolling
