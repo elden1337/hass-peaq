@@ -31,7 +31,7 @@ class ChargerHelpers:
         return self._updates_should_continue()
 
     def wait_update_current(self) -> bool:
-        self.charger.controller.hub.sensors.chargerobject_switch.updatecurrent()  # todo: composition
+        self.charger.controller.hub.sensors.amp_meter.update()  # todo: composition
         while all(
             [
                 (self._currents_match() or self._too_late_to_increase()),
@@ -43,10 +43,10 @@ class ChargerHelpers:
 
     def wait_loop_cycle(self):
         start_time = time.time()
-        self.charger.controller.hub.sensors.chargerobject_switch.updatecurrent()  # todo: composition
+        self.charger.controller.hub.sensors.amp_meter.update()
         while time.time() - start_time < LOOP_RELEASE_TIMER:
             time.sleep(LOOP_WAIT)
-        self.charger.controller.hub.sensors.chargerobject_switch.updatecurrent()  # todo: composition
+        self.charger.controller.hub.sensors.amp_meter.update()
 
     def _updates_should_continue(self) -> bool:
         return not any(
@@ -58,7 +58,7 @@ class ChargerHelpers:
 
     def _currents_match(self) -> bool:
         return (
-            self.charger.controller.hub.sensors.chargerobject_switch.current
+            self.charger.controller.hub.sensors.amp_meter.value
             == self.charger.controller.hub.threshold.allowed_current()
         )  # todo: composition
 
@@ -66,5 +66,5 @@ class ChargerHelpers:
         return (
             datetime.now().minute >= 55
             and self.charger.controller.hub.threshold.allowed_current()
-            > self.charger.controller.hub.sensors.chargerobject_switch.current
+            > self.charger.controller.hub.sensors.amp_meter.value
         )  # todo: composition
