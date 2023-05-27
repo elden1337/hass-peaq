@@ -120,7 +120,7 @@ class HubSensors:
         regular = {
             "chargerobject": partial(
                 ChargerObject,
-                data_type=self.chargertype.native_chargerstates,
+                data_type=type(self.chargertype.native_chargerstates[0]),
                 listenerentity=self.chargertype.entities.chargerentity,
             ),
             "chargerobject_switch": partial(
@@ -144,7 +144,7 @@ class HubSensors:
         lite = {
             "chargerobject": partial(
                 ChargerObject,
-                data_type=self.chargertype.native_chargerstates,
+                data_type=type(self.chargertype.native_chargerstates[0]),
                 listenerentity="no entity",
                 init_override=True,
             ),
