@@ -191,7 +191,7 @@ class Charger:
             _LOGGER.error(f"Error calling charger: {e}")
 
     async def async_update_max_current(self) -> None:
-        await self.controller.hub.sensors.amp_meter.async_update()
+        self.controller.hub.sensors.amp_meter.update()
         calls = self._charger.servicecalls.get_call(CallTypes.UpdateCurrent)
         if await self.controller.hub.state_machine.async_add_executor_job(
             self.helpers.wait_turn_on

@@ -179,7 +179,7 @@ class HubSensors:
                 is not None
                 else ""
             )
-            await self.amp_meter.async_update()
+            self.amp_meter.update()
             self.carpowersensor.value = (
                 self.state_machine.states.get(self.carpowersensor.entity).state
                 if isinstance(
