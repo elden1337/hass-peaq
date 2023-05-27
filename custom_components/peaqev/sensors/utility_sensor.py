@@ -35,7 +35,7 @@ class UtilityMeterDTO:
 async def async_create_single_utility(hub: HomeAssistantHub, sensor: any, meter_type: TimePeriods, entry_id: any):
     name = f"{hub.hubname} {sensor} {meter_type.value.lower()}"
     source = f"sensor.{DOMAIN.lower()}_{sensor}"
-    parent = f"{source}_{meter_type.value.lower()}"
+    this_sensor = f"{source}_{meter_type.value.lower()}"
     unique_id = f"{DOMAIN}_{entry_id}_{nametoid(name)}"
     params = {
         "source_entity": source,
@@ -50,7 +50,7 @@ async def async_create_single_utility(hub: HomeAssistantHub, sensor: any, meter_
 
     signature = inspect.signature(UtilityMeterSensor.__init__)
     if "parent_meter" in signature.parameters:
-        params["parent_meter"] = parent
+        params["parent_meter"] = source
     if "delta_values" in signature.parameters:
         params["delta_values"] = False
     if "unique_id" in signature.parameters:
@@ -59,7 +59,7 @@ async def async_create_single_utility(hub: HomeAssistantHub, sensor: any, meter_
         params["cron_pattern"] = None
 
     utility_meter = PeaqUtilitySensor(**params)
-    utility_meter.entity_id = parent
+    utility_meter.entity_id = this_sensor
     return utility_meter
 
 
