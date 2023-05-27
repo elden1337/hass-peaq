@@ -6,7 +6,8 @@ from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.services.chargertype.const import DOMAIN, PARAMS
 
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import call_ok
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import \
+    call_ok
 from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import \
     ChargerStates
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelpers import (
