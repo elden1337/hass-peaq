@@ -56,15 +56,15 @@ class GaroWallBox(IChargerType):
     def entity_endings(self) -> list:
         """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
         return [
-            "_current_temperature",
-            "_latest_reading_k",
-            "_latest_reading",
-            "_acc_session_energy",
+            "_temperature",
+            "_total_energy_kwh",
+            "_total_energy",
+            "_session_energy",
             "_pilot_level",
             "_current_limit",
-            "_nr_of_phases",
-            "_current_charging_power",
-            "_current_charging_current",
+            "_phases",
+            "_charging_power",
+            "_charging_current",
             "_status",
         ]
 
@@ -96,11 +96,11 @@ class GaroWallBox(IChargerType):
 
     @property
     def call_on(self) -> CallType:
-        return CallType(SET_MODE, {MODE: "on", ENTITY_ID: self.entities.chargerentity})
+        return CallType(SET_MODE, {MODE: "On", ENTITY_ID: self.entities.chargerentity})
 
     @property
     def call_off(self) -> CallType:
-        return CallType(SET_MODE, {MODE: "off", ENTITY_ID: self.entities.chargerentity})
+        return CallType(SET_MODE, {MODE: "Off", ENTITY_ID: self.entities.chargerentity})
 
     @property
     def call_resume(self) -> CallType:
@@ -141,15 +141,13 @@ class GaroWallBox(IChargerType):
         return ret
 
     async def async_set_sensors(self) -> None:
-        self.entities.chargerentity = f"sensor.{self.entities.entityschema}-status"
-        self.entities.powermeter = (
-            f"sensor.{self.entities.entityschema}-current_charging_power"
-        )
+        self.entities.chargerentity = f"sensor.{self.entities.entityschema}_status"
+        self.entities.powermeter = f"sensor.{self.entities.entityschema}_charging_power"
         self.options.powermeter_factor = 1
-        self.entities.ampmeter = (
-            f"sensor.{self.entities.entityschema}-current_charging_current"
-        )
-        self.entities.powerswitch = "n/a"
+        self.entities.ampmeter = f"sensor.{self.entities.entityschema}_charging_current"
+
+        # maybe not? The sensor shows On/Off, but it is not a switch
+        self.entities.powerswitch = f"sensor.{self.entities.entityschema}"
 
     async def async_determine_switch_entity(self) -> str:
         ent = await self.async_determine_entities()
