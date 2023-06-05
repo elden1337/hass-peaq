@@ -10,7 +10,8 @@ from datetime import datetime
 
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from custom_components.peaqev.peaqservice.chargecontroller.const import CHARGING_ALLOWED
+from custom_components.peaqev.peaqservice.chargecontroller.const import \
+    CHARGING_ALLOWED
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
 from custom_components.peaqev.sensors.money_sensor_helpers import *
 from custom_components.peaqev.sensors.sensorbase import SensorBase
