@@ -72,26 +72,26 @@ class GaroWallBox(IChargerType):
     def native_chargerstates(self) -> list:
         """declare a list of the native-charger states available for the type."""
         return [
-            "CHANGING",
-            "NOT_CONNECTED",
-            "CONNECTED",
-            "SEARCH_COMM",
-            "RCD_FAULT",
-            "CHARGING",
-            "CHARGING_PAUSED",
-            "CHARGING_FINISHED",
-            "CHARGING_CANCELLED",
-            "DISABLED",
-            "OVERHEAT",
-            "CRITICAL_TEMPERATURE",
-            "INITIALIZATION",
-            "CABLE_FAULT",
-            "LOCK_FAULT",
-            "CONTACTOR_FAULT",
-            "VENT_FAULT",
-            "DC_ERROR",
-            "UNKNOWN",
-            "UNAVAILABLE",
+            "changing",
+            "not_connected",
+            "connected",
+            "search_comm",
+            "rcd_fault",
+            "charging",
+            "charging_paused",
+            "charging_finished",
+            "charging_cancelled",
+            "disabled",
+            "overheat",
+            "critical_temperature",
+            "initialization",
+            "cable_fault",
+            "lock_fault",
+            "contactor_fault",
+            "vent_fault",
+            "dc_error",
+            "unknown",
+            "unavailable"
         ]
 
     @property
@@ -167,11 +167,11 @@ class GaroWallBox(IChargerType):
         return ret
 
     def _set_charger_states(self) -> None:
-        self.chargerstates[ChargeControllerStates.Idle] = ["NOT_CONNECTED"]
+        self.chargerstates[ChargeControllerStates.Idle] = ["not_connected"]
         self.chargerstates[ChargeControllerStates.Connected] = [
-            "CONNECTED",
-            "CHARGING_PAUSED",
-            "CHARGING_CANCELLED",
+            "connected",
+            "charging_paused",
+            "charging_cancelled",
         ]
-        self.chargerstates[ChargeControllerStates.Done] = ["CHARGING_FINISHED"]
-        self.chargerstates[ChargeControllerStates.Charging] = ["CHARGING"]
+        self.chargerstates[ChargeControllerStates.Done] = ["charging_finished"]
+        self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
