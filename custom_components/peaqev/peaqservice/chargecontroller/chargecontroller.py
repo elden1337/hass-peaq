@@ -11,16 +11,12 @@ if TYPE_CHECKING:
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import (
-    async_defer_start,
-)
+from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import \
+    async_defer_start
 from custom_components.peaqev.peaqservice.chargecontroller.const import (
-    INITIALIZING,
-    WAITING_FOR_POWER,
-)
-from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import (
-    IChargeController,
-)
+    INITIALIZING, WAITING_FOR_POWER)
+from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
+    IChargeController
 
 _LOGGER = logging.getLogger(__name__)
 
