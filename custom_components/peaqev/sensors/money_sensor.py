@@ -10,14 +10,9 @@ from datetime import datetime
 
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from custom_components.peaqev.peaqservice.chargecontroller.const import \
-    CHARGING_ALLOWED
+from custom_components.peaqev.peaqservice.chargecontroller.const import CHARGING_ALLOWED
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
-from custom_components.peaqev.sensors.money_sensor_helpers import (
-    async_calculate_stop_len, async_currency_translation, async_set_avg_cost,
-    async_set_caution_hours_display,
-    async_set_current_charge_permittance_display, async_set_non_hours_display,
-    async_set_total_charge)
+from custom_components.peaqev.sensors.money_sensor_helpers import *
 from custom_components.peaqev.sensors.sensorbase import SensorBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -78,51 +73,49 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             self._state = await self.async_state_display(
                 ret.get("non_hours", []), ret.get("dynamic_caution_hours", {})
             )
-            self._nonhours = await async_set_non_hours_display(
+            self._nonhours = set_non_hours_display(
                 ret.get("non_hours", []), ret.get("prices_tomorrow", [])
             )
-            self._dynamic_caution_hours = await async_set_caution_hours_display(
+            self._dynamic_caution_hours = set_caution_hours_display(
                 ret.get("dynamic_caution_hours", {})
             )
             self._currency = ret.get("currency")
             self._offsets = ret.get("offsets", {})
             self._current_peak = ret.get("current_peak")
-            self._max_charge = await async_set_total_charge(ret.get("max_charge"))
+            self._max_charge = set_total_charge(ret.get("max_charge"))
             self._average_nordpool_data = ret.get("average_nordpool_data", [])
-            self._charge_permittance = (
-                await async_set_current_charge_permittance_display(
-                    ret.get("non_hours"), ret.get("dynamic_caution_hours")
-                )
+            self._charge_permittance = set_current_charge_permittance_display(
+                ret.get("non_hours"), ret.get("dynamic_caution_hours")
             )
 
-            self._avg_cost = await async_set_avg_cost(
+            self._avg_cost = set_avg_cost(
                 avg_cost=ret.get("avg_kwh_price"),
                 currency=ret.get("currency"),
                 use_cent=ret.get("use_cent"),
             )
 
-            self._average_nordpool = await async_currency_translation(
+            self._average_nordpool = currency_translation(
                 value=ret.get("average_weekly"),
                 currency=ret.get("currency"),
                 use_cent=ret.get("use_cent", False),
             )
-            self._average_data_current_month = await async_currency_translation(
+            self._average_data_current_month = currency_translation(
                 value=ret.get("average_monthly"),
                 currency=ret.get("currency"),
                 use_cent=ret.get("use_cent", False),
             )
-            self._average_data_30 = await async_currency_translation(
+            self._average_data_30 = currency_translation(
                 value=ret.get("average_30"),
                 currency=ret.get("currency"),
                 use_cent=ret.get("use_cent", False),
             )
             if self.hub.options.price.dynamic_top_price:
-                _maxp = await async_currency_translation(
+                _maxp = currency_translation(
                     value=ret.get("max_price") if ret.get("max_price", 0) > 0 else None,
                     currency=ret.get("currency"),
                     use_cent=ret.get("use_cent", False),
                 )
-                _minp = await async_currency_translation(
+                _minp = currency_translation(
                     value=ret.get("min_price") if ret.get("min_price", 0) > 0 else None,
                     currency=ret.get("currency"),
                     use_cent=ret.get("use_cent", False),
@@ -183,7 +176,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             )  # todo: composition
         if hour in non_hours:
             self._icon = "mdi:car-clock"
-            ret = await async_calculate_stop_len(non_hours)
+            ret = calculate_stop_len(non_hours)
         elif hour in dynamic_caution_hours.keys():
             val = dynamic_caution_hours.get(hour)
             ret += f" at {int(val * 100)}% of peak"
