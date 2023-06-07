@@ -22,6 +22,7 @@ from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 
 @dataclass
 class HubSensors:
+    sensors_list: list[HubMember] = field(init=False)
     charger_enabled: HubMember = field(init=False)
     charger_done: HubMember = field(init=False)
     current_peak: CurrentPeak = field(init=False)
@@ -110,13 +111,21 @@ class HubSensors:
 
         if not options.peaqev_lite:
             sensors.update(regular_sensors)
-
         for k, v in sensors.items():
             setattr(self, k, v())
+        self.sensors_list = [
+            self.amp_meter,
+            self.chargerobject,
+            self.chargerobject_switch,
+            self.charger_enabled,
+            self.charger_done,
+        ]
 
     async def async_set_chargerobject_and_switch(
         self,
-    ) -> Tuple[ChargerObject, ChargerSwitch, HubMember, bool | None]:  # todo: refactor setup
+    ) -> Tuple[
+        ChargerObject, ChargerSwitch, HubMember, bool | None
+    ]:  # todo: refactor setup
         regular = {
             "chargerobject": partial(
                 ChargerObject,
@@ -129,7 +138,7 @@ class HubSensors:
                 data_type=bool,
                 listenerentity=self.chargertype.entities.powerswitch,
                 initval=False,
-                #currentname=self.chargertype.entities.ampmeter,
+                # currentname=self.chargertype.entities.ampmeter,
                 hubdata=self,
                 init_override=True,
             ),
@@ -138,8 +147,8 @@ class HubSensors:
                 data_type=int,
                 listenerentity=self.chargertype.entities.ampmeter,
                 initval=0,
-                hass=self.state_machine
-            )
+                hass=self.state_machine,
+            ),
         }
         lite = {
             "chargerobject": partial(
@@ -154,14 +163,24 @@ class HubSensors:
                 data_type=bool,
                 listenerentity=self.chargertype.entities.powerswitch,
                 initval=False,
-                #currentname=self.chargertype.entities.ampmeter,
+                # currentname=self.chargertype.entities.ampmeter,
                 hubdata=self,
-            )
+            ),
         }
         if len(self.chargertype.entities.chargerentity):
-            return regular["chargerobject"](), regular["chargerobject_switch"](),regular["amp_meter"](), None
+            return (
+                regular["chargerobject"](),
+                regular["chargerobject_switch"](),
+                regular["amp_meter"](),
+                None,
+            )
         else:
-            return lite["chargerobject"](), lite["chargerobject_switch"](),regular["amp_meter"](), True
+            return (
+                lite["chargerobject"](),
+                lite["chargerobject_switch"](),
+                regular["amp_meter"](),
+                True,
+            )
 
     async def async_init_hub_values(self):
         """Initialize values from Home Assistant on the set objects"""
