@@ -60,6 +60,16 @@ class IStateChanges:
                     await self.hub.hours.scheduler.async_update_facade()
 
     async def async_handle_sensor_attribute(self) -> None:
+        for sensor in self.hub.sensors.sensors_list:
+            try:
+                if sensor.use_attribute:
+                    sensor.update()
+            except Exception as e:
+                _LOGGER.debug(
+                    f"Unable to update attribute as state for {sensor.entity}. {e}"
+                )
+
+        # is this needed if we loop them all?
         if hasattr(self.hub.sensors, "carpowersensor"):
             if self.hub.sensors.carpowersensor.use_attribute:
                 entity = self.hub.sensors.carpowersensor

@@ -94,5 +94,7 @@ class ChargeController(IChargeController):
                 else:
                     return ChargeControllerStates.Stop, True
         except Exception as e:
-            _LOGGER.error(f"async_get_status_connected for: {e}")
+            _LOGGER.debug(
+                f"async_get_status_connected for: {e}. charger-state: {charger_state}"
+            )
             return ChargeControllerStates.Error, True

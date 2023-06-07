@@ -1,33 +1,35 @@
 from datetime import datetime
 
 
-async def async_calculate_stop_len(nonhours) -> str:
+def calculate_stop_len(nonhours) -> str:
     ret = ""
     for idx, h in enumerate(nonhours):
         if idx + 1 < len(nonhours):
-            if await async_getuneven(nonhours[idx + 1], nonhours[idx]):
-                ret = await async_get_stopped_string(h)
+            if _get_uneven(nonhours[idx + 1], nonhours[idx]):
+                ret = _get_stopped_string(h)
                 break
         elif idx + 1 == len(nonhours):
-            ret = await async_get_stopped_string(h)
+            ret = _get_stopped_string(h)
             break
     return ret
 
 
-async def async_get_stopped_string(h) -> str:
+def _get_stopped_string(
+    h,
+) -> str:  # todo: find out if stopped til further notice instead and type that.
     val = h + 1 if h + 1 < 24 else h + 1 - 24
     if val < 10:
         return f"Charging stopped until 0{val}:00"
     return f"Charging stopped until {val}:00"
 
 
-async def async_getuneven(first, second) -> bool:
+def _get_uneven(first, second) -> bool:
     if second > first:
         return first - (second - 24) != 1
     return first - second != 1
 
 
-async def async_currency_translation(
+def currency_translation(
     value: float | str | None, currency, use_cent: bool = False
 ) -> str:
     value = "-" if value is None else value
@@ -43,29 +45,29 @@ async def async_currency_translation(
     return ret
 
 
-async def async_set_avg_cost(avg_cost, currency, use_cent) -> str:
-    standard = await async_currency_translation(
+def set_avg_cost(avg_cost, currency, use_cent) -> str:
+    standard = currency_translation(
         value=avg_cost[0],
         currency=currency,
         use_cent=use_cent,
     )
     if avg_cost[1] is not None:
         if avg_cost[1] != avg_cost[0]:
-            override = await async_currency_translation(
+            override = currency_translation(
                 value=avg_cost[1], currency=currency, use_cent=use_cent
             )
             return f"{override} ({standard})"
     return f"{standard}"
 
 
-async def async_set_total_charge(max_charge) -> str:
+def set_total_charge(max_charge) -> str:
     if max_charge[1] is not None:
         if max_charge[1] != max_charge[0]:
             return f"{max_charge[1]} kWh ({max_charge[0]} kWh)"
     return f"{max_charge[0]} kWh"
 
 
-async def async_set_non_hours_display(non_hours: list, prices_tomorrow: list) -> list:
+def set_non_hours_display(non_hours: list, prices_tomorrow: list) -> list:
     ret = []
     for i in non_hours:
         if i < datetime.now().hour and len(prices_tomorrow) > 0:
@@ -75,7 +77,7 @@ async def async_set_non_hours_display(non_hours: list, prices_tomorrow: list) ->
     return ret
 
 
-async def async_set_caution_hours_display(dynamic_caution_hours: dict) -> dict:
+def set_caution_hours_display(dynamic_caution_hours: dict) -> dict:
     ret = {}
     if len(dynamic_caution_hours) > 0:
         for h in dynamic_caution_hours:
@@ -87,9 +89,7 @@ async def async_set_caution_hours_display(dynamic_caution_hours: dict) -> dict:
     return ret
 
 
-async def async_set_current_charge_permittance_display(
-    non_hours, dynamic_caution_hours
-) -> str:
+def set_current_charge_permittance_display(non_hours, dynamic_caution_hours) -> str:
     ret = 100
     hour = datetime.now().hour
     if hour in non_hours:
