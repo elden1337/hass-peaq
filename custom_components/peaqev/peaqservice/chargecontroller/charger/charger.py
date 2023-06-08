@@ -6,16 +6,22 @@ from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.services.chargertype.const import DOMAIN, PARAMS
 
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import \
-    call_ok
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import \
-    ChargerStates
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import (
+    call_ok,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import (
+    ChargerStates,
+)
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelpers import (
-    ChargerHelpers, async_set_chargerparams)
-from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import \
-    ChargerModel
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
+    ChargerHelpers,
+    async_set_chargerparams,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import (
+    ChargerModel,
+)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
@@ -57,8 +63,6 @@ class Charger:
 
     async def async_charge(self) -> None:
         """Main function to turn charging on or off"""
-        if self._charger.type is ChargerType.NoCharger:
-            return
         if self.model.charger_state_mismatch:
             await self.async_internal_state(ChargerStates.Pause)
         if (
