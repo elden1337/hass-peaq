@@ -63,7 +63,7 @@ class Charger:
 
     async def async_charge(self) -> None:
         """Main function to turn charging on or off"""
-        if self.model.charger_state_mismatch:
+        if self.model.unsuccessful_stop:
             await self.async_internal_state(ChargerStates.Pause)
         if (
             self.controller.hub.enabled
@@ -254,10 +254,10 @@ class Charger:
             ChargeControllerStates.Charging
         ):
             self.model.running = False
-            self.model.charger_state_mismatch = False
+            self.model.unsuccessful_stop = False
             _LOGGER.debug("Internal charger has been stopped")
         elif time.time() - self.model.lastest_call_off > 10:
-            self.model.charger_state_mismatch = True
+            self.model.unsuccessful_stop = True
             self.model.lastest_call_off = time.time()
             log_once(
                 f"Fail when trying to stop connected charger. Retrying stop-attempt..."
