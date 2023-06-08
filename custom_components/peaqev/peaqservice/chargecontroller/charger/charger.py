@@ -55,7 +55,7 @@ class Charger:
             )  # todo: composition
         return all(
             [
-                self.controller.hub.sensors.chargerobject_switch.value,  # todo: composition
+                # self.controller.hub.sensors.chargerobject_switch.value,  # todo: possibly remove to allow chargertypes without switch.
                 self.controller.hub.sensors.carpowersensor.value
                 > 0,  # todo: composition
             ]
@@ -124,6 +124,13 @@ class Charger:
                     "Detected charger running outside of peaqev-session, overtaking command."
                 )
                 await self.async_overtake_charger()
+        elif (
+            not self.charger_active
+        ):  # interim solution to test if case works with Garo and other types.
+            _LOGGER.debug(
+                "Restarting charger since it has been turned off from outside of Peaqev."
+            )
+            await self.async_start_charger()
 
     async def async_reset_session(self) -> None:
         if (
