@@ -118,7 +118,8 @@ class IChargeController:
                         old_state=self.status_type, new_state=status_type
                     )
                     self.model.status_type = status_type
-                    await self.charger.async_charge()
+                    if self.model.charger_type is not ChargerType.NoCharger:
+                        await self.charger.async_charge()
         except Exception as e:
             _LOGGER.debug(f"Error in async_set_status_type: {e}")
 
