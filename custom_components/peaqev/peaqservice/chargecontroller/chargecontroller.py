@@ -3,9 +3,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Tuple
 
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
-    ChargerType,
-)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
+    ChargerType
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
