@@ -27,8 +27,6 @@ _LOGGER = logging.getLogger(__name__)
 class IChargeController:
     """The interface for the charge controller"""
 
-    # charger_type: ChargerType
-
     def __init__(self, hub, charger_states, charger_type):
         self.hub = hub
         self.name: str = f"{self.hub.hubname} {CHARGERCONTROLLER}"
