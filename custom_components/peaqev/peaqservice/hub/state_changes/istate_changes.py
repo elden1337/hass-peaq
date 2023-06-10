@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
+
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
-    from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
-        ChargerType,
-    )
+
 import logging
 import time
 from abc import abstractmethod
