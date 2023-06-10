@@ -43,7 +43,7 @@ class StateChanges(IStateChanges):
                             config_sensor_value=None,
                         )
                     update_session = True
-                    self.hub.sensors.amp_meter.update()
+                    #self.hub.sensors.amp_meter.update()
                     self.hub.power.power_canary.total_power = (
                         self.hub.sensors.power.total.value
                     )
@@ -98,7 +98,7 @@ class StateChangesLite(IStateChanges):
                 else:
                     self.hub.sensors.carpowersensor.value = value
                     await self._handle_outlet_updates()
-                    self.hub.sensors.amp_meter.update()
+                    #self.hub.sensors.amp_meter.update()
             case self.hub.sensors.chargerobject.entity:
                 await self.hub.async_set_chargerobject_value(value)
             case self.hub.sensors.chargerobject_switch.entity:

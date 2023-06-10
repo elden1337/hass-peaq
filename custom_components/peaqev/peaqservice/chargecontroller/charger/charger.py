@@ -116,13 +116,13 @@ class Charger:
                     "Detected charger running outside of peaqev-session, overtaking command."
                 )
                 await self.async_overtake_charger()
-        elif (
-            not self.charger_active
-        ):  # interim solution to test if case works with Garo and other types.
-            _LOGGER.debug(
-                "Restarting charger since it has been turned off from outside of Peaqev."
-            )
-            await self.async_start_charger()
+        # elif (
+        #     not self.charger_active
+        # ):  # interim solution to test if case works with Garo and other types.
+        #     _LOGGER.debug(
+        #         "Restarting charger since it has been turned off from outside of Peaqev."
+        #     )
+        #     await self.async_start_charger()
 
     async def async_reset_session(self) -> None:
         if (
@@ -195,7 +195,7 @@ class Charger:
             _LOGGER.error(f"Error calling charger: {e}")
 
     async def async_update_max_current(self) -> None:
-        self.controller.hub.sensors.amp_meter.update()
+        #self.controller.hub.sensors.amp_meter.update()
         calls = self._charger.servicecalls.get_call(CallTypes.UpdateCurrent)
         if await self.controller.hub.state_machine.async_add_executor_job(
             self.helpers.wait_turn_on
