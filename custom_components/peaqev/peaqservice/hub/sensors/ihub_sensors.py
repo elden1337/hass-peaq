@@ -138,7 +138,6 @@ class HubSensors:
                 data_type=bool,
                 listenerentity=self.chargertype.entities.powerswitch,
                 initval=False,
-                # currentname=self.chargertype.entities.ampmeter,
                 hubdata=self,
                 init_override=True,
             ),
