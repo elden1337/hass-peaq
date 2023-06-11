@@ -166,12 +166,14 @@ class GaroWallBox(IChargerType):
         return ret
 
     def _set_charger_states(self) -> None:
-        self.chargerstates[ChargeControllerStates.Idle] = ["vehicle not connected"]
-        self.chargerstates[ChargeControllerStates.Connected] = [
-            "vehicle connected",
-            "charging paused",
-            "charging cancelled",
-            "charging disabled"
+        self.chargerstates[ChargeControllerStates.Idle] = [
+            "vehicle not connected",  # vehicle not plugged in
+            "charging paused"  # charging disabled by load balancer
         ]
-        self.chargerstates[ChargeControllerStates.Done] = ["charging finished"]
+        self.chargerstates[ChargeControllerStates.Connected] = [
+            "vehicle connected",  # waiting for start from vehicle (battery full)
+            "charging cancelled",  # ?
+            "charging disabled"  # charging off (disabled or out of schedule) in Garo GUI
+        ]
+        self.chargerstates[ChargeControllerStates.Done] = ["charging finished"]  # stopped by vehicle
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]

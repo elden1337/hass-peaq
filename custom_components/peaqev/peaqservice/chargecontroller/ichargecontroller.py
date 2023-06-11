@@ -118,8 +118,13 @@ class IChargeController:
                         old_state=self.status_type, new_state=status_type
                     )
                     self.model.status_type = status_type
+<<<<<<< Updated upstream
                     if self.model.charger_type is not ChargerType.NoCharger:
                         await self.charger.async_charge()
+=======
+                    _LOGGER.info(f"model status_type set to {status_type}")
+                    await self.charger.async_charge()
+>>>>>>> Stashed changes
         except Exception as e:
             _LOGGER.debug(f"Error in async_set_status_type: {e}")
 
@@ -147,6 +152,7 @@ class IChargeController:
 
     async def async_get_status(self) -> Tuple[ChargeControllerStates, bool]:
         _state = await self.hub.async_request_sensor_data("chargerobject_value")
+        _LOGGER.info(f"got state {_state}")
         try:
             if not self.hub.enabled:
                 if _state in self.model.charger_states.get(ChargeControllerStates.Idle):

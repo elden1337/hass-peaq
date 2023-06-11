@@ -56,35 +56,44 @@ class Charger:
     async def async_charge(self) -> None:
         """Main function to turn charging on or off"""
         if self.model.unsuccessful_stop:
+            _LOGGER.info(f"unsuccessful stop (>Pause)")
             await self.async_internal_state(ChargerStates.Pause)
         if (
             self.controller.hub.enabled
             and not self.controller.hub.sensors.power.killswitch.is_dead
         ):
+            _LOGGER.info(f"enabled, reset session")
             await self.async_reset_session()
             match self.controller.status_type:
                 case ChargeControllerStates.Start:
+                    _LOGGER.info(f"state Start (>start_case())")
                     await self.async_start_case()
                 case ChargeControllerStates.Stop:
+                    _LOGGER.info(f"state Stop (>stop_case())")
                     await self.async_stop_case()
                 case ChargeControllerStates.Done | ChargeControllerStates.Idle:
+                    _LOGGER.info(f"state Done|Idle (>done_idle_case())")
                     await self.async_done_idle_case()
                 case ChargeControllerStates.Connected | ChargeControllerStates.Disabled:
+                    _LOGGER.info(f"state Connected|Disabled (>pass)")
                     pass
                 case _:
-                    _LOGGER.debug(
+                    _LOGGER.info(
                         f"Could not match any chargecontroller-state. state: {self.controller.status_type}"
                     )
         else:
+            _LOGGER.info(f"not enabled")
             if self.charger_active and self.model.running:
+                _LOGGER.info(f"active and running")
                 if self.controller.hub.sensors.power.killswitch.is_dead:
-                    _LOGGER.debug(
+                    _LOGGER.info(
                         f"Powersensor has failed to update for more than {self.controller.hub.sensors.power.killswitch.total_timer}s. Charging is paused until it comes alive again."
                     )
                 elif self.controller.hub.enabled:
-                    _LOGGER.debug(
+                    _LOGGER.info(
                         "Detected charger running outside of peaqev-session, overtaking command and pausing."
                     )
+                _LOGGER.info(f"pause_charger")
                 await self.async_pause_charger()
 
     async def async_done_idle_case(self) -> None:
@@ -101,28 +110,34 @@ class Charger:
 
     async def async_stop_case(self) -> None:
         if self.charger_active:
+            _LOGGER.info(f"stop_case() active")
             if not self.model.running and not self.session_active:
-                _LOGGER.debug(
+                _LOGGER.info(
                     "Detected charger running outside of peaqev-session, overtaking command and pausing."
                 )
             await self.async_pause_charger()
+        else:
+            _LOGGER.info(f"stop_case() not active")
 
     async def async_start_case(self) -> None:
         if not self.model.running:
+            _LOGGER.info(f"start_case() not running")
             if not self.charger_active:
+                _LOGGER.info(f"start_case() not active")
                 await self.async_start_charger()
             else:
-                _LOGGER.debug(
+                _LOGGER.info(
                     "Detected charger running outside of peaqev-session, overtaking command."
                 )
                 await self.async_overtake_charger()
-        elif (
-            not self.charger_active
-        ):  # interim solution to test if case works with Garo and other types.
-            _LOGGER.debug(
+        elif not self.charger_active:
+            # interim solution to test if case works with Garo and other types.
+            _LOGGER.info(
                 "Restarting charger since it has been turned off from outside of Peaqev."
             )
             await self.async_start_charger()
+        else:
+            _LOGGER.info(f"start_case() running and active")
 
     async def async_reset_session(self) -> None:
         if (
