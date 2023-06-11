@@ -32,8 +32,6 @@ _LOGGER = logging.getLogger(__name__)
 class IChargeController:
     """The interface for the charge controller"""
 
-    # charger_type: ChargerType
-
     def __init__(self, hub, charger_states, charger_type):
         self.hub = hub
         self.name: str = f"{self.hub.hubname} {CHARGERCONTROLLER}"
@@ -123,7 +121,8 @@ class IChargeController:
                         old_state=self.status_type, new_state=status_type
                     )
                     self.model.status_type = status_type
-                    await self.charger.async_charge()
+                    if self.model.charger_type is not ChargerType.NoCharger:
+                        await self.charger.async_charge()
         except Exception as e:
             _LOGGER.debug(f"Error in async_set_status_type: {e}")
 
@@ -190,7 +189,8 @@ class IChargeController:
             ):
                 return await self.async_get_status_charging(), True
         except Exception as e:
-            _LOGGER.debug(f"Error in async_get_status: {e}. state is {_state}")
+            _LOGGER.debug(f"Error in async_get_status: {e}")
+        _LOGGER.debug(f"async_get_status: {_state} returning Error. {str(_state)}")
         return ChargeControllerStates.Error, True
 
     async def async_get_status_outlet(self) -> Tuple[ChargeControllerStates, bool]:

@@ -13,14 +13,10 @@ from peaqevcore.models.hub.power import Power
 from peaqevcore.services.locale.Locale import LocaleData, LocaleFactory
 
 from custom_components.peaqev.peaqservice.hub.const import (
-    AVERAGECONSUMPTION,
-    AVERAGECONSUMPTION_24H,
-    CHARGERDONE,
-    CHARGERENABLED,
-    CONSUMPTION_TOTAL_NAME,
-    HOURLY,
-)
-from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
+    AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H, CHARGERDONE, CHARGERENABLED,
+    CONSUMPTION_TOTAL_NAME, HOURLY)
+from custom_components.peaqev.peaqservice.hub.models.hub_options import \
+    HubOptions
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 
 
@@ -142,7 +138,6 @@ class HubSensors:
                 data_type=bool,
                 listenerentity=self.chargertype.entities.powerswitch,
                 initval=False,
-                # currentname=self.chargertype.entities.ampmeter,
                 hubdata=self,
                 init_override=True,
             ),

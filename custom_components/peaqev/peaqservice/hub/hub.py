@@ -289,10 +289,10 @@ class HomeAssistantHub:
             self.max_min_controller._original_total_charge = ret["max_charge"][0]
             # todo: 247
         if len(ret) == 1:
-            rr = list(ret.values())[0]
-            if isinstance(rr, str):
-                return rr.lower()
-            return rr
+            val = list(ret.values())[0]
+            if isinstance(val, str):
+                return val.lower()
+            return val
         return ret
 
     @property

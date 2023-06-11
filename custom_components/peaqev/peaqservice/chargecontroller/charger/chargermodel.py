@@ -8,4 +8,4 @@ class ChargerModel:
     session_active: bool = False
     latest_charger_call: float = 0
     lastest_call_off: float = 0
-    charger_state_mismatch: bool = False
+    unsuccessful_stop: bool = False

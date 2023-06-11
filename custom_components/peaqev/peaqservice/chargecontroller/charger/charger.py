@@ -14,8 +14,6 @@ from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelper
     ChargerHelpers, async_set_chargerparams)
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import \
     ChargerModel
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
@@ -49,7 +47,7 @@ class Charger:
             )  # todo: composition
         return all(
             [
-                self.controller.hub.sensors.chargerobject_switch.value,  # todo: composition
+                # self.controller.hub.sensors.chargerobject_switch.value,  # todo: possibly remove to allow chargertypes without switch.
                 self.controller.hub.sensors.carpowersensor.value
                 > 0,  # todo: composition
             ]
@@ -57,9 +55,7 @@ class Charger:
 
     async def async_charge(self) -> None:
         """Main function to turn charging on or off"""
-        if self._charger.type is ChargerType.NoCharger:
-            return
-        if self.model.charger_state_mismatch:
+        if self.model.unsuccessful_stop:
             await self.async_internal_state(ChargerStates.Pause)
         if (
             self.controller.hub.enabled
@@ -120,6 +116,13 @@ class Charger:
                     "Detected charger running outside of peaqev-session, overtaking command."
                 )
                 await self.async_overtake_charger()
+        # elif (
+        #     not self.charger_active
+        # ):  # interim solution to test if case works with Garo and other types.
+        #     _LOGGER.debug(
+        #         "Restarting charger since it has been turned off from outside of Peaqev."
+        #     )
+        #     await self.async_start_charger()
 
     async def async_reset_session(self) -> None:
         if (
@@ -192,7 +195,7 @@ class Charger:
             _LOGGER.error(f"Error calling charger: {e}")
 
     async def async_update_max_current(self) -> None:
-        self.controller.hub.sensors.amp_meter.update()
+        #self.controller.hub.sensors.amp_meter.update()
         calls = self._charger.servicecalls.get_call(CallTypes.UpdateCurrent)
         if await self.controller.hub.state_machine.async_add_executor_job(
             self.helpers.wait_turn_on
@@ -250,10 +253,10 @@ class Charger:
             ChargeControllerStates.Charging
         ):
             self.model.running = False
-            self.model.charger_state_mismatch = False
+            self.model.unsuccessful_stop = False
             _LOGGER.debug("Internal charger has been stopped")
         elif time.time() - self.model.lastest_call_off > 10:
-            self.model.charger_state_mismatch = True
+            self.model.unsuccessful_stop = True
             self.model.lastest_call_off = time.time()
             log_once(
                 f"Fail when trying to stop connected charger. Retrying stop-attempt..."
