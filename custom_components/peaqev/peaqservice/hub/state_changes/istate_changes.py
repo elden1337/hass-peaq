@@ -2,8 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
+    ChargerType
+
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
+
 import logging
 import time
 from abc import abstractmethod
@@ -38,7 +42,13 @@ class IStateChanges:
                 await self.hub.nordpool.async_update_nordpool()
         await self.async_handle_sensor_attribute()
         await self.async_update_session_parameters(update_session)
-        if entity in self.hub.chargingtracker_entities and self.hub.is_initialized:
+        if all(
+            [
+                entity in self.hub.chargingtracker_entities,
+                self.hub.is_initialized,
+                self.hub.chargertype is not ChargerType.NoCharger,
+            ]
+        ):
             await self.hub.chargecontroller.charger.async_charge()
 
     async def async_update_session_parameters(self, update_session: bool) -> None:
@@ -60,6 +70,7 @@ class IStateChanges:
                     await self.hub.hours.scheduler.async_update_facade()
 
     async def async_handle_sensor_attribute(self) -> None:
+        # is this needed if we loop them all?
         if hasattr(self.hub.sensors, "carpowersensor"):
             if self.hub.sensors.carpowersensor.use_attribute:
                 entity = self.hub.sensors.carpowersensor
@@ -81,7 +92,7 @@ class IStateChanges:
 
     async def async_update_chargerobject_switch(self, value) -> None:
         self.hub.sensors.chargerobject_switch.value = value
-        await self.hub.sensors.chargerobject_switch.async_updatecurrent()
+        #self.hub.sensors.amp_meter.update()
         await self.async_handle_outlet_updates()
 
     async def async_update_total_energy_and_peak(self, value) -> None:

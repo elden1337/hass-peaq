@@ -66,24 +66,24 @@ class WallBox(IChargerType):
     def native_chargerstates(self) -> list:
         """declare a list of the native-charger states available for the type."""
         return [
-            "Charging",
-            "Discharging",
-            "Paused",
-            "Scheduled",
-            "Waiting for car demand",
-            "Waiting",
-            "Disconnected",
-            "Error",
-            "Ready",
-            "Locked",
-            "Locked, car connected",
-            "Updating",
-            "Waiting in queue by Power Sharing",
-            "Waiting in queue by Power Boost",
-            "Waiting MID failed",
-            "Waiting MID safety margin exceeded",
-            "Waiting in queue by Eco-Smart",
-            "Unknown",
+        "charging",
+        "discharging",
+        "paused",
+        "scheduled",
+        "waiting_for_car_demand",
+        "waiting",
+        "disconnected",
+        "error",
+        "ready",
+        "locked",
+        "locked,_car_connected",
+        "updating",
+        "waiting_in_queue_by_power_sharing",
+        "waiting_in_queue_by_power_boost",
+        "waiting_mid_failed",
+        "waiting_mid_safety_margin_exceeded",
+        "waiting_in_queue_by_eco-smart",
+        "unknown"
         ]
 
     @property

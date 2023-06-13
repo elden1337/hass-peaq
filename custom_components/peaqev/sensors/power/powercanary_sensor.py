@@ -107,9 +107,12 @@ class PowerCanaryMaxAmpSensor(PowerCanaryDevice):
     async def async_update(self) -> None:
         if not self.hub.is_initialized:
             return
+        ret = {}
         if self.phases == 1:
             ret = getattr(self.hub.power.power_canary, "onephase_amps", {})
-            self._state = max(ret.values())
         if self.phases == 3:
             ret = getattr(self.hub.power.power_canary, "threephase_amps", {})
+        if len(ret):
             self._state = max(ret.values())
+        else:
+            _LOGGER.debug("No data for %s", self.name)

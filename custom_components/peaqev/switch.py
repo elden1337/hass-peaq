@@ -49,9 +49,11 @@ class PeaqSwitch(SwitchEntity, RestoreEntity):
 
     async def async_turn_on(self):
         await self.hub.observer.async_broadcast("update charger enabled", True)
+        await self.async_update()
 
     async def async_turn_off(self):
         await self.hub.observer.async_broadcast("update charger enabled", False)
+        await self.async_update()
 
     async def async_update(self):
         self._state = "on" if self.hub.enabled else "off"

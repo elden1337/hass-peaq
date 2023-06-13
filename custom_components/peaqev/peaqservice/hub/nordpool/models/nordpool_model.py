@@ -15,6 +15,7 @@ class NordPoolModel:
     daily_average: float = 0
     use_cent: bool = False
     dynamic_top_price_type: str = ""
+    dynamic_top_price: float|None = None
 
     async def fix_dst(self, val) -> list | None:
         if val is None:

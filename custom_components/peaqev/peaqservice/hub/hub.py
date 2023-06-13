@@ -289,10 +289,10 @@ class HomeAssistantHub:
             self.max_min_controller._original_total_charge = ret["max_charge"][0]
             # todo: 247
         if len(ret) == 1:
-            rr = list(ret.values())[0]
-            if isinstance(rr, str):
-                return rr.lower()
-            return rr
+            val = list(ret.values())[0]
+            if isinstance(val, str):
+                return val.lower()
+            return val
         return ret
 
     @property
@@ -322,6 +322,10 @@ class HomeAssistantHub:
     async def async_update_prices(self, prices: list) -> None:
         if self.options.price.price_aware:
             await self.hours.async_update_prices(prices[0], prices[1])
+            await self.hours.async_update_max_min(
+                max_charge=self.max_min_controller.max_charge,
+                session_energy=self.chargecontroller.session.session_energy,
+            )
 
     async def async_update_average_monthly_price(self, val) -> None:
         if self.options.price.price_aware and isinstance(val, float):

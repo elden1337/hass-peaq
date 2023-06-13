@@ -32,7 +32,6 @@ from custom_components.peaqev.sensors.power.powercanary_sensor import (
     PowerCanaryStatusSensor)
 from custom_components.peaqev.sensors.power.prediction_sensor import \
     PeaqPredictionSensor
-from custom_components.peaqev.sensors.savings_sensor import PeaqSavingsSensor
 from custom_components.peaqev.sensors.session_sensor import (
     PeaqSessionCostSensor, PeaqSessionSensor)
 from custom_components.peaqev.sensors.sql_sensor import PeaqPeakSensor
