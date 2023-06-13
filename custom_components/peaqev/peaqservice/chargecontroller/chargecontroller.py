@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import \
-    async_defer_start
+    defer_start
 from custom_components.peaqev.peaqservice.chargecontroller.const import (
     INITIALIZING, WAITING_FOR_POWER)
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
@@ -87,7 +87,7 @@ class ChargeController(IChargeController):
                                 await self.hub.async_free_charge(),
                             ]
                         ),
-                        not await async_defer_start(self.hub.hours.non_hours),
+                        not defer_start(self.hub.hours.non_hours),
                     ]
                 ):
                     return ChargeControllerStates.Start, False
