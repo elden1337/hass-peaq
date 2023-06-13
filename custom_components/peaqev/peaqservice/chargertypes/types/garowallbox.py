@@ -56,15 +56,15 @@ class GaroWallBox(IChargerType):
     def entity_endings(self) -> list:
         """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
         return [
-            "_current_temperature",
-            "_latest_reading_k",
-            "_latest_reading",
-            "_acc_session_energy",
+            "_temperature",
+            "_total_energy_kwh",
+            "_total_energy",
+            "_session_energy",
             "_pilot_level",
             "_current_limit",
-            "_nr_of_phases",
-            "_current_charging_power",
-            "_current_charging_current",
+            "_phases",
+            "_charging_power",
+            "_charging_current",
             "_status",
         ]
 
@@ -72,35 +72,34 @@ class GaroWallBox(IChargerType):
     def native_chargerstates(self) -> list:
         """declare a list of the native-charger states available for the type."""
         return [
-            "CHANGING",
-            "NOT_CONNECTED",
-            "CONNECTED",
-            "SEARCH_COMM",
-            "RCD_FAULT",
-            "CHARGING",
-            "CHARGING_PAUSED",
-            "CHARGING_FINISHED",
-            "CHARGING_CANCELLED",
-            "DISABLED",
-            "OVERHEAT",
-            "CRITICAL_TEMPERATURE",
-            "INITIALIZATION",
-            "CABLE_FAULT",
-            "LOCK_FAULT",
-            "CONTACTOR_FAULT",
-            "VENT_FAULT",
-            "DC_ERROR",
-            "UNKNOWN",
-            "UNAVAILABLE",
+            "cable fault",
+            "changing...",
+            "charging",
+            "charging cancelled",
+            "charging finished",
+            "charging paused",
+            "charging disabled",
+            "vehicle connected",
+            "contactor fault",
+            "overtemperature, charging cancelled",
+            "dc error",
+            "charger starting...",
+            "lock fault",
+            "vehicle not connected",
+            "overtemperature, charging temporarily restricted to 6A",
+            "rcd fault",
+            "ventilation required",
+            "unavailable",
+            "unknown",
         ]
 
     @property
     def call_on(self) -> CallType:
-        return CallType(SET_MODE, {MODE: "on", ENTITY_ID: self.entities.chargerentity})
+        return CallType(SET_MODE, {MODE: "On", ENTITY_ID: self._chargerid})
 
     @property
     def call_off(self) -> CallType:
-        return CallType(SET_MODE, {MODE: "off", ENTITY_ID: self.entities.chargerentity})
+        return CallType(SET_MODE, {MODE: "Off", ENTITY_ID: self._chargerid})
 
     @property
     def call_resume(self) -> CallType:
@@ -141,15 +140,13 @@ class GaroWallBox(IChargerType):
         return ret
 
     async def async_set_sensors(self) -> None:
-        self.entities.chargerentity = f"sensor.{self.entities.entityschema}-status"
-        self.entities.powermeter = (
-            f"sensor.{self.entities.entityschema}-current_charging_power"
-        )
+        self.entities.chargerentity = f"sensor.{self.entities.entityschema}_status"
+        self.entities.powermeter = f"sensor.{self.entities.entityschema}_charging_power"
         self.options.powermeter_factor = 1
-        self.entities.ampmeter = (
-            f"sensor.{self.entities.entityschema}-current_charging_current"
-        )
-        self.entities.powerswitch = "n/a"
+        self.entities.ampmeter = f"sensor.{self.entities.entityschema}_charging_current"
+
+        # maybe not? The sensor shows On/Off, but it is not a switch
+        self.entities.powerswitch = f"sensor.{self.entities.entityschema}"
 
     async def async_determine_switch_entity(self) -> str:
         ent = await self.async_determine_entities()
@@ -169,11 +166,14 @@ class GaroWallBox(IChargerType):
         return ret
 
     def _set_charger_states(self) -> None:
-        self.chargerstates[ChargeControllerStates.Idle] = ["NOT_CONNECTED"]
-        self.chargerstates[ChargeControllerStates.Connected] = [
-            "CONNECTED",
-            "CHARGING_PAUSED",
-            "CHARGING_CANCELLED",
+        self.chargerstates[ChargeControllerStates.Idle] = [
+            "vehicle not connected",  # vehicle not plugged in
+            "charging paused"  # charging disabled by load balancer
         ]
-        self.chargerstates[ChargeControllerStates.Done] = ["CHARGING_FINISHED"]
-        self.chargerstates[ChargeControllerStates.Charging] = ["CHARGING"]
+        self.chargerstates[ChargeControllerStates.Connected] = [
+            "vehicle connected",  # waiting for start from vehicle (battery full)
+            "charging cancelled",  # ?
+            "charging disabled"  # charging off (disabled or out of schedule) in Garo GUI
+        ]
+        self.chargerstates[ChargeControllerStates.Done] = ["charging finished"]  # stopped by vehicle
+        self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
