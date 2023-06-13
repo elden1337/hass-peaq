@@ -60,7 +60,7 @@ class IChargerType:
                     self.entities.imported_entities = entitiesobj.imported_entities
                     self.entities.entityschema = entitiesobj.entityschema
             except:
-                _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
+                _LOGGER.info(f"Could not get a proper entityschema for {self.domain_name}.")
                 return False
 
             try:

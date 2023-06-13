@@ -50,41 +50,40 @@ class Charger:
                 # self.controller.hub.sensors.chargerobject_switch.value,  # todo: possibly remove to allow chargertypes without switch.
                 self.controller.hub.sensors.carpowersensor.value
                 > 0,  # todo: composition
+                # For Garo, power takes quite a while, would be better to check state is 'charging'
             ]
         )
 
     async def async_charge(self) -> None:
         """Main function to turn charging on or off"""
         if self.model.unsuccessful_stop:
-            _LOGGER.info(f"unsuccessful stop (>Pause)")
+            _LOGGER.info(f"4 Charge Pause (unsuccessful stop)")
             await self.async_internal_state(ChargerStates.Pause)
         if (
             self.controller.hub.enabled
             and not self.controller.hub.sensors.power.killswitch.is_dead
         ):
-            _LOGGER.info(f"enabled, reset session")
             await self.async_reset_session()
             match self.controller.status_type:
                 case ChargeControllerStates.Start:
-                    _LOGGER.info(f"state Start (>start_case())")
+                    _LOGGER.info(f"4 Charge start_case() (Controller Start)")
                     await self.async_start_case()
                 case ChargeControllerStates.Stop:
-                    _LOGGER.info(f"state Stop (>stop_case())")
+                    _LOGGER.info(f"4 Charge stop_case() (Controller Stop)")
                     await self.async_stop_case()
                 case ChargeControllerStates.Done | ChargeControllerStates.Idle:
-                    _LOGGER.info(f"state Done|Idle (>done_idle_case())")
+                    _LOGGER.info(f"4 Charge done_idle_case() ({self.controller.status_type})")
                     await self.async_done_idle_case()
                 case ChargeControllerStates.Connected | ChargeControllerStates.Disabled:
-                    _LOGGER.info(f"state Connected|Disabled (>pass)")
+                    _LOGGER.info(f"4 Charge pass ({self.controller.status_type})")
                     pass
                 case _:
                     _LOGGER.info(
                         f"Could not match any chargecontroller-state. state: {self.controller.status_type}"
                     )
         else:
-            _LOGGER.info(f"not enabled")
+            _LOGGER.info(f"4 Not enabled, active: {self.charger_active}, running: {self.model.running}")
             if self.charger_active and self.model.running:
-                _LOGGER.info(f"active and running")
                 if self.controller.hub.sensors.power.killswitch.is_dead:
                     _LOGGER.info(
                         f"Powersensor has failed to update for more than {self.controller.hub.sensors.power.killswitch.total_timer}s. Charging is paused until it comes alive again."
@@ -93,7 +92,6 @@ class Charger:
                     _LOGGER.info(
                         "Detected charger running outside of peaqev-session, overtaking command and pausing."
                     )
-                _LOGGER.info(f"pause_charger")
                 await self.async_pause_charger()
 
     async def async_done_idle_case(self) -> None:
@@ -109,21 +107,18 @@ class Charger:
             await self.async_terminate_charger()
 
     async def async_stop_case(self) -> None:
+        _LOGGER.info(f"5 active: {self.charger_active}")
         if self.charger_active:
-            _LOGGER.info(f"stop_case() active")
             if not self.model.running and not self.session_active:
                 _LOGGER.info(
                     "Detected charger running outside of peaqev-session, overtaking command and pausing."
                 )
             await self.async_pause_charger()
-        else:
-            _LOGGER.info(f"stop_case() not active")
 
     async def async_start_case(self) -> None:
+        _LOGGER.info(f"5 running: {self.model.running}, active: {self.charger_active}")
         if not self.model.running:
-            _LOGGER.info(f"start_case() not running")
             if not self.charger_active:
-                _LOGGER.info(f"start_case() not active")
                 await self.async_start_charger()
             else:
                 _LOGGER.info(
@@ -136,8 +131,6 @@ class Charger:
                 "Restarting charger since it has been turned off from outside of Peaqev."
             )
             await self.async_start_charger()
-        else:
-            _LOGGER.info(f"start_case() running and active")
 
     async def async_reset_session(self) -> None:
         if (
@@ -159,7 +152,9 @@ class Charger:
         await self.async_post_start_charger()
 
     async def async_start_charger(self) -> None:
-        if call_ok(self.model.latest_charger_call):
+        ok = call_ok(self.model.latest_charger_call)
+        _LOGGER.info(f"start_charger, call_ok: {ok}, active session: {self.session_active}")
+        if ok:
             await self.async_internal_state(ChargerStates.Start)
             if not self.session_active:
                 await self.async_call_charger(CallTypes.On)

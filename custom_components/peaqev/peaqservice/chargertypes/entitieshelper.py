@@ -65,7 +65,7 @@ async def async_set_entitiesmodel(
                         break
                 if len(candidate) > 1:
                     break
-            _LOGGER.debug(f"Charger-entityschema is: {candidate}")
+            _LOGGER.info(f"Charger-entityschema is: {candidate}")
             return EntitiesModel(
                 entityschema=candidate, imported_entities=entities, valid=True
             )

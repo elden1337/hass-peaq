@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
-    from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
-        ChargerType,
-    )
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
 import logging
 import time
 from abc import abstractmethod
@@ -48,6 +48,7 @@ class IStateChanges:
                 self.hub.chargertype is not ChargerType.NoCharger,
             ]
         ):
+            _LOGGER.info(f"update on {entity}, calling charge")
             await self.hub.chargecontroller.charger.async_charge()
 
     async def async_update_session_parameters(self, update_session: bool) -> None:
