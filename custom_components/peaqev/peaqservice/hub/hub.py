@@ -295,6 +295,10 @@ class HomeAssistantHub:
             return val
         return ret
 
+    def now_is_non_hour(self) -> bool:
+        now = datetime.now().replace(minute=0, second=0, microsecond=0)
+        return now in self.non_hours
+
     @property
     def prices(self) -> list:
         if self.options.price.price_aware:

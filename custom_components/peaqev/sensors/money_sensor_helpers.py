@@ -69,11 +69,12 @@ def set_total_charge(max_charge) -> str:
 
 def set_non_hours_display(non_hours: list, prices_tomorrow: list) -> list:
     ret = []
+    now = datetime.now().replace(minute=0,second=0,microsecond=0)
     for i in non_hours:
-        if i < datetime.now().hour and len(prices_tomorrow) > 0:
-            ret.append(f"{str(i)}⁺¹")
-        elif i >= datetime.now().hour:
-            ret.append(str(i))
+        if i < now and len(prices_tomorrow) > 0:
+            ret.append(f"{str(i.hour)}⁺¹")
+        elif i >= now:
+            ret.append(str(i.hour))
     return ret
 
 

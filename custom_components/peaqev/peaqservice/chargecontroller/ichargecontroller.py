@@ -1,7 +1,6 @@
 import logging
 import time
 from abc import abstractmethod
-from datetime import datetime
 from typing import Tuple
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
@@ -166,7 +165,7 @@ class IChargeController:
                 return ChargeControllerStates.Done, False
             elif all(
                 [
-                    datetime.now().hour in self.hub.non_hours,
+                    self.hub.now_is_non_hour(),
                     not getattr(self.hub.hours.timer, "is_override", False),
                 ]
             ):
@@ -184,13 +183,14 @@ class IChargeController:
         _LOGGER.debug(f"async_get_status: {_state} returning Error. {str(_state)}")
         return ChargeControllerStates.Error, True
 
+
     async def async_get_status_outlet(self) -> Tuple[ChargeControllerStates, bool]:
         if not self.hub.enabled:
             return ChargeControllerStates.Connected, True
         elif self.hub.charger_done:
             return ChargeControllerStates.Done, True
         elif (
-            datetime.now().hour in self.hub.non_hours
+            self.hub.now_is_non_hour()
             and self.hub.hours.timer.is_override is False
         ):  # todo: composition
             return ChargeControllerStates.Stop, True
@@ -204,7 +204,7 @@ class IChargeController:
 
     async def async_get_status_no_charger(self) -> Tuple[ChargeControllerStates, bool]:
         if (
-            datetime.now().hour in self.hub.non_hours
+            self.hub.now_is_non_hour()
             and not self.hub.hours.timer.is_override
         ):
             return ChargeControllerStates.Stop, True

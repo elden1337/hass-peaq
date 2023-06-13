@@ -6,7 +6,6 @@ if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
 import logging
-from datetime import datetime
 
 from homeassistant.helpers.restore_state import RestoreEntity
 
@@ -168,17 +167,19 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
     async def async_state_display(
         self, non_hours: list, dynamic_caution_hours: dict
     ) -> str:
-        hour = datetime.now().hour
+        hour = datetime.now().replace(microsecond=0, second=0, minute=0)
         ret = CHARGING_ALLOWED.capitalize()
         if getattr(self.hub.hours.timer, "is_override", False):  # todo: composition
             self._icon = "mdi:car-electric-outline"
             return getattr(
                 self.hub.hours.timer, "override_string", ""
             )  # todo: composition
-        if hour in non_hours:
-            self._icon = "mdi:car-clock"
-            ret = calculate_stop_len(non_hours)
-        elif hour in dynamic_caution_hours.keys():
+        # if hour in non_hours:
+        #     self._icon = "mdi:car-clock"
+        #     ret = self.hub.hours.service.stopped_string #todo: composition
+        if hour in dynamic_caution_hours.keys():
             val = dynamic_caution_hours.get(hour)
             ret += f" at {int(val * 100)}% of peak"
+        else:
+            ret = self.hub.hours._core.service.stopped_string  # todo: composition
         return ret
