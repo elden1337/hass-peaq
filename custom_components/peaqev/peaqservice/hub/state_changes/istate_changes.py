@@ -125,8 +125,8 @@ class IStateChanges:
                     session_energy=self.hub.chargecontroller.session.session_energy,
                     car_connected=self.hub.chargecontroller.connected,
                 )
-            except:
-                _LOGGER.debug(f"Unable to update max_min")
+            except Exception as e:
+                _LOGGER.debug(f"Unable to update max_min: {e}")
 
     @abstractmethod
     async def async_update_sensor_internal(self, entity, value) -> bool:
