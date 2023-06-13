@@ -3,7 +3,7 @@ import logging
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import \
-    async_defer_start
+    defer_start
 from custom_components.peaqev.peaqservice.chargecontroller.const import \
     INITIALIZING
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
@@ -45,7 +45,7 @@ class ChargeControllerLite(IChargeController):
             if (self.hub.totalhourlyenergy.value < self.hub.current_peak_dynamic) or await self.hub.async_free_charge():
                 ret = (
                     ChargeControllerStates.Start
-                    if not await async_defer_start(self.hub.hours.non_hours)
+                    if not defer_start(self.hub.hours.non_hours)
                     else ChargeControllerStates.Stop
                 )
             else:

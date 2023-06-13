@@ -75,4 +75,4 @@ async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssis
 
     for service, handler in SERVICES.items():
         hass.services.async_register(DOMAIN, service.value, handler)
-    _LOGGER.debug("Registered services: {}".format(SERVICES.keys()))
+    #_LOGGER.debug("Registered services: {}".format(SERVICES.keys()))
