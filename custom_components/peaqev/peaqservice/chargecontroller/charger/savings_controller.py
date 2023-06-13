@@ -84,7 +84,7 @@ class SavingsController:
                         original_peak=self.controller.session.original_peak,
                     )
                     await self.service.async_stop_listen()
-                except Exception as e:
+                except Exception:
                     #_LOGGER.warning(f"Problem with savingsservice stop listening: {e}")
                     return
 
