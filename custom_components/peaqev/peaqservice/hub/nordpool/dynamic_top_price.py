@@ -42,7 +42,7 @@ class DynamicTopPrice:
         self.model.month = await self.async_get_current_month(prices)
 
     async def async_measure_type(self, month, measure, avg_type: AverageType) -> dict:
-        ret: dict[float, AverageType] = {}
+        ret: dict[float, AverageType] = {-1: avg_type}
         try:
             if measure > month:
                 if avg_type == AverageType.THIRTY:
@@ -57,9 +57,11 @@ class DynamicTopPrice:
                             return {}
                     gr = await self.async_set_gradient(gradient_measure)
                     if gr[-1] > 0:
-                        ret = {mean([month, measure]): avg_type}
+                        ret = {measure: avg_type}
         except Exception as e:
-            _LOGGER.debug(f"Error in async_measure_type: {e}. {avg_type}, {measure}, {month}")
+            _LOGGER.debug(
+                f"Error in async_measure_type: {e}. {avg_type}, {measure}, {month}"
+            )
         return ret
 
     @staticmethod
