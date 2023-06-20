@@ -9,8 +9,7 @@ import logging
 
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from custom_components.peaqev.peaqservice.chargecontroller.const import \
-    CHARGING_ALLOWED
+from custom_components.peaqev.peaqservice.chargecontroller.const import CHARGING_ALLOWED
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
 from custom_components.peaqev.sensors.money_sensor_helpers import *
 from custom_components.peaqev.sensors.sensorbase import SensorBase
@@ -57,7 +56,6 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "non_hours",
             "dynamic_caution_hours",
             "currency",
-            "offsets",
             "average_nordpool_data",
             "use_cent",
             "current_peak",
@@ -68,19 +66,18 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "max_price",
             "min_price",
             "average_30",
+            "future_hours",
         )
         if ret is not None:
             self._state = await self.async_state_display(
                 ret.get("non_hours", []), ret.get("dynamic_caution_hours", {})
             )
-            self._nonhours = set_non_hours_display(
-                ret.get("non_hours", []), ret.get("prices_tomorrow", [])
-            )
+            self._all_hours = set_all_hours_display(ret.get("future_hours", []))
+            self._nonhours = set_non_hours_display(ret.get("non_hours", []))
             self._dynamic_caution_hours = set_caution_hours_display(
                 ret.get("dynamic_caution_hours", {})
             )
             self._currency = ret.get("currency")
-            self._offsets = ret.get("offsets", {})
             self._current_peak = ret.get("current_peak")
             self._max_charge = set_total_charge(ret.get("max_charge"))
             self._average_nordpool_data = ret.get("average_nordpool_data", [])
@@ -138,7 +135,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "Nordpool average 30 days": self._average_data_30,
             "nordpool_average_this_month": self._average_data_current_month,
             "Nordpool average data": self._average_nordpool_data,
-            "offsets": self._offsets,
+            "All hours": self._all_hours,
         }
         if self.hub.options.price.dynamic_top_price:
             attr_dict["Max price based on"] = self._max_price_based_on

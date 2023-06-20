@@ -1,4 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+import logging
+from peaqevcore.services.hoursselection_service_new.models.hour_price import HourPrice
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def calculate_stop_len(nonhours) -> str:
@@ -67,25 +71,44 @@ def set_total_charge(max_charge) -> str:
     return f"{max_charge[0]} kWh"
 
 
-def set_non_hours_display(non_hours: list, prices_tomorrow: list) -> list:
+def set_all_hours_display(future_hours: list[HourPrice]) -> dict:
+    ret = {}
+    for h in future_hours:
+        dtstr = f"{h.dt.hour:02d}:{h.dt.minute:02d}"
+        if h.dt.date() == datetime.now().date():
+            dtstr = f"Today {dtstr}"
+        else:
+            dtstr = f"Tomorrow {dtstr}"
+
+        match h.permittance:
+            case 0:
+                ret[dtstr] = "Stop"
+            case 1:
+                ret[dtstr] = "Start"
+            case _:
+                ret[dtstr] = f"Caution {str(h.permittance * 100)}%"
+    return ret
+
+
+def set_non_hours_display(non_hours: list[datetime]) -> list:
     ret = []
-    now = datetime.now().replace(minute=0,second=0,microsecond=0)
+    now = datetime.now().replace(minute=0, second=0, microsecond=0)
     for i in non_hours:
-        if i < now and len(prices_tomorrow) > 0:
+        if i.date() > now.date():
             ret.append(f"{str(i.hour)}⁺¹")
-        elif i >= now:
+        elif i.date() == now.date():
             ret.append(str(i.hour))
     return ret
 
 
-def set_caution_hours_display(dynamic_caution_hours: dict) -> dict:
+def set_caution_hours_display(dynamic_caution_hours: dict[datetime, float]) -> dict:
     ret = {}
     if len(dynamic_caution_hours) > 0:
         for h in dynamic_caution_hours:
-            if h < datetime.now().hour:
-                hh = f"{h}⁺¹"
+            if h.date() > datetime.now().date():
+                hh = f"{h.hour}⁺¹"
             else:
-                hh = h
+                hh = h.hour
             ret[hh] = f"{str((int(dynamic_caution_hours.get(h, 0) * 100)))}%"
     return ret
 
