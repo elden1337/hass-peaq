@@ -26,6 +26,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
 
         self._attr_name = name
         self._nonhours = None
+        self._all_hours = None
         self._dynamic_caution_hours = None
         self._current_hour = None
         self._currency = None
