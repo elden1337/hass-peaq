@@ -5,8 +5,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
-import logging
-
 from homeassistant.helpers.restore_state import RestoreEntity
 
 from custom_components.peaqev.peaqservice.chargecontroller.const import CHARGING_ALLOWED
@@ -132,9 +130,9 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "Current hour charge permittance": self._charge_permittance,
             "Avg price per kWh": self._avg_cost,
             "Max charge amount": self._max_charge,
-            "Nordpool average 7 days": self._average_nordpool,
-            "Nordpool average 30 days": self._average_data_30,
-            "nordpool_average_this_month": self._average_data_current_month,
+            #"Nordpool average 7 days": self._average_nordpool,
+            #"Nordpool average 30 days": self._average_data_30,
+            #"nordpool_average_this_month": self._average_data_current_month,
             "Nordpool average data": self._average_nordpool_data,
             "All hours": self._all_hours,
         }
