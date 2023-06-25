@@ -114,9 +114,9 @@ def set_caution_hours_display(dynamic_caution_hours: dict[datetime, float]) -> d
     return ret
 
 
-def set_current_charge_permittance_display(non_hours, dynamic_caution_hours) -> str:
+def set_current_charge_permittance_display(non_hours:list[datetime], dynamic_caution_hours:dict[datetime, float]) -> str:
     ret = 100
-    hour = datetime.now().hour
+    hour = datetime.now().replace(minute=0, second=0, microsecond=0)
     if hour in non_hours:
         ret = 0
     elif hour in dynamic_caution_hours.keys():

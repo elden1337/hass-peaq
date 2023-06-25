@@ -7,7 +7,6 @@ if TYPE_CHECKING:
 
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from custom_components.peaqev.peaqservice.chargecontroller.const import CHARGING_ALLOWED
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
 from custom_components.peaqev.sensors.money_sensor_helpers import *
 from custom_components.peaqev.sensors.sensorbase import SensorBase
@@ -34,8 +33,8 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._max_charge = None
         self._max_min_price = None
         self._max_price_based_on = None
-        self._average_nordpool = None
-        self._average_data_30 = None
+        #self._average_nordpool = None
+        #self._average_data_30 = None
         self._average_data_current_month = None
         self._charge_permittance = None
         self._offsets = {}
@@ -60,17 +59,12 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "current_peak",
             "avg_kwh_price",
             "max_charge",
-            "average_weekly",
-            "average_monthly",
             "max_price",
             "min_price",
-            "average_30",
             "future_hours",
         )
         if ret is not None:
-            self._state = await self.async_state_display(
-                ret.get("non_hours", []), ret.get("dynamic_caution_hours", {})
-            )
+            self._state = await self.async_state_display()
             self._all_hours = set_all_hours_display(ret.get("future_hours", []))
             self._nonhours = set_non_hours_display(ret.get("non_hours", []))
             self._dynamic_caution_hours = set_caution_hours_display(
@@ -83,28 +77,17 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             self._charge_permittance = set_current_charge_permittance_display(
                 ret.get("non_hours"), ret.get("dynamic_caution_hours")
             )
-
             self._avg_cost = set_avg_cost(
                 avg_cost=ret.get("avg_kwh_price"),
                 currency=ret.get("currency"),
                 use_cent=ret.get("use_cent"),
-            )
-
-            self._average_nordpool = currency_translation(
-                value=ret.get("average_weekly"),
-                currency=ret.get("currency"),
-                use_cent=ret.get("use_cent", False),
             )
             self._average_data_current_month = currency_translation(
                 value=ret.get("average_monthly"),
                 currency=ret.get("currency"),
                 use_cent=ret.get("use_cent", False),
             )
-            self._average_data_30 = currency_translation(
-                value=ret.get("average_30"),
-                currency=ret.get("currency"),
-                use_cent=ret.get("use_cent", False),
-            )
+
             if self.hub.options.price.dynamic_top_price:
                 _maxp = currency_translation(
                     value=ret.get("max_price") if ret.get("max_price", 0) > 0 else None,
@@ -130,9 +113,6 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "Current hour charge permittance": self._charge_permittance,
             "Avg price per kWh": self._avg_cost,
             "Max charge amount": self._max_charge,
-            #"Nordpool average 7 days": self._average_nordpool,
-            #"Nordpool average 30 days": self._average_data_30,
-            #"nordpool_average_this_month": self._average_data_current_month,
             "Nordpool average data": self._average_nordpool_data,
             "All hours": self._all_hours,
         }
@@ -160,22 +140,11 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         else:
             self._average_nordpool = f"- {self._currency}"
 
-    async def async_state_display(
-        self, non_hours: list, dynamic_caution_hours: dict
-    ) -> str:
-        hour = datetime.now().replace(microsecond=0, second=0, minute=0)
-        ret = CHARGING_ALLOWED.capitalize()
+    async def async_state_display(self) -> str:
+        ret = self.hub.hours._core.service.stopped_string  # todo: composition
         if getattr(self.hub.hours.timer, "is_override", False):  # todo: composition
             self._icon = "mdi:car-electric-outline"
             return getattr(
                 self.hub.hours.timer, "override_string", ""
             )  # todo: composition
-        # if hour in non_hours:
-        #     self._icon = "mdi:car-clock"
-        #     ret = self.hub.hours.service.stopped_string #todo: composition
-        if hour in dynamic_caution_hours.keys():
-            val = dynamic_caution_hours.get(hour)
-            ret += f" at {int(val * 100)}% of peak"
-        else:
-            ret = self.hub.hours._core.service.stopped_string  # todo: composition
         return ret
