@@ -1,5 +1,6 @@
-from datetime import datetime, timedelta
 import logging
+from datetime import datetime
+
 from peaqevcore.services.hoursselection_service_new.models.hour_price import HourPrice
 
 _LOGGER = logging.getLogger(__name__)
@@ -86,7 +87,7 @@ def set_all_hours_display(future_hours: list[HourPrice]) -> dict:
             case 1:
                 ret[dtstr] = "Start"
             case _:
-                ret[dtstr] = f"Caution {str(h.permittance * 100)}%"
+                ret[dtstr] = f"Caution {str(int(h.permittance * 100))}%"
     return ret
 
 
