@@ -24,5 +24,5 @@
   "requirements": [
     "peaqevcore==19.0.0a36"
   ],
-  "version": "3.0.0a0"
+  "version": "3.0.0b0"
 }
