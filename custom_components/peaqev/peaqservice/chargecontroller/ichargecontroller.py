@@ -6,18 +6,23 @@ from typing import Tuple
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.services.session.session import Session
 
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import \
-    Charger
-from custom_components.peaqev.peaqservice.chargecontroller.charger.savings_controller import \
-    SavingsController
-from custom_components.peaqev.peaqservice.chargecontroller.chargercontroller_model import \
-    ChargeControllerModel
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import (
+    Charger,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.charger.savings_controller import (
+    SavingsController,
+)
+from custom_components.peaqev.peaqservice.chargecontroller.chargercontroller_model import (
+    ChargeControllerModel,
+)
 from custom_components.peaqev.peaqservice.chargecontroller.const import (
-    DEBUGLOG_TIMEOUT, DONETIMEOUT)
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
-from custom_components.peaqev.peaqservice.util.constants import \
-    CHARGERCONTROLLER
+    DEBUGLOG_TIMEOUT,
+    DONETIMEOUT,
+)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    ChargerType,
+)
+from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
@@ -144,6 +149,9 @@ class IChargeController:
 
     async def async_get_status(self) -> Tuple[ChargeControllerStates, bool]:
         _state = await self.hub.async_request_sensor_data("chargerobject_value")
+        if _state is None:
+            _LOGGER.debug("Chargerobject_value is None. Returning Error-state.")
+            return ChargeControllerStates.Error, True
         try:
             if not self.hub.enabled:
                 if _state in self.model.charger_states.get(ChargeControllerStates.Idle):
@@ -154,6 +162,7 @@ class IChargeController:
             elif _state in self.model.charger_states.get(ChargeControllerStates.Idle):
                 return ChargeControllerStates.Idle, True
             elif self.hub.sensors.power.killswitch.is_dead:  # todo: composition
+                _LOGGER.debug("Killswitch is dead. Returning Error-state.")
                 return ChargeControllerStates.Error, True
             elif all(
                 [

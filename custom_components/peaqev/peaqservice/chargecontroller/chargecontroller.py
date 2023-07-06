@@ -51,15 +51,14 @@ class ChargeController(IChargeController):
         return predicted_energy, current_peak
 
     async def async_get_status_charging(self) -> ChargeControllerStates:
-        if not self.hub.power.power_canary.alive:
-            return ChargeControllerStates.Stop
-        if all(
+        if any([not self.hub.power.power_canary.alive,
+                all(
             [
                 await self.async_above_stopthreshold(),
                 self.hub.sensors.totalhourlyenergy.value > 0,
                 not await self.hub.async_free_charge(),
             ]
-        ):
+        )]):
             return ChargeControllerStates.Stop
         return ChargeControllerStates.Start
 
