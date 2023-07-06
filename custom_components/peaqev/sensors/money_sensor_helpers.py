@@ -1,7 +1,8 @@
 import logging
 from datetime import datetime
 
-from peaqevcore.services.hoursselection_service_new.models.hour_price import HourPrice
+from peaqevcore.services.hoursselection_service_new.models.hour_price import \
+    HourPrice
 
 _LOGGER = logging.getLogger(__name__)
 
