@@ -116,5 +116,9 @@ def set_caution_hours_display(dynamic_caution_hours: dict[datetime, float]) -> d
 
 def set_current_charge_permittance_display(future_hours: list[HourPrice]) -> str:
     hour = datetime.now().replace(minute=0, second=0, microsecond=0)
-    ret = next(filter(lambda x: hour == x.dt, future_hours))
-    return f"{str((ret.permittance or 0)*100)}%"
+    ret = 0
+    for h in future_hours:
+        if h.dt == hour:
+            ret = h.permittance
+            break
+    return f"{str(ret*100)}%"
