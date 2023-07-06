@@ -11,7 +11,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class MaxMinController:
     def __init__(self, hub: HomeAssistantHub):
-        self.hub = hub
+        self.hub: HomeAssistantHub = hub
         self.active: bool = hub.options.price.price_aware
         self._override_max_charge = None
         self._original_total_charge = 0
@@ -46,8 +46,11 @@ class MaxMinController:
         """Overrides the max-charge with the input from frontend"""
         if self.active:
             self._override_max_charge = max_charge
+            _LOGGER.debug(f"Max charge overridden to {max_charge}kWh. Updating max_min with {self.max_charge}")
             await self.hub.hours.async_update_max_min(
-                max_charge=self.max_charge
+                max_charge=self.max_charge,
+                session_energy=self.hub.chargecontroller.session.session_energy,
+                car_connected=self.hub.chargecontroller.connected
             )
 
     async def async_servicecall_override_charge_amount(self, amount: int):
@@ -94,6 +97,7 @@ class MaxMinController:
 
     async def async_update_sensor(self, val):
         if self.active:
+            _LOGGER.debug(f"Updating input number-sensor for maxmin with {val}")
             await self.hub.state_machine.services.async_call(
                 "number",
                 "set_value",

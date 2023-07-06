@@ -332,6 +332,7 @@ class HomeAssistantHub:
             await self.hours.async_update_prices(prices[0], prices[1])
             await self.hours.async_update_max_min(
                 max_charge=self.max_min_controller.max_charge,
+                car_connected=self.chargecontroller.connected,
                 session_energy=self.chargecontroller.session.session_energy,
             )
 

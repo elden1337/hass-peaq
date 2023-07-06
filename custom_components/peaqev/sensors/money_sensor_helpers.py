@@ -77,17 +77,17 @@ def set_all_hours_display(future_hours: list[HourPrice]) -> dict:
     for h in future_hours:
         dtstr = f"{h.dt.hour:02d}:{h.dt.minute:02d}"
         if h.dt.date() == datetime.now().date():
-            dtstr = f"Today {dtstr}"
+            dtstr = f"{dtstr}"
         else:
-            dtstr = f"Tomorrow {dtstr}"
+            dtstr = f"{dtstr}⁺¹"
 
         match h.permittance:
             case 0:
-                ret[dtstr] = "Stop"
+                ret[str(dtstr)] = "-"
             case 1:
-                ret[dtstr] = "Start"
+                ret[str(dtstr)] = "Charge"
             case _:
-                ret[dtstr] = f"Caution {str(int(h.permittance * 100))}%"
+                ret[str(dtstr)] = f"Caution {str(int(h.permittance * 100))}%"
     return ret
 
 
@@ -114,11 +114,7 @@ def set_caution_hours_display(dynamic_caution_hours: dict[datetime, float]) -> d
     return ret
 
 
-def set_current_charge_permittance_display(non_hours:list[datetime], dynamic_caution_hours:dict[datetime, float]) -> str:
-    ret = 100
+def set_current_charge_permittance_display(future_hours: list[HourPrice]) -> str:
     hour = datetime.now().replace(minute=0, second=0, microsecond=0)
-    if hour in non_hours:
-        ret = 0
-    elif hour in dynamic_caution_hours.keys():
-        ret = int(dynamic_caution_hours.get(hour) * 100)
-    return f"{str(ret)}%"
+    ret = next(filter(lambda x: hour == x.dt, future_hours))
+    return f"{str((ret.permittance or 0)*100)}%"
