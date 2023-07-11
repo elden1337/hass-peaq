@@ -13,6 +13,7 @@ class MaxMinController:
     def __init__(self, hub: HomeAssistantHub):
         self.hub: HomeAssistantHub = hub
         self.active: bool = hub.options.price.price_aware
+        self.is_on:bool = False
         self._override_max_charge = None
         self._original_total_charge = 0
         self.override_max_charge: bool = False
@@ -28,9 +29,11 @@ class MaxMinController:
         if self.active:
             if self._override_max_charge is not None:
                 """overridden by frontend"""
+                self.is_on = True
                 return self._override_max_charge
             if self.hub.options.max_charge > 0:
                 """set in config flow"""
+                self.is_on = True
                 return self.hub.options.max_charge
         return self._original_total_charge
 

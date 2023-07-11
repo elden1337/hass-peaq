@@ -324,11 +324,12 @@ class HomeAssistantHub:
     async def async_update_prices(self, prices: list) -> None:
         if self.options.price.price_aware:
             await self.hours.async_update_prices(prices[0], prices[1])
-            await self.hours.async_update_max_min(
-                max_charge=self.max_min_controller.max_charge,
-                car_connected=self.chargecontroller.connected,
-                session_energy=self.chargecontroller.session.session_energy,
-            )
+            if self.max_min_controller.is_on:
+                await self.hours.async_update_max_min(
+                    max_charge=self.max_min_controller.max_charge,
+                    car_connected=self.chargecontroller.connected,
+                    session_energy=self.chargecontroller.session.session_energy,
+                )
 
     async def async_update_average_monthly_price(self, val) -> None:
         if self.options.price.price_aware and isinstance(val, float):
