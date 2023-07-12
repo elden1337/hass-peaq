@@ -39,7 +39,6 @@
       "misc": {
         "data": {
           "mains": "(Optional), pick your main fuses to allow peaqev to act as an ampguard.",
-          "blocknocturnal": "Block charging between 23-06 due to safety concerns.",
           "gainloss": "Add Gain/Loss-sensors (requires priceaware)"
         },
         "description": "Experimental and extra options."
@@ -111,7 +110,6 @@
       "misc": {
         "data": {
           "mains": "(Optional), pick your main fuses to allow peaqev to act as an ampguard.",
-          "blocknocturnal": "Block charging between 23-06 due to safety concerns.",
           "gainloss": "Add Gain/Loss-sensors (requires priceaware)"
         },
         "description": "Experimental and extra options."

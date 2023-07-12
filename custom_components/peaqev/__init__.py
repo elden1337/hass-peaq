@@ -12,7 +12,6 @@ from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.constants import TYPELITE
 from custom_components.peaqev.services import async_prepare_register_services
-
 from .const import DOMAIN, PLATFORMS
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
@@ -45,7 +44,6 @@ PRICE_CHANGES = [
     "top_price",
     "cautionhour_type",
     "dynamic_top_price",
-    "blocknocturnal",
     "max_charge",
     "cautionhours",
     "_startpeaks",
@@ -113,9 +111,6 @@ async def async_set_options(conf) -> HubOptions:
     )
     options.max_charge = conf.options.get("max_charge", 0)
     options.fuse_type = await async_get_existing_param(conf, "mains", "")
-    options.blocknocturnal = await async_get_existing_param(
-        conf, "blocknocturnal", False
-    )
     options.gainloss = await async_get_existing_param(conf, "gainloss", False)
     return options
 
