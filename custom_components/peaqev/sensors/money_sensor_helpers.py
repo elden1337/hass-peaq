@@ -122,4 +122,4 @@ def set_current_charge_permittance_display(future_hours: list[HourPrice]) -> str
         if h.dt == hour:
             ret = h.permittance
             break
-    return f"{str(ret*100)}%"
+    return f"{str(int(ret*100))}%"
