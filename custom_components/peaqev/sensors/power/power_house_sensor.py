@@ -27,7 +27,12 @@ class PeaqHousePowerSensor(PowerDevice):
 
     @property
     def state(self) -> int:
-        return self._state
+        try:
+            return int(self._state)
+        except (ValueError, TypeError):
+            if self._state is not None:
+                _LOGGER.error("Could not parse state %s for housepowersensor", self._state)
+            return 0
 
     async def async_update(self) -> None:
         if self.hub.is_initialized:

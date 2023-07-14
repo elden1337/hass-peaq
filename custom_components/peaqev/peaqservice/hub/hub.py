@@ -195,9 +195,6 @@ class HomeAssistantHub:
 
     def _set_observers(self) -> None:
         self.observer.add("prices changed", self.async_update_prices)
-        # self.observer.add(
-        #     "monthly average price changed", self.async_update_average_monthly_price
-        # )
         self.observer.add(
             "weekly average price changed", self.async_update_average_weekly_price
         )
@@ -242,6 +239,7 @@ class HomeAssistantHub:
             "prices": partial(getattr, self.hours, "prices", []),
             "prices_tomorrow": partial(getattr, self.hours, "prices_tomorrow", []),
             "non_hours": partial(getattr, self, "non_hours", []),
+            "future_hours": partial(getattr, self.hours, "future_hours", []),
             "caution_hours": partial(getattr, self.hours, "caution_hours", []),
             "dynamic_caution_hours": partial(
                 getattr, self, "dynamic_caution_hours", {}
@@ -289,11 +287,15 @@ class HomeAssistantHub:
             self.max_min_controller._original_total_charge = ret["max_charge"][0]
             # todo: 247
         if len(ret) == 1:
-            rr = list(ret.values())[0]
-            if isinstance(rr, str):
-                return rr.lower()
-            return rr
+            val = list(ret.values())[0]
+            if isinstance(val, str):
+                return val.lower()
+            return val
         return ret
+
+    def now_is_non_hour(self) -> bool:
+        now = datetime.now().replace(minute=0, second=0, microsecond=0)
+        return now in self.non_hours
 
     @property
     def prices(self) -> list:
@@ -322,10 +324,12 @@ class HomeAssistantHub:
     async def async_update_prices(self, prices: list) -> None:
         if self.options.price.price_aware:
             await self.hours.async_update_prices(prices[0], prices[1])
-            await self.hours.async_update_max_min(
-                max_charge=self.max_min_controller.max_charge,
-                session_energy=self.chargecontroller.session.session_energy,
-            )
+            if self.max_min_controller.is_on:
+                await self.hours.async_update_max_min(
+                    max_charge=self.max_min_controller.max_charge,
+                    car_connected=self.chargecontroller.connected,
+                    session_energy=self.chargecontroller.session.session_energy,
+                )
 
     async def async_update_average_monthly_price(self, val) -> None:
         if self.options.price.price_aware and isinstance(val, float):

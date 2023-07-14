@@ -154,7 +154,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Misc options"""
         if user_input is not None:
             self.data["mains"] = user_input["mains"]
-            self.data["blocknocturnal"] = user_input["blocknocturnal"]
             self.data["gainloss"] = user_input["gainloss"]
             return self.async_create_entry(title=self.info["title"], data=self.data)
 
@@ -164,7 +163,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     "mains",
                     default="",
                 ): vol.In(FUSES_LIST),
-                vol.Optional("blocknocturnal", default=False): cv.boolean,
                 vol.Optional("gainloss", default=True): cv.boolean,
             }
         )
@@ -273,12 +271,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Misc options"""
         if user_input is not None:
             self.options["mains"] = user_input["mains"]
-            self.options["blocknocturnal"] = user_input["blocknocturnal"]
             self.options["gainloss"] = user_input["gainloss"]
             return self.async_create_entry(title="", data=self.options)
 
         mainsvalue = await self._get_existing_param("mains", "")
-        blocknocturnal = await self._get_existing_param("blocknocturnal", False)
         gainloss = await self._get_existing_param("gainloss", True)
 
         schema = vol.Schema(
@@ -287,7 +283,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     "mains",
                     default=mainsvalue,
                 ): vol.In(FUSES_LIST),
-                vol.Optional("blocknocturnal", default=blocknocturnal): cv.boolean,
                 vol.Optional("gainloss", default=gainloss): cv.boolean,
             }
         )

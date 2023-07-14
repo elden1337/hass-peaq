@@ -3,16 +3,16 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Tuple
 
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
+    ChargerType
+
 if TYPE_CHECKING:
-    from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
-        ChargerType,
-    )
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import \
-    async_defer_start
+    defer_start
 from custom_components.peaqev.peaqservice.chargecontroller.const import (
     INITIALIZING, WAITING_FOR_POWER)
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
@@ -51,15 +51,14 @@ class ChargeController(IChargeController):
         return predicted_energy, current_peak
 
     async def async_get_status_charging(self) -> ChargeControllerStates:
-        if not self.hub.power.power_canary.alive:
-            return ChargeControllerStates.Stop
-        if all(
+        if any([not self.hub.power.power_canary.alive,
+                all(
             [
                 await self.async_above_stopthreshold(),
                 self.hub.sensors.totalhourlyenergy.value > 0,
                 not await self.hub.async_free_charge(),
             ]
-        ):
+        )]):
             return ChargeControllerStates.Stop
         return ChargeControllerStates.Start
 
@@ -88,12 +87,14 @@ class ChargeController(IChargeController):
                                 await self.hub.async_free_charge(),
                             ]
                         ),
-                        not await async_defer_start(self.hub.hours.non_hours),
+                        not defer_start(self.hub.hours.non_hours),
                     ]
                 ):
                     return ChargeControllerStates.Start, False
                 else:
                     return ChargeControllerStates.Stop, True
         except Exception as e:
-            _LOGGER.error(f"async_get_status_connected for: {e}")
+            _LOGGER.debug(
+                f"async_get_status_connected for: {e}. charger-state: {charger_state}"
+            )
             return ChargeControllerStates.Error, True

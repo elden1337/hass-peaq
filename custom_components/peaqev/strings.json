@@ -39,7 +39,6 @@
       "misc": {
         "data": {
           "mains": "[%key:common::config_flow::data::mains%]",
-          "blocknocturnal": "[%key:common::config_flow::data::blocknocturnal%]",
           "gainloss": "[%key:common::config_flow::data::gainloss%]"
         }
       }
@@ -110,7 +109,6 @@
       "misc": {
         "data": {
           "mains": "[%key:common::config_flow::data::mains%]",
-          "blocknocturnal": "[%key:common::config_flow::data::blocknocturnal%]",
           "gainloss": "[%key:common::config_flow::data::gainloss%]"
         }
       }

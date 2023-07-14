@@ -7,6 +7,7 @@
     "garo_wallbox",
     "wallbox",
     "zaptec",
+    "keba",
     "nordpool",
     "tibber",
     "filter",
@@ -22,7 +23,7 @@
   "iot_class": "calculated",
   "issue_tracker": "https://github.com/elden1337/hass-peaq/issues",
   "requirements": [
-    "peaqevcore==17.1.2"
+    "peaqevcore==19.0.0"
   ],
-  "version": "2.11.2"
+  "version": "3.0.0"
 }

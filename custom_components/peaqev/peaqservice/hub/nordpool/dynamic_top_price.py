@@ -42,27 +42,26 @@ class DynamicTopPrice:
         self.model.month = await self.async_get_current_month(prices)
 
     async def async_measure_type(self, month, measure, avg_type: AverageType) -> dict:
-        ret: dict[float, AverageType] = {}
+        ret: dict[float, AverageType] = {-1: avg_type}
         try:
-            if measure > month and datetime.now().day >= self.filterlen[avg_type]:
-                do_gradient: bool = True
-                match avg_type:
-                    case AverageType.THREE:
-                        gradient_measure = self.model.three
-                    case AverageType.SEVEN:
-                        gradient_measure = self.model.seven
-                    case AverageType.THIRTY:
-                        ret = {measure: avg_type}
-                        gradient_measure = self.model.thirty
-                        do_gradient = False
-                    case _:
-                        raise KeyError
-                if do_gradient:
+            if measure > month:
+                if avg_type == AverageType.THIRTY:
+                    return {measure: avg_type}
+                elif datetime.now().day >= self.filterlen[avg_type]:
+                    match avg_type:
+                        case AverageType.THREE:
+                            gradient_measure = self.model.three
+                        case AverageType.SEVEN:
+                            gradient_measure = self.model.seven
+                        case _:
+                            return {}
                     gr = await self.async_set_gradient(gradient_measure)
                     if gr[-1] > 0:
-                        ret = {mean([month, measure]): avg_type}
+                        ret = {measure: avg_type}
         except Exception as e:
-            _LOGGER.debug(f"Error in async_measure_type: {e}")
+            _LOGGER.debug(
+                f"Error in async_measure_type: {e}. {avg_type}, {measure}, {month}"
+            )
         return ret
 
     @staticmethod
@@ -76,7 +75,7 @@ class DynamicTopPrice:
             for i in range((listlen - datetime.now().day), listlen):
                 divident = prices[i - days : i]
                 if not len(divident):
-                    break
+                    continue
                 rolling.append(mean(divident))
         except Exception as e:
             _LOGGER.debug(f"Error in async_get_rolling: {e}")
@@ -91,7 +90,10 @@ class DynamicTopPrice:
             listlen = len(prices)
             start_at = listlen - datetime.now().day
             for i in range(start_at, listlen):
-                rolling.append(mean(prices[start_at : i + 1]))
+                divident = prices[start_at : i + 1]
+                if not len(divident):
+                    break
+                rolling.append(mean(divident))
         except Exception as e:
             _LOGGER.debug(f"Error in async_get_current_month: {e}")
         return rolling

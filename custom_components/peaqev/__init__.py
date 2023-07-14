@@ -45,7 +45,6 @@ PRICE_CHANGES = [
     "top_price",
     "cautionhour_type",
     "dynamic_top_price",
-    "blocknocturnal",
     "max_charge",
     "cautionhours",
     "_startpeaks",
@@ -76,6 +75,13 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 
 
 async def async_set_options(conf) -> HubOptions:
+    #remove this after september 2023.
+    if await async_get_existing_param(
+        conf, "blocknocturnal", False
+    ):
+        _LOGGER.warning("You are using the deprecated option 'blocknocturnal'. Please note that this option no longer has any effect and that your charger may be started during the night.")
+    # remove this after september 2023.
+
     options = HubOptions()
     options.peaqev_lite = bool(conf.data.get("peaqevtype") == TYPELITE)
     if options.peaqev_lite is False:
@@ -113,9 +119,6 @@ async def async_set_options(conf) -> HubOptions:
     )
     options.max_charge = conf.options.get("max_charge", 0)
     options.fuse_type = await async_get_existing_param(conf, "mains", "")
-    options.blocknocturnal = await async_get_existing_param(
-        conf, "blocknocturnal", False
-    )
     options.gainloss = await async_get_existing_param(conf, "gainloss", False)
     return options
 
