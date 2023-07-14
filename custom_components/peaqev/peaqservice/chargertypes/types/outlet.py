@@ -21,6 +21,9 @@ _LOGGER = logging.getLogger(__name__)
 
 class SmartOutlet(IChargerType):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
+        _LOGGER.warning(
+            "You are initiating SmartOutlet as Chargertype. Bare in mind that this chargertype is generic and your results may vary depending on your brand of outlet. If issues emerge, report findings to the developer."
+        )
         self._hass = hass
         self._type = chargertype
         self.entities.powerswitch = huboptions.charger.powerswitch

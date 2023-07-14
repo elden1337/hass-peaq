@@ -40,15 +40,16 @@ class Charger:
 
     @property
     def charger_active(self) -> bool:
+        # todo: strategy should handle this
         if self._charger.options.powerswitch_controls_charging:
             return (
                 self.controller.hub.sensors.chargerobject_switch.value
-            )  # todo: composition
+            )
         return all(
             [
-                # self.controller.hub.sensors.chargerobject_switch.value,  # todo: possibly remove to allow chargertypes without switch.
+                # self.controller.hub.sensors.chargerobject_switch.value,  # todo: possibly remove to allow chargertypes without switch. strategy should handle this
                 self.controller.hub.sensors.carpowersensor.value
-                > 0,  # todo: composition
+                > 0
             ]
         )
 
@@ -115,7 +116,7 @@ class Charger:
                     "Detected charger running outside of peaqev-session, overtaking command."
                 )
                 await self.async_overtake_charger()
-        # elif (
+        # elif (  # todo: strategy should handle this
         #     not self.charger_active
         # ):  # interim solution to test if case works with Garo and other types.
         #     _LOGGER.debug(
@@ -152,7 +153,7 @@ class Charger:
                 await self.async_call_charger(CallTypes.Resume)
             await self.async_post_start_charger()
 
-    async def async_post_start_charger(self) -> None:
+    async def async_post_start_charger(self) -> None:  # todo: strategy should handle this
         await self.controller.async_update_latest_charger_start()
         if (
             self._charger.servicecalls.options.allowupdatecurrent
@@ -193,7 +194,7 @@ class Charger:
         except Exception as e:
             _LOGGER.error(f"Error calling charger: {e}")
 
-    async def async_update_max_current(self) -> None:
+    async def async_update_max_current(self) -> None:  # todo: strategy should handle this
         calls = self._charger.servicecalls.get_call(CallTypes.UpdateCurrent)
         if await self.controller.hub.state_machine.async_add_executor_job(
             self.helpers.wait_turn_on
@@ -262,13 +263,13 @@ class Charger:
 
     async def async_do_update(self, calls_domain, calls_command, calls_params) -> bool:
         if self._charger.servicecalls.options.switch_controls_charger:
-            return await self.async_do_outlet_update(calls_command)
+            return await self.async_do_outlet_update(calls_command)  # todo: strategy should handle this
         else:
             return await self.async_do_service_call(
                 calls_domain, calls_command, calls_params
-            )
+            )  # todo: strategy should handle this
 
-    async def async_do_outlet_update(self, call) -> bool:
+    async def async_do_outlet_update(self, call) -> bool:  # todo: strategy should handle this
         _LOGGER.debug("Calling charger-outlet")
         try:
             await self.controller.hub.state_machine.states.async_set(
@@ -279,7 +280,7 @@ class Charger:
             return False
         return True
 
-    async def async_do_service_call(self, domain, command, params) -> bool:
+    async def async_do_service_call(self, domain, command, params) -> bool:  # todo: strategy should handle this
         _domain = domain
         if params.get("domain", None) is not None:
             _domain = params.pop("domain")
@@ -295,3 +296,27 @@ class Charger:
             _LOGGER.error(f"Error in async_do_service_call: {e}")
             return False
         return True
+
+class ChargerA(Charger):
+    """ChargerA calls servicecalls directly"""
+    pass
+
+class ChargerA1(ChargerA):
+    """ChargerA1 can update amps"""
+    pass
+
+class ChargerA2(ChargerA):
+    """ChargerA1 can not update amps"""
+    pass
+
+class ChargerB(Charger):
+    """ChargerB calls set servicecalls"""
+    pass
+
+class ChargerB1(ChargerB):
+    """ChargerB1 can update amps"""
+    pass
+
+class ChargerB2(ChargerB):
+    """ChargerB1 can not update amps"""
+    pass
