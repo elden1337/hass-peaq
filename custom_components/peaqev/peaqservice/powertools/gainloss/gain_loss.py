@@ -25,12 +25,16 @@ class GainLoss:
     async def async_calculate_state(self, consumption, cost, time_period: TimePeriods) -> float:
         if consumption is not None and cost is not None:
             if await self.async_check_invalid_states(consumption, cost):
-                return 0
+                return 0.0
             average = await self.async_get_average(time_period)
             if float(consumption.state) > 0 and float(cost.state) > 0 and average is not None:
                 net = float(cost.state) / float(consumption.state)
-                return round((net / average) - 1, 4)
-        return 0
+                try:
+                    ret = round((net / average) - 1, 4)
+                    return max(-1.0,min(ret,1.0))
+                except ZeroDivisionError:
+                    return 0.0
+        return 0.0
 
     def _update_monthly_average(self, val):
         if isinstance(val, float):
@@ -45,6 +49,7 @@ class GainLoss:
             return self._monthly_average
         if time_period == TimePeriods.Daily:
             return self._daily_average
+        raise ValueError(f"Invalid time period: {time_period}")
 
     @staticmethod
     async def async_check_invalid_states(consumption, cost) -> bool:
