@@ -62,7 +62,7 @@ Peaqev has two types of installations: Regular and Lite. Regular is much more pr
 
 Charger | Required integration                                        | Can update amps | Supported models | Notes
 --- |-------------------------------------------------------------| --- | --- | ---
-Chargeamps| [hass-chargeamps](https://github.com/kirei/hass-chargeamps) | Yes | Halo |
+Chargeamps| [hass-chargeamps](https://github.com/kirei/hass-chargeamps) | Yes | Halo, Aura (plug 1) |
 Easee| [easee-hass](https://github.com/fondberg/easee_hass/)       | Yes | Robot | _Turn off all smart charging before using peaqev_
 Zaptec| [zaptec](https://github.com/custom-components/zaptec)       | No | Go | _Currently in beta and may not work_
 Garo|[garo_wallbox](https://github.com/sockless-coding/garo_wallbox/)       | No | Wallbox | _Currently in beta and may not work_
