@@ -196,7 +196,7 @@ class HomeAssistantHub:
     def _set_observers(self) -> None:
         self.observer.add("prices changed", self.async_update_prices)
         self.observer.add(
-            "weekly average price changed", self.async_update_average_weekly_price
+            "adjusted average price changed", self.async_update_adjusted_average
         )
         self.observer.add("update charger done", self.async_update_charger_done)
         self.observer.add("update charger enabled", self.async_update_charger_enabled)
@@ -335,7 +335,7 @@ class HomeAssistantHub:
         if self.options.price.price_aware and isinstance(val, float):
             await self.hours.async_update_top_price(val)
 
-    async def async_update_average_weekly_price(self, val) -> None:
+    async def async_update_adjusted_average(self, val) -> None:
         if self.options.price.price_aware and isinstance(val, float):
             await self.hours.async_update_adjusted_average(val)
 
