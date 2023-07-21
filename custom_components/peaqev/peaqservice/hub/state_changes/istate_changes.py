@@ -29,10 +29,10 @@ class IStateChanges:
         if time.time() - self.latest_chargecontroller_update > 3:
             self.latest_chargecontroller_update = time.time()
             await self.hub.chargecontroller.async_set_status()
-            if self.hub.options.price.price_aware:
+            if self.hub.options.price.price_aware:  # todo: strategy should handle this
                 if not self.hub.max_min_controller.override_max_charge:
                     await self.hub.max_min_controller.async_reset_max_charge_sensor()
-        if self.hub.options.price.price_aware:
+        if self.hub.options.price.price_aware:  # todo: strategy should handle this
             if entity != self.hub.nordpool.nordpool_entity and (
                 not self.hub.hours.is_initialized
                 or time.time() - self.latest_nordpool_update > 60
@@ -46,7 +46,7 @@ class IStateChanges:
             [
                 entity in self.hub.chargingtracker_entities,
                 self.hub.is_initialized,
-                self.hub.chargertype is not ChargerType.NoCharger,
+                self.hub.chargertype is not ChargerType.NoCharger,  # todo: strategy should handle this
             ]
         ):
             await self.hub.chargecontroller.charger.async_charge()
@@ -62,7 +62,7 @@ class IStateChanges:
             await self.hub.chargecontroller.session.async_set_session_energy(
                 getattr(self.hub.sensors.carpowersensor, "value")
             )
-            if self.hub.options.price.price_aware:
+            if self.hub.options.price.price_aware:  # todo: strategy should handle this
                 await self.hub.chargecontroller.session.async_set_session_price(
                     float(self.hub.nordpool.state)
                 )
@@ -72,7 +72,7 @@ class IStateChanges:
     async def async_handle_sensor_attribute(self) -> None:
         # is this needed if we loop them all?
         if hasattr(self.hub.sensors, "carpowersensor"):
-            if self.hub.sensors.carpowersensor.use_attribute:
+            if self.hub.sensors.carpowersensor.use_attribute:  # todo: strategy should handle this
                 entity = self.hub.sensors.carpowersensor
                 try:
                     val = self.hub.state_machine.states.get(
@@ -92,7 +92,6 @@ class IStateChanges:
 
     async def async_update_chargerobject_switch(self, value) -> None:
         self.hub.sensors.chargerobject_switch.value = value
-        #self.hub.sensors.amp_meter.update()
         await self.async_handle_outlet_updates()
 
     async def async_update_total_energy_and_peak(self, value) -> None:
@@ -118,7 +117,7 @@ class IStateChanges:
             await self.hub.chargecontroller.savings.async_add_consumption(float(value))
         except:
             _LOGGER.debug(f"Unable to add consumption to savings")
-        if self.hub.options.price.price_aware and not self.hub.options.peaqev_lite:
+        if self.hub.options.price.price_aware and not self.hub.options.peaqev_lite:  # todo: strategy should handle this
             try:
                 await self.hub.hours.async_update_max_min(
                     max_charge=self.hub.max_min_controller.max_charge,
