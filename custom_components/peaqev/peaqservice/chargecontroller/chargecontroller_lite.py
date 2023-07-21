@@ -22,6 +22,11 @@ class ChargeControllerLite(IChargeController):
             return INITIALIZING
         return self.status_type.name
 
+    def _check_initialized(self) -> bool:
+        if self.model.is_initialized:
+            return True
+        return self._do_initialize()
+
     async def async_get_status_charging(self) -> ChargeControllerStates:
         if (
             self.hub.sensors.totalhourlyenergy.value >= self.hub.current_peak_dynamic

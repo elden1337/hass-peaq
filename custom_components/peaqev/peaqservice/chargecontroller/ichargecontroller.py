@@ -73,17 +73,9 @@ class IChargeController:
         self.model.latest_charger_start = time.time()
         return self.model.is_initialized
 
+    @abstractmethod
     def _check_initialized(self) -> bool:
-        if self.model.is_initialized:
-            return True
-        if not self.hub.options.peaqev_lite:
-            _state = self.hub.get_power_sensor_from_hass()
-            if _state is not None:
-                if isinstance(_state, (float, int)):
-                    if _state > 0:
-                        return self._do_initialize()
-            return False
-        return self._do_initialize()
+        pass
 
     async def async_set_status(self) -> None:
         try:

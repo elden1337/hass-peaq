@@ -35,6 +35,16 @@ class ChargeController(IChargeController):
             return WAITING_FOR_POWER
         return self.status_type.name
 
+    def _check_initialized(self) -> bool:
+        if self.model.is_initialized:
+            return True
+        _state = self.hub.get_power_sensor_from_hass()
+        if _state is not None:
+            if isinstance(_state, (float, int)):
+                if _state > 0:
+                    return self._do_initialize()
+        return False
+
     async def async_below_startthreshold(self) -> bool:
         energy, peak = await self.async_get_energy_and_peak()
         threshold_start = await self.hub.threshold.async_start() / 100
