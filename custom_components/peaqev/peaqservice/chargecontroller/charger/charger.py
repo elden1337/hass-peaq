@@ -273,7 +273,7 @@ class Charger:
     async def async_do_outlet_update(self, call) -> bool:
         _LOGGER.debug("Calling charger-outlet")
         try:
-            await self.controller.hub.state_machine.states.async_set(
+            self.controller.hub.state_machine.states.async_set(
                 self._charger.entities.powerswitch, call
             )  # todo: composition
         except Exception as e:
