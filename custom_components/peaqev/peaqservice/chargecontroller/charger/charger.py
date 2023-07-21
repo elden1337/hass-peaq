@@ -1,5 +1,4 @@
 import logging
-import logging
 import time
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates

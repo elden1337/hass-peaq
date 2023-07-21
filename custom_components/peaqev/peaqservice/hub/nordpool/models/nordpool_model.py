@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 
+
 @dataclass
 class NordPoolModel:
     currency: str = ""

@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime, date
+from datetime import date, datetime
 from statistics import mean
 
 import homeassistant.helpers.template as template
