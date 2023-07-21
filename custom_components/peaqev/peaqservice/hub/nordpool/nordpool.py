@@ -202,17 +202,12 @@ class NordPoolUpdater:
             rounded = round(new_val, 3)
             if datetime.now().date not in self.model.average_data.keys():
                 self.model.average_data[datetime.now().date] = rounded
-            # if len(self.model.average_data) == 0:
-            #     self.model.average_data.append(rounded)
-            # elif self.model.average_data[-1] != rounded:
-            #     self.model.average_data.append(rounded)
             await self.async_cap_average_data_length()
 
     async def async_cap_average_data_length(self):
         while len(self.model.average_data) > AVERAGE_MAX_LEN:
             min_key = min(self.model.average_data.keys())
             del self.model.average_data[min_key]
-            #del self.model.average_data[0]
 
     async def async_get_average(self, days: int) -> float:
         try:

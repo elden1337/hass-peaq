@@ -116,9 +116,6 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             await self.hub.nordpool.async_import_average_data(
                 state.attributes.get("Nordpool average data", 50)
             )
-            # self._average_nordpool_data = list(
-            #     state.attributes.get("Nordpool average data", 50)
-            # )
             self._average_nordpool_data = self.hub.nordpool.average_data
             self._average_nordpool = (
                 f"{self.hub.nordpool.average_weekly} {self._currency}"
