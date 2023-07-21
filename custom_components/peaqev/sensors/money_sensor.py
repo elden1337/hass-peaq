@@ -129,10 +129,12 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             self._average_nordpool = f"- {self._currency}"
 
     async def async_state_display(self) -> str:
-        ret = self.hub.hours.stopped_string  # todo: composition
-        if getattr(self.hub.hours.timer, "is_override", False):  # todo: composition
-            self._icon = "mdi:car-electric-outline"
-            return getattr(
-                self.hub.hours.timer, "override_string", ""
-            )  # todo: composition
-        return ret
+        if self.hub.chargecontroller.is_initialized:
+            if getattr(self.hub.hours.timer, "is_override", False):  # todo: composition
+                return getattr(
+                    self.hub.hours.timer, "override_string", ""
+                )  # todo: composition
+            return self.hub.hours.stopped_string  # todo: composition
+        return getattr(
+                    self.hub.chargecontroller, "status_string", ""
+                )  # todo: composition

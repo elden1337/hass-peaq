@@ -77,6 +77,7 @@ class NordPoolUpdater:
                         await self.hub.async_update_prices(
                             [self.model.prices, self.model.prices_tomorrow]
                         )
+                        await self.hub.observer.async_broadcast("nordpool initialized")
                     else:
                         await self.hub.observer.async_broadcast(
                             "prices changed",
