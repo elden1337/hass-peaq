@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, date
 from statistics import mean
 
 import homeassistant.helpers.template as template
@@ -59,7 +59,7 @@ class NordPoolUpdater:
         return self.model.average_30
 
     @property
-    def average_data(self) -> list:
+    def average_data(self) -> dict[date,float]:
         return self.model.average_data
 
     @property
@@ -156,7 +156,7 @@ class NordPoolUpdater:
     async def async_update_dynamic_max_price(self):
         if len(self.model.average_data) > 3:
             _dynamic_max_price = await self._dynamic_top_price.async_get_max(
-                self.model.average_data
+                list(self.model.average_data.values())
             )
             if self.model.dynamic_top_price != _dynamic_max_price[0]:
                 self.model.dynamic_top_price_type = _dynamic_max_price[1].value
@@ -191,37 +191,40 @@ class NordPoolUpdater:
                 f"Peaqev was unable to get a Nordpool-entity. Disabling Priceawareness until reboot of HA: {e}"
             )
 
-    async def async_import_average_data(self, incoming: list):
-        if isinstance(incoming, list):
-            rounded_vals = [round(h, 3) for h in incoming]
-            if len(incoming):
-                self.model.average_data = rounded_vals
+    async def async_import_average_data(self, incoming: list|dict):
+        if len(incoming):
+            self.model.average_data = await self.model.async_create_date_dict(incoming)
         await self.async_cap_average_data_length()
         await self.async_update_nordpool()
 
     async def async_add_average_data(self, new_val):
         if isinstance(new_val, float):
             rounded = round(new_val, 3)
-            if len(self.model.average_data) == 0:
-                self.model.average_data.append(rounded)
-            elif self.model.average_data[-1] != rounded:
-                self.model.average_data.append(rounded)
+            if datetime.now().date not in self.model.average_data.keys():
+                self.model.average_data[datetime.now().date] = rounded
+            # if len(self.model.average_data) == 0:
+            #     self.model.average_data.append(rounded)
+            # elif self.model.average_data[-1] != rounded:
+            #     self.model.average_data.append(rounded)
             await self.async_cap_average_data_length()
 
     async def async_cap_average_data_length(self):
         while len(self.model.average_data) > AVERAGE_MAX_LEN:
-            del self.model.average_data[0]
+            min_key = min(self.model.average_data.keys())
+            del self.model.average_data[min_key]
+            #del self.model.average_data[0]
 
     async def async_get_average(self, days: int) -> float:
         try:
             if len(self.model.average_data) > days:
-                ret = self.model.average_data[-days:]
+                avg_values = list(self.model.average_data.values())
+                ret = avg_values[-days:]
             elif len(self.model.average_data) == 0:
                 return 0.0
             else:
-                ret = self.model.average_data
+                ret = list(self.model.average_data.values())
             return round(mean(ret), 2)
         except Exception as e:
             _LOGGER.debug(
-                f"Could not calculate average. indata: {self.model.average_data}, error: {e}"
+                f"Could not calculate average. indata: {list(self.model.average_data.values())}, error: {e}"
             )

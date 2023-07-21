@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-
+from datetime import date, timedelta
 
 @dataclass
 class NordPoolModel:
@@ -8,7 +8,7 @@ class NordPoolModel:
     prices_tomorrow: list = field(default_factory=lambda: [])
     state: float = 0
     nordpool_entity: str = ""
-    average_data: list = field(default_factory=lambda: [])
+    average_data: dict = field(default_factory=lambda: {})
     average_month: float = 0
     average_weekly: float = 0
     average_three_days: float = 0
@@ -17,6 +17,18 @@ class NordPoolModel:
     use_cent: bool = False
     dynamic_top_price_type: str = ""
     dynamic_top_price: float|None = None
+
+    async def async_create_date_dict(self, numbers: dict[date,float]|list[float]) -> dict[date, float]:
+        if isinstance(numbers, dict):
+            return numbers
+        today = date.today()
+        delta = timedelta(days=len(numbers) - 1)
+        start_date = today - delta
+        ret = {}
+        for number in numbers:
+            ret[start_date] = number
+            start_date += timedelta(days=1)
+        return ret
 
     async def fix_dst(self, val) -> list | None:
         if val is None:

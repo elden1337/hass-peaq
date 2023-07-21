@@ -33,8 +33,8 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._max_price_based_on = None
         self._average_data_current_month = None
         self._charge_permittance = None
-        self._offsets = {}
-        self._average_nordpool_data = []
+        #self._offsets = {}
+        self._average_nordpool_data = {}
 
     @property
     def state(self):
@@ -101,8 +101,8 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "Current hour charge permittance": self._charge_permittance,
             "Avg price per kWh": self._avg_cost,
             "Max charge amount": self._max_charge,
-            "Nordpool average data": self._average_nordpool_data,
             "All hours": self._all_hours,
+            "Nordpool average data": self._average_nordpool_data,
         }
         if self.hub.options.price.dynamic_top_price:
             attr_dict["Max price based on"] = self._max_price_based_on
@@ -116,9 +116,10 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             await self.hub.nordpool.async_import_average_data(
                 state.attributes.get("Nordpool average data", 50)
             )
-            self._average_nordpool_data = list(
-                state.attributes.get("Nordpool average data", 50)
-            )
+            # self._average_nordpool_data = list(
+            #     state.attributes.get("Nordpool average data", 50)
+            # )
+            self._average_nordpool_data = self.hub.nordpool.average_data
             self._average_nordpool = (
                 f"{self.hub.nordpool.average_weekly} {self._currency}"
             )
