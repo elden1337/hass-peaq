@@ -1,5 +1,8 @@
+import logging
 from dataclasses import dataclass, field
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
+
+_LOGGER = logging.getLogger(__name__)
 
 @dataclass
 class NordPoolModel:
@@ -18,9 +21,13 @@ class NordPoolModel:
     dynamic_top_price_type: str = ""
     dynamic_top_price: float|None = None
 
-    async def async_create_date_dict(self, numbers: dict[date,float]|list[float]) -> dict[date, float]:
+    async def async_create_date_dict(self, numbers: dict|list) -> dict[date, float]:
         if isinstance(numbers, dict):
-            return numbers
+            try:
+                return {datetime.strptime(key, "%Y-%m-%d").date(): value for key, value in numbers.items()}
+            except ValueError:
+                _LOGGER.error("Could not convert date string to date object")
+                return {}
         today = date.today()
         delta = timedelta(days=len(numbers) - 1)
         start_date = today - delta
