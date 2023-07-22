@@ -4,6 +4,7 @@ from datetime import date, timedelta, datetime
 
 _LOGGER = logging.getLogger(__name__)
 
+
 @dataclass
 class NordPoolModel:
     currency: str = ""

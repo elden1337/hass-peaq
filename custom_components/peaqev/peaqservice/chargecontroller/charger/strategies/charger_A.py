@@ -1,5 +1,4 @@
 import logging
-import logging
 import time
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
@@ -299,24 +298,18 @@ class Charger:
 
 class ChargerA(Charger):
     """ChargerA calls servicecalls directly"""
-    pass
 
 class ChargerA1(ChargerA):
     """ChargerA1 can update amps"""
-    pass
 
 class ChargerA2(ChargerA):
     """ChargerA1 can not update amps"""
-    pass
 
 class ChargerB(Charger):
     """ChargerB calls set servicecalls"""
-    pass
 
 class ChargerB1(ChargerB):
     """ChargerB1 can update amps"""
-    pass
 
 class ChargerB2(ChargerB):
     """ChargerB1 can not update amps"""
-    pass
