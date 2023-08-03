@@ -27,13 +27,14 @@ class Observer:
     When broadcasting, you may use one argument that the of-course needs to correspond to your receiving function.
     """
 
-    def __init__(self, hub):
+    def __init__(self, hub = None, test:bool = False):
         self.model = ObserverModel()
-        self.hub = hub
         self._lock = Lock()
-        async_track_time_interval(
-            self.hub.state_machine, self.async_dispatch, timedelta(seconds=1)
-        )
+        if not test:
+            self.hub = hub
+            async_track_time_interval(
+                self.hub.state_machine, self.async_dispatch, timedelta(seconds=1)
+            )
 
     def activate(self, init_broadcast: str = None) -> None:
         self.model.active = True

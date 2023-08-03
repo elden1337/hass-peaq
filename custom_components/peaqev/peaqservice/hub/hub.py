@@ -207,12 +207,14 @@ class HomeAssistantHub:
     """Composition below here"""
 
     async def async_set_init_dict(self, init_dict):
-        ret = await self.sensors.locale.data.query_model.peaks.async_set_init_dict(
+        await self.sensors.locale.data.query_model.peaks.async_set_init_dict(
             init_dict
         )
-        if ret:
-            ff = getattr(self.sensors.locale.data.query_model.peaks, "export_peaks")
+        try:
+            ff = getattr(self.sensors.locale.data.query_model.peaks, "export_peaks", {})
             _LOGGER.debug(f"intialized_peaks: {ff}")
+        except Exception as e:
+            pass
 
     def get_power_sensor_from_hass(self) -> float | None:
         ret = self.state_machine.states.get(self.options.powersensor)
