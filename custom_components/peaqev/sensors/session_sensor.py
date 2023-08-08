@@ -82,6 +82,9 @@ class PeaqSessionSensor(SessionDevice, RestoreEntity):
         if state:
             _LOGGER.debug("last state of %s = %s", self._attr_name, state)
             self._state = state.state
+            if float(state.state) > 0:
+                self.hub.chargecontroller.charger.model.session_active = True
+            await self.hub.chargecontroller.session.async_set_session_energy(float(state.state))
             await self.hub.chargecontroller.session.async_unpack(
                 state.attributes.get("average_weekly", 50)
             )
@@ -119,5 +122,8 @@ class PeaqSessionCostSensor(SessionDevice, RestoreEntity):
         state = await super().async_get_last_state()
         if state:
             self._state = state.state
+            if float(state.state) > 0:
+                self.hub.chargecontroller.charger.model.session_active = True
+            await self.hub.chargecontroller.session.async_set_session_price(float(state.state))
         else:
             self._state = 0
