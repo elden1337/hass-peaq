@@ -8,33 +8,45 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class GainLoss:
-    def __init__(self, hub):
+    def __init__(self, hub = None, test:bool = False):
         self._daily_average: float = None
         self._monthly_average: float = None
-        self._hub = hub
-        self._hub.observer.add("monthly average price changed", self._update_monthly_average)
-        self._hub.observer.add("daily average price changed", self._update_daily_average)
+        if not test:
+            self._hub = hub
+            self._hub.observer.add("monthly average price changed", self._update_monthly_average)
+            self._hub.observer.add("daily average price changed", self._update_daily_average)
 
     async def async_state(self, time_period: TimePeriods) -> float:
         consumption = self._hub.state_machine.states.get(
             await self.async_get_entity(time_period, CONSUMPTION)
         )
         cost = self._hub.state_machine.states.get(await self.async_get_entity(time_period, COST))
-        return await self.async_calculate_state(consumption, cost, time_period)
+        try:
+            return await self.async_calculate_state(consumption.state, cost.state, time_period)
+        except AttributeError:
+            return 0.0
 
     async def async_calculate_state(self, consumption, cost, time_period: TimePeriods) -> float:
         if consumption is not None and cost is not None:
             if await self.async_check_invalid_states(consumption, cost):
                 return 0.0
-            average = await self.async_get_average(time_period)
-            if float(consumption.state) > 0 and float(cost.state) > 0 and average is not None:
-                net = float(cost.state) / float(consumption.state)
+            average, cost = self.normalize_numbers(await self.async_get_average(time_period), cost)
+            if float(consumption) > 0 and float(cost) > 0 and average is not None:
+                net = float(cost) / float(consumption)
                 try:
                     ret = round((net / average) - 1, 4)
                     return max(-1.0,min(ret,1.0))
                 except ZeroDivisionError:
                     return 0.0
         return 0.0
+
+    @staticmethod
+    def normalize_numbers(average, cost):
+        if min(average, cost) < 0:
+            diff = abs(min(average, cost)) + 0.01
+            average += diff
+            cost += diff
+        return round(average, 3), round(cost, 3)
 
     def _update_monthly_average(self, val):
         if isinstance(val, float):
@@ -55,8 +67,8 @@ class GainLoss:
     async def async_check_invalid_states(consumption, cost) -> bool:
         return any(
             [
-                str(consumption.state).lower() in INVALID_STATES,
-                str(cost.state).lower() in INVALID_STATES,
+                str(consumption).lower() in INVALID_STATES,
+                str(cost).lower() in INVALID_STATES,
             ]
         )
 
