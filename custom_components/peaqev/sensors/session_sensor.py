@@ -122,7 +122,7 @@ class PeaqSessionCostSensor(SessionDevice, RestoreEntity):
         state = await super().async_get_last_state()
         if state:
             self._state = state.state
-            if float(state.state) > 0:
+            if float(state.state) != 0:
                 self.hub.chargecontroller.charger.model.session_active = True
             await self.hub.chargecontroller.session.async_set_session_price(float(state.state))
         else:
