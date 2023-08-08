@@ -30,9 +30,9 @@ class GainLoss:
         if consumption is not None and cost is not None:
             if await self.async_check_invalid_states(consumption, cost):
                 return 0.0
-            average, cost = self.normalize_numbers(await self.async_get_average(time_period), cost)
-            if float(consumption) > 0 and float(cost) > 0 and average is not None:
-                net = float(cost) / float(consumption)
+            average, cost = self.normalize_numbers(await self.async_get_average(time_period), float(cost))
+            if float(consumption) > 0 and cost > 0 and average is not None:
+                net = cost / float(consumption)
                 try:
                     ret = round((net / average) - 1, 4)
                     return max(-1.0,min(ret,1.0))
