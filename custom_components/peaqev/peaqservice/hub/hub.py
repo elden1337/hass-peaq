@@ -213,7 +213,7 @@ class HomeAssistantHub:
         try:
             ff = getattr(self.sensors.locale.data.query_model.peaks, "export_peaks", {})
             _LOGGER.debug(f"intialized_peaks: {ff}")
-        except Exception as e:
+        except Exception:
             pass
 
     def get_power_sensor_from_hass(self) -> float | None:
