@@ -1,6 +1,7 @@
 import pytest
 
-from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import Observer
+from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
+    Observer
 
 
 @pytest.mark.asyncio
