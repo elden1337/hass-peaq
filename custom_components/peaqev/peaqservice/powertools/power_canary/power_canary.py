@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import logging
 
-from custom_components.peaqev.peaqservice.powertools.power_canary.const import (
-    FUSES_MAX_SINGLE_FUSE)
-from custom_components.peaqev.peaqservice.powertools.power_canary.ipower_canary import IPowerCanary
+from custom_components.peaqev.peaqservice.powertools.power_canary.const import \
+    FUSES_MAX_SINGLE_FUSE
+from custom_components.peaqev.peaqservice.powertools.power_canary.ipower_canary import \
+    IPowerCanary
 
 _LOGGER = logging.getLogger(__name__)
 
