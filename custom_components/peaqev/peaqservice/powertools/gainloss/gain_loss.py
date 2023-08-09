@@ -3,7 +3,8 @@ import logging
 from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
 from custom_components.peaqev.peaqservice.powertools.gainloss.const import *
-from custom_components.peaqev.peaqservice.powertools.gainloss.igain_loss import IGainLoss
+from custom_components.peaqev.peaqservice.powertools.gainloss.igain_loss import \
+    IGainLoss
 
 _LOGGER = logging.getLogger(__name__)
 
