@@ -5,7 +5,8 @@ from datetime import timedelta
 
 from homeassistant.helpers.event import async_track_time_interval
 
-from custom_components.peaqev.peaqservice.hub.observer.iobserver_coordinator import IObserver
+from custom_components.peaqev.peaqservice.hub.observer.iobserver_coordinator import \
+    IObserver
 from custom_components.peaqev.peaqservice.util.extensionmethods import \
     async_iscoroutine
 
@@ -30,6 +31,7 @@ class Observer(IObserver):
 
 
 import asyncio
+
 
 class ObserverTest(IObserver):
     def __init__(self):

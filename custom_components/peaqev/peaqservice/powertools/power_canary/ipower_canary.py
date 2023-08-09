@@ -7,8 +7,7 @@ from peaqevcore.models.fuses import Fuses
 from peaqevcore.models.phases import Phases
 
 from custom_components.peaqev.peaqservice.powertools.power_canary.const import (
-    CRITICAL, CUTOFF_THRESHOLD, DISABLED, OK, WARNING,
-    WARNING_THRESHOLD)
+    CRITICAL, CUTOFF_THRESHOLD, DISABLED, OK, WARNING, WARNING_THRESHOLD)
 from custom_components.peaqev.peaqservice.powertools.power_canary.power_canary_model import \
     PowerCanaryModel
 from custom_components.peaqev.peaqservice.powertools.power_canary.smooth_average import \
