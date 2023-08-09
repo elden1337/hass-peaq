@@ -1,26 +1,40 @@
+import time
+
 import pytest
 
 from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
     ObserverTest
 
 
-async def mock_async_call_no_args():
-    return True
+class MockCalls:
+    mock_async_call_single_arg_result = None
+    mock_async_call_multiple_args_result = None
+    mock_call_single_arg_result = None
+    mock_call_multiple_args_result = None
 
-async def mock_async_call_single_arg(test_arg):
-    return test_arg
+    @staticmethod
+    async def mock_async_call_no_args():
+        return True
 
-async def mock_async_call_multiple_args(test_arg1, test_arg2):
-    return test_arg1, test_arg2
+    @staticmethod
+    async def mock_async_call_single_arg(test_arg):
+        MockCalls.mock_async_call_single_arg_result = test_arg
 
-def mock_call_no_args():
-    return True
+    @staticmethod
+    async def mock_async_call_multiple_args(test_arg1, test_arg2):
+        MockCalls.mock_async_call_multiple_args_result = test_arg1, test_arg2
 
-def mock_call_single_arg(test_arg):
-    return test_arg
+    @staticmethod
+    def mock_call_no_args():
+        return True
 
-def mock_call_multiple_args(test_arg1, test_arg2):
-    return test_arg1, test_arg2
+    @staticmethod
+    def mock_call_single_arg(test_arg):
+        MockCalls.mock_call_single_arg_result = test_arg
+
+    @staticmethod
+    def mock_call_multiple_args(test_arg1, test_arg2):
+        MockCalls.mock_call_multiple_args_result = test_arg1, test_arg2
 
 
 @pytest.mark.asyncio
@@ -50,10 +64,36 @@ async def test_observer_broadcast():
 @pytest.mark.asyncio
 async def test_observer_async_dispatch():
     observer = ObserverTest()
-    observer.add("test", mock_async_call_no_args)
+    observer.add("test", MockCalls.mock_async_call_no_args)
     await observer.async_broadcast("test")
     await observer.async_dispatch()
     assert observer.model.broadcast_queue == []
+
+@pytest.mark.asyncio
+async def test_observer_async_dispatch_single_arg():
+    observer = ObserverTest()
+    observer.add("test", MockCalls.mock_async_call_single_arg)
+    argument = time.time
+    await observer.async_broadcast("test", argument)
+    await observer.async_dispatch()
+    assert MockCalls.mock_async_call_single_arg_result == argument
+
+@pytest.mark.asyncio
+async def test_observer_sync_dispatch():
+    observer = ObserverTest()
+    observer.add("test", MockCalls.mock_call_no_args)
+    await observer.async_broadcast("test")
+    await observer.async_dispatch()
+    assert observer.model.broadcast_queue == []
+
+@pytest.mark.asyncio
+async def test_observer_sync_dispatch_single_arg():
+    observer = ObserverTest()
+    observer.add("test", MockCalls.mock_call_single_arg)
+    argument = time.time
+    await observer.async_broadcast("test", argument)
+    await observer.async_dispatch()
+    assert MockCalls.mock_call_single_arg_result == argument
 
 @pytest.mark.asyncio
 async def test_observer_async_dispatch_no_subscriber():

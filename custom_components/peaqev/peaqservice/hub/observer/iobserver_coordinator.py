@@ -42,11 +42,7 @@ class IObserver:
             self.model.subscribers[command] = [func]
 
     async def async_broadcast(self, command: str, argument=None):
-        _expiration = time.time() + TIMEOUT
-        cc = Command(command, _expiration, argument)
-        if cc not in self.model.broadcast_queue:
-            self.model.broadcast_queue.append(cc)
-            # _LOGGER.debug(f"added to broadcast queue: {cc.command}")
+        self.broadcast(command, argument)
 
     def broadcast(self, command: str, argument=None):
         _expiration = time.time() + TIMEOUT
