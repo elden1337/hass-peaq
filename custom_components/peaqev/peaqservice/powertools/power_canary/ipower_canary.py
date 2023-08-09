@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from abc import abstractmethod, ABC
+from abc import abstractmethod
 
 from peaqevcore.models.fuses import Fuses
 from peaqevcore.models.phases import Phases
@@ -17,9 +17,10 @@ from custom_components.peaqev.peaqservice.powertools.power_canary.smooth_average
 _LOGGER = logging.getLogger(__name__)
 
 
-class IPowerCanary(ABC):
+class IPowerCanary:
+    _enabled: bool = False
+
     def __init__(self, hub, fuse_type, allow_amp_adjustment: bool):
-        self._enabled: bool = False
         self.hub = hub
         self.model = PowerCanaryModel(
             warning_threshold=WARNING_THRESHOLD,

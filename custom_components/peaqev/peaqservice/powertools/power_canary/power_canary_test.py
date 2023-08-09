@@ -11,8 +11,8 @@ _LOGGER = logging.getLogger(__name__)
 
 class PowerCanaryTest(IPowerCanary):
     def __init__(self, phases, fuse_type, allow_amp_adjustment: bool):
-        self._phases = phases
         self.total_power = 0
+        self._phases = phases
         super().__init__(None, fuse_type, allow_amp_adjustment)
 
     @property
