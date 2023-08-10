@@ -28,7 +28,6 @@ CONNECTOR = "connector"
 class ChargeAmps(IChargerType):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
         self._hass = hass
-        self._is_initialized = False
         self._type = chargertype
         self._chargeramps_type = ""
         self._chargerid = huboptions.charger.chargerid
