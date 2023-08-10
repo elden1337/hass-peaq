@@ -7,21 +7,12 @@ if TYPE_CHECKING:
 
 from homeassistant.helpers.restore_state import RestoreEntity
 
+from custom_components.peaqev.peaqservice.hub.const import (
+    AVERAGE_KWH_PRICE, AVERAGE_MONTHLY, AVERAGE_NORDPOOL_DATA, CURRENCY,
+    CURRENT_PEAK, FUTURE_HOURS, MAX_CHARGE, MAX_PRICE, MIN_PRICE, USE_CENT)
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
 from custom_components.peaqev.sensors.money_sensor_helpers import *
 from custom_components.peaqev.sensors.sensorbase import SensorBase
-from custom_components.peaqev.peaqservice.hub.const import (
-CURRENCY,
-AVERAGE_NORDPOOL_DATA,
-USE_CENT,
-CURRENT_PEAK,
-AVERAGE_KWH_PRICE,
-MAX_CHARGE,
-MAX_PRICE,
-MIN_PRICE,
-FUTURE_HOURS,
-AVERAGE_MONTHLY
-)
 
 _LOGGER = logging.getLogger(__name__)
 
