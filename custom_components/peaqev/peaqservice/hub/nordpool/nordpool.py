@@ -90,7 +90,7 @@ class NordPoolUpdater:
                 )
 
     async def async_update_average_month(self) -> None:
-        _new = await self.async_get_average(datetime.now().day)
+        _new = self._get_average(datetime.now().day)
         if (
             len(self.model.average_data) >= int(datetime.now().day)
             and self.model.average_month != _new
@@ -100,24 +100,29 @@ class NordPoolUpdater:
                 "monthly average price changed", self.model.average_month
             )
 
-    async def async_update_average_30(self) -> None:
-        _new = await self.async_get_average(30)
-        if self.model.average_30 != _new:
-            self.model.average_30 = _new
+    async def async_update_average(self, length: list[int]) -> None:
+        averages_dict = {
+            3: "average_three_days",
+            7: "average_weekly",
+            30: "average_30",
+        }
+        for l in length:
+            _new = self._get_average(l)
+            if len(self.model.average_data) >= l:
+                setattr(self.model, averages_dict[l], _new)
+        await self.async_update_adjusted_average()
 
-
-    async def async_update_average_week(self) -> None:
-        _average7 = await self.async_get_average(7)
-        if len(self.model.average_data) >= 7 and self.model.average_weekly != _average7:
-            self.model.average_weekly = _average7
-
-    async def async_update_average_three_days(self) -> None:
-        _average3 = await self.async_get_average(3)
-        if len(self.model.average_data) >= 3 and self.model.average_three_days != _average3:
-            self.model.average_three_days = _average3
+    async def async_update_adjusted_average(self) -> None:
+        adj_avg: float|None = None
+        if len(self.model.average_data) >= 7:
+            adj_avg = max(self.model.average_weekly, self.model.average_three_days)
+        elif len(self.model.average_data) >= 3:
+            adj_avg = self.model.average_three_days
+        if adj_avg is not None and adj_avg != self.model.adjusted_average:
             await self.hub.observer.async_broadcast(
-                "adjusted average price changed", self.model.average_three_days
+                "adjusted average price changed", adj_avg
             )
+        self.model.adjusted_average = adj_avg
 
     async def async_update_average_day(self, average) -> None:
         if average != self.model.daily_average:
@@ -142,14 +147,12 @@ class NordPoolUpdater:
             if self.model.prices_tomorrow:
                 self.model.prices_tomorrow = []
                 ret = True
-        await self.async_update_average_week()
-        await self.async_update_average_three_days()
+        await self.async_update_average([3, 7, 30])
         self.model.currency = result.currency
         self.model.use_cent = result.price_in_cent
         self.state = result.state
         await self.async_update_average_day(result.average)
         await self.async_update_average_month()
-        await self.async_update_average_30()
         await self.async_update_dynamic_max_price()
         return ret
 
@@ -161,7 +164,7 @@ class NordPoolUpdater:
             if self.model.dynamic_top_price != _dynamic_max_price[0]:
                 self.model.dynamic_top_price_type = _dynamic_max_price[1].value
                 self.model.dynamic_top_price = _dynamic_max_price[0]
-                _LOGGER.debug(_dynamic_max_price)
+                #_LOGGER.debug(_dynamic_max_price)
                 await self.hub.observer.async_broadcast(
                     "dynamic max price changed", _dynamic_max_price[0]
                 )
@@ -193,7 +196,7 @@ class NordPoolUpdater:
 
     async def async_import_average_data(self, incoming: list|dict):
         if len(incoming):
-            self.model.average_data = await self.model.async_create_date_dict(incoming)
+            self.model.create_date_dict(incoming)
         await self.async_cap_average_data_length()
         await self.async_update_nordpool()
 
@@ -209,7 +212,7 @@ class NordPoolUpdater:
             min_key = min(self.model.average_data.keys())
             del self.model.average_data[min_key]
 
-    async def async_get_average(self, days: int) -> float:
+    def _get_average(self, days: int) -> float:
         try:
             if len(self.model.average_data) > days:
                 avg_values = list(self.model.average_data.values())

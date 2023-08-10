@@ -14,6 +14,7 @@ class NordPoolModel:
     nordpool_entity: str = ""
     average_data: dict = field(default_factory=lambda: {})
     average_month: float = 0
+    adjusted_average: float = 0
     average_weekly: float = 0
     average_three_days: float = 0
     average_30: float = 0
@@ -22,21 +23,22 @@ class NordPoolModel:
     dynamic_top_price_type: str = ""
     dynamic_top_price: float|None = None
 
-    async def async_create_date_dict(self, numbers: dict|list) -> dict[date, float]:
+    def create_date_dict(self, numbers: dict|list) -> None:
         if isinstance(numbers, dict):
             try:
-                return {datetime.strptime(key, "%Y-%m-%d").date(): value for key, value in numbers.items()}
+                ret = {datetime.strptime(key, "%Y-%m-%d").date(): value for key, value in numbers.items()}
             except ValueError:
                 _LOGGER.error("Could not convert date string to date object")
-                return {}
-        today = date.today()
-        delta = timedelta(days=len(numbers) - 1)
-        start_date = today - delta
-        ret = {}
-        for number in numbers:
-            ret[start_date] = number
-            start_date += timedelta(days=1)
-        return ret
+                ret = {}
+        else:
+            today = date.today()
+            delta = timedelta(days=len(numbers) - 1)
+            start_date = today - delta
+            ret = {}
+            for number in numbers:
+                ret[start_date] = number
+                start_date += timedelta(days=1)
+        self.average_data = ret
 
     async def fix_dst(self, val) -> list | None:
         if val is None:

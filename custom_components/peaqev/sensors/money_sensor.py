@@ -32,6 +32,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._max_min_price = None
         self._max_price_based_on = None
         self._average_data_current_month = None
+        self._secondary_threshold = None
         self._charge_permittance = None
         #self._offsets = {}
         self._average_nordpool_data = {}
@@ -61,6 +62,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         )
         if ret is not None:
             self._state = await self.async_state_display()
+            self._secondary_threshold = self.hub.nordpool.model.adjusted_average
             self._all_hours = set_all_hours_display(ret.get("future_hours", []))
             self._currency = ret.get("currency")
             self._current_peak = ret.get("current_peak")
@@ -107,6 +109,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         if self.hub.options.price.dynamic_top_price:
             attr_dict["Max price based on"] = self._max_price_based_on
             attr_dict["Max min price"] = self._max_min_price
+        attr_dict["secondary_threshold"] = self._secondary_threshold
         return attr_dict
 
     async def async_added_to_hass(self):

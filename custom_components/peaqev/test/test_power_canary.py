@@ -4,7 +4,7 @@ from peaqevcore.models.phases import Phases
 
 from custom_components.peaqev.peaqservice.powertools.power_canary.const import (
     CRITICAL, WARNING)
-from custom_components.peaqev.peaqservice.powertools.power_canary.power_canary_test import \
+from custom_components.peaqev.test.mock_classes.power_canary_test import \
     PowerCanaryTest
 
 

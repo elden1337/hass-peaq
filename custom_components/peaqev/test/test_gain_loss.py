@@ -2,8 +2,7 @@ import pytest
 from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
 from custom_components.peaqev.peaqservice.powertools.gainloss.const import *
-from custom_components.peaqev.peaqservice.powertools.gainloss.gain_loss import \
-    GainLossTest
+from custom_components.peaqev.test.mock_classes.gain_loss_test import GainLossTest
 
 
 @pytest.mark.asyncio

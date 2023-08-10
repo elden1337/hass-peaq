@@ -45,11 +45,15 @@ class IGainLoss:
 
     @staticmethod
     def normalize_numbers(average, cost):
-        if min(average, cost) < 0:
-            diff = abs(min(average, cost)) + 0.01
-            average += diff
-            cost += diff
-        return round(average, 3), round(cost, 3)
+        try:
+            if min(average, cost) < 0:
+                diff = abs(min(average, cost)) + 0.01
+                average += diff
+                cost += diff
+            return round(average, 3), round(cost, 3)
+        except TypeError as T:
+            _LOGGER.error(f"Error in normalize_numbers. Can't calculate gain/loss: {T}")
+            return average, cost
 
     def _update_monthly_average(self, val):
         if isinstance(val, float):

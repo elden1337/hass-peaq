@@ -18,6 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class IPowerCanary:
     _enabled: bool = False
+    _active:bool = False
 
     def __init__(self, hub, fuse_type, allow_amp_adjustment: bool):
         self.hub = hub

@@ -92,19 +92,22 @@ class IObserver:
 
     @staticmethod
     async def async_call_func(func: Callable, command: Command) -> None:
-        if command.argument is not None:
-            if isinstance(command.argument, dict):
-                try:
-                    await func(**command.argument)
-                except TypeError:
-                    await func()
+        try:
+            if command.argument is not None:
+                if isinstance(command.argument, dict):
+                    try:
+                        await func(**command.argument)
+                    except TypeError:
+                        await func()
+                else:
+                    try:
+                        await func(command.argument)
+                    except TypeError:
+                        await func()
             else:
-                try:
-                    await func(command.argument)
-                except TypeError:
-                    await func()
-        else:
-            await func()
+                await func()
+        except Exception as e:
+            _LOGGER.error(f"async_call_func for {func} with command {command}: {e}")
 
     async def async_ok_to_broadcast(self, command) -> bool:
         if command not in self.model.wait_queue.keys():
