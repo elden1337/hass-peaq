@@ -21,6 +21,7 @@ from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
     IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
+from custom_components.peaqev.peaqservice.hub.const import *
 from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import \
     HourselectionFactory
 from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import \
@@ -233,48 +234,48 @@ class HomeAssistantHub:
         if not self.is_initialized:
             return {}
         lookup = {
-            "charger_done": partial(getattr, self.sensors.charger_done, "value"),
-            "chargerobject_value": partial(
+            CHARGER_DONE: partial(getattr, self.sensors.charger_done, "value"),
+            CHARGEROBJECT_VALUE: partial(
                 getattr, self.sensors.chargerobject, "value"
             ),
-            "hour_state": partial(getattr, self.hours, "state", "unknown"),
-            "prices": partial(getattr, self.hours, "prices", []),
-            "prices_tomorrow": partial(getattr, self.hours, "prices_tomorrow", []),
-            "non_hours": partial(getattr, self, "non_hours", []),
-            "future_hours": partial(getattr, self.hours, "future_hours", []),
-            "caution_hours": partial(getattr, self.hours, "caution_hours", []),
-            "dynamic_caution_hours": partial(
+            HOUR_STATE: partial(getattr, self.hours, "state", "unknown"),
+            PRICES: partial(getattr, self.hours, "prices", []),
+            PRICES_TOMORROW: partial(getattr, self.hours, "prices_tomorrow", []),
+            NON_HOURS: partial(getattr, self, "non_hours", []),
+            FUTURE_HOURS: partial(getattr, self.hours, "future_hours", []),
+            CAUTION_HOURS: partial(getattr, self.hours, "caution_hours", []),
+            DYNAMIC_CAUTION_HOURS: partial(
                 getattr, self, "dynamic_caution_hours", {}
             ),
-            "average_nordpool_data": partial(getattr, self.nordpool, "average_data"),
-            "use_cent": partial(getattr, self.nordpool.model, "use_cent"),
-            "current_peak": partial(getattr, self.sensors.current_peak, "value"),
-            "avg_kwh_price": partial(self.hours.async_get_average_kwh_price),
-            "max_charge": partial(self.hours.async_get_total_charge),
-            "average_weekly": partial(getattr, self.nordpool, "average_weekly"),
-            "average_monthly": partial(getattr, self.nordpool, "average_month"),
-            "average_30": partial(getattr, self.nordpool, "average_30"),
-            "currency": partial(getattr, self.nordpool, "currency"),
-            "offsets": partial(getattr, self.hours, "offsets", {}),
-            "is_price_aware": partial(getattr, self.options.price, "price_aware"),
-            "is_scheduler_active": partial(
+            AVERAGE_NORDPOOL_DATA: partial(getattr, self.nordpool, "average_data"),
+            USE_CENT: partial(getattr, self.nordpool.model, "use_cent"),
+            CURRENT_PEAK: partial(getattr, self.sensors.current_peak, "value"),
+            AVERAGE_KWH_PRICE: partial(self.hours.async_get_average_kwh_price),
+            MAX_CHARGE: partial(self.hours.async_get_total_charge),
+            AVERAGE_WEEKLY: partial(getattr, self.nordpool, "average_weekly"),
+            AVERAGE_MONTHLY: partial(getattr, self.nordpool, "average_month"),
+            AVERAGE_30: partial(getattr, self.nordpool, "average_30"),
+            CURRENCY: partial(getattr, self.nordpool, "currency"),
+            OFFSETS: partial(getattr, self.hours, "offsets", {}),
+            IS_PRICE_AWARE: partial(getattr, self.options.price, "price_aware"),
+            IS_SCHEDULER_ACTIVE: partial(
                 getattr, self.hours.scheduler, "scheduler_active", False
             ),
-            "chargecontroller_status": partial(
+            CHARGECONTROLLER_STATUS: partial(
                 getattr, self.chargecontroller, "status_string"
             ),
-            "max_price": partial(getattr, self.hours, "absolute_top_price"),
-            "min_price": partial(getattr, self.hours, "min_price"),
-            "savings_peak": partial(
+            MAX_PRICE: partial(getattr, self.hours, "absolute_top_price"),
+            MIN_PRICE: partial(getattr, self.hours, "min_price"),
+            SAVINGS_PEAK: partial(
                 getattr, self.chargecontroller.savings, "savings_peak"
             ),
-            "savings_trade": partial(
+            SAVINGS_TRADE: partial(
                 getattr, self.chargecontroller.savings, "savings_trade"
             ),
-            "savings_total": partial(
+            SAVINGS_TOTAL: partial(
                 getattr, self.chargecontroller.savings, "savings_total"
             ),
-            "export_savings_data": partial(
+            EXPORT_SAVINGS_DATA: partial(
                 self.chargecontroller.savings.async_export_data
             ),
         }

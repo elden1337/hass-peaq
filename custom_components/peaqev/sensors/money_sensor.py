@@ -10,6 +10,18 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
 from custom_components.peaqev.sensors.money_sensor_helpers import *
 from custom_components.peaqev.sensors.sensorbase import SensorBase
+from custom_components.peaqev.peaqservice.hub.const import (
+CURRENCY,
+AVERAGE_NORDPOOL_DATA,
+USE_CENT,
+CURRENT_PEAK,
+AVERAGE_KWH_PRICE,
+MAX_CHARGE,
+MAX_PRICE,
+MIN_PRICE,
+FUTURE_HOURS,
+AVERAGE_MONTHLY
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,6 +42,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         self._avg_cost = None
         self._max_charge = None
         self._max_min_price = None
+        self._average_nordpool = None
         self._max_price_based_on = None
         self._average_data_current_month = None
         self._secondary_threshold = None
@@ -47,49 +60,47 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
 
     async def async_update(self) -> None:
         ret = await self.hub.async_request_sensor_data(
-            "prices_tomorrow",
-            "non_hours",
-            "dynamic_caution_hours",
-            "currency",
-            "average_nordpool_data",
-            "use_cent",
-            "current_peak",
-            "avg_kwh_price",
-            "max_charge",
-            "max_price",
-            "min_price",
-            "future_hours",
+            CURRENCY,
+            AVERAGE_NORDPOOL_DATA,
+            USE_CENT,
+            CURRENT_PEAK,
+            AVERAGE_KWH_PRICE,
+            MAX_CHARGE,
+            MAX_PRICE,
+            MIN_PRICE,
+            FUTURE_HOURS,
+            AVERAGE_MONTHLY,
         )
         if ret is not None:
             self._state = await self.async_state_display()
             self._secondary_threshold = self.hub.nordpool.model.adjusted_average
-            self._all_hours = set_all_hours_display(ret.get("future_hours", []))
-            self._currency = ret.get("currency")
-            self._current_peak = ret.get("current_peak")
-            self._max_charge = set_total_charge(ret.get("max_charge"))
-            self._average_nordpool_data = ret.get("average_nordpool_data", [])
-            self._charge_permittance = set_current_charge_permittance_display(ret.get("future_hours"))
+            self._all_hours = set_all_hours_display(ret.get(FUTURE_HOURS, []))
+            self._currency = ret.get(CURRENCY)
+            self._current_peak = ret.get(CURRENT_PEAK)
+            self._max_charge = set_total_charge(ret.get(MAX_CHARGE))
+            self._average_nordpool_data = ret.get(AVERAGE_NORDPOOL_DATA, [])
+            self._charge_permittance = set_current_charge_permittance_display(ret.get(FUTURE_HOURS))
             self._avg_cost = set_avg_cost(
-                avg_cost=ret.get("avg_kwh_price"),
-                currency=ret.get("currency"),
-                use_cent=ret.get("use_cent"),
+                avg_cost=ret.get(AVERAGE_KWH_PRICE),
+                currency=ret.get(CURRENCY),
+                use_cent=ret.get(USE_CENT),
             )
             self._average_data_current_month = currency_translation(
-                value=ret.get("average_monthly"),
-                currency=ret.get("currency"),
-                use_cent=ret.get("use_cent", False),
+                value=ret.get(AVERAGE_MONTHLY),
+                currency=ret.get(CURRENCY),
+                use_cent=ret.get(USE_CENT, False),
             )
 
             if self.hub.options.price.dynamic_top_price:
                 _maxp = currency_translation(
-                    value=ret.get("max_price") if ret.get("max_price", 0) > 0 else None,
-                    currency=ret.get("currency"),
-                    use_cent=ret.get("use_cent", False),
+                    value=ret.get(MAX_PRICE) if ret.get(MAX_PRICE, 0) > 0 else None,
+                    currency=ret.get(CURRENCY),
+                    use_cent=ret.get(USE_CENT, False),
                 )
                 _minp = currency_translation(
-                    value=ret.get("min_price") if ret.get("min_price", 0) > 0 else None,
-                    currency=ret.get("currency"),
-                    use_cent=ret.get("use_cent", False),
+                    value=ret.get(MIN_PRICE) if ret.get(MIN_PRICE, 0) > 0 else None,
+                    currency=ret.get(CURRENCY),
+                    use_cent=ret.get(USE_CENT, False),
                 )
                 self._max_min_price = f"max:{_maxp}, min:{_minp}"
                 self._max_price_based_on = (
