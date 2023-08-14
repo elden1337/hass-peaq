@@ -108,8 +108,9 @@ class NordPoolUpdater:
         }
         for l in length:
             _new = self._get_average(l)
-            if len(self.model.average_data) >= l:
+            if len(self.model.average_data) >= l and getattr(self.model, averages_dict[l]) != _new:
                 setattr(self.model, averages_dict[l], _new)
+                _LOGGER.debug(f"average {str(l)} updated to {_new}")
         await self.async_update_adjusted_average()
 
     async def async_update_adjusted_average(self) -> None:
@@ -118,11 +119,11 @@ class NordPoolUpdater:
             adj_avg = max(self.model.average_weekly, self.model.average_three_days)
         elif len(self.model.average_data) >= 3:
             adj_avg = self.model.average_three_days
-        if adj_avg is not None and adj_avg != self.model.adjusted_average:
+        if self.model.adjusted_average != adj_avg:
+            self.model.adjusted_average = adj_avg
             await self.hub.observer.async_broadcast(
                 "adjusted average price changed", adj_avg
             )
-        self.model.adjusted_average = adj_avg
 
     async def async_update_average_day(self, average) -> None:
         if average != self.model.daily_average:
