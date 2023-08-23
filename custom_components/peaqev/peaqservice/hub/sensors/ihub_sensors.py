@@ -13,7 +13,7 @@ from peaqevcore.models.hub.power import Power
 from peaqevcore.services.locale.Locale import LocaleData, LocaleFactory
 
 from custom_components.peaqev.peaqservice.hub.const import (
-    AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H, CHARGERDONE, CHARGERENABLED,
+    AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H, CHARGER_DONE, CHARGERENABLED,
     CONSUMPTION_TOTAL_NAME, HOURLY)
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
@@ -68,7 +68,7 @@ class HubSensors:
             "charger_done": partial(
                 HubMember,
                 data_type=bool,
-                listenerentity=f"binary_sensor.{domain}_{nametoid(CHARGERDONE)}",
+                listenerentity=f"binary_sensor.{domain}_{nametoid(CHARGER_DONE)}",
                 initval=False,
             ),
             "carpowersensor": partial(

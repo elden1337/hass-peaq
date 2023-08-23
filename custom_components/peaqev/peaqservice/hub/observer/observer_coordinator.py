@@ -7,7 +7,8 @@ from homeassistant.helpers.event import async_track_time_interval
 
 from custom_components.peaqev.peaqservice.hub.observer.iobserver_coordinator import \
     IObserver
-from custom_components.peaqev.peaqservice.hub.observer.models.command import Command
+from custom_components.peaqev.peaqservice.hub.observer.models.command import \
+    Command
 from custom_components.peaqev.peaqservice.util.extensionmethods import \
     async_iscoroutine
 
