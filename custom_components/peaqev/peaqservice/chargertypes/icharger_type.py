@@ -1,6 +1,6 @@
 import logging
 from abc import abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
@@ -31,7 +31,6 @@ class IChargerType:
     domainname: str = ""
     _hass: HomeAssistant = None
     _max_amps = None
-    native_chargerstates: list = field(default_factory=lambda: [])  # type: ignore
     servicecalls: ServiceCalls = None
     chargerstates = CHARGERSTATES_BASE
     entities = ChargerEntitiesModel
@@ -48,25 +47,26 @@ class IChargerType:
         return True
 
     async def async_setup(self) -> bool:
-        if self.type is not ChargerType.NoCharger:
-            try:
-                entitiesobj = helper.set_entitiesmodel(
-                    hass=self._hass,
-                    domain=self.domain_name,
-                    entity_endings=self.entity_endings,
-                    entity_schema=self.entities.entityschema,
-                )
-                if entitiesobj.valid:
-                    self.entities.imported_entities = entitiesobj.imported_entities
-                    self.entities.entityschema = entitiesobj.entityschema
-            except:
-                _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
-                return False
+        if self.type is ChargerType.NoCharger:
+            return True
+        try:
+            entities_model = helper.set_entitiesmodel(
+                hass=self._hass,
+                domain=self.domain_name,
+                entity_endings=self.entity_endings,
+                entity_schema=self.entities.entityschema,
+            )
+            if entities_model.valid:
+                self.entities.imported_entities = entities_model.imported_entities
+                self.entities.entityschema = entities_model.entityschema
+        except:
+            _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
+            return False
 
-            try:
-                await self.async_set_sensors()
-            except Exception:
-                return False
+        try:
+            await self.async_set_sensors()
+        except Exception:
+            return False
 
         await self.async_set_servicecalls(
             domain=self.domain_name,
@@ -135,6 +135,7 @@ class IChargerType:
     @abstractmethod
     def native_chargerstates(self) -> list:
         """declare a list of the native-charger states available for the type."""
+        pass
 
     @property
     @abstractmethod

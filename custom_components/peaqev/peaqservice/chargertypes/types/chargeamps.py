@@ -8,8 +8,6 @@ from peaqevcore.models.chargertype.servicecalls_options import \
 
 from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
     IChargerType
-from custom_components.peaqev.peaqservice.chargertypes.models.chargeamps_types import \
-    ChargeAmpsTypes
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
@@ -71,27 +69,27 @@ class ChargeAmps(IChargerType):
         """declare a list of the native-charger states available for the type."""
         return ["available", "connected", "charging"]
 
-    @property
-    def call_on(self) -> CallType:
-        return CallType(
-            "enable",
-            {CHARGEPOINT: self._chargerid, CONNECTOR: self._chargeamps_connector},
-        )
-
-    @property
-    def call_off(self) -> CallType:
-        return CallType(
-            "disable",
-            {CHARGEPOINT: self._chargerid, CONNECTOR: self._chargeamps_connector},
-        )
-
-    @property
-    def call_resume(self) -> CallType:
-        return self.call_on
-
-    @property
-    def call_pause(self) -> CallType:
-        return self.call_off
+    # @property
+    # def call_on(self) -> CallType:
+    #     return CallType(
+    #         "enable",
+    #         {CHARGEPOINT: self._chargerid, CONNECTOR: self._chargeamps_connector},
+    #     )
+    #
+    # @property
+    # def call_off(self) -> CallType:
+    #     return CallType(
+    #         "disable",
+    #         {CHARGEPOINT: self._chargerid, CONNECTOR: self._chargeamps_connector},
+    #     )
+    #
+    # @property
+    # def call_resume(self) -> CallType:
+    #     return self.call_on
+    #
+    # @property
+    # def call_pause(self) -> CallType:
+    #     return self.call_off
 
     @property
     def call_update_current(self) -> CallType:
@@ -112,27 +110,6 @@ class ChargeAmps(IChargerType):
         """no such method for chargeamps available right now."""
         return 16
 
-    def _determine_entities(self) -> list:
-        ret = []
-        for e in self.entities.imported_entities:
-            entity_state = self._hass.states.get(e)
-            if entity_state != "unavailable":
-                ret.append(e)
-        return ret
-
-    def _set_chargeamps_type(self, main_sensor_entity) -> ChargeAmpsTypes:
-        if self._hass.states.get(main_sensor_entity) is not None:
-            chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get("chargepoint_type")
-            return ChargeAmpsTypes.get_type(chargeampstype)
-
-    def _determine_switch_entity(self) -> str:
-        ent = self._determine_entities()
-        for e in ent:
-            if e.startswith("switch."):
-                amps = self._hass.states.get(e).attributes.get("max_current")
-                if isinstance(amps, int):
-                    return e
-        raise Exception
 
     async def async_set_sensors(self) -> None:
         self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"
@@ -141,24 +118,30 @@ class ChargeAmps(IChargerType):
         self.entities.ampmeter = f"{self.entities.powerswitch}|max_current"
         self._chargeramps_type = await self.async_set_chargeamps_type(self.entities.chargerentity)
 
-    async def async_determine_switch_entity(self) -> str:
-        ent = await self.async_determine_entities()
-        for e in ent:
-            if e.startswith("switch."):
-                amps = self._hass.states.get(e).attributes.get("max_current")
-                if isinstance(amps, int):
-                    return e
-        raise Exception
 
-    async def async_determine_entities(self) -> list:
-        ret = []
-        for e in self.entities.imported_entities:
-            entity_state = self._hass.states.get(e)
-            if entity_state != "unavailable":
-                ret.append(e)
-        return ret
-
-    async def async_set_chargeamps_type(self, main_sensor_entity) -> ChargeAmpsTypes:
-        if self._hass.states.get(main_sensor_entity) is not None:
-            chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get("chargepoint_type")
-            return await ChargeAmpsTypes.async_get_type(chargeampstype)
+    # def _set_chargeamps_type(self, main_sensor_entity) -> ChargeAmpsTypes:
+    #     if self._hass.states.get(main_sensor_entity) is not None:
+    #         chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get("chargepoint_type")
+    #         return ChargeAmpsTypes.get_type(chargeampstype)
+    #
+    # async def async_determine_switch_entity(self) -> str:
+    #     ent = await self.async_determine_entities()
+    #     for e in ent:
+    #         if e.startswith("switch."):
+    #             amps = self._hass.states.get(e).attributes.get("max_current")
+    #             if isinstance(amps, int):
+    #                 return e
+    #     raise Exception
+    #
+    # async def async_determine_entities(self) -> list:
+    #     ret = []
+    #     for e in self.entities.imported_entities:
+    #         entity_state = self._hass.states.get(e)
+    #         if entity_state != "unavailable":
+    #             ret.append(e)
+    #     return ret
+    #
+    # async def async_set_chargeamps_type(self, main_sensor_entity) -> ChargeAmpsTypes:
+    #     if self._hass.states.get(main_sensor_entity) is not None:
+    #         chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get("chargepoint_type")
+    #         return await ChargeAmpsTypes.async_get_type(chargeampstype)
