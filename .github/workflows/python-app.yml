@@ -29,4 +29,4 @@ jobs:
           flake8 custom_components --count --exit-zero --statistics
       - name: Test with pytest
         run: |
-          pytest
+          pytest custom_components/peaqev/test/
