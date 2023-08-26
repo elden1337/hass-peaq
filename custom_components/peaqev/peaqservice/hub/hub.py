@@ -26,6 +26,7 @@ from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory im
     HourselectionFactory
 from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import \
     ThresholdFactory
+from custom_components.peaqev.peaqservice.hub.hub_events import HubEvents
 from custom_components.peaqev.peaqservice.hub.hub_initializer import \
     HubInitializer
 from custom_components.peaqev.peaqservice.hub.max_min_controller import \
@@ -66,8 +67,11 @@ class HomeAssistantHub:
     states: IStateChanges
     chargecontroller: IChargeController
     nordpool: NordPoolUpdater
+    events :HubEvents
 
     def __init__(self, hass: HomeAssistant, options: HubOptions, domain: str):
+        self.chargingtracker_entities = []
+        self.power = None
         self.hubname = domain.capitalize()
         self.domain = domain
         self.state_machine = hass
@@ -100,8 +104,8 @@ class HomeAssistantHub:
             hub=self, is_active=self.options.price.price_aware
         )  # hours
         self.power = await PowerToolsFactory.async_create(self)
-
-        self.chargingtracker_entities = []
+        self.events = HubEvents(self, self.state_machine)
+        #self.chargingtracker_entities = []
         trackers = await self.async_setup_tracking()
         async_track_state_change(self.state_machine, trackers, self.async_state_changed)
 
