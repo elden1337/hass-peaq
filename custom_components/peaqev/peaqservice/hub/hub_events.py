@@ -20,9 +20,9 @@ class HubEvents:
             _LOGGER.debug(f"Listening to {e} for aux_stop")
 
     def handle_event(self, event):
-        _LOGGER.debug(f"Received event {event.event_type}")
         ret = bool(event.data.get("new", False))
         if ret != self._aux_stop:
+            _LOGGER.debug(f"Received event {event.event_type} with data {event.data}")
             self._aux_stop = ret
             self._hub.observer.broadcast("aux stop")
 
