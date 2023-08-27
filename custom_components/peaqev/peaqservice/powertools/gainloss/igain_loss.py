@@ -30,10 +30,14 @@ class IGainLoss:
         pass
 
     async def async_calculate_state(self, consumption, cost, time_period: TimePeriods) -> float:
+        average: float = None
         if consumption is not None and cost is not None:
             if await self.async_check_invalid_states(consumption, cost):
                 return 0.0
-            average, cost = self.normalize_numbers(await self.async_get_average(time_period), float(cost))
+            try:
+                average, cost = self.normalize_numbers(await self.async_get_average(time_period), float(cost))
+            except TypeError:
+                return 0.0
             if float(consumption) > 0 and cost > 0 and average is not None:
                 net = cost / float(consumption)
                 try:
