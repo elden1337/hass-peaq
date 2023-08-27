@@ -1,8 +1,8 @@
 import logging
 import time
 
+from peaqevcore.common.enums.calltype_enum import CallTypes
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
-from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.services.chargertype.const import DOMAIN, PARAMS
 
 from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import \
