@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 import logging
-import time
 
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
@@ -70,9 +69,9 @@ class StateChanges(IStateChanges):
     async def async_handle_outlet_updates(self):
         if self.hub.chargertype.domainname is ChargerType.Outlet:
             old_state = await self.hub.async_request_sensor_data("chargerobject_value")
-            if time.time() - self.latest_outlet_update < 10:
+            if not self.latest_outlet_update.is_timeout():
                 return
-            self.latest_outlet_update = time.time()
+            self.latest_outlet_update.update()
             if self.hub.sensors.carpowersensor.value > 0:
                 await self.hub.async_set_chargerobject_value("charging")
             else:
@@ -115,9 +114,9 @@ class StateChangesLite(IStateChanges):
     async def _handle_outlet_updates(self):
         if self.hub.chargertype.domainname is ChargerType.Outlet:
             old_state = await self.hub.async_request_sensor_data("chargerobject_value")
-            if time.time() - self.latest_outlet_update < 10:
+            if not self.latest_outlet_update.is_timeout():
                 return
-            self.latest_outlet_update = time.time()
+            self.latest_outlet_update.update()
             if self.hub.sensors.carpowersensor.value > 0:
                 await self.hub.async_set_chargerobject_value("charging")
             else:

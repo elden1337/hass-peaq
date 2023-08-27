@@ -65,12 +65,12 @@ class IChargeController:
 
     async def async_update_latest_charger_start(self):
         if self.hub.enabled:
-            self.model.latest_charger_start = time.time()
+            self.model.latest_charger_start.update()
 
     def _do_initialize(self) -> bool:
         self.model.is_initialized = True
         log_once("Chargecontroller is initialized and ready to work.")
-        self.model.latest_charger_start = time.time()
+        self.model.latest_charger_start.update()
         return self.model.is_initialized
 
     @abstractmethod
@@ -216,7 +216,7 @@ class IChargeController:
                     f"'is_done' reported that charger is Done based on current charger state"
                 )
                 return await self.async_is_done_return(True)
-        elif time.time() - self.model.latest_charger_start > DONETIMEOUT:
+        elif self.model.latest_charger_start.is_timeout():
             self.__debug_log(
                 f"'is_done' reported that charger is Done because of idle-charging for more than {DONETIMEOUT} seconds."
             )

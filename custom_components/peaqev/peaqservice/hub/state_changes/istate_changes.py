@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from peaqevcore.common.wait_timer import WaitTimer
+
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 
@@ -9,7 +11,6 @@ if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
 import logging
-import time
 from abc import abstractmethod
 from datetime import datetime
 
@@ -17,17 +18,18 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class IStateChanges:
-    latest_nordpool_update = 0
-    latest_outlet_update = 0
-    latest_chargecontroller_update = 0
+    latest_nordpool_update = WaitTimer(timeout=60)
+    latest_chargecontroller_update = WaitTimer(timeout=3)
+    latest_outlet_update = WaitTimer(timeout=10)
+
 
     def __init__(self, hub: HomeAssistantHub):
         self.hub = hub
 
     async def async_update_sensor(self, entity, value):
         update_session = await self.async_update_sensor_internal(entity, value)
-        if time.time() - self.latest_chargecontroller_update > 3:
-            self.latest_chargecontroller_update = time.time()
+        if self.latest_chargecontroller_update.is_timeout():
+            self.latest_chargecontroller_update.update()
             await self.hub.chargecontroller.async_set_status()
             if self.hub.options.price.price_aware:  # todo: strategy should handle this
                 if not self.hub.max_min_controller.override_max_charge:
@@ -35,10 +37,10 @@ class IStateChanges:
         if self.hub.options.price.price_aware:  # todo: strategy should handle this
             if entity != self.hub.nordpool.nordpool_entity and (
                 not self.hub.hours.is_initialized
-                or time.time() - self.latest_nordpool_update > 60
+                or self.latest_nordpool_update.is_timeout()
             ):
                 """tweak to provoke nordpool to update more often"""
-                self.latest_nordpool_update = time.time()
+                self.latest_nordpool_update.update()
                 await self.hub.nordpool.async_update_nordpool()
         await self.async_handle_sensor_attribute()
         await self.async_update_session_parameters(update_session)
