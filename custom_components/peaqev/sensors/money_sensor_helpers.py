@@ -73,22 +73,22 @@ def set_total_charge(max_charge) -> str:
     return f"{max_charge[0]} kWh"
 
 
-def set_all_hours_display(future_hours: list[HourPrice]) -> dict:
+def set_all_hours_display(future_hours: list[HourPrice]) -> dict[str, str]:
     ret = {}
     for h in future_hours:
-        dtstr = f"{h.dt.hour:02d}:{h.dt.minute:02d}"
+        dt_string = f"{h.dt.hour:02d}:{h.dt.minute:02d}"
         if h.dt.date() == datetime.now().date():
-            dtstr = f"{dtstr}"
+            dt_string = f"{dt_string}"
         else:
-            dtstr = f"{dtstr}⁺¹"
+            dt_string = f"{dt_string}⁺¹"
 
         match h.permittance:
             case 0:
-                ret[str(dtstr)] = "-"
+                ret[str(dt_string)] = "-"
             case 1:
-                ret[str(dtstr)] = "Charge"
+                ret[str(dt_string)] = "Charge"
             case _:
-                ret[str(dtstr)] = f"Caution {str(int(h.permittance * 100))}%"
+                ret[str(dt_string)] = f"Caution {str(int(h.permittance * 100))}%"
     return ret
 
 

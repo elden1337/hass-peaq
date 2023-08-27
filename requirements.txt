@@ -2,3 +2,4 @@ peaqevcore~=13.0.0
 black
 isort
 autoflake
+pytest
