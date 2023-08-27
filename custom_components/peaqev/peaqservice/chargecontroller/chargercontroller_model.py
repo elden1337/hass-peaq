@@ -3,7 +3,8 @@ from dataclasses import dataclass
 from peaqevcore.common.wait_timer import WaitTimer
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
-from custom_components.peaqev.peaqservice.chargecontroller.const import DONETIMEOUT
+from custom_components.peaqev.peaqservice.chargecontroller.const import \
+    DONETIMEOUT
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 
