@@ -242,7 +242,7 @@ class IChargeController:
         )
         self.hub.observer.add("hub initialized", self._check_initialized)
         self.hub.observer.add("timer activated", self.async_set_status)
-        self.hub.observer.add("aux stop", self.async_set_status)
+        self.hub.observer.add("aux stop changed", self.async_set_status)
 
     @abstractmethod
     async def async_below_startthreshold(self) -> bool:

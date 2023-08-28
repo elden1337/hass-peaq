@@ -2,8 +2,8 @@ import logging
 
 events = [
     "peaqhvac.try_heat_water_changed",
-    "peaqhvac.currently_heating_changed",
-    "peaqhvac.boost_changed",
+    #"peaqhvac.currently_heating_changed",
+    #"peaqhvac.boost_changed",
     "peaqhvac.pre_heating_changed",
     "peaqhvac.upcoming_water_heater_warning"
 ]
@@ -22,9 +22,9 @@ class HubEvents:
     def handle_event(self, event):
         ret = bool(event.data.get("new", False))
         if ret != self._aux_stop:
-            #_LOGGER.debug(f"Received event {event.event_type} with data {event.data}")
+            _LOGGER.debug(f"Received event {event.event_type} with data {event.data}")
             self._aux_stop = ret
-            self._hub.observer.broadcast("aux stop")
+            self._hub.observer.broadcast("aux stop changed")
 
     @property
     def aux_stop(self) -> bool:
