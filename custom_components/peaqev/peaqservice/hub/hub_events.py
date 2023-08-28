@@ -29,4 +29,4 @@ class HubEvents:
     @property
     def aux_stop(self) -> bool:
         """Auxiliary stop of charging. Responds to various events from peaqhvac and possibly others."""
-        return self._aux_stop
+        return self._aux_stop   
