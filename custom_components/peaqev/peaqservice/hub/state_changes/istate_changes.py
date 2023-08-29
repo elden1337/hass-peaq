@@ -18,7 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class IStateChanges:
-    latest_nordpool_update = WaitTimer(timeout=60)
+    latest_spotprice_update = WaitTimer(timeout=60)
     latest_chargecontroller_update = WaitTimer(timeout=3)
     latest_outlet_update = WaitTimer(timeout=10)
 
@@ -35,13 +35,13 @@ class IStateChanges:
                 if not self.hub.max_min_controller.override_max_charge:
                     await self.hub.max_min_controller.async_reset_max_charge_sensor()
         if self.hub.options.price.price_aware:  # todo: strategy should handle this
-            if entity != self.hub.nordpool.nordpool_entity and (
+            if entity != self.hub.spotprice.entity and (
                 not self.hub.hours.is_initialized
-                or self.latest_nordpool_update.is_timeout()
+                or self.latest_spotprice_update.is_timeout()
             ):
-                """tweak to provoke nordpool to update more often"""
-                self.latest_nordpool_update.update()
-                await self.hub.nordpool.async_update_nordpool()
+                """tweak to provoke spotprice to update more often"""
+                self.latest_spotprice_update.update()
+                await self.hub.spotprice.async_update_spotprice()
         await self.async_handle_sensor_attribute()
         await self.async_update_session_parameters(update_session)
         if all(
@@ -66,7 +66,7 @@ class IStateChanges:
             )
             if self.hub.options.price.price_aware:  # todo: strategy should handle this
                 await self.hub.chargecontroller.session.async_set_session_price(
-                    float(self.hub.nordpool.state)
+                    float(self.hub.spotprice.state)
                 )
                 if getattr(self.hub.hours.scheduler, "schedule_created", False):
                     await self.hub.hours.scheduler.async_update_facade()

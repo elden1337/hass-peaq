@@ -10,7 +10,7 @@
           "cautionhour_type": "Caution-hour type",
           "max_charge": "(Optional) The standard maximum charge (kWh) per session."
         },
-        "description": "Select price-aware if you wish to adhere to Nordpool-prices (requires integration)"
+        "description": "Select price-aware if you wish to adhere to Nordpool- or EnergiDataService-prices (requires integration)"
       },
       "hours": {
         "data": {
@@ -78,7 +78,7 @@
       },
       "priceaware": {
         "data": {
-          "priceaware": "Price aware charging (requires Nordpool)",
+          "priceaware": "Price aware charging (requires Nordpool or EnergiDataService)",
           "absolute_top_price": "(Optional) Never charge over this price",
           "dynamic_top_price": "Top price based on current month average price (ignores set max-price)",
           "min_priceaware_threshold_price": "(Optional) Always allow charging below this price",

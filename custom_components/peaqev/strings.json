@@ -10,7 +10,7 @@
           "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]",
           "max_charge": "[%key:common::config_flow::data::max_charge%]"
         },
-        "description": "Select price-aware if you wish to adhere to Nordpool-prices (requires integration)"
+        "description": "Select price-aware if you wish to adhere to Nordpool- or EnergidataService-prices (requires integration)"
       },
       "hours": {
         "data": {

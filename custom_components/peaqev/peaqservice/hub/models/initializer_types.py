@@ -8,4 +8,4 @@ class InitializerTypes(Enum):
     Power = "Power"
     ChargerObject = "Chargerobject"
     ChargerType = "Chargertype"
-    Nordpool = "Nordpool"
+    SpotPrice = "Spotprice"

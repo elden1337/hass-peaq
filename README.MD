@@ -68,8 +68,8 @@ No charger| - | No | | _For using the sensors and logic_
 
 
 #### Price-aware:
-- `Price-aware charging` - Check this to calculate the cheapest hours from Nordpool (requires [Nordpool](https://github.com/custom-components/nordpool)). Non- and Caution hours below here will be ignored
-- `Dynamic top price` - If checked, the absolute top price for charging will be calculated by the monthly average from Nordpool (current month)
+- `Price-aware charging` - Check this to calculate the cheapest hours from [Nordpool](https://github.com/custom-components/nordpool) or [EnergiDataService](https://github.com/MTrab/energidataservice). Non- and Caution hours below here will be ignored
+- `Dynamic top price` - If checked, the absolute top price for charging will be calculated by the monthly average from the spotprice-source (current month)
 - `Absolute top price` - The limit (if any) where your charger should be stopped, regardless of the hour algorithm
 - `Min price` - The lower limit (if any) where charging will always be permitted (must be lower than top price if set)
 - `Caution hour type` - Choose to what extent you would like Peaqev to hold back during caution hours. *Suave > Aggressive* 

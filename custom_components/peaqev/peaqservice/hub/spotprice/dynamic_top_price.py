@@ -3,10 +3,8 @@ from datetime import datetime
 from statistics import mean
 from typing import Tuple
 
-from custom_components.peaqev.peaqservice.hub.nordpool.models.average_type import \
-    AverageType
-from custom_components.peaqev.peaqservice.hub.nordpool.models.dynamic_top_price_model import \
-    DynamicTopPriceModel
+from custom_components.peaqev.peaqservice.hub.spotprice.models.average_type import AverageType
+from custom_components.peaqev.peaqservice.hub.spotprice.models.dynamic_top_price_model import DynamicTopPriceModel
 
 _LOGGER = logging.getLogger(__name__)
 

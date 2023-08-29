@@ -57,9 +57,9 @@ class StateChanges(IStateChanges):
                     self.hub.sensors.powersensormovingaverage.value = value
                 case self.hub.sensors.powersensormovingaverage24.entity:
                     self.hub.sensors.powersensormovingaverage24.value = value
-                case self.hub.nordpool.nordpool_entity:
+                case self.hub.spotprice.entity:
                     if self.hub.options.price.price_aware:
-                        await self.hub.nordpool.async_update_nordpool()
+                        await self.hub.spotprice.async_update_spotprice()
                         update_session = True
             return update_session
         except Exception as e:
@@ -97,7 +97,6 @@ class StateChangesLite(IStateChanges):
                 else:
                     self.hub.sensors.carpowersensor.value = value
                     await self._handle_outlet_updates()
-                    #self.hub.sensors.amp_meter.update()
             case self.hub.sensors.chargerobject.entity:
                 await self.hub.async_set_chargerobject_value(value)
             case self.hub.sensors.chargerobject_switch.entity:
@@ -106,9 +105,9 @@ class StateChangesLite(IStateChanges):
                 self.hub.sensors.current_peak.value = value
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self.async_update_total_energy_and_peak(value)
-            case self.hub.nordpool.nordpool_entity:
+            case self.hub.spotprice.entity:
                 if self.hub.options.price.price_aware:
-                    await self.hub.nordpool.async_update_nordpool()
+                    await self.hub.spotprice.async_update_spotprice()
         return False
 
     async def _handle_outlet_updates(self):
@@ -152,9 +151,9 @@ class StateChangesNoCharger(IStateChanges):
                 self.hub.sensors.powersensormovingaverage.value = value
             case self.hub.sensors.powersensormovingaverage24.entity:
                 self.hub.sensors.powersensormovingaverage24.value = value
-            case self.hub.nordpool.nordpool_entity:
+            case self.hub.spotprice.entity:
                 if self.hub.options.price.price_aware:
-                    await self.hub.nordpool.async_update_nordpool()
+                    await self.hub.spotprice.async_update_spotprice()
                     update_session = True
         return update_session
 
@@ -168,7 +167,7 @@ class StateChangesLiteNoCharger(IStateChanges):
         match entity:
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self.async_update_total_energy_and_peak(value)
-            case self.hub.nordpool.nordpool_entity:
+            case self.hub.spotprice.entity:
                 if self.hub.options.price.price_aware:
-                    await self.hub.nordpool.async_update_nordpool()
+                    await self.hub.spotprice.async_update_spotprice()
         return False
