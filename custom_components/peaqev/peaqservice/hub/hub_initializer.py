@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from custom_components.peaqev.peaqservice.hub.models.initializer_types import InitializerTypes
+from custom_components.peaqev.peaqservice.hub.models.initializer_types import \
+    InitializerTypes
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub import HomeAssistantHub

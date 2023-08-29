@@ -1,8 +1,9 @@
 import logging
-from datetime import datetime, date
+from datetime import date, datetime
 from statistics import mean
 
-from custom_components.peaqev.peaqservice.hub.spotprice.const import AVERAGE_MAX_LEN
+from custom_components.peaqev.peaqservice.hub.spotprice.const import \
+    AVERAGE_MAX_LEN
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -1,9 +1,12 @@
 import asyncio
 import logging
 
-from custom_components.peaqev.peaqservice.hub.spotprice.const import ENERGIDATASERVICE, ENERGIDATASERVICE_SENSOR
-from custom_components.peaqev.peaqservice.hub.spotprice.ispotprice import ISpotPrice
-from custom_components.peaqev.peaqservice.hub.spotprice.models.spotprice_dto import EnergiDataServiceDTO
+from custom_components.peaqev.peaqservice.hub.spotprice.const import (
+    ENERGIDATASERVICE, ENERGIDATASERVICE_SENSOR)
+from custom_components.peaqev.peaqservice.hub.spotprice.ispotprice import \
+    ISpotPrice
+from custom_components.peaqev.peaqservice.hub.spotprice.models.spotprice_dto import \
+    EnergiDataServiceDTO
 
 _LOGGER = logging.getLogger(__name__)
 

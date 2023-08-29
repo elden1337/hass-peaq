@@ -4,8 +4,10 @@ import logging
 import homeassistant.helpers.template as template
 
 from custom_components.peaqev.peaqservice.hub.spotprice.const import NORDPOOL
-from custom_components.peaqev.peaqservice.hub.spotprice.ispotprice import ISpotPrice
-from custom_components.peaqev.peaqservice.hub.spotprice.models.spotprice_dto import NordpoolDTO
+from custom_components.peaqev.peaqservice.hub.spotprice.ispotprice import \
+    ISpotPrice
+from custom_components.peaqev.peaqservice.hub.spotprice.models.spotprice_dto import \
+    NordpoolDTO
 
 _LOGGER = logging.getLogger(__name__)
 

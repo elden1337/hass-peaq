@@ -1,9 +1,12 @@
 import logging
 
 from custom_components.peaqev.peaqservice.hub.spotprice.const import *
-from custom_components.peaqev.peaqservice.hub.spotprice.energidataservice import EnergiDataServiceUpdater
-from custom_components.peaqev.peaqservice.hub.spotprice.ispotprice import ISpotPrice
-from custom_components.peaqev.peaqservice.hub.spotprice.nordpool import NordPoolUpdater
+from custom_components.peaqev.peaqservice.hub.spotprice.energidataservice import \
+    EnergiDataServiceUpdater
+from custom_components.peaqev.peaqservice.hub.spotprice.ispotprice import \
+    ISpotPrice
+from custom_components.peaqev.peaqservice.hub.spotprice.nordpool import \
+    NordPoolUpdater
 
 _LOGGER = logging.getLogger(__name__)
 

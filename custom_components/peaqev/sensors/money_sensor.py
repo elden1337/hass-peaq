@@ -9,7 +9,8 @@ from homeassistant.helpers.restore_state import RestoreEntity
 
 from custom_components.peaqev.peaqservice.hub.const import (
     AVERAGE_KWH_PRICE, AVERAGE_MONTHLY, AVERAGE_SPOTPRICE_DATA, CURRENCY,
-    CURRENT_PEAK, FUTURE_HOURS, MAX_CHARGE, MAX_PRICE, MIN_PRICE, USE_CENT, SPOTPRICE_SOURCE)
+    CURRENT_PEAK, FUTURE_HOURS, MAX_CHARGE, MAX_PRICE, MIN_PRICE,
+    SPOTPRICE_SOURCE, USE_CENT)
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
 from custom_components.peaqev.sensors.money_sensor_helpers import *
 from custom_components.peaqev.sensors.sensorbase import SensorBase

@@ -40,8 +40,10 @@ from custom_components.peaqev.peaqservice.hub.sensors.hubsensors_factory import 
 from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import \
     HubSensors
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
-from custom_components.peaqev.peaqservice.hub.spotprice.ispotprice import ISpotPrice
-from custom_components.peaqev.peaqservice.hub.spotprice.spotprice_factory import SpotPriceFactory
+from custom_components.peaqev.peaqservice.hub.spotprice.ispotprice import \
+    ISpotPrice
+from custom_components.peaqev.peaqservice.hub.spotprice.spotprice_factory import \
+    SpotPriceFactory
 from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
     IStateChanges
 from custom_components.peaqev.peaqservice.hub.state_changes.state_changes_factory import \
