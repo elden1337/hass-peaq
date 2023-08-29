@@ -333,6 +333,7 @@ class HomeAssistantHub:
             if self.max_min_controller.is_on:
                 await self.hours.async_update_max_min(
                     max_charge=self.max_min_controller.max_charge,
+                    limiter=self.max_min_controller.max_min_limiter,
                     car_connected=self.chargecontroller.connected,
                     session_energy=self.chargecontroller.session.session_energy,
                 )

@@ -16,6 +16,7 @@ class MaxMinController:
         self.is_on:bool = False
         self._override_max_charge = None
         self._original_total_charge = 0
+        self._max_min_limiter: float = 0
         self.override_max_charge: bool = False
         if not hub.options.peaqev_lite:
             self.hub.observer.add("car disconnected", self.async_null_max_charge)
@@ -23,6 +24,7 @@ class MaxMinController:
                 "update charger done", self.async_null_max_charge_done
             )
             self.hub.observer.add("update charger enabled", self.async_null_max_charge)
+            self.hub.observer.add("max min limiter changed", self.async_update_maxmin_core)
 
     @property
     def max_charge(self) -> int:
@@ -45,16 +47,29 @@ class MaxMinController:
             self.hub.chargecontroller.session, "session_energy", 0
         )  # todo: composition
 
+    @property
+    def max_min_limiter(self) -> float:
+        return self._max_min_limiter
+
+    @max_min_limiter.setter
+    def max_min_limiter(self, val: float):
+        self._max_min_limiter = val
+        self.hub.observer.broadcast("max min limiter changed")
+
     async def async_override_max_charge(self, max_charge: int):
         """Overrides the max-charge with the input from frontend"""
         if self.active:
             self._override_max_charge = max_charge
             _LOGGER.debug(f"Max charge overridden to {max_charge}kWh. Updating max_min with {self.max_charge}")
-            await self.hub.hours.async_update_max_min(
-                max_charge=self.max_charge,
-                session_energy=self.hub.chargecontroller.session.session_energy,
-                car_connected=self.hub.chargecontroller.connected
-            )
+            await self.async_update_maxmin_core()
+
+    async def async_update_maxmin_core(self) -> None:
+        await self.hub.hours.async_update_max_min(
+            max_charge=self.max_charge,
+            limiter=self.max_min_limiter,
+            session_energy=self.hub.chargecontroller.session.session_energy,
+            car_connected=self.hub.chargecontroller.connected
+        )
 
     async def async_servicecall_override_charge_amount(self, amount: int):
         await self.async_override_max_charge(amount)
@@ -109,3 +124,6 @@ class MaxMinController:
                     "value": int(val),
                 },
             )
+
+
+

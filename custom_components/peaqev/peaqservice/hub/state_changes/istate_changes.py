@@ -123,6 +123,7 @@ class IStateChanges:
             try:
                 await self.hub.hours.async_update_max_min(
                     max_charge=self.hub.max_min_controller.max_charge,
+                    limiter=self.hub.max_min_controller.max_min_limiter,
                     session_energy=self.hub.chargecontroller.session.session_energy,
                     car_connected=self.hub.chargecontroller.connected,
                 )
