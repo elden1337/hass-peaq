@@ -39,7 +39,7 @@ class NordPoolUpdater(ISpotPrice):
             if len(list(entities)) < 1:
                 self.hub.options.price.price_aware = False  # todo: composition
                 _LOGGER.error(
-                    f"There were no Spotprice-entities. Cannot continue. with price-awareness: {e}"
+                    f"There were no Spotprice-entities. Cannot continue. with price-awareness."
                 )
             if len(list(entities)) == 1:
                 self._setup_set_entity(entities[0])

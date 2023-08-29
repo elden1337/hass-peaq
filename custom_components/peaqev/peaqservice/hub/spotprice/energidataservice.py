@@ -37,7 +37,7 @@ class EnergiDataServiceUpdater(ISpotPrice):
             if not sensor.state:
                 self.hub.options.price.price_aware = False  # todo: composition
                 _LOGGER.error(
-                    f"There were no Spotprice-entities. Cannot continue. with price-awareness: {e}"
+                    f"There were no Spotprice-entities. Cannot continue. with price-awareness."
                 )
             else:
                 self.model.entity = ENERGIDATASERVICE_SENSOR
