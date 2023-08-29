@@ -91,7 +91,6 @@ class Charger:
             not self.controller.hub.charger_done
             and _state is ChargeControllerStates.Done
         ):
-            _LOGGER.debug("Going to terminate since the charger is done.")
             await self.async_terminate_charger()
         elif self.charger_active and _state is ChargeControllerStates.Idle:
             _LOGGER.debug("Going to terminate since the car has been disconnected.")
