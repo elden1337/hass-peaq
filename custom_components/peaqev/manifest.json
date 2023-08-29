@@ -23,7 +23,7 @@
   "iot_class": "calculated",
   "issue_tracker": "https://github.com/elden1337/hass-peaq/issues",
   "requirements": [
-    "peaqevcore==19.1.1"
+    "peaqevcore==19.1.2"
   ],
-  "version": "3.0.7"
+  "version": "3.1.0b0"
 }
