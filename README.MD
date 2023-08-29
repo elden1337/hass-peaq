@@ -16,12 +16,8 @@ First time here? Check the [getting-started](https://github.com/elden1337/hass-p
 Interested in sponsoring or prioritizing a certain feature, look [here](https://github.com/elden1337/hass-peaq/wiki/Sponsorship-and-prioritized-development)
 
 Peaqev aims at lowering the household's peak energy charges, targeted at charging an electronic vehicle (EV) below a dynamic threshold. 
-Peaqev covers [28 different energy companies](https://github.com/elden1337/hass-peaq/wiki/Locale) in Sweden, Norway and Belgium and two types of ev chargers _(2022-11-08)_
-You will get the best experience with a supported charger that can update amps while charging, as well as using a connected power meter that update your total power draw frequently. Examples of such meters are:
-
-- Shelly 3EM
-- Tibber Watty
-- Tibber Pulse
+Peaqev covers [28 different energy companies](https://github.com/elden1337/hass-peaq/wiki/Locale) in Sweden, Norway and Belgium.
+You will get the best experience with a supported charger that can update amps while charging, as well as using a connected power meter that update your total power draw frequently (every 10s or more).
 
 The integration does not communicate with any proprietary API's. However, the chargers selected will use the integrations set for them, and may include cloud polling of data.
 
