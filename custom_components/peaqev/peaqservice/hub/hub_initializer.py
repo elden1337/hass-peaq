@@ -2,27 +2,18 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from custom_components.peaqev.peaqservice.hub.models.initializer_types import InitializerTypes
+
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub import HomeAssistantHub
 
 import logging
 import time
-from enum import Enum
 
 from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import \
     HourselectionFactory
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class InitializerTypes(Enum):
-    Hours = "Hours"
-    CarPowerSensor = "Car powersensor"
-    ChargerObjectSwitch = "Chargerobject switch"
-    Power = "Power"
-    ChargerObject = "Chargerobject"
-    ChargerType = "Chargertype"
-    Nordpool = "Nordpool"
 
 
 class HubInitializer:
