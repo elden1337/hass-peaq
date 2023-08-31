@@ -48,7 +48,7 @@ class ISpotPriceDTO:
 class EnergiDataServiceDTO(ISpotPriceDTO):
 
     def _set_price_in_cent(self, ret) -> bool:
-            return False
+            return bool(ret.attributes.get("use_cent", False))
 
     def _set_average(self, ret) -> float:
         try:
