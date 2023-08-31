@@ -116,7 +116,7 @@ class PeaqSessionCostSensor(SessionDevice, RestoreEntity):
 
     async def async_update(self) -> None:
         self._state = getattr(self.hub.chargecontroller.session, "session_price")
-        self._attr_unit_of_measurement = getattr(self.hub.nordpool, "currency")
+        self._attr_unit_of_measurement = getattr(self.hub.spotprice, "currency")
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()

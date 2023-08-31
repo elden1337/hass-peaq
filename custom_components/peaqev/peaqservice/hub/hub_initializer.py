@@ -2,27 +2,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from custom_components.peaqev.peaqservice.hub.models.initializer_types import \
+    InitializerTypes
+
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub import HomeAssistantHub
 
 import logging
 import time
-from enum import Enum
 
 from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import \
     HourselectionFactory
 
 _LOGGER = logging.getLogger(__name__)
-
-
-class InitializerTypes(Enum):
-    Hours = "Hours"
-    CarPowerSensor = "Car powersensor"
-    ChargerObjectSwitch = "Chargerobject switch"
-    Power = "Power"
-    ChargerObject = "Chargerobject"
-    ChargerType = "Chargertype"
-    Nordpool = "Nordpool"
 
 
 class HubInitializer:
@@ -42,7 +34,7 @@ class HubInitializer:
     def _check(self) -> bool:
         init_types = {InitializerTypes.Hours: self.parent.hours.is_initialized}
         if self.parent.options.price.price_aware:
-            init_types[InitializerTypes.Nordpool] = self.parent.nordpool.is_initialized
+            init_types[InitializerTypes.SpotPrice] = self.parent.spotprice.is_initialized
         if hasattr(self.parent.sensors, "carpowersensor"):
             init_types[InitializerTypes.CarPowerSensor] = self.parent.sensors.carpowersensor.is_initialized
         if hasattr(self.parent.sensors, "chargerobject_switch"):
@@ -84,6 +76,6 @@ class HubInitializer:
         self.parent.hours = await HourselectionFactory.async_create(self.parent)
         if self.parent.options.price.price_aware:
             await self.parent.hours.async_update_prices(
-                self.parent.nordpool.model.prices,
-                self.parent.nordpool.model.prices_tomorrow)
+                self.parent.spotprice.model.prices,
+                self.parent.spotprice.model.prices_tomorrow)
         _LOGGER.debug("Re-initializing Hoursclasses.")

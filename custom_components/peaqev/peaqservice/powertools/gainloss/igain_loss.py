@@ -10,10 +10,16 @@ _LOGGER = logging.getLogger(__name__)
 
 class IGainLoss:
     def __init__(self):
-        self._daily_average: float = None
-        self._monthly_average: float = None
+        self._daily_average: float|None = None
+        self._monthly_average: float|None = None
+
+    @property
+    def is_initialized(self) -> bool:
+        return self._daily_average is not None and self._monthly_average is not None
 
     async def async_state(self, time_period: TimePeriods) -> float:
+        if not self.is_initialized:
+            return 0.0
         consumption = await self.async_get_consumption(time_period)
         cost = await self.async_get_cost(time_period)
         try:
@@ -30,7 +36,7 @@ class IGainLoss:
         pass
 
     async def async_calculate_state(self, consumption, cost, time_period: TimePeriods) -> float:
-        average: float = None
+        average: float|None = None
         if consumption is not None and cost is not None:
             if await self.async_check_invalid_states(consumption, cost):
                 return 0.0
@@ -48,7 +54,7 @@ class IGainLoss:
         return 0.0
 
     @staticmethod
-    def normalize_numbers(average, cost):
+    def normalize_numbers(average:float, cost:float):
         try:
             if min(average, cost) < 0:
                 diff = abs(min(average, cost)) + 0.01
@@ -56,7 +62,7 @@ class IGainLoss:
                 cost += diff
             return round(average, 3), round(cost, 3)
         except TypeError as T:
-            _LOGGER.error(f"Error in normalize_numbers. Can't calculate gain/loss: {T}")
+            _LOGGER.warning(f"normalize_numbers. Can't calculate gain/loss: {T}. avg: {average}, cost: {cost}")
             return average, cost
 
     def _update_monthly_average(self, val):

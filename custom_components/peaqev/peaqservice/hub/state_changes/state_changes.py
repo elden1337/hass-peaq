@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 import logging
-import time
 
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
@@ -33,6 +32,7 @@ class StateChanges(IStateChanges):
                     self.hub.power.power_canary.total_power = (
                         self.hub.sensors.power.total.value
                     )
+                    self.hub.sensors.power_trend.add_reading(self.hub.sensors.power.total.value)
                 case self.hub.sensors.carpowersensor.entity:
                     if self.hub.sensors.carpowersensor.use_attribute:
                         pass
@@ -58,9 +58,9 @@ class StateChanges(IStateChanges):
                     self.hub.sensors.powersensormovingaverage.value = value
                 case self.hub.sensors.powersensormovingaverage24.entity:
                     self.hub.sensors.powersensormovingaverage24.value = value
-                case self.hub.nordpool.nordpool_entity:
+                case self.hub.spotprice.entity:
                     if self.hub.options.price.price_aware:
-                        await self.hub.nordpool.async_update_nordpool()
+                        await self.hub.spotprice.async_update_spotprice()
                         update_session = True
             return update_session
         except Exception as e:
@@ -70,9 +70,9 @@ class StateChanges(IStateChanges):
     async def async_handle_outlet_updates(self):
         if self.hub.chargertype.domainname is ChargerType.Outlet:
             old_state = await self.hub.async_request_sensor_data("chargerobject_value")
-            if time.time() - self.latest_outlet_update < 10:
+            if not self.latest_outlet_update.is_timeout():
                 return
-            self.latest_outlet_update = time.time()
+            self.latest_outlet_update.update()
             if self.hub.sensors.carpowersensor.value > 0:
                 await self.hub.async_set_chargerobject_value("charging")
             else:
@@ -98,7 +98,6 @@ class StateChangesLite(IStateChanges):
                 else:
                     self.hub.sensors.carpowersensor.value = value
                     await self._handle_outlet_updates()
-                    #self.hub.sensors.amp_meter.update()
             case self.hub.sensors.chargerobject.entity:
                 await self.hub.async_set_chargerobject_value(value)
             case self.hub.sensors.chargerobject_switch.entity:
@@ -107,17 +106,17 @@ class StateChangesLite(IStateChanges):
                 self.hub.sensors.current_peak.value = value
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self.async_update_total_energy_and_peak(value)
-            case self.hub.nordpool.nordpool_entity:
+            case self.hub.spotprice.entity:
                 if self.hub.options.price.price_aware:
-                    await self.hub.nordpool.async_update_nordpool()
+                    await self.hub.spotprice.async_update_spotprice()
         return False
 
     async def _handle_outlet_updates(self):
         if self.hub.chargertype.domainname is ChargerType.Outlet:
             old_state = await self.hub.async_request_sensor_data("chargerobject_value")
-            if time.time() - self.latest_outlet_update < 10:
+            if not self.latest_outlet_update.is_timeout():
                 return
-            self.latest_outlet_update = time.time()
+            self.latest_outlet_update.update()
             if self.hub.sensors.carpowersensor.value > 0:
                 await self.hub.async_set_chargerobject_value("charging")
             else:
@@ -146,6 +145,7 @@ class StateChangesNoCharger(IStateChanges):
                 self.hub.power.power_canary.total_power = (
                     self.hub.sensors.power.total.value
                 )
+                self.hub.sensors.power_trend.add_reading(self.hub.sensors.power.total.value)
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self.async_update_total_energy_and_peak(value)
             case self.hub.sensors.powersensormovingaverage.entity:
@@ -153,9 +153,9 @@ class StateChangesNoCharger(IStateChanges):
                 self.hub.sensors.powersensormovingaverage.value = value
             case self.hub.sensors.powersensormovingaverage24.entity:
                 self.hub.sensors.powersensormovingaverage24.value = value
-            case self.hub.nordpool.nordpool_entity:
+            case self.hub.spotprice.entity:
                 if self.hub.options.price.price_aware:
-                    await self.hub.nordpool.async_update_nordpool()
+                    await self.hub.spotprice.async_update_spotprice()
                     update_session = True
         return update_session
 
@@ -169,7 +169,7 @@ class StateChangesLiteNoCharger(IStateChanges):
         match entity:
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self.async_update_total_energy_and_peak(value)
-            case self.hub.nordpool.nordpool_entity:
+            case self.hub.spotprice.entity:
                 if self.hub.options.price.price_aware:
-                    await self.hub.nordpool.async_update_nordpool()
+                    await self.hub.spotprice.async_update_spotprice()
         return False

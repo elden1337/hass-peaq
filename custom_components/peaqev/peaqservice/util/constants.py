@@ -1,4 +1,4 @@
-from peaqevcore.models.hourselection.cautionhourtype import CautionHourType
+from peaqevcore.common.enums.cautionhourtype import CautionHourType
 
 """NAMING CONSTANTS"""
 CHARGERCONTROLLER = "Charger controller"

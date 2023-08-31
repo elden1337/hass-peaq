@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from functools import partial
 from typing import Tuple
 
+from peaqevcore.common.trend import Gradient
 from peaqevcore.models.hub.carpowersensor import CarPowerSensor
 from peaqevcore.models.hub.chargerobject import ChargerObject
 from peaqevcore.models.hub.chargerswitch import ChargerSwitch
@@ -36,6 +37,7 @@ class HubSensors:
     powersensormovingaverage: HubMember = field(init=False)
     powersensormovingaverage24: HubMember = field(init=False)
     power: Power = field(init=False)
+    power_trend: Gradient = field(init=False)
     chargertype: any = field(init=False)
 
     async def async_setup(
@@ -63,6 +65,12 @@ class HubSensors:
                 configsensor=options.powersensor,
                 powersensor_includes_car=options.powersensor_includes_car,
             ),
+            "power_trend": partial(
+                Gradient,
+                max_age=300,
+                max_samples=300,
+                precision=0
+            )
         }
         charger_sensors = {
             "charger_done": partial(

@@ -26,14 +26,13 @@ from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory im
     HourselectionFactory
 from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import \
     ThresholdFactory
+from custom_components.peaqev.peaqservice.hub.hub_events import HubEvents
 from custom_components.peaqev.peaqservice.hub.hub_initializer import \
     HubInitializer
 from custom_components.peaqev.peaqservice.hub.max_min_controller import \
     MaxMinController
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
-from custom_components.peaqev.peaqservice.hub.nordpool.nordpool import \
-    NordPoolUpdater
 from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
     Observer
 from custom_components.peaqev.peaqservice.hub.sensors.hubsensors_factory import \
@@ -41,6 +40,10 @@ from custom_components.peaqev.peaqservice.hub.sensors.hubsensors_factory import 
 from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import \
     HubSensors
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
+from custom_components.peaqev.peaqservice.hub.spotprice.ispotprice import \
+    ISpotPrice
+from custom_components.peaqev.peaqservice.hub.spotprice.spotprice_factory import \
+    SpotPriceFactory
 from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
     IStateChanges
 from custom_components.peaqev.peaqservice.hub.state_changes.state_changes_factory import \
@@ -65,9 +68,12 @@ class HomeAssistantHub:
     servicecalls: ServiceCalls
     states: IStateChanges
     chargecontroller: IChargeController
-    nordpool: NordPoolUpdater
+    spotprice: ISpotPrice
+    events :HubEvents
 
     def __init__(self, hass: HomeAssistant, options: HubOptions, domain: str):
+        self.chargingtracker_entities = []
+        self.power = None
         self.hubname = domain.capitalize()
         self.domain = domain
         self.state_machine = hass
@@ -95,13 +101,9 @@ class HomeAssistantHub:
         self.prediction = Prediction(self)  # threshold
         self.servicecalls = ServiceCalls(self)  # top level
         self.states = await StateChangesFactory.async_create(self)  # top level
-
-        self.nordpool = NordPoolUpdater(
-            hub=self, is_active=self.options.price.price_aware
-        )  # hours
+        self.spotprice: ISpotPrice = SpotPriceFactory.create(hub=self, test=False, is_active=self.options.price.price_aware)
         self.power = await PowerToolsFactory.async_create(self)
-
-        self.chargingtracker_entities = []
+        self.events = HubEvents(self, self.state_machine)
         trackers = await self.async_setup_tracking()
         async_track_state_change(self.state_machine, trackers, self.async_state_changed)
 
@@ -147,7 +149,7 @@ class HomeAssistantHub:
                 return int(
                     round(
                         float(self.sensors.power.total.value)
-                        * float(self.nordpool.state),
+                        * float(self.spotprice.state),
                         0,
                     )
                 )
@@ -190,8 +192,8 @@ class HomeAssistantHub:
         if not self.options.peaqev_lite:
             ret.append(self.sensors.powersensormovingaverage.entity)
             ret.append(self.sensors.powersensormovingaverage24.entity)
-        if self.hours.nordpool_entity is not None:
-            ret.append(self.hours.nordpool_entity)
+        if self.options.price.price_aware:
+            ret.append(getattr(self.spotprice, "entity", ""))
         return ret
 
     def _set_observers(self) -> None:
@@ -235,29 +237,30 @@ class HomeAssistantHub:
             return {}
         lookup = {
             CHARGER_DONE: partial(getattr, self.sensors.charger_done, "value"),
-            CHARGEROBJECT_VALUE: partial(
+            CHARGEROBJECT_VALUE:    partial(
                 getattr, self.sensors.chargerobject, "value"
             ),
-            HOUR_STATE: partial(getattr, self.hours, "state", "unknown"),
-            PRICES: partial(getattr, self.hours, "prices", []),
-            PRICES_TOMORROW: partial(getattr, self.hours, "prices_tomorrow", []),
-            NON_HOURS: partial(getattr, self, "non_hours", []),
-            FUTURE_HOURS: partial(getattr, self.hours, "future_hours", []),
-            CAUTION_HOURS: partial(getattr, self.hours, "caution_hours", []),
-            DYNAMIC_CAUTION_HOURS: partial(
+            HOUR_STATE:             partial(getattr, self.hours, "state", "unknown"),
+            PRICES:                 partial(getattr, self.hours, "prices", []),
+            PRICES_TOMORROW:        partial(getattr, self.hours, "prices_tomorrow", []),
+            NON_HOURS:              partial(getattr, self, "non_hours", []),
+            FUTURE_HOURS:           partial(getattr, self.hours, "future_hours", []),
+            CAUTION_HOURS:          partial(getattr, self.hours, "caution_hours", []),
+            DYNAMIC_CAUTION_HOURS:  partial(
                 getattr, self, "dynamic_caution_hours", {}
             ),
-            AVERAGE_NORDPOOL_DATA: partial(getattr, self.nordpool, "average_data"),
-            USE_CENT: partial(getattr, self.nordpool.model, "use_cent"),
-            CURRENT_PEAK: partial(getattr, self.sensors.current_peak, "value"),
-            AVERAGE_KWH_PRICE: partial(self.hours.async_get_average_kwh_price),
-            MAX_CHARGE: partial(self.hours.async_get_total_charge),
-            AVERAGE_WEEKLY: partial(getattr, self.nordpool, "average_weekly"),
-            AVERAGE_MONTHLY: partial(getattr, self.nordpool, "average_month"),
-            AVERAGE_30: partial(getattr, self.nordpool, "average_30"),
-            CURRENCY: partial(getattr, self.nordpool, "currency"),
-            OFFSETS: partial(getattr, self.hours, "offsets", {}),
-            IS_PRICE_AWARE: partial(getattr, self.options.price, "price_aware"),
+            SPOTPRICE_SOURCE:       partial(getattr, self.spotprice, "source", "unknown"),
+            AVERAGE_SPOTPRICE_DATA: partial(getattr, self.spotprice, "average_data"),
+            USE_CENT:               partial(getattr, self.spotprice.model, "use_cent"),
+            CURRENT_PEAK:           partial(getattr, self.sensors.current_peak, "value"),
+            AVERAGE_KWH_PRICE:      partial(self.hours.async_get_average_kwh_price),
+            MAX_CHARGE:             partial(self.hours.async_get_total_charge),
+            AVERAGE_WEEKLY:         partial(getattr, self.spotprice, "average_weekly"),
+            AVERAGE_MONTHLY:        partial(getattr, self.spotprice, "average_month"),
+            AVERAGE_30:             partial(getattr, self.spotprice, "average_30"),
+            CURRENCY:               partial(getattr, self.spotprice, "currency"),
+            OFFSETS:                partial(getattr, self.hours, "offsets", {}),
+            IS_PRICE_AWARE:         partial(getattr, self.options.price, "price_aware"),
             IS_SCHEDULER_ACTIVE: partial(
                 getattr, self.hours.scheduler, "scheduler_active", False
             ),
@@ -330,6 +333,7 @@ class HomeAssistantHub:
             if self.max_min_controller.is_on:
                 await self.hours.async_update_max_min(
                     max_charge=self.max_min_controller.max_charge,
+                    limiter=self.max_min_controller.max_min_limiter,
                     car_connected=self.chargecontroller.connected,
                     session_energy=self.chargecontroller.session.session_energy,
                 )

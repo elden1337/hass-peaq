@@ -6,12 +6,13 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass
-class NordPoolModel:
+class SpotPriceModel:
+    source: str
     currency: str = ""
     prices: list = field(default_factory=lambda: [])
     prices_tomorrow: list = field(default_factory=lambda: [])
     state: float = 0
-    nordpool_entity: str = ""
+    entity: str = ""
     average_data: dict = field(default_factory=lambda: {})
     average_month: float = 0
     adjusted_average: float = 0
