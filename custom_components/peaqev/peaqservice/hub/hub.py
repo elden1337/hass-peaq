@@ -11,54 +11,34 @@ from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_factory import \
-    ChargeControllerFactory
-from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
-    IChargeController
-from custom_components.peaqev.peaqservice.chargertypes.chargertype_factory import \
-    ChargerTypeFactory
-from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
-    IChargerType
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
+from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_factory import ChargeControllerFactory
+from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
+from custom_components.peaqev.peaqservice.chargertypes.chargertype_factory import ChargerTypeFactory
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
 from custom_components.peaqev.peaqservice.hub.const import *
-from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import \
-    HourselectionFactory
-from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import \
-    ThresholdFactory
+from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import HourselectionFactory
+from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import ThresholdFactory
 from custom_components.peaqev.peaqservice.hub.hub_events import HubEvents
-from custom_components.peaqev.peaqservice.hub.hub_initializer import \
-    HubInitializer
-from custom_components.peaqev.peaqservice.hub.max_min_controller import \
-    MaxMinController
-from custom_components.peaqev.peaqservice.hub.models.hub_options import \
-    HubOptions
-from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
-    Observer
-from custom_components.peaqev.peaqservice.hub.sensors.hubsensors_factory import \
-    HubSensorsFactory
-from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import \
-    HubSensors
+from custom_components.peaqev.peaqservice.hub.max_min_controller import MaxMinController
+from custom_components.peaqev.peaqservice.hub.mixins.hub_getters_mixin import HubGettersMixin
+from custom_components.peaqev.peaqservice.hub.mixins.hub_initializer import HubInitializerMixin
+from custom_components.peaqev.peaqservice.hub.mixins.hub_setters_mixin import HubSettersMixin
+from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
+from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import Observer
+from custom_components.peaqev.peaqservice.hub.sensors.hubsensors_factory import HubSensorsFactory
+from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import HubSensors
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
-from custom_components.peaqev.peaqservice.hub.spotprice.ispotprice import \
-    ISpotPrice
-from custom_components.peaqev.peaqservice.hub.spotprice.spotprice_factory import \
-    SpotPriceFactory
-from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
-    IStateChanges
-from custom_components.peaqev.peaqservice.hub.state_changes.state_changes_factory import \
-    StateChangesFactory
-from custom_components.peaqev.peaqservice.powertools.powertools_factory import \
-    PowerToolsFactory
-from custom_components.peaqev.peaqservice.util.constants import \
-    CHARGERCONTROLLER
-from custom_components.peaqev.peaqservice.util.extensionmethods import (
-    async_iscoroutine, nametoid)
+from custom_components.peaqev.peaqservice.hub.spotprice.ispotprice import ISpotPrice
+from custom_components.peaqev.peaqservice.hub.spotprice.spotprice_factory import SpotPriceFactory
+from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import IStateChanges
+from custom_components.peaqev.peaqservice.hub.state_changes.state_changes_factory import StateChangesFactory
+from custom_components.peaqev.peaqservice.powertools.powertools_factory import PowerToolsFactory
+from custom_components.peaqev.peaqservice.util.extensionmethods import async_iscoroutine
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class HomeAssistantHub:
+class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
     hub_id = 1337
     chargertype: IChargerType
     sensors: HubSensors
@@ -81,7 +61,6 @@ class HomeAssistantHub:
         self._is_initialized = False
         self.observer = Observer(self)
         self._set_observers()
-        self.initializer = HubInitializer(self)
         self.max_min_controller = MaxMinController(self)
 
     async def setup(self):
@@ -135,7 +114,7 @@ class HomeAssistantHub:
     @property
     def is_initialized(self) -> bool:
         if not self._is_initialized:
-            if self.initializer.check():
+            if self.check_initializer():
                 self.observer.activate("hub initialized")
                 self._is_initialized = True
                 return True
@@ -158,6 +137,24 @@ class HomeAssistantHub:
                 return 0
         return 0
 
+    @property
+    def prices(self) -> list:
+        if self.options.price.price_aware:
+            return self.hours.prices
+        return []
+
+    @property
+    def prices_tomorrow(self) -> list:
+        if self.options.price.price_aware:
+            return self.hours.prices_tomorrow
+        return []
+
+    @property
+    def charger_done(self) -> bool:
+        if hasattr(self.sensors, "charger_done"):
+            return self.sensors.charger_done.value
+        return False
+
     @callback
     async def async_state_changed(self, entity_id, old_state, new_state):
         if entity_id is not None:
@@ -168,57 +165,6 @@ class HomeAssistantHub:
                 msg = f"Unable to handle data-update: {entity_id} {old_state}|{new_state}. Exception: {e}"
                 _LOGGER.error(msg)
 
-    async def async_setup_tracking(self) -> list:
-        tracker_entities = []
-        if not self.options.peaqev_lite:
-            tracker_entities.append(self.options.powersensor)
-            tracker_entities.append(self.sensors.totalhourlyenergy.entity)
-        self.chargingtracker_entities = await self.async_set_chargingtracker_entities()
-        tracker_entities += self.chargingtracker_entities
-        return tracker_entities
-
-    async def async_set_chargingtracker_entities(self) -> list:
-        ret = [f"sensor.{self.domain}_{nametoid(CHARGERCONTROLLER)}"]
-        if hasattr(self.sensors, "chargerobject_switch"):
-            ret.append(self.sensors.chargerobject_switch.entity)
-        if hasattr(self.sensors, "carpowersensor"):
-            ret.append(self.sensors.carpowersensor.entity)
-        if hasattr(self.sensors, "charger_enabled"):
-            ret.append(self.sensors.charger_enabled.entity)
-        if hasattr(self.sensors, "charger_done"):
-            ret.append(self.sensors.charger_done.entity)
-        if self.chargertype.type not in [ChargerType.Outlet, ChargerType.NoCharger]:
-            ret.append(self.sensors.chargerobject.entity)
-        if not self.options.peaqev_lite:
-            ret.append(self.sensors.powersensormovingaverage.entity)
-            ret.append(self.sensors.powersensormovingaverage24.entity)
-        if self.options.price.price_aware:
-            ret.append(getattr(self.spotprice, "entity", ""))
-        return ret
-
-    def _set_observers(self) -> None:
-        self.observer.add("prices changed", self.async_update_prices)
-        self.observer.add(
-            "adjusted average price changed", self.async_update_adjusted_average
-        )
-        self.observer.add("update charger done", self.async_update_charger_done)
-        self.observer.add("update charger enabled", self.async_update_charger_enabled)
-        self.observer.add(
-            "dynamic max price changed", self.async_update_average_monthly_price
-        )
-
-    """Composition below here"""
-
-    async def async_set_init_dict(self, init_dict):
-        await self.sensors.locale.data.query_model.peaks.async_set_init_dict(
-            init_dict
-        )
-        try:
-            ff = getattr(self.sensors.locale.data.query_model.peaks, "export_peaks", {})
-            _LOGGER.debug(f"intialized_peaks: {ff}")
-        except Exception:
-            pass
-
     def get_power_sensor_from_hass(self) -> float | None:
         ret = self.state_machine.states.get(self.options.powersensor)
         if ret is not None:
@@ -227,10 +173,6 @@ class HomeAssistantHub:
             except Exception:
                 return None
         return ret
-
-    async def async_set_chargerobject_value(self, value) -> None:
-        if hasattr(self.sensors, "chargerobject"):
-            setattr(self.sensors.chargerobject, "value", value)
 
     async def async_request_sensor_data(self, *args) -> dict | any:
         if not self.is_initialized:
@@ -299,90 +241,4 @@ class HomeAssistantHub:
             return val
         return ret
 
-    def now_is_non_hour(self) -> bool:
-        now = datetime.now().replace(minute=0, second=0, microsecond=0)
-        return now in self.non_hours
 
-    @property
-    def prices(self) -> list:
-        if self.options.price.price_aware:
-            return self.hours.prices
-        return []
-
-    @property
-    def prices_tomorrow(self) -> list:
-        if self.options.price.price_aware:
-            return self.hours.prices_tomorrow
-        return []
-
-    async def async_free_charge(self) -> bool:
-        try:
-            return await self.sensors.locale.data.async_free_charge()
-        except Exception:
-            return False
-
-    @property
-    def charger_done(self) -> bool:
-        if hasattr(self.sensors, "charger_done"):
-            return self.sensors.charger_done.value
-        return False
-
-    async def async_update_prices(self, prices: list) -> None:
-        if self.options.price.price_aware:
-            await self.hours.async_update_prices(prices[0], prices[1])
-            if self.max_min_controller.is_on:
-                await self.hours.async_update_max_min(
-                    max_charge=self.max_min_controller.max_charge,
-                    limiter=self.max_min_controller.max_min_limiter,
-                    car_connected=self.chargecontroller.connected,
-                    session_energy=self.chargecontroller.session.session_energy,
-                )
-
-    async def async_update_average_monthly_price(self, val) -> None:
-        if self.options.price.price_aware and isinstance(val, float):
-            await self.hours.async_update_top_price(val)
-
-    async def async_update_adjusted_average(self, val) -> None:
-        if self.options.price.price_aware and isinstance(val, float):
-            await self.hours.async_update_adjusted_average(val)
-
-    async def async_update_charger_done(self, val):
-        setattr(self.sensors.charger_done, "value", bool(val))
-
-    async def async_update_charger_enabled(self, val):
-        await self.observer.async_broadcast("update latest charger start")
-        if hasattr(self.sensors, "charger_enabled"):
-            setattr(self.sensors.charger_enabled, "value", bool(val))
-        else:
-            raise Exception("Peaqev cannot function without a charger_enabled entity")
-
-    async def async_predictedpercentageofpeak(self):
-        return await self.prediction.async_predicted_percentage_of_peak(
-            predicted_energy=await self.async_get_predicted_energy(),
-            peak=self.sensors.current_peak.value,
-        )
-
-    async def async_threshold_start(self):
-        return await self.threshold.async_start(
-            is_caution_hour=await self.async_is_caution_hour(),
-            is_quarterly=await self.sensors.locale.data.async_is_quarterly(),
-        )
-
-    async def async_threshold_stop(self):
-        return await self.threshold.async_stop(
-            is_caution_hour=await self.async_is_caution_hour(),
-            is_quarterly=await self.sensors.locale.data.async_is_quarterly(),
-        )
-
-    async def async_is_caution_hour(self) -> bool:
-        if self.options.price.price_aware:
-            return False
-        return str(datetime.now().hour) in self.hours.caution_hours
-
-    async def async_get_predicted_energy(self) -> float:
-        ret = await self.prediction.async_predicted_energy(
-            power_avg=self.sensors.powersensormovingaverage.value,
-            total_hourly_energy=self.sensors.totalhourlyenergy.value,
-            is_quarterly=await self.sensors.locale.data.async_is_quarterly(),
-        )
-        return ret
