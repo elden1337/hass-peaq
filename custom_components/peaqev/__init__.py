@@ -12,7 +12,6 @@ from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.constants import TYPELITE
 from custom_components.peaqev.services import async_prepare_register_services
-
 from .const import DOMAIN, PLATFORMS
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
@@ -66,7 +65,7 @@ async def async_update_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     if [i for i in diff if i in RELOAD_CHANGES]:
         return await hass.config_entries.async_reload(config_entry.entry_id)
     if [i for i in diff if i in PRICE_CHANGES]:
-        await hass.data[DOMAIN]["hub"].initializer.async_init_hours()
+        await hass.data[DOMAIN]["hub"].async_init_hours()
 
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
