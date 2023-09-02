@@ -147,6 +147,7 @@ class StateChangesNoCharger(IStateChanges):
                     self.hub.sensors.power.total.value
                 )
                 self.hub.sensors.power_trend.add_reading(self.hub.sensors.power.total.value, time.time())
+                self.hub.sensors.power_sensor_moving_average_5.add_reading(self.hub.sensors.power.total.value)
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self.async_update_total_energy_and_peak(value)
             case self.hub.sensors.powersensormovingaverage.entity:
