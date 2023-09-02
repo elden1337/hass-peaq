@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -37,8 +38,13 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
 
     async def async_update(self) -> None:
         self._charged_peak = getattr(self.hub.sensors.locale.data.query_model, "charged_peak")
-        self._peaks_dict = getattr(self.hub.sensors.locale.data.query_model.peaks, "export_peaks")
-        self._observed_peak = getattr(self.hub.sensors.locale.data.query_model, "observed_peak")
+        _peaks_dict = getattr(self.hub.sensors.locale.data.query_model.peaks, "export_peaks")
+        if self._peaks_dict != _peaks_dict:
+            _LOGGER.debug("updating peaks_dict frontend.")
+            self._peaks_dict = _peaks_dict
+        _observed = getattr(self.hub.sensors.locale.data.query_model, "observed_peak")
+        _options_observed = self.hub.options.startpeaks.get(datetime.now().month)
+        self._observed_peak = max(_observed, _options_observed)
 
     @property
     def extra_state_attributes(self) -> dict:
