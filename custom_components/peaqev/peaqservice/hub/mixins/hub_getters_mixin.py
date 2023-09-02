@@ -1,5 +1,6 @@
 from datetime import datetime
 
+
 class HubGettersMixin:
     def now_is_non_hour(self) -> bool:
         now = datetime.now().replace(minute=0, second=0, microsecond=0)
@@ -8,7 +9,7 @@ class HubGettersMixin:
     async def async_free_charge(self) -> bool:
         try:
             return await self.sensors.locale.data.async_free_charge()
-        except Exception as e:
+        except Exception:
             return False
 
     async def async_predictedpercentageofpeak(self):
