@@ -42,7 +42,7 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
         if self._peaks_dict != _peaks_dict:
             #_LOGGER.debug("updating peaks_dict frontend.")
             self._peaks_dict = _peaks_dict
-        _observed = getattr(self.hub.sensors.locale.data.query_model, "observed_peak")
+        getattr(self.hub.sensors.locale.data.query_model, "observed_peak")
         self._observed_peak = self.hub.sensors.current_peak.value
         self._history = self.hub.sensors.current_peak.history
 
