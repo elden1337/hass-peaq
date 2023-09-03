@@ -103,8 +103,8 @@ class StateChangesLite(IStateChanges):
                 await self.hub.async_set_chargerobject_value(value)
             case self.hub.sensors.chargerobject_switch.entity:
                 await self.async_update_chargerobject_switch(value)
-            case self.hub.sensors.current_peak.entity:
-                self.hub.sensors.current_peak.value = value
+            # case self.hub.sensors.current_peak.entity:
+            #     self.hub.sensors.current_peak.value = value
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self.async_update_total_energy_and_peak(value)
             case self.hub.spotprice.entity:

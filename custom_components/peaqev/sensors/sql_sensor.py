@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -27,6 +26,7 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
         self._charged_peak = 0
         self._peaks_dict: dict = {}
         self._observed_peak = 0
+        self._history: dict = {}
         super().__init__(hub, self._name, entry_id)
 
     @property
@@ -43,15 +43,18 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
             #_LOGGER.debug("updating peaks_dict frontend.")
             self._peaks_dict = _peaks_dict
         _observed = getattr(self.hub.sensors.locale.data.query_model, "observed_peak")
-        _options_observed = self.hub.options.startpeaks.get(datetime.now().month)
-        self._observed_peak = max(_observed, _options_observed)
+        self._observed_peak = self.hub.sensors.current_peak.value
+        self._history = self.hub.sensors.current_peak.history
 
     @property
     def extra_state_attributes(self) -> dict:
         attr_dict = {
             "observed_peak": float(self._observed_peak),
             "peaks_dictionary": self.set_peaksdict(),
+            "peaks_history": self._history,
         }
+        if self.hub.options.use_peak_history:
+            attr_dict["Use startpeak from last year"] = True
         return attr_dict
 
     @property
@@ -79,10 +82,12 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
         if state:
             _LOGGER.debug("last state of %s = %s", self._name, state)
             self._charged_peak = state.state
-            #self._peaks_dict = {"m":8,"p":{"1h2":1.0,"2h15":1.32}}
-            self._peaks_dict = state.attributes.get("peaks_dictionary", 50)
+            self._peaks_dict = state.attributes.get("peaks_dictionary", {})
             await self.hub.async_set_init_dict(self._peaks_dict)
-            self._observed_peak = state.attributes.get("observed_peak", 50)
+            self._observed_peak = state.attributes.get("observed_peak", 0)
+            self._history = state.attributes.get("peaks_history", {})
+            if len(self._history):
+                self.hub.sensors.current_peak.import_from_service(self._history)
         else:
             self._charged_peak = 0
             self._peaks_dict = {}

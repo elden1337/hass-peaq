@@ -12,7 +12,6 @@ from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.constants import TYPELITE
 from custom_components.peaqev.services import async_prepare_register_services
-
 from .const import DOMAIN, PLATFORMS
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
@@ -100,6 +99,7 @@ async def async_set_options(conf) -> HubOptions:
             "powersensorincludescar", False
         )
     options.startpeaks = conf.options.get("startpeaks", conf.data.get("startpeaks"))
+    options.use_peak_history = conf.options.get("use_peak_history", conf.data.get("use_peak_history", False))
     options.cautionhours = await async_get_existing_param(conf, "cautionhours", [])
     options.nonhours = await async_get_existing_param(conf, "nonhours", [])
     options.price.price_aware = await async_get_existing_param(

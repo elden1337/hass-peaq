@@ -84,6 +84,7 @@ MONTHS_SCHEMA = vol.Schema(
         vol.Optional("oct", default=1.5): cv.positive_float,
         vol.Optional("nov", default=1.5): cv.positive_float,
         vol.Optional("dec", default=1.5): cv.positive_float,
+        vol.Optional("use_peak_history", default=False): cv.boolean,
     }
 )
 

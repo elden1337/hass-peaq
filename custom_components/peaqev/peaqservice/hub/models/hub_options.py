@@ -44,6 +44,7 @@ class HubOptions:
     fuse_type: str = ""
     gainloss: bool = False
     max_charge: int = 0
+    use_peak_history: bool = False
 
     def __post_init__(self):
         self.charger = Charger()

@@ -32,7 +32,8 @@
           "sep": "September",
           "oct": "October",
           "nov": "November",
-          "dec": "December"
+          "dec": "December",
+          "use_peak_history": "[%key:common::config_flow::data::use_peak_history%]"
         },
         "description": "Select your allowed monthly start-peak."
       },
@@ -103,7 +104,8 @@
           "sep": "September",
           "oct": "October",
           "nov": "November",
-          "dec": "December"
+          "dec": "December",
+          "use_peak_history": "[%key:common::config_flow::data::use_peak_history%]"
         }
       },
       "misc": {
@@ -177,6 +179,16 @@
         "desired_charge_amount": {
           "name": "Desired charge amount",
           "description": "The number of kWh you wish to charge within the session. Set to 0 to disable override."
+        }
+      }
+    },
+    "update_peaks_history": {
+      "name": "Update peaks history",
+      "description": "Update the peaks history with old values. Remember to use the observed peak, ie if you have multiple peaks in your area, use the lowest of your top-peaks for the month.",
+      "fields": {
+        "import_dictionary": {
+          "name": "Dictionary to import",
+          "description": "The observed peaks for each month you would like to import."
         }
       }
     }

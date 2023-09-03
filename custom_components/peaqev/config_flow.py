@@ -20,7 +20,6 @@ from custom_components.peaqev.peaqservice.powertools.power_canary.const import \
     FUSES_LIST
 from custom_components.peaqev.peaqservice.util.constants import (
     CAUTIONHOURTYPE_NAMES, TYPELITE, CautionHourType)
-
 from .const import DOMAIN  # pylint:disable=unused-import
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
@@ -142,6 +141,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             months_dict = await async_set_startpeak_dict(user_input)
             self.data["startpeaks"] = months_dict
+            self.data["use_peak_history"] = user_input.get("use_peak_history", False)
             return await self.async_step_misc()
 
         return self.async_show_form(
@@ -240,10 +240,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Months"""
         if user_input is not None:
             months_dict = await async_set_startpeak_dict(user_input)
+            self.options["use_peak_history"] = user_input.get("use_peak_history", False)
             self.options["startpeaks"] = months_dict
+
+
             return await self.async_step_misc()
 
         _defaultvalues = self.config_entry.options.get("startpeaks", self.config_entry.data.get("startpeaks"))
+        _default_history = await self._get_existing_param("use_peak_history", False)
         defaultvalues = {float(k): v for (k, v) in _defaultvalues.items()}
 
         return self.async_show_form(
@@ -263,6 +267,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     vol.Optional("oct", default=defaultvalues[10]): cv.positive_float,
                     vol.Optional("nov", default=defaultvalues[11]): cv.positive_float,
                     vol.Optional("dec", default=defaultvalues[12]): cv.positive_float,
+                    vol.Optional("use_peak_history", default=_default_history): cv.boolean,
                 }
             ),
         )

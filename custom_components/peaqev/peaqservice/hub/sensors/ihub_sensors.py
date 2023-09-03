@@ -144,7 +144,7 @@ class HubSensors:
                 initval=False,
             ),
             "current_peak": partial(
-                CurrentPeak, data_type=float, initval=0, startpeaks=options.startpeaks
+                CurrentPeak, data_type=float, initval=0, startpeaks=options.startpeaks, options_use_history=options.use_peak_history
             ),
             "totalhourlyenergy": partial(
                 HubMember,

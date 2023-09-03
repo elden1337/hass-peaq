@@ -105,7 +105,6 @@ class IStateChanges:
             await self.hub.sensors.locale.async_try_update_peak(
                 new_val=float(value), timestamp=datetime.now()
             )
-            _LOGGER.debug(f"Pushed to try_update_peak with {value}")
         except:
             _LOGGER.debug(f"Unable to update peak to {value}")
         try:
