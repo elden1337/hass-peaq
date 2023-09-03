@@ -40,7 +40,7 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
         self._charged_peak = getattr(self.hub.sensors.locale.data.query_model, "charged_peak")
         _peaks_dict = getattr(self.hub.sensors.locale.data.query_model.peaks, "export_peaks")
         if self._peaks_dict != _peaks_dict:
-            _LOGGER.debug("updating peaks_dict frontend.")
+            #_LOGGER.debug("updating peaks_dict frontend.")
             self._peaks_dict = _peaks_dict
         _observed = getattr(self.hub.sensors.locale.data.query_model, "observed_peak")
         _options_observed = self.hub.options.startpeaks.get(datetime.now().month)
