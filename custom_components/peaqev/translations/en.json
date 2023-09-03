@@ -33,9 +33,10 @@
           "oct": "October",
           "nov": "November",
           "dec": "December",
-          "use_peak_history": "Use last year's value as start peak if available",
+          "use_peak_history": "Use last year's value as start peak if available"
         },
-        "description": "Select your allowed monthly start-peak."
+        "description": "Select your allowed monthly start-peak.",
+        "title": "Start peaks"
       },
       "misc": {
         "data": {

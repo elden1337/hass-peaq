@@ -9,15 +9,13 @@
           "min_priceaware_threshold_price": "[%key:common::config_flow::data::min_priceaware_threshold_price%]",
           "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]",
           "max_charge": "[%key:common::config_flow::data::max_charge%]"
-        },
-        "description": "Select price-aware if you wish to adhere to Nordpool- or EnergidataService-prices (requires integration)"
+        }
       },
       "hours": {
         "data": {
           "nonhours": "[%key:common::config_flow::data::nonhours%]",
           "cautionhours": "[%key:common::config_flow::data::cautionhours%]"
-        },
-        "description": "Change the non-hours and caution-hours"
+        }
       },
       "months": {
         "data": {
@@ -34,8 +32,7 @@
           "nov": "November",
           "dec": "December",
           "use_peak_history": "[%key:common::config_flow::data::use_peak_history%]"
-        },
-        "description": "Select your allowed monthly start-peak."
+        }
       },
       "misc": {
         "data": {
@@ -73,8 +70,7 @@
         "data": {
           "outletswitch": "[%key:common::config_flow::data::outletswitch%]",
           "outletpowermeter": "[%key:common::config_flow::data::outletpowermeter%]"
-        },
-        "description": "Set sensors for outlet switch and powermeter. Note that Peaqev cannot know which outlet you are using. Therefore, make sure that you use a safe smart outlet to not cause damage to your system."
+        }
       },
       "priceaware": {
         "data": {
