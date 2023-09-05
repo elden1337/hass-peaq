@@ -40,9 +40,7 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
         self._charged_peak = getattr(self.hub.sensors.locale.data.query_model, "charged_peak")
         _peaks_dict = getattr(self.hub.sensors.locale.data.query_model.peaks, "export_peaks")
         if self._peaks_dict != _peaks_dict:
-            #_LOGGER.debug("updating peaks_dict frontend.")
             self._peaks_dict = _peaks_dict
-        _observed = getattr(self.hub.sensors.locale.data.query_model, "observed_peak")
         self._observed_peak = self.hub.sensors.current_peak.value
         self._history = self.hub.sensors.current_peak.history
 
@@ -85,9 +83,13 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
             self._peaks_dict = state.attributes.get("peaks_dictionary", {})
             await self.hub.async_set_init_dict(self._peaks_dict)
             self._observed_peak = state.attributes.get("observed_peak", 0)
-            self._history = state.attributes.get("peaks_history", {})
-            if len(self._history):
-                self.hub.sensors.current_peak.import_from_service(self._history)
+            _history = state.attributes.get("peaks_history", {})
+            if len(_history):
+                mykeys = list(_history.keys())
+                mykeys.sort()
+                sorted_dict = {i: _history[i] for i in mykeys}
+                self._history = sorted_dict
+                self.hub.sensors.current_peak.import_from_service(sorted_dict)
         else:
             self._charged_peak = 0
             self._peaks_dict = {}

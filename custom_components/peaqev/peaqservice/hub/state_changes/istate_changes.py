@@ -109,10 +109,10 @@ class IStateChanges:
             _LOGGER.debug(f"Unable to update peak to {value}")
         try:
             self.hub.sensors.current_peak.value = (
-                self.hub.sensors.locale.data.query_model.observed_peak
+                list(self.hub.sensors.locale.data.query_model.peaks.p.values())
             )
-        except:
-            _LOGGER.debug(f"Unable to set current_peak to {value}")
+        except Exception as e:
+            _LOGGER.debug(f"Unable to set current_peak to {value}. {self.hub.sensors.locale.data.query_model.peaks.p.values()}. Exception: {e}")
 
         try:
             await self.hub.chargecontroller.savings.async_add_consumption(float(value))
