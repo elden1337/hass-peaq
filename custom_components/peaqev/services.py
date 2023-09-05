@@ -6,9 +6,10 @@ if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
     from homeassistant.core import HomeAssistant
 
-from homeassistant.core import ServiceCall, ServiceResponse, SupportsResponse
 import logging
 from enum import Enum
+
+from homeassistant.core import ServiceCall, ServiceResponse, SupportsResponse
 
 from .const import DOMAIN
 
