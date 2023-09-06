@@ -86,7 +86,7 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
             _history = state.attributes.get("peaks_history", {})
             if len(_history):
                 mykeys = list(_history.keys())
-                mykeys = sorted(ll, key=lambda x: (x.split("_")[0], x.split("_")[1]), reverse=True)
+                mykeys = sorted(mykeys, key=lambda x: (x.split("_")[0], x.split("_")[1]), reverse=True)
                 mykeys.sort()
                 sorted_dict = {i: _history[i] for i in mykeys}
                 self._history = sorted_dict
