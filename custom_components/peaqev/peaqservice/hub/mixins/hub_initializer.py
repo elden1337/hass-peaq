@@ -70,7 +70,7 @@ class HubInitializerMixin:
 
 
     async def async_init_hours(self):
-        self.hours = await HourselectionFactory.async_create(self.parent)
+        self.hours = await HourselectionFactory.async_create(self)
         if self.options.price.price_aware:
             await self.hours.async_update_prices(
                 self.spotprice.model.prices,
