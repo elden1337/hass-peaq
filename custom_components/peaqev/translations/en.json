@@ -12,6 +12,11 @@
         },
         "description": "Select price-aware if you wish to adhere to Nordpool- or EnergiDataService-prices (requires integration)"
       },
+      "priceaware_hours": {
+        "data": {
+          "priceaware_nonhours": "Hours when the charger is always disabled"
+        }
+      },
       "hours": {
         "data": {
           "nonhours": "Hours when the charger is always disabled",
@@ -85,6 +90,11 @@
           "dynamic_top_price": "Top price based on current month average price (ignores set max-price)",
           "min_priceaware_threshold_price": "(Optional) Always allow charging below this price",
           "cautionhour_type": "Caution-hour type"
+        }
+      },
+      "priceaware_hours": {
+        "data": {
+          "priceaware_nonhours": "Hours when the charger is always disabled"
         }
       },
       "hours": {

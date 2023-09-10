@@ -13,14 +13,13 @@ from custom_components.peaqev.configflow.config_flow_helpers import \
     async_set_startpeak_dict
 from custom_components.peaqev.configflow.config_flow_schemas import (
     CHARGER_DETAILS_SCHEMA, CHARGER_SCHEMA, HOURS_SCHEMA, MONTHS_SCHEMA,
-    OUTLET_DETAILS_SCHEMA, PRICEAWARE_SCHEMA, SENSOR_SCHEMA, TYPE_SCHEMA)
+    OUTLET_DETAILS_SCHEMA, PRICEAWARE_SCHEMA, SENSOR_SCHEMA, TYPE_SCHEMA, PRICEAWARE_HOURS_SCHEMA)
 from custom_components.peaqev.configflow.config_flow_validation import \
     ConfigFlowValidation
 from custom_components.peaqev.peaqservice.powertools.power_canary.const import \
     FUSES_LIST
 from custom_components.peaqev.peaqservice.util.constants import (
     CAUTIONHOURTYPE_NAMES, TYPELITE, CautionHourType)
-
 from .const import DOMAIN  # pylint:disable=unused-import
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
@@ -118,12 +117,23 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.data.update(user_input)
             if self.data["priceaware"] is False:
                 return await self.async_step_hours()
-            return await self.async_step_months()
+            return await self.async_step_priceaware_hours()
 
         return self.async_show_form(
             step_id="priceaware",
             data_schema=PRICEAWARE_SCHEMA,
             errors=errors,
+            last_step=False,
+        )
+
+    async def async_step_priceaware_hours(self, user_input=None):
+        if user_input is not None:
+            self.data.update(user_input)
+            return await self.async_step_months()
+
+        return self.async_show_form(
+            step_id="priceaware_hours",
+            data_schema=PRICEAWARE_HOURS_SCHEMA,
             last_step=False,
         )
 
@@ -190,7 +200,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self.options.update(user_input)
             if self.options["priceaware"] is False:
                 return await self.async_step_hours()
-            return await self.async_step_months()
+            return await self.async_step_priceaware_hours()
 
         _priceaware = await self._get_existing_param("priceaware", False)
         _topprice = await self._get_existing_param("absolute_top_price", 0)
@@ -213,6 +223,24 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         default=_hourtype,
                     ): vol.In(CAUTIONHOURTYPE_NAMES),
                     vol.Optional("max_charge", default=_max_charge): cv.positive_float,
+                }
+            ),
+        )
+
+    async def async_step_priceaware_hours(self, user_input=None):
+        """Hours"""
+        if user_input is not None:
+            self.options.update(user_input)
+            return await self.async_step_months()
+
+        _nonhours = await self._get_existing_param("priceaware_nonhours", list(range(0, 24)))
+
+        return self.async_show_form(
+            step_id="priceaware_hours",
+            last_step=False,
+            data_schema=vol.Schema(
+                {
+                    vol.Optional("priceaware_nonhours", default=_nonhours): cv.multi_select(list(range(0, 24))),
                 }
             ),
         )

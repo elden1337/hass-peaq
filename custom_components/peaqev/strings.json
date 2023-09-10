@@ -11,6 +11,11 @@
           "max_charge": "[%key:common::config_flow::data::max_charge%]"
         }
       },
+      "priceaware_hours": {
+        "data": {
+          "priceaware_nonhours": "[%key:common::config_flow::data::priceaware_nonhours%]"
+        }
+      },
       "hours": {
         "data": {
           "nonhours": "[%key:common::config_flow::data::nonhours%]",
@@ -85,6 +90,11 @@
         "data": {
           "nonhours": "[%key:common::config_flow::data::nonhours%]",
           "cautionhours": "[%key:common::config_flow::data::cautionhours%]"
+        }
+      },
+      "priceaware_hours": {
+        "data": {
+          "priceaware_nonhours": "[%key:common::config_flow::data::priceaware_nonhours%]"
         }
       },
       "months": {

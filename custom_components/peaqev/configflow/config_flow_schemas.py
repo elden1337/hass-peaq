@@ -57,6 +57,12 @@ HOURS_SCHEMA = vol.Schema(
     }
 )
 
+PRICEAWARE_HOURS_SCHEMA = vol.Schema(
+    {
+        vol.Optional("priceaware_nonhours"): cv.multi_select(list(range(0, 24))),
+    }
+)
+
 PRICEAWARE_SCHEMA = vol.Schema(
     {
         vol.Optional("priceaware", default=False): cv.boolean,

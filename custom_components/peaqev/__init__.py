@@ -12,7 +12,6 @@ from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.constants import TYPELITE
 from custom_components.peaqev.services import async_prepare_register_services
-
 from .const import DOMAIN, PLATFORMS
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
@@ -88,6 +87,7 @@ async def async_set_options(conf) -> HubOptions:
         options.powersensor = conf.data["name"]
     options.locale = conf.data.get("locale", "")
     options.charger.chargertype = conf.data.get("chargertype", "")
+
     if options.charger.chargertype == ChargerType.Outlet.value:
         options.charger.powerswitch = conf.data.get("outletswitch", "")
         options.charger.powermeter = conf.data.get("outletpowermeter", "")
@@ -99,13 +99,18 @@ async def async_set_options(conf) -> HubOptions:
         options.powersensor_includes_car = conf.data.get(
             "powersensorincludescar", False
         )
+
     options.startpeaks = conf.options.get("startpeaks", conf.data.get("startpeaks"))
     options.use_peak_history = conf.options.get("use_peak_history", conf.data.get("use_peak_history", False))
     options.cautionhours = await async_get_existing_param(conf, "cautionhours", [])
-    options.nonhours = await async_get_existing_param(conf, "nonhours", [])
+
     options.price.price_aware = await async_get_existing_param(
         conf, "priceaware", False
     )
+    if options.price.price_aware:
+        options.nonhours = await async_get_existing_param(conf, "priceaware_nonhours", [])
+    else:
+        options.nonhours = await async_get_existing_param(conf, "nonhours", [])
     options.price.min_price = await async_get_existing_param(
         conf, "min_priceaware_threshold_price", 0
     )
