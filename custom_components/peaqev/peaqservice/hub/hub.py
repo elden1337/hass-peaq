@@ -122,7 +122,7 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
     def current_peak_dynamic(self):
         """Dynamically calculated peak to adhere to caution-hours"""
         if self.options.price.price_aware and len(self.dynamic_caution_hours) > 0:
-            if datetime.now().hour in self.dynamic_caution_hours.keys() and not getattr(
+            if datetime.now().replace(minute=0,second=0,microsecond=0) in self.dynamic_caution_hours.keys() and not getattr(
                 self.hours.timer, "is_override", False
             ):
                 return (
