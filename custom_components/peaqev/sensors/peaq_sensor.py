@@ -70,8 +70,8 @@ class PeaqSensor(SensorBase):
     def extra_state_attributes(self) -> dict:
         attr_dict = {}
         attr_dict["price aware"] = self._price_aware
+        attr_dict["non_hours"] = self._nonhours
         if self.hub.hours.price_aware is False:
-            attr_dict["non_hours"] = self._nonhours
             attr_dict["caution_hours"] = self._cautionhours
 
         attr_dict["current_hour state"] = self._current_hour
