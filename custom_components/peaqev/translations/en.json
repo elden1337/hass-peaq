@@ -12,6 +12,11 @@
         },
         "description": "Select price-aware if you wish to adhere to Nordpool- or EnergiDataService-prices (requires integration)"
       },
+      "priceaware_hours": {
+        "data": {
+          "priceaware_nonhours": "Hours when the charger is always disabled"
+        }
+      },
       "hours": {
         "data": {
           "nonhours": "Hours when the charger is always disabled",
@@ -32,9 +37,11 @@
           "sep": "September",
           "oct": "October",
           "nov": "November",
-          "dec": "December"
+          "dec": "December",
+          "use_peak_history": "Use last year's value as start peak if available"
         },
-        "description": "Select your allowed monthly start-peak."
+        "description": "Select your allowed monthly start-peak.",
+        "title": "Start peaks"
       },
       "misc": {
         "data": {
@@ -85,6 +92,11 @@
           "cautionhour_type": "Caution-hour type"
         }
       },
+      "priceaware_hours": {
+        "data": {
+          "priceaware_nonhours": "Hours when the charger is always disabled"
+        }
+      },
       "hours": {
         "data": {
           "nonhours": "Hours when the charger is always disabled",
@@ -104,7 +116,8 @@
           "sep": "September",
           "oct": "October",
           "nov": "November",
-          "dec": "December"
+          "dec": "December",
+          "use_peak_history": "Use last year's value as start peak if available"
         }
       },
       "misc": {
@@ -179,6 +192,16 @@
         "desired_charge_amount": {
           "name": "Desired charge amount",
           "description": "The number of kWh you wish to charge within the session. Set to 0 to disable override."
+        }
+      }
+    },
+    "update_peaks_history": {
+      "name": "Update peaks history",
+      "description": "Update the peaks history with old values. Remember to use the observed peak, ie if you have multiple peaks in your area, use the lowest of your top-peaks for the month.",
+      "fields": {
+        "import_dictionary": {
+          "name": "Dictionary to import",
+          "description": "The observed peaks for each month you would like to import."
         }
       }
     }

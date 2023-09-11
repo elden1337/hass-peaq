@@ -66,7 +66,7 @@ async def async_update_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     if [i for i in diff if i in RELOAD_CHANGES]:
         return await hass.config_entries.async_reload(config_entry.entry_id)
     if [i for i in diff if i in PRICE_CHANGES]:
-        await hass.data[DOMAIN]["hub"].initializer.async_init_hours()
+        await hass.data[DOMAIN]["hub"].async_init_hours()
 
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
@@ -88,6 +88,7 @@ async def async_set_options(conf) -> HubOptions:
         options.powersensor = conf.data["name"]
     options.locale = conf.data.get("locale", "")
     options.charger.chargertype = conf.data.get("chargertype", "")
+
     if options.charger.chargertype == ChargerType.Outlet.value:
         options.charger.powerswitch = conf.data.get("outletswitch", "")
         options.charger.powermeter = conf.data.get("outletpowermeter", "")
@@ -99,12 +100,18 @@ async def async_set_options(conf) -> HubOptions:
         options.powersensor_includes_car = conf.data.get(
             "powersensorincludescar", False
         )
+
     options.startpeaks = conf.options.get("startpeaks", conf.data.get("startpeaks"))
+    options.use_peak_history = conf.options.get("use_peak_history", conf.data.get("use_peak_history", False))
     options.cautionhours = await async_get_existing_param(conf, "cautionhours", [])
-    options.nonhours = await async_get_existing_param(conf, "nonhours", [])
+
     options.price.price_aware = await async_get_existing_param(
         conf, "priceaware", False
     )
+    if options.price.price_aware:
+        options.nonhours = await async_get_existing_param(conf, "priceaware_nonhours", [])
+    else:
+        options.nonhours = await async_get_existing_param(conf, "nonhours", [])
     options.price.min_price = await async_get_existing_param(
         conf, "min_priceaware_threshold_price", 0
     )

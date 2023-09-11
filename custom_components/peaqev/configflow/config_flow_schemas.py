@@ -57,6 +57,12 @@ HOURS_SCHEMA = vol.Schema(
     }
 )
 
+PRICEAWARE_HOURS_SCHEMA = vol.Schema(
+    {
+        vol.Optional("priceaware_nonhours"): cv.multi_select(list(range(0, 24))),
+    }
+)
+
 PRICEAWARE_SCHEMA = vol.Schema(
     {
         vol.Optional("priceaware", default=False): cv.boolean,
@@ -84,6 +90,7 @@ MONTHS_SCHEMA = vol.Schema(
         vol.Optional("oct", default=1.5): cv.positive_float,
         vol.Optional("nov", default=1.5): cv.positive_float,
         vol.Optional("dec", default=1.5): cv.positive_float,
+        vol.Optional("use_peak_history", default=False): cv.boolean,
     }
 )
 

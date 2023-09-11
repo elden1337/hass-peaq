@@ -9,15 +9,18 @@
           "min_priceaware_threshold_price": "[%key:common::config_flow::data::min_priceaware_threshold_price%]",
           "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]",
           "max_charge": "[%key:common::config_flow::data::max_charge%]"
-        },
-        "description": "Select price-aware if you wish to adhere to Nordpool- or EnergidataService-prices (requires integration)"
+        }
+      },
+      "priceaware_hours": {
+        "data": {
+          "priceaware_nonhours": "[%key:common::config_flow::data::priceaware_nonhours%]"
+        }
       },
       "hours": {
         "data": {
           "nonhours": "[%key:common::config_flow::data::nonhours%]",
           "cautionhours": "[%key:common::config_flow::data::cautionhours%]"
-        },
-        "description": "Change the non-hours and caution-hours"
+        }
       },
       "months": {
         "data": {
@@ -32,9 +35,9 @@
           "sep": "September",
           "oct": "October",
           "nov": "November",
-          "dec": "December"
-        },
-        "description": "Select your allowed monthly start-peak."
+          "dec": "December",
+          "use_peak_history": "[%key:common::config_flow::data::use_peak_history%]"
+        }
       },
       "misc": {
         "data": {
@@ -72,8 +75,7 @@
         "data": {
           "outletswitch": "[%key:common::config_flow::data::outletswitch%]",
           "outletpowermeter": "[%key:common::config_flow::data::outletpowermeter%]"
-        },
-        "description": "Set sensors for outlet switch and powermeter. Note that Peaqev cannot know which outlet you are using. Therefore, make sure that you use a safe smart outlet to not cause damage to your system."
+        }
       },
       "priceaware": {
         "data": {
@@ -90,6 +92,11 @@
           "cautionhours": "[%key:common::config_flow::data::cautionhours%]"
         }
       },
+      "priceaware_hours": {
+        "data": {
+          "priceaware_nonhours": "[%key:common::config_flow::data::priceaware_nonhours%]"
+        }
+      },
       "months": {
         "data": {
           "jan": "January",
@@ -103,7 +110,8 @@
           "sep": "September",
           "oct": "October",
           "nov": "November",
-          "dec": "December"
+          "dec": "December",
+          "use_peak_history": "[%key:common::config_flow::data::use_peak_history%]"
         }
       },
       "misc": {
@@ -177,6 +185,16 @@
         "desired_charge_amount": {
           "name": "Desired charge amount",
           "description": "The number of kWh you wish to charge within the session. Set to 0 to disable override."
+        }
+      }
+    },
+    "update_peaks_history": {
+      "name": "Update peaks history",
+      "description": "Update the peaks history with old values. Remember to use the observed peak, ie if you have multiple peaks in your area, use the lowest of your top-peaks for the month.",
+      "fields": {
+        "import_dictionary": {
+          "name": "Dictionary to import",
+          "description": "The observed peaks for each month you would like to import."
         }
       }
     }

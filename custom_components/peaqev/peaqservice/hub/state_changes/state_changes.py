@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -32,7 +33,7 @@ class StateChanges(IStateChanges):
                     self.hub.power.power_canary.total_power = (
                         self.hub.sensors.power.total.value
                     )
-                    self.hub.sensors.power_trend.add_reading(self.hub.sensors.power.total.value)
+                    self.hub.sensors.power_trend.add_reading(self.hub.sensors.power.total.value, time.time())
                 case self.hub.sensors.carpowersensor.entity:
                     if self.hub.sensors.carpowersensor.use_attribute:
                         pass
@@ -102,8 +103,8 @@ class StateChangesLite(IStateChanges):
                 await self.hub.async_set_chargerobject_value(value)
             case self.hub.sensors.chargerobject_switch.entity:
                 await self.async_update_chargerobject_switch(value)
-            case self.hub.sensors.current_peak.entity:
-                self.hub.sensors.current_peak.value = value
+            # case self.hub.sensors.current_peak.entity:
+            #     self.hub.sensors.current_peak.value = value
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self.async_update_total_energy_and_peak(value)
             case self.hub.spotprice.entity:
@@ -145,7 +146,8 @@ class StateChangesNoCharger(IStateChanges):
                 self.hub.power.power_canary.total_power = (
                     self.hub.sensors.power.total.value
                 )
-                self.hub.sensors.power_trend.add_reading(self.hub.sensors.power.total.value)
+                self.hub.sensors.power_trend.add_reading(self.hub.sensors.power.total.value, time.time())
+                self.hub.sensors.power_sensor_moving_average_5.add_reading(self.hub.sensors.power.total.value)
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self.async_update_total_energy_and_peak(value)
             case self.hub.sensors.powersensormovingaverage.entity:

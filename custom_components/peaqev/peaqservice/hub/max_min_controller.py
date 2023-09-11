@@ -64,6 +64,7 @@ class MaxMinController:
             await self.async_update_maxmin_core()
 
     async def async_update_maxmin_core(self) -> None:
+        _LOGGER.debug(f"Updating maxmin with maxcharge: {self.max_charge}, limiter: {self.max_min_limiter}, session_energy: {self.hub.chargecontroller.session.session_energy}, car_connected: {self.hub.chargecontroller.connected}, avg24 = {self.hub.sensors.powersensormovingaverage24.value}, peak = {self.hub.sensors.current_peak.value}")
         await self.hub.hours.async_update_max_min(
             max_charge=self.max_charge,
             limiter=self.max_min_limiter,
