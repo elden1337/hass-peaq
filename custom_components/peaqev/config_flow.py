@@ -13,13 +13,15 @@ from custom_components.peaqev.configflow.config_flow_helpers import \
     async_set_startpeak_dict
 from custom_components.peaqev.configflow.config_flow_schemas import (
     CHARGER_DETAILS_SCHEMA, CHARGER_SCHEMA, HOURS_SCHEMA, MONTHS_SCHEMA,
-    OUTLET_DETAILS_SCHEMA, PRICEAWARE_SCHEMA, SENSOR_SCHEMA, TYPE_SCHEMA, PRICEAWARE_HOURS_SCHEMA)
+    OUTLET_DETAILS_SCHEMA, PRICEAWARE_HOURS_SCHEMA, PRICEAWARE_SCHEMA,
+    SENSOR_SCHEMA, TYPE_SCHEMA)
 from custom_components.peaqev.configflow.config_flow_validation import \
     ConfigFlowValidation
 from custom_components.peaqev.peaqservice.powertools.power_canary.const import \
     FUSES_LIST
 from custom_components.peaqev.peaqservice.util.constants import (
     CAUTIONHOURTYPE_NAMES, TYPELITE, CautionHourType)
+
 from .const import DOMAIN  # pylint:disable=unused-import
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
