@@ -57,7 +57,7 @@ class IChargeController:
     def is_initialized(self) -> bool:
         if not self.hub.is_initialized:
             return False
-        if self.hub.options.price.price_aware and not self.hub.nordpool.is_initialized:
+        if self.hub.options.price.price_aware and not self.hub.spotprice.is_initialized:
             return False
         if self.hub.is_initialized and not self.model.is_initialized:
             return self._check_initialized()
@@ -65,12 +65,12 @@ class IChargeController:
 
     async def async_update_latest_charger_start(self):
         if self.hub.enabled:
-            self.model.latest_charger_start = time.time()
+            self.model.latest_charger_start.update()
 
     def _do_initialize(self) -> bool:
         self.model.is_initialized = True
         log_once("Chargecontroller is initialized and ready to work.")
-        self.model.latest_charger_start = time.time()
+        self.model.latest_charger_start.update()
         return self.model.is_initialized
 
     @abstractmethod
@@ -216,7 +216,7 @@ class IChargeController:
                     f"'is_done' reported that charger is Done based on current charger state"
                 )
                 return await self.async_is_done_return(True)
-        elif time.time() - self.model.latest_charger_start > DONETIMEOUT:
+        elif self.model.latest_charger_start.is_timeout():
             self.__debug_log(
                 f"'is_done' reported that charger is Done because of idle-charging for more than {DONETIMEOUT} seconds."
             )
@@ -242,6 +242,7 @@ class IChargeController:
         )
         self.hub.observer.add("hub initialized", self._check_initialized)
         self.hub.observer.add("timer activated", self.async_set_status)
+        self.hub.observer.add("aux stop changed", self.async_set_status)
 
     @abstractmethod
     async def async_below_startthreshold(self) -> bool:

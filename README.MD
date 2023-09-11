@@ -16,12 +16,8 @@ First time here? Check the [getting-started](https://github.com/elden1337/hass-p
 Interested in sponsoring or prioritizing a certain feature, look [here](https://github.com/elden1337/hass-peaq/wiki/Sponsorship-and-prioritized-development)
 
 Peaqev aims at lowering the household's peak energy charges, targeted at charging an electronic vehicle (EV) below a dynamic threshold. 
-Peaqev covers [28 different energy companies](https://github.com/elden1337/hass-peaq/wiki/Locale) in Sweden, Norway and Belgium and two types of ev chargers _(2022-11-08)_
-You will get the best experience with a supported charger that can update amps while charging, as well as using a connected power meter that update your total power draw frequently. Examples of such meters are:
-
-- Shelly 3EM
-- Tibber Watty
-- Tibber Pulse
+Peaqev covers [28 different energy companies](https://github.com/elden1337/hass-peaq/wiki/Locale) in Sweden, Norway and Belgium.
+You will get the best experience with a supported charger that can update amps while charging, as well as using a connected power meter that update your total power draw frequently (every 10s or more).
 
 The integration does not communicate with any proprietary API's. However, the chargers selected will use the integrations set for them, and may include cloud polling of data.
 
@@ -72,8 +68,8 @@ No charger| - | No | | _For using the sensors and logic_
 
 
 #### Price-aware:
-- `Price-aware charging` - Check this to calculate the cheapest hours from Nordpool (requires [Nordpool](https://github.com/custom-components/nordpool)). Non- and Caution hours below here will be ignored
-- `Dynamic top price` - If checked, the absolute top price for charging will be calculated by the monthly average from Nordpool (current month)
+- `Price-aware charging` - Check this to calculate the cheapest hours from [Nordpool](https://github.com/custom-components/nordpool) or [EnergiDataService](https://github.com/MTrab/energidataservice). Non- and Caution hours below here will be ignored
+- `Dynamic top price` - If checked, the absolute top price for charging will be calculated by the monthly average from the spotprice-source (current month)
 - `Absolute top price` - The limit (if any) where your charger should be stopped, regardless of the hour algorithm
 - `Min price` - The lower limit (if any) where charging will always be permitted (must be lower than top price if set)
 - `Caution hour type` - Choose to what extent you would like Peaqev to hold back during caution hours. *Suave > Aggressive* 

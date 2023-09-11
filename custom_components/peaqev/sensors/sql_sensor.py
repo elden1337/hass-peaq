@@ -26,6 +26,7 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
         self._charged_peak = 0
         self._peaks_dict: dict = {}
         self._observed_peak = 0
+        self._history: dict = {}
         super().__init__(hub, self._name, entry_id)
 
     @property
@@ -37,15 +38,21 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
 
     async def async_update(self) -> None:
         self._charged_peak = getattr(self.hub.sensors.locale.data.query_model, "charged_peak")
-        self._peaks_dict = getattr(self.hub.sensors.locale.data.query_model.peaks, "export_peaks")
-        self._observed_peak = getattr(self.hub.sensors.locale.data.query_model, "observed_peak")
+        _peaks_dict = getattr(self.hub.sensors.locale.data.query_model.peaks, "export_peaks")
+        if self._peaks_dict != _peaks_dict:
+            self._peaks_dict = _peaks_dict
+        self._observed_peak = self.hub.sensors.current_peak.value
+        self._history = self.hub.sensors.current_peak.history
 
     @property
     def extra_state_attributes(self) -> dict:
         attr_dict = {
             "observed_peak": float(self._observed_peak),
             "peaks_dictionary": self.set_peaksdict(),
+            "peaks_history": self._history,
         }
+        if self.hub.options.use_peak_history:
+            attr_dict["Use startpeak from last year"] = True
         return attr_dict
 
     @property
@@ -73,10 +80,17 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
         if state:
             _LOGGER.debug("last state of %s = %s", self._name, state)
             self._charged_peak = state.state
-            #self._peaks_dict = {"m":8,"p":{"1h2":1.0,"2h15":1.32}}
-            self._peaks_dict = state.attributes.get("peaks_dictionary", 50)
+            self._peaks_dict = state.attributes.get("peaks_dictionary", {})
             await self.hub.async_set_init_dict(self._peaks_dict)
-            self._observed_peak = state.attributes.get("observed_peak", 50)
+            self._observed_peak = state.attributes.get("observed_peak", 0)
+            _history = state.attributes.get("peaks_history", {})
+            if len(_history):
+                mykeys = list(_history.keys())
+                mykeys = sorted(mykeys, key=lambda x: (x.split("_")[0], x.split("_")[1]), reverse=True)
+                mykeys.sort()
+                sorted_dict = {i: _history[i] for i in mykeys}
+                self._history = sorted_dict
+                self.hub.sensors.current_peak.import_from_service(sorted_dict)
         else:
             self._charged_peak = 0
             self._peaks_dict = {}

@@ -1,9 +1,9 @@
 import logging
 
 from homeassistant.core import HomeAssistant
+from peaqevcore.common.enums.calltype_enum import CallTypes
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
-from peaqevcore.models.chargertype.calltype_enum import CallTypes
 from peaqevcore.models.chargertype.servicecalls_dto import ServiceCallsDTO
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions

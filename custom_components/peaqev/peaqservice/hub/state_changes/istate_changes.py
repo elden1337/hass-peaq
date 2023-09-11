@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from peaqevcore.common.wait_timer import WaitTimer
+
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 
@@ -9,7 +11,6 @@ if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
 import logging
-import time
 from abc import abstractmethod
 from datetime import datetime
 
@@ -17,29 +18,30 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class IStateChanges:
-    latest_nordpool_update = 0
-    latest_outlet_update = 0
-    latest_chargecontroller_update = 0
+    latest_spotprice_update = WaitTimer(timeout=60)
+    latest_chargecontroller_update = WaitTimer(timeout=3)
+    latest_outlet_update = WaitTimer(timeout=10)
+
 
     def __init__(self, hub: HomeAssistantHub):
         self.hub = hub
 
     async def async_update_sensor(self, entity, value):
         update_session = await self.async_update_sensor_internal(entity, value)
-        if time.time() - self.latest_chargecontroller_update > 3:
-            self.latest_chargecontroller_update = time.time()
+        if self.latest_chargecontroller_update.is_timeout():
+            self.latest_chargecontroller_update.update()
             await self.hub.chargecontroller.async_set_status()
             if self.hub.options.price.price_aware:  # todo: strategy should handle this
                 if not self.hub.max_min_controller.override_max_charge:
                     await self.hub.max_min_controller.async_reset_max_charge_sensor()
         if self.hub.options.price.price_aware:  # todo: strategy should handle this
-            if entity != self.hub.nordpool.nordpool_entity and (
+            if entity != self.hub.spotprice.entity and (
                 not self.hub.hours.is_initialized
-                or time.time() - self.latest_nordpool_update > 60
+                or self.latest_spotprice_update.is_timeout()
             ):
-                """tweak to provoke nordpool to update more often"""
-                self.latest_nordpool_update = time.time()
-                await self.hub.nordpool.async_update_nordpool()
+                """tweak to provoke spotprice to update more often"""
+                self.latest_spotprice_update.update()
+                await self.hub.spotprice.async_update_spotprice()
         await self.async_handle_sensor_attribute()
         await self.async_update_session_parameters(update_session)
         if all(
@@ -64,7 +66,7 @@ class IStateChanges:
             )
             if self.hub.options.price.price_aware:  # todo: strategy should handle this
                 await self.hub.chargecontroller.session.async_set_session_price(
-                    float(self.hub.nordpool.state)
+                    float(self.hub.spotprice.state)
                 )
                 if getattr(self.hub.hours.scheduler, "schedule_created", False):
                     await self.hub.hours.scheduler.async_update_facade()
@@ -99,7 +101,6 @@ class IStateChanges:
             self.hub.sensors.totalhourlyenergy.value = value
         except:
             _LOGGER.debug(f"Unable to set totalhourlyenergy to {value}")
-
         try:
             await self.hub.sensors.locale.async_try_update_peak(
                 new_val=float(value), timestamp=datetime.now()
@@ -108,10 +109,10 @@ class IStateChanges:
             _LOGGER.debug(f"Unable to update peak to {value}")
         try:
             self.hub.sensors.current_peak.value = (
-                self.hub.sensors.locale.data.query_model.observed_peak
+                list(self.hub.sensors.locale.data.query_model.peaks.p.values())
             )
-        except:
-            _LOGGER.debug(f"Unable to set current_peak to {value}")
+        except Exception as e:
+            _LOGGER.debug(f"Unable to set current_peak to {value}. {self.hub.sensors.locale.data.query_model.peaks.p.values()}. Exception: {e}")
 
         try:
             await self.hub.chargecontroller.savings.async_add_consumption(float(value))
@@ -121,6 +122,7 @@ class IStateChanges:
             try:
                 await self.hub.hours.async_update_max_min(
                     max_charge=self.hub.max_min_controller.max_charge,
+                    limiter=self.hub.max_min_controller.max_min_limiter,
                     session_energy=self.hub.chargecontroller.session.session_energy,
                     car_connected=self.hub.chargecontroller.connected,
                 )

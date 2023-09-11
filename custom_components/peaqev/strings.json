@@ -9,15 +9,18 @@
           "min_priceaware_threshold_price": "[%key:common::config_flow::data::min_priceaware_threshold_price%]",
           "cautionhour_type": "[%key:common::config_flow::data::cautionhour_type%]",
           "max_charge": "[%key:common::config_flow::data::max_charge%]"
-        },
-        "description": "Select price-aware if you wish to adhere to Nordpool-prices (requires integration)"
+        }
+      },
+      "priceaware_hours": {
+        "data": {
+          "priceaware_nonhours": "[%key:common::config_flow::data::priceaware_nonhours%]"
+        }
       },
       "hours": {
         "data": {
           "nonhours": "[%key:common::config_flow::data::nonhours%]",
           "cautionhours": "[%key:common::config_flow::data::cautionhours%]"
-        },
-        "description": "Change the non-hours and caution-hours"
+        }
       },
       "months": {
         "data": {
@@ -32,9 +35,9 @@
           "sep": "September",
           "oct": "October",
           "nov": "November",
-          "dec": "December"
-        },
-        "description": "Select your allowed monthly start-peak."
+          "dec": "December",
+          "use_peak_history": "[%key:common::config_flow::data::use_peak_history%]"
+        }
       },
       "misc": {
         "data": {
@@ -72,8 +75,7 @@
         "data": {
           "outletswitch": "[%key:common::config_flow::data::outletswitch%]",
           "outletpowermeter": "[%key:common::config_flow::data::outletpowermeter%]"
-        },
-        "description": "Set sensors for outlet switch and powermeter. Note that Peaqev cannot know which outlet you are using. Therefore, make sure that you use a safe smart outlet to not cause damage to your system."
+        }
       },
       "priceaware": {
         "data": {
@@ -90,6 +92,11 @@
           "cautionhours": "[%key:common::config_flow::data::cautionhours%]"
         }
       },
+      "priceaware_hours": {
+        "data": {
+          "priceaware_nonhours": "[%key:common::config_flow::data::priceaware_nonhours%]"
+        }
+      },
       "months": {
         "data": {
           "jan": "January",
@@ -103,7 +110,8 @@
           "sep": "September",
           "oct": "October",
           "nov": "November",
-          "dec": "December"
+          "dec": "December",
+          "use_peak_history": "[%key:common::config_flow::data::use_peak_history%]"
         }
       },
       "misc": {
@@ -124,5 +132,72 @@
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
     }
+  },
+  "services": {
+    "enable": {
+      "name": "Enable Peaqev",
+      "description": "Enables Peaqev smart charging."
+    },
+  "disable": {
+      "name": "Disable Peaqev",
+      "description": "Disables Peaqev smart charging."
+    },
+  "override_nonhours": {
+      "name": "Enable Peaqev",
+      "description": "Will override non-hours for the set amount of hours. Default per call is to add one hour. Note that this service will not keep state on reboot.",
+      "fields": {
+        "hours": {
+          "name": "Hours",
+          "description": "The number of hours you wish to add to the override."
+        }
+      }
+    },
+  "scheduler_set": {
+      "name": "Set Peaqev Scheduler",
+      "description": "Set a one-time schedule to help Peaqev optimize the cheapest hours for your desired charge-amount. Does not work with Peaqev-lite.",
+      "fields": {
+        "charge_amount": {
+          "name": "Charge amount",
+          "description": "The number of kWh you wish to charge within the session"
+        },
+        "departure_time": {
+          "name": "Departure time",
+          "description": "The datetime you wish to depart from the charger"
+        },
+        "schedule_starttime": {
+          "name": "Schedule start time",
+          "description": "Optional. The datetime you wish for the schedule to begin. Must be less than the departure-time, else it will default to the time of service call."
+        },
+        "override_settings": {
+          "name": "Override settings",
+          "description": "Optional, set to True if you want to let Peaqev ignore your max-price and possibly peak-level during this scheduled session."
+        }
+      }
+    },
+  "scheduler_cancel": {
+      "name": "Cancel Peaqev Scheduler",
+      "description": "Will cancel the previously set scheduled charge."
+    },
+  "override_charge_amount": {
+      "name": "Override Max Charge Amount",
+      "description": "Override the scheduled charge amount (requires price-awareness). Will be active during one session.",
+      "fields": {
+        "desired_charge_amount": {
+          "name": "Desired charge amount",
+          "description": "The number of kWh you wish to charge within the session. Set to 0 to disable override."
+        }
+      }
+    },
+    "update_peaks_history": {
+      "name": "Update peaks history",
+      "description": "Update the peaks history with old values. Remember to use the observed peak, ie if you have multiple peaks in your area, use the lowest of your top-peaks for the month.",
+      "fields": {
+        "import_dictionary": {
+          "name": "Dictionary to import",
+          "description": "The observed peaks for each month you would like to import."
+        }
+      }
+    }
   }
+
 }

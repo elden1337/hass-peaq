@@ -22,7 +22,7 @@ class PeaqSensor(SensorBase):
 
         self._attr_name = name
         self._state = None
-        self._nonhours = None
+        self._nonhours: list = []
         self._cautionhours = None
         self._current_hour = None
         self._price_aware: bool = False
@@ -73,7 +73,8 @@ class PeaqSensor(SensorBase):
         if self.hub.hours.price_aware is False:
             attr_dict["non_hours"] = self._nonhours
             attr_dict["caution_hours"] = self._cautionhours
-
+        else:
+            attr_dict["non_hours"] = self.hub.options.nonhours
         attr_dict["current_hour state"] = self._current_hour
         attr_dict["scheduler_active"] = self._scheduler_active
         return attr_dict

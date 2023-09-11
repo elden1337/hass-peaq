@@ -64,7 +64,8 @@ class IObserver:
                 )
                 for func in self.model.subscribers.get(command.command, []):
                     await self.async_broadcast_separator(func, command)
-                self.model.broadcast_queue.remove(command)
+                if command in self.model.broadcast_queue:
+                    self.model.broadcast_queue.remove(command)
         else:
             _LOGGER.debug(
                 f"not able to broadcast: {command.command} with params: {command.argument}"

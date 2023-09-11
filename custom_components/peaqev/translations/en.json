@@ -10,7 +10,12 @@
           "cautionhour_type": "Caution-hour type",
           "max_charge": "(Optional) The standard maximum charge (kWh) per session."
         },
-        "description": "Select price-aware if you wish to adhere to Nordpool-prices (requires integration)"
+        "description": "Select price-aware if you wish to adhere to Nordpool- or EnergiDataService-prices (requires integration)"
+      },
+      "priceaware_hours": {
+        "data": {
+          "priceaware_nonhours": "Hours when the charger is always disabled"
+        }
       },
       "hours": {
         "data": {
@@ -32,9 +37,11 @@
           "sep": "September",
           "oct": "October",
           "nov": "November",
-          "dec": "December"
+          "dec": "December",
+          "use_peak_history": "Use last year's value as start peak if available"
         },
-        "description": "Select your allowed monthly start-peak."
+        "description": "Select your allowed monthly start-peak.",
+        "title": "Start peaks"
       },
       "misc": {
         "data": {
@@ -78,11 +85,16 @@
       },
       "priceaware": {
         "data": {
-          "priceaware": "Price aware charging (requires Nordpool)",
+          "priceaware": "Price aware charging (requires Nordpool or EnergiDataService)",
           "absolute_top_price": "(Optional) Never charge over this price",
           "dynamic_top_price": "Top price based on current month average price (ignores set max-price)",
           "min_priceaware_threshold_price": "(Optional) Always allow charging below this price",
           "cautionhour_type": "Caution-hour type"
+        }
+      },
+      "priceaware_hours": {
+        "data": {
+          "priceaware_nonhours": "Hours when the charger is always disabled"
         }
       },
       "hours": {
@@ -104,7 +116,8 @@
           "sep": "September",
           "oct": "October",
           "nov": "November",
-          "dec": "December"
+          "dec": "December",
+          "use_peak_history": "Use last year's value as start peak if available"
         }
       },
       "misc": {
@@ -125,6 +138,72 @@
     },
     "abort": {
       "already_configured": "This integration has already been configured"
+    }
+  },
+  "services": {
+    "enable": {
+      "name": "Enable Peaqev",
+      "description": "Enables Peaqev smart charging."
+    },
+  "disable": {
+      "name": "Disable Peaqev",
+      "description": "Disables Peaqev smart charging."
+    },
+  "override_nonhours": {
+      "name": "Enable Peaqev",
+      "description": "Will override non-hours for the set amount of hours. Default per call is to add one hour. Note that this service will not keep state on reboot.",
+      "fields": {
+        "hours": {
+          "name": "Hours",
+          "description": "The number of hours you wish to add to the override."
+        }
+      }
+    },
+  "scheduler_set": {
+      "name": "Set Peaqev Scheduler",
+      "description": "Set a one-time schedule to help Peaqev optimize the cheapest hours for your desired charge-amount. Does not work with Peaqev-lite.",
+      "fields": {
+        "charge_amount": {
+          "name": "Charge amount",
+          "description": "The number of kWh you wish to charge within the session"
+        },
+        "departure_time": {
+          "name": "Departure time",
+          "description": "The datetime you wish to depart from the charger"
+        },
+        "schedule_starttime": {
+          "name": "Schedule start time",
+          "description": "Optional. The datetime you wish for the schedule to begin. Must be less than the departure-time, else it will default to the time of service call."
+        },
+        "override_settings": {
+          "name": "Override settings",
+          "description": "Optional, set to True if you want to let Peaqev ignore your max-price and possibly peak-level during this scheduled session."
+        }
+      }
+    },
+  "scheduler_cancel": {
+      "name": "Cancel Peaqev Scheduler",
+      "description": "Will cancel the previously set scheduled charge."
+    },
+  "override_charge_amount": {
+      "name": "Override Max Charge Amount",
+      "description": "Override the scheduled charge amount (requires price-awareness). Will be active during one session.",
+      "fields": {
+        "desired_charge_amount": {
+          "name": "Desired charge amount",
+          "description": "The number of kWh you wish to charge within the session. Set to 0 to disable override."
+        }
+      }
+    },
+    "update_peaks_history": {
+      "name": "Update peaks history",
+      "description": "Update the peaks history with old values. Remember to use the observed peak, ie if you have multiple peaks in your area, use the lowest of your top-peaks for the month.",
+      "fields": {
+        "import_dictionary": {
+          "name": "Dictionary to import",
+          "description": "The observed peaks for each month you would like to import."
+        }
+      }
     }
   }
 }

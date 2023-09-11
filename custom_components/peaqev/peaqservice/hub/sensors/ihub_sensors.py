@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
 from functools import partial
+from statistics import mean
 from typing import Tuple
 
+from peaqevcore.common.trend import Gradient
 from peaqevcore.models.hub.carpowersensor import CarPowerSensor
 from peaqevcore.models.hub.chargerobject import ChargerObject
 from peaqevcore.models.hub.chargerswitch import ChargerSwitch
@@ -20,6 +23,44 @@ from custom_components.peaqev.peaqservice.hub.models.hub_options import \
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 
 
+class Average:
+    def __init__(self, max_age: int, max_samples: int, precision: int = 2):
+        self._readings = []
+        self._average = 0
+        self._max_age = max_age
+        self._max_samples = max_samples
+        self._precision = precision
+        self._latest_update = 0
+
+    @property
+    def average(self) -> float:
+        self._set_average()
+        return round(self._average, self._precision)
+
+    def _set_average(self):
+        try:
+            self._average = mean([x[1] for x in self._readings])
+        except ZeroDivisionError:
+            self._average = 0
+
+    def _remove_from_list(self):
+        """Removes overflowing number of samples and old samples from the list."""
+        while len(self._readings) > self._max_samples:
+            self._readings.pop(0)
+        gen = (
+            x for x in self._readings if time.time() - int(x[0]) > self._max_age
+        )
+        for i in gen:
+            if len(self._readings) > 1:
+                # Always keep one reading
+                self._readings.remove(i)
+
+    def add_reading(self, val: float):
+        self._readings.append((int(time.time()), round(val, 3)))
+        self._latest_update = time.time()
+        self._remove_from_list()
+        self._set_average()
+
 @dataclass
 class HubSensors:
     sensors_list: list[HubMember] = field(init=False)
@@ -35,7 +76,9 @@ class HubSensors:
     state_machine: any = field(init=False)
     powersensormovingaverage: HubMember = field(init=False)
     powersensormovingaverage24: HubMember = field(init=False)
+    power_sensor_moving_average_5: Average = field(init=False)
     power: Power = field(init=False)
+    power_trend: Gradient = field(init=False)
     chargertype: any = field(init=False)
 
     async def async_setup(
@@ -52,6 +95,12 @@ class HubSensors:
                 listenerentity=f"sensor.{domain}_{nametoid(AVERAGECONSUMPTION)}",
                 initval=0,
             ),
+            "power_sensor_moving_average_5": partial(
+                Average,
+                max_age=300,
+                max_samples=300,
+                precision=0
+            ),
             "powersensormovingaverage24": partial(
                 HubMember,
                 data_type=int,
@@ -63,6 +112,12 @@ class HubSensors:
                 configsensor=options.powersensor,
                 powersensor_includes_car=options.powersensor_includes_car,
             ),
+            "power_trend": partial(
+                Gradient,
+                max_age=300,
+                max_samples=300,
+                precision=0
+            )
         }
         charger_sensors = {
             "charger_done": partial(
@@ -89,7 +144,7 @@ class HubSensors:
                 initval=False,
             ),
             "current_peak": partial(
-                CurrentPeak, data_type=float, initval=0, startpeaks=options.startpeaks
+                CurrentPeak, data_type=float, initval=0, startpeaks=options.startpeaks, options_use_history=options.use_peak_history
             ),
             "totalhourlyenergy": partial(
                 HubMember,
