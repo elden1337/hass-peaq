@@ -26,6 +26,6 @@ SCAN_INTERVAL = timedelta(seconds=4)
 
 async def async_gather_binary_sensors(hub) -> list:
     ret = []
-    if hub.chargertype.type != ChargerType.NoCharger:
+    if hub.chargecontroller.charger_type.type != ChargerType.NoCharger:
         ret.append(PeaqBinarySensorDone(hub))
     return ret

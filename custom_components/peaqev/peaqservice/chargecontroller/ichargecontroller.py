@@ -14,6 +14,7 @@ from custom_components.peaqev.peaqservice.chargecontroller.chargercontroller_mod
     ChargeControllerModel
 from custom_components.peaqev.peaqservice.chargecontroller.const import (
     DEBUGLOG_TIMEOUT, DONETIMEOUT)
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.util.constants import \
@@ -26,16 +27,21 @@ _LOGGER = logging.getLogger(__name__)
 class IChargeController:
     """The interface for the charge controller"""
 
-    def __init__(self, hub, charger_states, charger_type):
+    def __init__(self, hub, charger_type: IChargerType):
         self.hub = hub
         self.name: str = f"{self.hub.hubname} {CHARGERCONTROLLER}"
+        self._charger_type = charger_type
         self.model = ChargeControllerModel(
-            charger_type=charger_type, charger_states=charger_states
+            charger_type=charger_type.type, charger_states=charger_type.chargerstates
         )
         self.charger = Charger(controller=self)
         self.session = Session(self.charger)
         self.savings = SavingsController(self)
         self._setup_observers()
+
+    @property
+    def charger_type(self) -> IChargerType:
+        return self._charger_type
 
     @abstractmethod
     async def async_below_startthreshold(self) -> bool:
@@ -255,8 +261,8 @@ class IChargeController:
         ):  # todo: composition
             return ChargeControllerStates.Stop, True
         elif (
-            self.hub.chargertype.entities.powerswitch == "on"
-            and self.hub.chargertype.entities.powermeter < 1
+            self.hub.chargecontroller.charger_type.entities.powerswitch == "on"
+            and self.hub.chargecontroller.charger_type.entities.powermeter < 1
         ):  # todo: composition
             return await self.async_get_status_connected()
         else:

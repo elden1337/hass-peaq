@@ -13,8 +13,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class ChargeControllerLite(IChargeController):
-    def __init__(self, hub, charger_states, charger_type):
-        super().__init__(hub, charger_states, charger_type)
+    def __init__(self, hub, charger_type):
+        super().__init__(hub, charger_type)
 
     @property
     def status_string(self) -> str:

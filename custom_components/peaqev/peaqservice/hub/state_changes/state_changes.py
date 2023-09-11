@@ -72,7 +72,7 @@ class StateChanges(IStateChanges):
             self.hub.sensors.power.total.value
         )
     async def async_handle_outlet_updates(self):
-        if self.hub.chargertype.type is ChargerType.Outlet:
+        if self.hub.chargecontroller.charger_type.type is ChargerType.Outlet:
             old_state = await self.hub.async_request_sensor_data("chargerobject_value")
             if not self.latest_outlet_update.is_timeout():
                 return
@@ -114,7 +114,7 @@ class StateChangesLite(IStateChanges):
         return False
 
     async def _handle_outlet_updates(self):
-        if self.hub.chargertype.type is ChargerType.Outlet:
+        if self.hub.chargecontroller.charger_type.type is ChargerType.Outlet:
             old_state = await self.hub.async_request_sensor_data("chargerobject_value")
             if not self.latest_outlet_update.is_timeout():
                 return

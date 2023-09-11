@@ -3,9 +3,6 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Tuple
 
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
-
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
@@ -23,9 +20,9 @@ _LOGGER = logging.getLogger(__name__)
 
 class ChargeController(IChargeController):
     def __init__(
-        self, hub: HomeAssistantHub, charger_states: dict, charger_type: ChargerType
+        self, hub: HomeAssistantHub, charger_type
     ):
-        super().__init__(hub, charger_states, charger_type)
+        super().__init__(hub, charger_type)
 
     @property
     def status_string(self) -> str:

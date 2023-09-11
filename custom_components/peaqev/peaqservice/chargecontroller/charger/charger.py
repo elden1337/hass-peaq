@@ -23,7 +23,7 @@ class Charger:
     def __init__(self, controller):
         self.controller = controller
         self._charger = (
-            controller.hub.chargertype
+            controller.charger_type
         )  # todo: should not have direct access. route through chargecontroller
         self.model = ChargerModel()
         self.helpers = ChargerHelpers(self)

@@ -80,7 +80,7 @@ async def async_setup(hub, config, hass, async_add_entities):
     if hub.options.price.price_aware:
         sensors.append(PeaqMoneySensor(hub, config.entry_id))
         # sensors.append(PeaqSavingsSensor(hub, config.entry_id))
-        if hub.chargertype.type != ChargerType.NoCharger:
+        if hub.chargecontroller.charger_type.type != ChargerType.NoCharger:
             sensors.append(PeaqSessionCostSensor(hub, config.entry_id))
         if not hub.options.peaqev_lite:
             utility_meters.append(
@@ -104,7 +104,7 @@ async def async_setup(hub, config, hass, async_add_entities):
         integrationsensors.append(ex.nametoid(CONSUMPTION_TOTAL_NAME))
         if (
             hub.options.powersensor_includes_car
-            or hub.chargertype.type is ChargerType.NoCharger
+            or hub.chargecontroller.charger_type.type is ChargerType.NoCharger
         ):
             sensors.append(PeaqHousePowerSensor(hub, config.entry_id))
         else:
@@ -126,10 +126,10 @@ async def async_setup(hub, config, hass, async_add_entities):
         if any(
             [
                 hub.options.powersensor_includes_car,
-                hub.chargertype.type is ChargerType.NoCharger,
+                hub.chargecontroller.charger_type.type is ChargerType.NoCharger,
             ]
         ):
-            if hub.chargertype.type is not ChargerType.NoCharger:
+            if hub.chargecontroller.charger_type.type is not ChargerType.NoCharger:
                 integration_sensors.append(
                     PeaqIntegrationSensor(
                         hub,
@@ -164,7 +164,7 @@ async def async_setup(hub, config, hass, async_add_entities):
                 )
             )
 
-    if hub.chargertype.type is not ChargerType.NoCharger:
+    if hub.chargecontroller.charger_type.type is not ChargerType.NoCharger:
         integrationsensors.append(ex.nametoid(CONSUMPTION_INTEGRAL_NAME))
 
         sensors.append(PeaqSessionSensor(hub, config.entry_id))
