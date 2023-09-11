@@ -15,6 +15,8 @@ from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_fact
     ChargeControllerFactory
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
     IChargeController
+from custom_components.peaqev.peaqservice.chargertypes.chargertype_factory import \
+    ChargerTypeFactory
 from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
     IChargerType
 from custom_components.peaqev.peaqservice.hub.const import *
@@ -82,8 +84,15 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
         self.max_min_controller = MaxMinController(self)
 
     async def setup(self):
+        self.chargertype = await ChargerTypeFactory.async_create(
+            self.state_machine, self.options
+        )  # chargecontroller
         self.sensors: HubSensors = await HubSensorsFactory.async_create(hub=self)
-        self.chargecontroller = await ChargeControllerFactory.async_create(self)
+        self.chargecontroller = await ChargeControllerFactory.async_create(
+            self,
+            charger_states=self.chargertype.chargerstates,
+            charger_type=self.chargertype.type,
+        )
         self.hours: Hours = await HourselectionFactory.async_create(self)  # top level
         self.threshold: ThresholdBase = await ThresholdFactory.async_create(
             self

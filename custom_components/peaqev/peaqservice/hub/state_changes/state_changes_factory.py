@@ -19,12 +19,12 @@ class StateChangesFactory:
         if all(
             [
                 hub.options.peaqev_lite is True,
-                hub.chargecontroller.charger_type.type is ChargerType.NoCharger,
+                hub.chargertype.type is ChargerType.NoCharger,
             ]
         ):
             return StateChangesLiteNoCharger(hub)
         if hub.options.peaqev_lite is True:
             return StateChangesLite(hub)
-        if hub.chargecontroller.charger_type.type is ChargerType.NoCharger:
+        if hub.chargertype.type is ChargerType.NoCharger:
             return StateChangesNoCharger(hub)
         return StateChanges(hub)

@@ -12,7 +12,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class PowerCanary(IPowerCanary):
     def __init__(self, hub):
-        super().__init__(hub, hub.options.fuse_type, hub.chargecontroller.charger_type.servicecalls.options.allowupdatecurrent)
+        super().__init__(hub, hub.options.fuse_type, hub.chargertype.servicecalls.options.allowupdatecurrent)
 
     @property
     def alive(self) -> bool:

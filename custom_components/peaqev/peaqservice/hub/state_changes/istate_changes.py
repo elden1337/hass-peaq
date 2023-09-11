@@ -48,7 +48,7 @@ class IStateChanges:
             [
                 entity in self.hub.chargingtracker_entities,
                 self.hub.is_initialized,
-                self.hub.chargecontroller.charger_type.type is not ChargerType.NoCharger,  # todo: strategy should handle this
+                self.hub.chargertype is not ChargerType.NoCharger,  # todo: strategy should handle this
             ]
         ):
             await self.hub.chargecontroller.charger.async_charge()

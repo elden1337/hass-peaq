@@ -21,7 +21,7 @@ class HubSensorsFactory:
             state_machine=hub.state_machine,
             options=hub.options,
             domain=hub.domain,
-            chargerobject=hub.chargecontroller.charger_type,
+            chargerobject=hub.chargertype,
         )
         await sensors.async_init_hub_values()
         return sensors
