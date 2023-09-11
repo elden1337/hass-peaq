@@ -72,40 +72,69 @@ class ChargeController(IChargeController):
             return ChargeControllerStates.Stop
         return ChargeControllerStates.Start
 
-    async def async_get_status_connected(
-        self, charger_state=None
-    ) -> Tuple[ChargeControllerStates, bool]:
+    # async def async_get_status_connected(
+    #     self, charger_state=None
+    # ) -> Tuple[ChargeControllerStates, bool]:
+    #     try:
+    #         if not self.hub.enabled:
+    #             return ChargeControllerStates.Connected, True
+    #         if (
+    #             charger_state is not None
+    #             and self.hub.sensors.carpowersensor.value < 1
+    #             and await self.async_is_done(charger_state)
+    #         ):
+    #             await self.hub.observer.async_broadcast("car done")
+    #             return ChargeControllerStates.Done, False
+    #         else:
+    #             if all(
+    #                 [
+    #                     any(
+    #                         [
+    #                             (
+    #                                 await self.async_below_startthreshold()
+    #                                 and self.hub.sensors.totalhourlyenergy.value != 0
+    #                             ),
+    #                             await self.hub.async_free_charge(),
+    #                         ]
+    #                     ),
+    #                     not defer_start(self.hub.hours.non_hours),
+    #                     not self.hub.events.aux_stop
+    #                 ]
+    #             ):
+    #                 return ChargeControllerStates.Start, False
+    #             else:
+    #                 return ChargeControllerStates.Stop, True
+    #     except Exception as e:
+    #         _LOGGER.debug(
+    #             f"async_get_status_connected for: {e}. charger-state: {charger_state}"
+    #         )
+    #         return ChargeControllerStates.Error, True
+
+    async def async_get_status_connected(self, charger_state=None) -> Tuple[ChargeControllerStates, bool]:
         try:
             if not self.hub.enabled:
                 return ChargeControllerStates.Connected, True
-            if (
-                charger_state is not None
-                and self.hub.sensors.carpowersensor.value < 1
-                and await self.async_is_done(charger_state)
-            ):
+
+            if charger_state is not None and self.hub.sensors.carpowersensor.value < 1 and await self.async_is_done(
+                    charger_state):
                 await self.hub.observer.async_broadcast("car done")
                 return ChargeControllerStates.Done, False
+
+            if await self._should_start_charging():
+                return ChargeControllerStates.Start, False
             else:
-                if all(
-                    [
-                        any(
-                            [
-                                (
-                                    await self.async_below_startthreshold()
-                                    and self.hub.sensors.totalhourlyenergy.value != 0
-                                ),
-                                await self.hub.async_free_charge(),
-                            ]
-                        ),
-                        not defer_start(self.hub.hours.non_hours),
-                        not self.hub.events.aux_stop
-                    ]
-                ):
-                    return ChargeControllerStates.Start, False
-                else:
-                    return ChargeControllerStates.Stop, True
+                return ChargeControllerStates.Stop, True
+
         except Exception as e:
-            _LOGGER.debug(
-                f"async_get_status_connected for: {e}. charger-state: {charger_state}"
-            )
+            _LOGGER.debug(f"async_get_status_connected for: {e}. charger-state: {charger_state}")
             return ChargeControllerStates.Error, True
+
+    async def _should_start_charging(self) -> bool:
+        return all([
+            any([
+                await self.async_below_startthreshold() and self.hub.sensors.totalhourlyenergy.value != 0,
+                await self.hub.async_free_charge()
+            ]),
+            not defer_start(self.hub.hours.non_hours),
+            not self.hub.events.aux_stop
+        ])

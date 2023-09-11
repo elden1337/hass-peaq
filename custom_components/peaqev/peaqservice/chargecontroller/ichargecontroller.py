@@ -37,9 +37,32 @@ class IChargeController:
         self.savings = SavingsController(self)
         self._setup_observers()
 
-    async def async_setup(self):
-        await self.session.async_setup()
-        await self.charger.async_setup()
+    @abstractmethod
+    async def async_below_startthreshold(self) -> bool:
+        pass
+
+    @abstractmethod
+    async def async_above_stopthreshold(self) -> bool:
+        pass
+
+    @property
+    @abstractmethod
+    def status_string(self) -> str:
+        pass
+
+    @abstractmethod
+    async def async_get_status_charging(self) -> ChargeControllerStates:
+        pass
+
+    @abstractmethod
+    async def async_get_status_connected(
+            self, charger_state=None
+    ) -> Tuple[ChargeControllerStates, bool]:
+        pass
+
+    @abstractmethod
+    def _check_initialized(self) -> bool:
+        pass
 
     @property
     def status_type(self) -> ChargeControllerStates:
@@ -63,6 +86,11 @@ class IChargeController:
             return self._check_initialized()
         return self.model.is_initialized
 
+
+    async def async_setup(self):
+        await self.session.async_setup()
+        await self.charger.async_setup()
+
     async def async_update_latest_charger_start(self):
         if self.hub.enabled:
             self.model.latest_charger_start.update()
@@ -72,10 +100,6 @@ class IChargeController:
         log_once("Chargecontroller is initialized and ready to work.")
         self.model.latest_charger_start.update()
         return self.model.is_initialized
-
-    @abstractmethod
-    def _check_initialized(self) -> bool:
-        pass
 
     async def async_set_status(self) -> None:
         try:
@@ -134,49 +158,89 @@ class IChargeController:
             case _:
                 pass
 
+    # async def async_get_status(self) -> Tuple[ChargeControllerStates, bool]:
+    #     _state = await self.hub.async_request_sensor_data("chargerobject_value")
+    #     if _state is None:
+    #         _LOGGER.debug("Chargerobject_value is None. Returning Error-state.")
+    #         return ChargeControllerStates.Error, True
+    #     try:
+    #         if not self.hub.enabled:
+    #             if _state in self.model.charger_states.get(ChargeControllerStates.Idle):
+    #                 return ChargeControllerStates.Idle, True
+    #             return ChargeControllerStates.Connected, True
+    #         elif _state in self.model.charger_states.get(ChargeControllerStates.Done):
+    #             return ChargeControllerStates.Done, False
+    #         elif _state in self.model.charger_states.get(ChargeControllerStates.Idle):
+    #             return ChargeControllerStates.Idle, True
+    #         elif self.hub.sensors.power.killswitch.is_dead:  # todo: composition
+    #             _LOGGER.debug("Killswitch is dead. Returning Error-state.")
+    #             return ChargeControllerStates.Error, True
+    #         elif all(
+    #             [
+    #                 _state
+    #                 not in self.model.charger_states.get(ChargeControllerStates.Idle),
+    #                 self.hub.charger_done,
+    #             ]
+    #         ):
+    #             return ChargeControllerStates.Done, False
+    #         elif all(
+    #             [
+    #                 self.hub.now_is_non_hour(),
+    #                 not getattr(self.hub.hours.timer, "is_override", False),
+    #             ]
+    #         ):
+    #             return ChargeControllerStates.Stop, True
+    #         elif _state in self.model.charger_states.get(
+    #             ChargeControllerStates.Connected
+    #         ):
+    #             return await self.async_get_status_connected(_state)
+    #         elif _state in self.model.charger_states.get(
+    #             ChargeControllerStates.Charging
+    #         ):
+    #             return await self.async_get_status_charging(), True
+    #     except Exception as e:
+    #         _LOGGER.debug(f"Error in async_get_status: {e}")
+    #     _LOGGER.debug(f"async_get_status: {_state} returning Error. {str(_state)}")
+    #     return ChargeControllerStates.Error, True
+
     async def async_get_status(self) -> Tuple[ChargeControllerStates, bool]:
-        _state = await self.hub.async_request_sensor_data("chargerobject_value")
-        if _state is None:
+        state = await self.hub.async_request_sensor_data("chargerobject_value")
+        if state is None:
             _LOGGER.debug("Chargerobject_value is None. Returning Error-state.")
             return ChargeControllerStates.Error, True
+
         try:
             if not self.hub.enabled:
-                if _state in self.model.charger_states.get(ChargeControllerStates.Idle):
+                if state in self.model.charger_states[ChargeControllerStates.Idle]:
                     return ChargeControllerStates.Idle, True
                 return ChargeControllerStates.Connected, True
-            elif _state in self.model.charger_states.get(ChargeControllerStates.Done):
+
+            if state in self.model.charger_states[ChargeControllerStates.Done]:
                 return ChargeControllerStates.Done, False
-            elif _state in self.model.charger_states.get(ChargeControllerStates.Idle):
+
+            if state in self.model.charger_states[ChargeControllerStates.Idle]:
                 return ChargeControllerStates.Idle, True
-            elif self.hub.sensors.power.killswitch.is_dead:  # todo: composition
+
+            if self.hub.sensors.power.killswitch.is_dead:
                 _LOGGER.debug("Killswitch is dead. Returning Error-state.")
                 return ChargeControllerStates.Error, True
-            elif all(
-                [
-                    _state
-                    not in self.model.charger_states.get(ChargeControllerStates.Idle),
-                    self.hub.charger_done,
-                ]
-            ):
+
+            if not state in self.model.charger_states[ChargeControllerStates.Idle] and self.hub.charger_done:
                 return ChargeControllerStates.Done, False
-            elif all(
-                [
-                    self.hub.now_is_non_hour(),
-                    not getattr(self.hub.hours.timer, "is_override", False),
-                ]
-            ):
+
+            if self.hub.now_is_non_hour() and not getattr(self.hub.hours.timer, "is_override", False):
                 return ChargeControllerStates.Stop, True
-            elif _state in self.model.charger_states.get(
-                ChargeControllerStates.Connected
-            ):
-                return await self.async_get_status_connected(_state)
-            elif _state in self.model.charger_states.get(
-                ChargeControllerStates.Charging
-            ):
+
+            if state in self.model.charger_states[ChargeControllerStates.Connected]:
+                return await self.async_get_status_connected(state)
+
+            if state in self.model.charger_states[ChargeControllerStates.Charging]:
                 return await self.async_get_status_charging(), True
+
         except Exception as e:
             _LOGGER.debug(f"Error in async_get_status: {e}")
-        _LOGGER.debug(f"async_get_status: {_state} returning Error. {str(_state)}")
+
+        _LOGGER.debug(f"async_get_status: {state} returning Error. {str(state)}")
         return ChargeControllerStates.Error, True
 
 
@@ -228,7 +292,7 @@ class IChargeController:
             await self.hub.observer.async_broadcast("update charger done", True)
         return state
 
-    def __debug_log(self, message: str):
+    def __debug_log(self, message: str): #todo: move to extensions or shared
         if time.time() - self.model.latest_debuglog > DEBUGLOG_TIMEOUT:
             _LOGGER.debug(message)
             self.model.latest_debuglog = time.time()
@@ -244,25 +308,4 @@ class IChargeController:
         self.hub.observer.add("timer activated", self.async_set_status)
         self.hub.observer.add("aux stop changed", self.async_set_status)
 
-    @abstractmethod
-    async def async_below_startthreshold(self) -> bool:
-        pass
 
-    @abstractmethod
-    async def async_above_stopthreshold(self) -> bool:
-        pass
-
-    @property
-    @abstractmethod
-    def status_string(self) -> str:
-        pass
-
-    @abstractmethod
-    async def async_get_status_charging(self) -> ChargeControllerStates:
-        pass
-
-    @abstractmethod
-    async def async_get_status_connected(
-        self, charger_state=None
-    ) -> Tuple[ChargeControllerStates, bool]:
-        pass
