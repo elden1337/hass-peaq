@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Tuple
 
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
@@ -83,7 +84,7 @@ class ChargeController(IChargeController):
                 and self.hub.sensors.carpowersensor.value < 1
                 and await self.async_is_done(charger_state)
             ):
-                await self.hub.observer.async_broadcast("car done")
+                await self.hub.observer.async_broadcast(ObserverTypes.CarDone)
                 return ChargeControllerStates.Done, False
             else:
                 if all(

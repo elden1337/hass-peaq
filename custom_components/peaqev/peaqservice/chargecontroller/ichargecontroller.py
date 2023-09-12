@@ -16,6 +16,7 @@ from custom_components.peaqev.peaqservice.chargecontroller.const import (
     DEBUGLOG_TIMEOUT, DONETIMEOUT)
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
 from custom_components.peaqev.peaqservice.util.constants import \
     CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
@@ -118,19 +119,19 @@ class IChargeController:
         _LOGGER.debug(f"async_check_broadcasting: {old_state} -> {new_state}")
         match new_state:
             case ChargeControllerStates.Idle:
-                await self.hub.observer.async_broadcast("car disconnected")
+                await self.hub.observer.async_broadcast(ObserverTypes.CarDisconnected)
                 if self.hub.charger_done:
                     await self.hub.observer.async_broadcast(
-                        "update charger done", False
+                        ObserverTypes.UpdateChargerDone, False
                     )
             case ChargeControllerStates.Done:
-                await self.hub.observer.async_broadcast("update charger done", True)
+                await self.hub.observer.async_broadcast(ObserverTypes.UpdateChargerDone, True)
             case ChargeControllerStates.Charging | ChargeControllerStates.Start | ChargeControllerStates.Stop | ChargeControllerStates.Connected:
                 if old_state in [
                     ChargeControllerStates.Idle,
                     ChargeControllerStates.Disabled,
                 ]:
-                    await self.hub.observer.async_broadcast("car connected")
+                    await self.hub.observer.async_broadcast(ObserverTypes.CarConnected)
             case _:
                 pass
 
@@ -225,7 +226,7 @@ class IChargeController:
 
     async def async_is_done_return(self, state: bool) -> bool:
         if state and self.hub.sensors.charger_done is False:
-            await self.hub.observer.async_broadcast("update charger done", True)
+            await self.hub.observer.async_broadcast(ObserverTypes.UpdateChargerDone, True)
         return state
 
     def __debug_log(self, message: str):
@@ -235,14 +236,14 @@ class IChargeController:
 
     def _setup_observers(self) -> None:
         self.hub.observer.add(
-            "update latest charger start", self.async_update_latest_charger_start
+            ObserverTypes.UpdateLatestChargerStart, self.async_update_latest_charger_start
         )
         self.hub.observer.add(
-            "update charger enabled", self.async_update_latest_charger_start
+            ObserverTypes.UpdateChargerEnabled, self.async_update_latest_charger_start
         )
-        self.hub.observer.add("hub initialized", self._check_initialized)
-        self.hub.observer.add("timer activated", self.async_set_status)
-        self.hub.observer.add("aux stop changed", self.async_set_status)
+        self.hub.observer.add(ObserverTypes.HubInitialized, self._check_initialized)
+        self.hub.observer.add(ObserverTypes.TimerActivated, self.async_set_status)
+        self.hub.observer.add(ObserverTypes.AuxStopChanged, self.async_set_status)
 
     @abstractmethod
     async def async_below_startthreshold(self) -> bool:

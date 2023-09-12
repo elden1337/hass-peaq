@@ -13,6 +13,7 @@ from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelper
     ChargerHelpers, async_set_chargerparams)
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import \
     ChargerModel
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
@@ -27,8 +28,8 @@ class Charger:
         )  # todo: should not have direct access. route through chargecontroller
         self.model = ChargerModel()
         self.helpers = ChargerHelpers(self)
-        self.controller.hub.observer.add("power canary dead", self.async_pause_charger)
-        self.controller.hub.observer.add("car connected", self.async_reset_session)
+        self.controller.hub.observer.add(ObserverTypes.PowerCanaryDead, self.async_pause_charger)
+        self.controller.hub.observer.add(ObserverTypes.CarConnected, self.async_reset_session)
 
     async def async_setup(self):
         pass
@@ -167,7 +168,7 @@ class Charger:
             self.model.session_active = False
             await self.async_call_charger(CallTypes.Off)
             await self.controller.hub.observer.async_broadcast(
-                "update charger done", True
+                ObserverTypes.UpdateChargerDone, True
             )
 
     async def async_pause_charger(self) -> None:

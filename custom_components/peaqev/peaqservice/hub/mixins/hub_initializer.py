@@ -9,6 +9,7 @@ from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory im
     HourselectionFactory
 from custom_components.peaqev.peaqservice.hub.models.initializer_types import \
     InitializerTypes
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
 from custom_components.peaqev.peaqservice.util.constants import \
     CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
@@ -106,12 +107,12 @@ class HubInitializerMixin:
         return ret
 
     def _set_observers(self) -> None:
-        self.observer.add("prices changed", self.async_update_prices)
+        self.observer.add(ObserverTypes.PricesChanged, self.async_update_prices)
         self.observer.add(
-            "adjusted average price changed", self.async_update_adjusted_average
+            ObserverTypes.AdjustedAveragePriceChanged, self.async_update_adjusted_average
         )
-        self.observer.add("update charger done", self.async_update_charger_done)
-        self.observer.add("update charger enabled", self.async_update_charger_enabled)
+        self.observer.add(ObserverTypes.UpdateChargerDone, self.async_update_charger_done)
+        self.observer.add(ObserverTypes.UpdateChargerEnabled, self.async_update_charger_enabled)
         self.observer.add(
-            "dynamic max price changed", self.async_update_average_monthly_price
+            ObserverTypes.DynamicMaxPriceChanged, self.async_update_average_monthly_price
         )

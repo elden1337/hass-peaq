@@ -1,5 +1,7 @@
 import logging
 
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
+
 events = [
     "peaqhvac.try_heat_water_changed",    
     "peaqhvac.pre_heating_changed",
@@ -27,7 +29,7 @@ class HubEvents:
         if new_state != self._aux_stop:
             _LOGGER.debug(f"Received event {event.event_type} with data {event.data}. This changed aux stop to {self._aux_stop}")
             self._aux_stop = new_state
-            self._hub.observer.broadcast("aux stop changed")
+            self._hub.observer.broadcast(ObserverTypes.AuxStopChanged)
 
     @property
     def aux_stop(self) -> bool:

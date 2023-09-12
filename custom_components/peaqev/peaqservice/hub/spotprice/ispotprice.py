@@ -2,6 +2,7 @@ import logging
 from abc import abstractmethod
 from datetime import date
 
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
 from custom_components.peaqev.peaqservice.hub.spotprice.dynamic_top_price import \
     DynamicTopPrice
 from custom_components.peaqev.peaqservice.hub.spotprice.models.spotprice_dto import \
@@ -122,7 +123,7 @@ class ISpotPrice(SpotPriceAverageMixin):
                 self.model.dynamic_top_price = _dynamic_max_price[0]
                 #_LOGGER.debug(_dynamic_max_price)
                 await self.hub.observer.async_broadcast(
-                    "dynamic max price changed", _dynamic_max_price[0]
+                    ObserverTypes.DynamicMaxPriceChanged, _dynamic_max_price[0]
                 )
 
 
