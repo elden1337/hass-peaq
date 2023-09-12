@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
+
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub import HomeAssistantHub
 
@@ -19,12 +21,12 @@ class MaxMinController:
         self._max_min_limiter: float = 0
         self.override_max_charge: bool = False
         if not hub.options.peaqev_lite:
-            self.hub.observer.add("car disconnected", self.async_null_max_charge)
+            self.hub.observer.add(ObserverTypes.CarDisconnected, self.async_null_max_charge)
             self.hub.observer.add(
-                "update charger done", self.async_null_max_charge_done
+                ObserverTypes.UpdateChargerDone, self.async_null_max_charge_done
             )
-            self.hub.observer.add("update charger enabled", self.async_null_max_charge)
-            self.hub.observer.add("max min limiter changed", self.async_update_maxmin_core)
+            self.hub.observer.add(ObserverTypes.UpdateChargerEnabled, self.async_null_max_charge)
+            self.hub.observer.add(ObserverTypes.MaxMinLimiterChanged, self.async_update_maxmin_core)
 
     @property
     def max_charge(self) -> int:
@@ -54,7 +56,7 @@ class MaxMinController:
     @max_min_limiter.setter
     def max_min_limiter(self, val: float):
         self._max_min_limiter = val
-        self.hub.observer.broadcast("max min limiter changed")
+        self.hub.observer.broadcast(ObserverTypes.MaxMinLimiterChanged)
 
     async def async_override_max_charge(self, max_charge: int):
         """Overrides the max-charge with the input from frontend"""

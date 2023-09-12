@@ -6,6 +6,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import DOMAIN
+from .peaqservice.hub.observer.models.observer_types import ObserverTypes
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(seconds=4)
@@ -48,11 +49,11 @@ class PeaqSwitch(SwitchEntity, RestoreEntity):
         return self._state
 
     async def async_turn_on(self):
-        await self.hub.observer.async_broadcast("update charger enabled", True)
+        await self.hub.observer.async_broadcast(ObserverTypes.UpdateChargerEnabled, True)
         await self.async_update()
 
     async def async_turn_off(self):
-        await self.hub.observer.async_broadcast("update charger enabled", False)
+        await self.hub.observer.async_broadcast(ObserverTypes.UpdateChargerEnabled, False)
         await self.async_update()
 
     async def async_update(self):
@@ -63,6 +64,6 @@ class PeaqSwitch(SwitchEntity, RestoreEntity):
         if state:
             self._state = state.state
             _state = True if state.state == "on" else False
-            await self.hub.observer.async_broadcast("update charger enabled", _state)
+            await self.hub.observer.async_broadcast(ObserverTypes.UpdateChargerEnabled, _state)
         else:
             self._state = self.hub.enabled

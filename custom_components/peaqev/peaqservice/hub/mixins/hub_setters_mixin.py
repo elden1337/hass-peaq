@@ -1,5 +1,7 @@
 import logging
 
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
+
 _LOGGER = logging.getLogger(__name__)
 
 class HubSettersMixin:
@@ -46,7 +48,7 @@ class HubSettersMixin:
 
 
     async def async_update_charger_enabled(self, val):
-        await self.observer.async_broadcast("update latest charger start")
+        await self.observer.async_broadcast(ObserverTypes.UpdateLatestChargerStart)
         if hasattr(self.sensors, "charger_enabled"):
             setattr(self.sensors.charger_enabled, "value", bool(val))
         else:

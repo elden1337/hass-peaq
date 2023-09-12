@@ -2,6 +2,7 @@ import logging
 
 from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
 from custom_components.peaqev.peaqservice.powertools.gainloss.const import *
 from custom_components.peaqev.peaqservice.powertools.gainloss.igain_loss import \
     IGainLoss
@@ -13,8 +14,8 @@ class GainLoss(IGainLoss):
     def __init__(self, hub):
         super().__init__()
         self._hub = hub
-        self._hub.observer.add("monthly average price changed", self._update_monthly_average)
-        self._hub.observer.add("daily average price changed", self._update_daily_average)
+        self._hub.observer.add(ObserverTypes.MonthlyAveragePriceChanged, self._update_monthly_average)
+        self._hub.observer.add(ObserverTypes.DailyAveragePriceChanged, self._update_daily_average)
 
     async def async_get_consumption(self, time_period: TimePeriods) -> float:
         try:

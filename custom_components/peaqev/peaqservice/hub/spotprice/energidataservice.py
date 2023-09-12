@@ -1,6 +1,7 @@
 import asyncio
 import logging
 
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
 from custom_components.peaqev.peaqservice.hub.spotprice.const import (
     ENERGIDATASERVICE, ENERGIDATASERVICE_SENSOR)
 from custom_components.peaqev.peaqservice.hub.spotprice.ispotprice import \
@@ -23,10 +24,10 @@ class EnergiDataServiceUpdater(ISpotPrice):
                 await self.hub.async_update_prices(
                     [self.model.prices, self.model.prices_tomorrow]
                 )
-                await self.hub.observer.async_broadcast("spotprice initialized")
+                await self.hub.observer.async_broadcast(ObserverTypes.SpotpriceInitialized)
             else:
                 await self.hub.observer.async_broadcast(
-                    "prices changed",
+                    ObserverTypes.PricesChanged,
                     [self.model.prices, self.model.prices_tomorrow],
                 )
             self._is_initialized = True

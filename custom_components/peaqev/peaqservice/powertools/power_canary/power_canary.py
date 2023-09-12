@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
 from custom_components.peaqev.peaqservice.powertools.power_canary.const import \
     FUSES_MAX_SINGLE_FUSE
 from custom_components.peaqev.peaqservice.powertools.power_canary.ipower_canary import \
@@ -32,9 +33,9 @@ class PowerCanary(IPowerCanary):
 
     def check_current_percentage(self):
         if not self.alive:
-            self.hub.observer.broadcast(command="power canary dead")
+            self.hub.observer.broadcast(command=ObserverTypes.PowerCanaryDead)
         if self.current_percentage >= self.model.warning_threshold:
-            self.hub.observer.broadcast(command="power canary warning")
+            self.hub.observer.broadcast(command=ObserverTypes.PowerCanaryWarning)
 
     @property
     def max_current_amp(self) -> int:

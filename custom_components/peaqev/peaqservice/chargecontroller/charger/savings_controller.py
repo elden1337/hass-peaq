@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
+
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import (
         IChargeController,
@@ -22,10 +24,10 @@ class SavingsController:
             peak_price=self.controller.hub.sensors.locale.data.price.value
         )  # todo: must be dynamic to adhere to tiered prices.
         if self.controller.hub.sensors.locale.data.price.is_active:
-            self.controller.hub.observer.add("car connected", self.async_enter)
-            self.controller.hub.observer.add("car disconnected", self.async_exit)
-            self.controller.hub.observer.add("update charger done", self.async_exit)
-            self.controller.hub.observer.add("prices changed", self.async_update_prices)
+            self.controller.hub.observer.add(ObserverTypes.CarConnected, self.async_enter)
+            self.controller.hub.observer.add(ObserverTypes.CarDisconnected, self.async_exit)
+            self.controller.hub.observer.add(ObserverTypes.UpdateChargerDone, self.async_exit)
+            self.controller.hub.observer.add(ObserverTypes.PricesChanged, self.async_update_prices)
             self._enabled = True
         else:
             self._enabled = False

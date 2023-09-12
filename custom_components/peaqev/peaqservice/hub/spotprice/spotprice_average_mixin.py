@@ -2,6 +2,7 @@ import logging
 from datetime import date, datetime
 from statistics import mean
 
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
 from custom_components.peaqev.peaqservice.hub.spotprice.const import \
     AVERAGE_MAX_LEN
 
@@ -18,7 +19,7 @@ class SpotPriceAverageMixin:
             self.model.average_month = _new
             if self.model.average_month is not None:
                 await self.hub.observer.async_broadcast(
-                    "monthly average price changed", self.model.average_month
+                    ObserverTypes.MonthlyAveragePriceChanged, self.model.average_month
                 )
 
     async def async_update_average(self, length: list[int]) -> None:
@@ -43,7 +44,7 @@ class SpotPriceAverageMixin:
         if self.model.adjusted_average != adj_avg and adj_avg is not None:
             self.model.adjusted_average = adj_avg
             await self.hub.observer.async_broadcast(
-                "adjusted average price changed", adj_avg
+                ObserverTypes.AdjustedAveragePriceChanged, adj_avg
             )
 
     async def async_update_average_day(self, average) -> None:
@@ -51,7 +52,7 @@ class SpotPriceAverageMixin:
             self.model.daily_average = average
             await self.async_add_average_data(average)
             await self.hub.observer.async_broadcast(
-                "daily average price changed", average
+                ObserverTypes.DailyAveragePriceChanged, average
             )
 
     async def async_import_average_data(self, incoming: list|dict):
