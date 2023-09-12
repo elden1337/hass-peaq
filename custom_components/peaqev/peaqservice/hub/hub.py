@@ -158,18 +158,6 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
         return 0
 
     @property
-    def prices(self) -> list:
-        if self.options.price.price_aware:
-            return self.hours.prices
-        return []
-
-    @property
-    def prices_tomorrow(self) -> list:
-        if self.options.price.price_aware:
-            return self.hours.prices_tomorrow
-        return []
-
-    @property
     def charger_done(self) -> bool:
         if hasattr(self.sensors, "charger_done"):
             return self.sensors.charger_done.value
