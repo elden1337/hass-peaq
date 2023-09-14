@@ -2,7 +2,8 @@ import time
 
 import pytest
 
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
+    ObserverTypes
 from custom_components.peaqev.test.mock_classes.observer_coordinator_test import \
     ObserverTest
 

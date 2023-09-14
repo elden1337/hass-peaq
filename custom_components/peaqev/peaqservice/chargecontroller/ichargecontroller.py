@@ -16,7 +16,8 @@ from custom_components.peaqev.peaqservice.chargecontroller.const import (
     DEBUGLOG_TIMEOUT, DONETIMEOUT)
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
+    ObserverTypes
 from custom_components.peaqev.peaqservice.util.constants import \
     CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once

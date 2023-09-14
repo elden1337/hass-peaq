@@ -13,7 +13,8 @@ from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelper
     ChargerHelpers, async_set_chargerparams)
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import \
     ChargerModel
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
+    ObserverTypes
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 

@@ -1,5 +1,6 @@
 from datetime import datetime
 
+
 class HubGettersMixin:
 
     def now_is_non_hour(self) -> bool:

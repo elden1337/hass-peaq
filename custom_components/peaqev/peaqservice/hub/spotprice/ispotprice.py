@@ -2,7 +2,8 @@ import logging
 from abc import abstractmethod
 from datetime import date
 
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
+    ObserverTypes
 from custom_components.peaqev.peaqservice.hub.spotprice.dynamic_top_price import \
     DynamicTopPrice
 from custom_components.peaqev.peaqservice.hub.spotprice.models.spotprice_dto import \

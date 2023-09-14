@@ -12,7 +12,8 @@ from custom_components.peaqev.peaqservice.hub.observer.models.command import \
     Command
 from custom_components.peaqev.peaqservice.hub.observer.models.observer_model import \
     ObserverModel
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
+    ObserverTypes
 
 _LOGGER = logging.getLogger(__name__)
 

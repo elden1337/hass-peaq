@@ -2,7 +2,8 @@ from dataclasses import dataclass, field
 
 from homeassistant.core import HomeAssistant
 
-from custom_components.peaqev.peaqservice.hub.models.event_property import EventProperty
+from custom_components.peaqev.peaqservice.hub.models.event_property import \
+    EventProperty
 
 
 @dataclass

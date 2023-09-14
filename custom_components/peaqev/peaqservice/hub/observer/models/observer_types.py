@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class ObserverTypes(Enum):
     Test = "test"
     HubInitialized = "hub initialized" #1

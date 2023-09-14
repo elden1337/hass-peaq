@@ -36,7 +36,8 @@ from custom_components.peaqev.peaqservice.hub.mixins.hub_setters_mixin import \
 from custom_components.peaqev.peaqservice.hub.models.hub_model import HubModel
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
+    ObserverTypes
 from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
     Observer
 from custom_components.peaqev.peaqservice.hub.sensors.hubsensors_factory import \

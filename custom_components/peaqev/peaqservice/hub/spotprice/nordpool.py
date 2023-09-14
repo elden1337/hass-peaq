@@ -3,7 +3,8 @@ import logging
 
 import homeassistant.helpers.template as template
 
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
+    ObserverTypes
 from custom_components.peaqev.peaqservice.hub.spotprice.const import NORDPOOL
 from custom_components.peaqev.peaqservice.hub.spotprice.ispotprice import \
     ISpotPrice

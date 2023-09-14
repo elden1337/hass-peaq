@@ -53,7 +53,6 @@ class StateChanges(IStateChanges):
             carpowersensor_value=self.hub.sensors.carpowersensor.value,
             config_sensor_value=value,
         )
-        update_session = True
         self.hub.power.power_canary.total_power = (
             self.hub.sensors.power.total.value
         )
@@ -67,7 +66,6 @@ class StateChanges(IStateChanges):
                 carpowersensor_value=self.hub.sensors.carpowersensor.value,
                 config_sensor_value=None,
             )
-        update_session = True
         self.hub.power.power_canary.total_power = (
             self.hub.sensors.power.total.value
         )

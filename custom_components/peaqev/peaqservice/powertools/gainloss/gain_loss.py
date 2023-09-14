@@ -2,7 +2,8 @@ import logging
 
 from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
+    ObserverTypes
 from custom_components.peaqev.peaqservice.powertools.gainloss.const import *
 from custom_components.peaqev.peaqservice.powertools.gainloss.igain_loss import \
     IGainLoss
