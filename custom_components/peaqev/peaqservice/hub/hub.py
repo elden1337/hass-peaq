@@ -35,6 +35,7 @@ from custom_components.peaqev.peaqservice.hub.mixins.hub_setters_mixin import \
     HubSettersMixin
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
 from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
     Observer
 from custom_components.peaqev.peaqservice.hub.sensors.hubsensors_factory import \
@@ -135,7 +136,7 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
     def is_initialized(self) -> bool:
         if not self._is_initialized:
             if self.check_initializer():
-                self.observer.activate("hub initialized")
+                self.observer.activate(ObserverTypes.HubInitialized)
                 self._is_initialized = True
                 return True
             return False
