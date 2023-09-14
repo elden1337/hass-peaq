@@ -83,8 +83,8 @@ class HubInitializerMixin:
         if not self.options.peaqev_lite:
             tracker_entities.append(self.options.powersensor)
             tracker_entities.append(self.sensors.totalhourlyenergy.entity)
-        self.chargingtracker_entities = await self.async_set_chargingtracker_entities()
-        tracker_entities += self.chargingtracker_entities
+        self.model.chargingtracker_entities = await self.async_set_chargingtracker_entities()
+        tracker_entities += self.model.chargingtracker_entities
         return tracker_entities
 
     async def async_set_chargingtracker_entities(self) -> list:

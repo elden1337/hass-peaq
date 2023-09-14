@@ -1,7 +1,7 @@
 from datetime import datetime
 
-
 class HubGettersMixin:
+
     def now_is_non_hour(self) -> bool:
         now = datetime.now().replace(minute=0, second=0, microsecond=0)
         return now in self.non_hours
@@ -13,10 +13,12 @@ class HubGettersMixin:
             return False
 
     async def async_predictedpercentageofpeak(self):
-        return await self.prediction.async_predicted_percentage_of_peak(
+        ret = await self.prediction.async_predicted_percentage_of_peak(
             predicted_energy=await self.async_get_predicted_energy(),
             peak=self.sensors.current_peak.value,
         )
+        self.peak_breached = ret > 100
+        return ret
 
     async def async_threshold_start(self):
         return await self.threshold.async_start(

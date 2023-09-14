@@ -33,6 +33,7 @@ from custom_components.peaqev.peaqservice.hub.mixins.hub_initializer import \
     HubInitializerMixin
 from custom_components.peaqev.peaqservice.hub.mixins.hub_setters_mixin import \
     HubSettersMixin
+from custom_components.peaqev.peaqservice.hub.models.hub_model import HubModel
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
@@ -73,10 +74,9 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
     events :HubEvents
 
     def __init__(self, hass: HomeAssistant, options: HubOptions, domain: str):
-        self.chargingtracker_entities = []
+        self.model = HubModel(domain, hass)
         self.power = None
         self.hubname = domain.capitalize()
-        self.domain = domain
         self.state_machine = hass
         self.options: HubOptions = options
         self._is_initialized = False
