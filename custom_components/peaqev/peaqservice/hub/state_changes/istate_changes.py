@@ -46,7 +46,7 @@ class IStateChanges:
         await self.async_update_session_parameters(update_session)
         if all(
             [
-                entity in self.hub.chargingtracker_entities,
+                entity in self.hub.model.chargingtracker_entities,
                 self.hub.is_initialized,
                 self.hub.chargertype is not ChargerType.NoCharger,  # todo: strategy should handle this
             ]

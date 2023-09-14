@@ -20,7 +20,7 @@ class HubSensorsFactory:
         await sensors.async_setup(
             state_machine=hub.state_machine,
             options=hub.options,
-            domain=hub.domain,
+            domain=hub.model.domain,
             chargerobject=hub.chargertype,
         )
         await sensors.async_init_hub_values()
