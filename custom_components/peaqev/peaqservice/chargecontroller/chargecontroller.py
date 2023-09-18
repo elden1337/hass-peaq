@@ -137,6 +137,6 @@ class ChargeController(IChargeController):
                 await self.async_below_startthreshold() and self.hub.sensors.totalhourlyenergy.value != 0,
                 await self.hub.async_free_charge()
             ]),
-            not defer_start(self.hub.hours.non_hours),
+            any([not defer_start(self.hub.hours.non_hours), getattr(self.hub.hours.timer, "is_override", True)]),
             not self.hub.events.aux_stop
         ])
