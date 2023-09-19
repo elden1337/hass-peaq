@@ -89,7 +89,7 @@ class HubInitializerMixin:
         return tracker_entities
 
     async def async_set_chargingtracker_entities(self) -> list:
-        ret = [f"sensor.{self.domain}_{nametoid(CHARGERCONTROLLER)}"]
+        ret = [f"sensor.{self.model.domain}_{nametoid(CHARGERCONTROLLER)}"]
         if hasattr(self.sensors, "chargerobject_switch"):
             ret.append(self.sensors.chargerobject_switch.entity)
         if hasattr(self.sensors, "carpowersensor"):

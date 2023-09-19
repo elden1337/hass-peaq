@@ -62,6 +62,10 @@ class ISpotPrice(SpotPriceAverageMixin):
         return self.model.average_month
 
     @property
+    def average_three_days(self) -> float:
+        return self.model.average_three_days
+
+    @property
     def average_weekly(self) -> float:
         return self.model.average_weekly
 

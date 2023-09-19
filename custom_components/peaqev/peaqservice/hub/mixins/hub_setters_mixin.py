@@ -26,6 +26,12 @@ class HubSettersMixin:
         if self.options.price.price_aware:
             await self.hours.async_update_prices(prices[0], prices[1])
             if self.max_min_controller.is_on:
+                # if not prices[1]:
+                #     #todo: move this into hoursselectionservice if it works
+                #     _LOGGER.debug("reinitializing max_min")
+                #     self.hours._core.service.max_min.__init__(self.hours._core.service.max_min.parent, self.hours._core.service.max_min.model.min_price)
+                #     await self.hours.service.max_min.async_setup(max_charge=self.max_min_controller.max_charge)
+                #     _LOGGER.debug("reinitializing max_min done.")
                 await self.hours.async_update_max_min(
                     max_charge=self.max_min_controller.max_charge,
                     limiter=self.max_min_controller.max_min_limiter,

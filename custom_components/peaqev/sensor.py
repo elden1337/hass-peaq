@@ -34,6 +34,7 @@ from custom_components.peaqev.sensors.power.prediction_sensor import \
     PeaqPredictionSensor
 from custom_components.peaqev.sensors.session_sensor import (
     PeaqSessionCostSensor, PeaqSessionSensor)
+from custom_components.peaqev.sensors.simple_money_sensor import PeaqSimpleMoneySensor
 from custom_components.peaqev.sensors.sql_sensor import PeaqPeakSensor
 from custom_components.peaqev.sensors.threshold_sensor import \
     PeaqThresholdSensor
@@ -80,6 +81,15 @@ async def async_setup(hub, config, hass, async_add_entities):
     if hub.options.price.price_aware:
         sensors.append(PeaqMoneySensor(hub, config.entry_id))
         # sensors.append(PeaqSavingsSensor(hub, config.entry_id))
+        simplesensors = [("Average price this month", "average_month"),
+                         ("Average price 7 days", "average_weekly"),
+                         ("Average price 30 days", "average_30"),
+                         ("Average price 3 days", "average_three_days")]
+        for name, attr in simplesensors:
+            sensors.append(
+                PeaqSimpleMoneySensor(
+                    hub, config.entry_id, name, attr)
+                )
         if hub.chargertype.type != ChargerType.NoCharger:
             sensors.append(PeaqSessionCostSensor(hub, config.entry_id))
         if not hub.options.peaqev_lite:
