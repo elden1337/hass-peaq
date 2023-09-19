@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -85,12 +86,15 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
             self._observed_peak = state.attributes.get("observed_peak", 0)
             _history = state.attributes.get("peaks_history", {})
             if len(_history):
-                mykeys = list(_history.keys())
-                mykeys = sorted(mykeys, key=lambda x: (x.split("_")[0], x.split("_")[1]), reverse=True)
-                mykeys.sort()
-                sorted_dict = {i: _history[i] for i in mykeys}
-                self._history = sorted_dict
-                self.hub.sensors.current_peak.import_from_service(sorted_dict)
+                _dto = {}
+                for k, v in _history.items():
+                    _dto[datetime(year=int(k.split("_")[0]), month=int(k.split("_")[1]), day=1)] = v
+                mykeys = list(_dto.keys())
+                mykeys.sort(reverse=True)
+                sorted_dict: dict[datetime, list[float]] = {i: _dto[i] for i in mykeys}
+                _history = {f"{k.year}_{k.month}": v for k, v in sorted_dict.items()}
+                self._history = _history
+                self.hub.sensors.current_peak.import_from_service(_history)
         else:
             self._charged_peak = 0
             self._peaks_dict = {}
