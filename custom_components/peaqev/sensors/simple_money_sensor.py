@@ -7,11 +7,14 @@ if TYPE_CHECKING:
 
 from custom_components.peaqev.sensors.money_sensor_helpers import *
 from custom_components.peaqev.sensors.sensorbase import MoneyDevice
+from homeassistant.components.sensor import SensorDeviceClass
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class PeaqSimpleMoneySensor(MoneyDevice):
+    device_class = SensorDeviceClass.MONETARY
+    
     def __init__(self, hub: HomeAssistantHub, entry_id, sensor_name: str, caller_attribute: str):
         name = f"{hub.hubname} {sensor_name}"
         super().__init__(hub, name, entry_id)
