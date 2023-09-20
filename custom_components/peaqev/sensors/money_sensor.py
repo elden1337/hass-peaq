@@ -68,7 +68,7 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             self._state = await self.async_state_display()
             self._source = str(ret.get(SPOTPRICE_SOURCE)).capitalize()
             self._secondary_threshold = self.hub.spotprice.model.adjusted_average
-            self._all_hours = set_all_hours_display(ret.get(FUTURE_HOURS, []))
+            self._all_hours = set_all_hours_display(ret.get(FUTURE_HOURS, []), self.hub.spotprice.tomorrow_valid)
             self._currency = ret.get(CURRENCY)
             self._current_peak = ret.get(CURRENT_PEAK)
             self._max_charge = set_total_charge(ret.get(MAX_CHARGE))

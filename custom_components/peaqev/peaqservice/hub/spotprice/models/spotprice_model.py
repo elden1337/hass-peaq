@@ -19,6 +19,7 @@ class SpotPriceModel:
     average_weekly: float = 0
     average_three_days: float = 0
     average_30: float = 0
+    tomorrow_valid: bool = False
     daily_average: float = 0
     use_cent: bool = False
     dynamic_top_price_type: str = ""

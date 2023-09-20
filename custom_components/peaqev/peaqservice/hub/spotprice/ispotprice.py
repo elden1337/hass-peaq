@@ -29,6 +29,10 @@ class ISpotPrice(SpotPriceAverageMixin):
                 self.setup()
 
     @property
+    def tomorrow_valid(self) -> bool:
+        return getattr(self.model, "tomorrow_valid", False)
+
+    @property
     def entity(self) -> str:
         return getattr(self.model, "entity", "")
 
@@ -101,11 +105,13 @@ class ISpotPrice(SpotPriceAverageMixin):
             self.model.prices = today
             ret = True
         if result.tomorrow_valid:
+            self.model.tomorrow_valid = True
             tomorrow = await self.model.fix_dst(result.tomorrow)
             if self.model.prices_tomorrow != tomorrow:
                 self.model.prices_tomorrow = tomorrow
                 ret = True
         else:
+            self.model.tomorrow_valid = False
             if self.model.prices_tomorrow:
                 self.model.prices_tomorrow = []
                 ret = True
