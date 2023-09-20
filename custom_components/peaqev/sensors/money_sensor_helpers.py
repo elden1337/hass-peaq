@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from peaqevcore.services.hoursselection_service_new.models.hour_price import \
     HourPrice
@@ -73,14 +73,16 @@ def set_total_charge(max_charge) -> str:
     return f"{max_charge[0]} kWh"
 
 
-def set_all_hours_display(future_hours: list[HourPrice]) -> dict[str, str]:
+def set_all_hours_display(future_hours: list[HourPrice], tomorrow_valid: bool) -> dict[str, str]:
     ret = {}
     for h in future_hours:
         dt_string = f"{h.dt.hour:02d}:{h.dt.minute:02d}"
         if h.dt.date() == datetime.now().date():
             dt_string = f"{dt_string}"
-        else:
+        elif h.dt.date() == datetime.now().date()+timedelta(days=1) and tomorrow_valid:
             dt_string = f"{dt_string}⁺¹"
+        else:
+            _LOGGER.warning(f"Invalid hour {h.dt} in all_hours_display. Tomorrow valid {tomorrow_valid} and hourdate is {h.dt.date()}")
 
         match h.permittance:
             case 0:
