@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
+from homeassistant.components.sensor import SensorDeviceClass
+
 from custom_components.peaqev.sensors.money_sensor_helpers import *
 from custom_components.peaqev.sensors.sensorbase import MoneyDevice
 
@@ -12,6 +14,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class PeaqSimpleMoneySensor(MoneyDevice):
+    device_class = SensorDeviceClass.MONETARY
+
     def __init__(self, hub: HomeAssistantHub, entry_id, sensor_name: str, caller_attribute: str):
         name = f"{hub.hubname} {sensor_name}"
         super().__init__(hub, name, entry_id)
@@ -35,5 +39,12 @@ class PeaqSimpleMoneySensor(MoneyDevice):
         self._currency = self.hub.spotprice.currency
         ret = getattr(self.hub.spotprice, self._caller_attribute)
         if ret is not None:
-            self._state = currency_translation(ret, self._currency, self._use_cent)
+            self._state = ret
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        return {
+            "Currency": self._currency,
+            "Use Cent": self._use_cent
+        }
 
