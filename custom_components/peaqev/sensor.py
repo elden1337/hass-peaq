@@ -34,7 +34,8 @@ from custom_components.peaqev.sensors.power.prediction_sensor import \
     PeaqPredictionSensor
 from custom_components.peaqev.sensors.session_sensor import (
     PeaqSessionCostSensor, PeaqSessionSensor)
-from custom_components.peaqev.sensors.simple_money_sensor import PeaqSimpleMoneySensor
+from custom_components.peaqev.sensors.simple_money_sensor import \
+    PeaqSimpleMoneySensor
 from custom_components.peaqev.sensors.sql_sensor import PeaqPeakSensor
 from custom_components.peaqev.sensors.threshold_sensor import \
     PeaqThresholdSensor

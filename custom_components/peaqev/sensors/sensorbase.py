@@ -4,10 +4,12 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
+
 from homeassistant.components.sensor import SensorEntity
 
 from custom_components.peaqev.const import DOMAIN
-from custom_components.peaqev.peaqservice.util.constants import (HUB,MONEYCONTROLS,
+from custom_components.peaqev.peaqservice.util.constants import (HUB,
+                                                                 MONEYCONTROLS,
                                                                  POWERCONTROLS)
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 
