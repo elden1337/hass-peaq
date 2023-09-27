@@ -14,6 +14,7 @@ from custom_components.peaqev.peaqservice.hub.const import (
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
 from custom_components.peaqev.sensors.money_sensor_helpers import *
 from custom_components.peaqev.sensors.sensorbase import SensorBase
+from peaqevcore.common.currency_translation import currency_translation
 
 _LOGGER = logging.getLogger(__name__)
 

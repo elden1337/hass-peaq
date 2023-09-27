@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 
+from peaqevcore.common.currency_translation import currency_translation
 from peaqevcore.services.hoursselection_service_new.models.hour_price import \
     HourPrice
 
@@ -33,22 +34,6 @@ def _get_uneven(first, second) -> bool:
     if second > first:
         return first - (second - 24) != 1
     return first - second != 1
-
-
-def currency_translation(
-    value: float | str | None, currency, use_cent: bool = False
-) -> str:
-    value = "-" if value is None else value
-    match currency:
-        case "EUR":
-            ret = f"{value}¢" if use_cent else f"€ {value}"
-        case "SEK":
-            ret = f"{value} öre" if use_cent else f"{value} kr"
-        case "NOK":
-            ret = f"{value} øre" if use_cent else f"{value} kr"
-        case _:
-            ret = f"{value} {currency}"
-    return ret
 
 
 def set_avg_cost(avg_cost, currency, use_cent) -> str:
