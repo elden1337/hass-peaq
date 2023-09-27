@@ -21,16 +21,13 @@ class NordPoolUpdater(ISpotPrice):
     async def async_set_dto(self, ret, initial: bool = False) -> None:
         _result = NordpoolDTO()
         await _result.set_model(ret)
-        _broadcast_queue = {}
-        if await self.async_update_set_prices(_result, _broadcast_queue):
+        if await self.async_update_set_prices(_result):
             if initial:
                 await self.hub.async_update_prices(
                     [self.model.prices, self.model.prices_tomorrow]
                 )
                 await self.hub.observer.async_broadcast(ObserverTypes.SpotpriceInitialized)
             else:
-                for k, v in _broadcast_queue.items():
-                    await self.hub.observer.async_broadcast(k, v)
                 await self.hub.observer.async_broadcast(
                     ObserverTypes.PricesChanged,
                     [self.model.prices, self.model.prices_tomorrow],

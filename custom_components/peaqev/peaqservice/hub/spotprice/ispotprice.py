@@ -98,7 +98,7 @@ class ISpotPrice(SpotPriceAverageMixin):
                 _LOGGER.debug(
                     f"Could not get spot-prices. Entity: {self.entity}. Retrying..."
                 )
-    async def async_update_set_prices(self, result: ISpotPriceDTO, _broadcast_queue: dict) -> bool:
+    async def async_update_set_prices(self, result: ISpotPriceDTO) -> bool:
         ret = False
         today = await self.model.fix_dst(result.today)
         if self.model.prices != today:
@@ -115,17 +115,16 @@ class ISpotPrice(SpotPriceAverageMixin):
             if self.model.prices_tomorrow:
                 self.model.prices_tomorrow = []
                 ret = True
-
-        await self.async_update_average([3, 7, 30], _broadcast_queue)
+        await self.async_update_average([3, 7, 30])
         self.model.currency = result.currency
         self.model.use_cent = result.price_in_cent
         self.state = result.state
-        await self.async_update_average_day(result.average, _broadcast_queue)
-        await self.async_update_average_month(_broadcast_queue)
-        await self.async_update_dynamic_max_price(_broadcast_queue)
+        await self.async_update_average_day(result.average)
+        await self.async_update_average_month()
+        await self.async_update_dynamic_max_price()
         return ret
 
-    async def async_update_dynamic_max_price(self, _broadcast_queue: dict):
+    async def async_update_dynamic_max_price(self):
         if len(self.model.average_data) > 3:
             _dynamic_max_price = await self._dynamic_top_price.async_get_max(
                 list(self.model.average_data.values())
@@ -134,10 +133,9 @@ class ISpotPrice(SpotPriceAverageMixin):
                 self.model.dynamic_top_price_type = _dynamic_max_price[1].value
                 self.model.dynamic_top_price = _dynamic_max_price[0]
                 #_LOGGER.debug(_dynamic_max_price)
-                _broadcast_queue[ObserverTypes.DynamicMaxPriceChanged] = _dynamic_max_price[0]
-                # await self.hub.observer.async_broadcast(
-                #     ObserverTypes.DynamicMaxPriceChanged, _dynamic_max_price[0]
-                # )
+                await self.hub.observer.async_broadcast(
+                    ObserverTypes.DynamicMaxPriceChanged, _dynamic_max_price[0]
+                )
 
 
 
