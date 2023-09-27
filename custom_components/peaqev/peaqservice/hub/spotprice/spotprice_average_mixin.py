@@ -11,7 +11,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class SpotPriceAverageMixin:
-    async def async_update_average_month(self) -> None:
+    async def async_update_average_month(self, _broadcast_queue: dict) -> None:
         _new = self._get_average(datetime.now().day)
         if (
             len(self.model.average_data) >= int(datetime.now().day)
@@ -19,11 +19,12 @@ class SpotPriceAverageMixin:
         ):
             self.model.average_month = _new
             if self.model.average_month is not None:
-                await self.hub.observer.async_broadcast(
-                    ObserverTypes.MonthlyAveragePriceChanged, self.model.average_month
-                )
+                _broadcast_queue[ObserverTypes.MonthlyAveragePriceChanged] = self.model.average_month
+                # await self.hub.observer.async_broadcast(
+                #     ObserverTypes.MonthlyAveragePriceChanged, self.model.average_month
+                # )
 
-    async def async_update_average(self, length: list[int]) -> None:
+    async def async_update_average(self, length: list[int], _broadcast_queue: dict) -> None:
         averages_dict = {
             3: "average_three_days",
             7: "average_weekly",
@@ -34,9 +35,9 @@ class SpotPriceAverageMixin:
             if len(self.model.average_data) >= l and getattr(self.model, averages_dict[l]) != _new:
                 setattr(self.model, averages_dict[l], _new)
                 _LOGGER.debug(f"average {str(l)} updated to {_new}")
-        await self.async_update_adjusted_average()
+        await self.async_update_adjusted_average(_broadcast_queue)
 
-    async def async_update_adjusted_average(self) -> None:
+    async def async_update_adjusted_average(self, _broadcast_queue: dict) -> None:
         adj_avg: float|None = None
         if len(self.model.average_data) >= 7:
             adj_avg = max(self.model.average_weekly, self.model.average_three_days)
@@ -44,17 +45,19 @@ class SpotPriceAverageMixin:
             adj_avg = self.model.average_three_days
         if self.model.adjusted_average != adj_avg and adj_avg is not None:
             self.model.adjusted_average = adj_avg
-            await self.hub.observer.async_broadcast(
-                ObserverTypes.AdjustedAveragePriceChanged, adj_avg
-            )
+            _broadcast_queue[ObserverTypes.AdjustedAveragePriceChanged] = adj_avg
+            # await self.hub.observer.async_broadcast(
+            #     ObserverTypes.AdjustedAveragePriceChanged, adj_avg
+            # )
 
-    async def async_update_average_day(self, average) -> None:
+    async def async_update_average_day(self, average, _broadcast_queue: dict) -> None:
         if average != self.model.daily_average:
             self.model.daily_average = average
             await self.async_add_average_data(average)
-            await self.hub.observer.async_broadcast(
-                ObserverTypes.DailyAveragePriceChanged, average
-            )
+            _broadcast_queue[ObserverTypes.DailyAveragePriceChanged] = average
+            # await self.hub.observer.async_broadcast(
+            #     ObserverTypes.DailyAveragePriceChanged, average
+            # )
 
     async def async_import_average_data(self, incoming: list|dict):
         if len(incoming):
