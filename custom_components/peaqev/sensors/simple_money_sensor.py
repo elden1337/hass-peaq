@@ -24,7 +24,7 @@ class PeaqSimpleMoneySensor(MoneyDevice):
         self._state = None
         self._caller_attribute = caller_attribute
         self._use_cent = None
-        self._currency = None
+        self._attr_unit_of_measurement = None
 
     @property
     def state(self):
@@ -34,9 +34,13 @@ class PeaqSimpleMoneySensor(MoneyDevice):
     def icon(self) -> str:
         return "mdi:car-clock"
 
+    @property
+    def unit_of_measurement(self):
+        return self._attr_unit_of_measurement
+
     async def async_update(self) -> None:
         self._use_cent = self.hub.spotprice.use_cent
-        self._currency = self.hub.spotprice.currency
+        self._attr_unit_of_measurement = getattr(self.hub.spotprice, "currency")
         ret = getattr(self.hub.spotprice, self._caller_attribute)
         if ret is not None:
             self._state = ret
@@ -44,7 +48,6 @@ class PeaqSimpleMoneySensor(MoneyDevice):
     @property
     def extra_state_attributes(self) -> dict:
         return {
-            "Currency": self._currency,
             "Use Cent": self._use_cent
         }
 
