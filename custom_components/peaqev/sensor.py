@@ -64,7 +64,6 @@ async def async_setup_utility_meters(hub, hass, utility_meters: list) -> list:
                 hub, meter.sensor, meter.meter_type, meter.entry_id
             )
         )
-
     return ret
 
 
@@ -85,7 +84,8 @@ async def async_setup(hub, config, hass, async_add_entities):
         simplesensors = [("Average price this month", "average_month"),
                          ("Average price 7 days", "average_weekly"),
                          ("Average price 30 days", "average_30"),
-                         ("Average price 3 days", "average_three_days")]
+                         ("Average price 3 days", "average_three_days"),
+                         ("My average price this month", "purchased_average_month")]
         for name, attr in simplesensors:
             sensors.append(
                 PeaqSimpleMoneySensor(

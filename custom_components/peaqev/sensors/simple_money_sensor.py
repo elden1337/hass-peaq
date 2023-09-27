@@ -43,7 +43,7 @@ class PeaqSimpleMoneySensor(MoneyDevice):
         self._attr_unit_of_measurement = getattr(self.hub.spotprice, "currency")
         ret = getattr(self.hub.spotprice, self._caller_attribute)
         if ret is not None:
-            self._state = ret
+            self._state = ret if not self._use_cent else ret / 100
 
     @property
     def extra_state_attributes(self) -> dict:

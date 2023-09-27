@@ -78,6 +78,17 @@ class ISpotPrice(SpotPriceAverageMixin):
         return self.model.average_30
 
     @property
+    def purchased_average_month(self) -> float:
+        try:
+            month_draw = self.hub.state_machine.states.get("sensor.peaqev_energy_including_car_monthly")
+            month_cost = self.hub.state_machine.states.get("sensor.peaqev_energy_cost_integral_monthly")
+            if month_cost and month_draw:
+                return round(float(month_cost.state) / float(month_draw.state),3)
+            return 0
+        except ZeroDivisionError:
+            return 0
+
+    @property
     def average_data(self) -> dict[date, float]:
         return self.model.average_data
 
