@@ -3,6 +3,8 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
+from custom_components.peaqev.peaqservice.chargertypes.types.outlet import OUTLET_TYPE_CHARGING, OUTLET_TYPE_CONNECTED
+
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 import logging
@@ -15,6 +17,7 @@ from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes impor
 _LOGGER = logging.getLogger(__name__)
 
 
+
 class StateChanges(IStateChanges):
     def __init__(self, hub: HomeAssistantHub):
         self.hub = hub
@@ -25,10 +28,12 @@ class StateChanges(IStateChanges):
             update_session = False
             match entity:
                 case self.hub.options.powersensor:
-                    await self.async_handle_powersensor(value, update_session)
+                    await self.async_handle_powersensor(value)
+                    update_session = True
                 case self.hub.sensors.carpowersensor.entity:
-                    await self.async_handle_carpowersensor(value, update_session)
+                    await self.async_handle_carpowersensor(value)
                     await self.async_handle_outlet_updates()
+                    update_session = True
                 case self.hub.sensors.chargerobject.entity:
                     await self.hub.async_set_chargerobject_value(value)
                 case self.hub.sensors.chargerobject_switch.entity:
@@ -48,7 +53,7 @@ class StateChanges(IStateChanges):
             _LOGGER.error(f"async_update_sensor_internal for {entity}: {e}")
             return False
 
-    async def async_handle_powersensor(self, value, update_session) -> None:
+    async def async_handle_powersensor(self, value) -> None:
         await self.hub.sensors.power.async_update(
             carpowersensor_value=self.hub.sensors.carpowersensor.value,
             config_sensor_value=value,
@@ -57,7 +62,8 @@ class StateChanges(IStateChanges):
             self.hub.sensors.power.total.value
         )
         self.hub.sensors.power_trend.add_reading(self.hub.sensors.power.total.value, time.time())
-    async def async_handle_carpowersensor(self, value, update_session) -> None:
+
+    async def async_handle_carpowersensor(self, value) -> None:
         if self.hub.sensors.carpowersensor.use_attribute:
             return
         else:
@@ -76,9 +82,9 @@ class StateChanges(IStateChanges):
                 return
             self.latest_outlet_update.update()
             if self.hub.sensors.carpowersensor.value > 0:
-                await self.hub.async_set_chargerobject_value("charging")
+                await self.hub.async_set_chargerobject_value(OUTLET_TYPE_CHARGING)
             else:
-                await self.hub.async_set_chargerobject_value("connected")
+                await self.hub.async_set_chargerobject_value(OUTLET_TYPE_CONNECTED)
             if old_state != await self.hub.async_request_sensor_data(
                 "chargerobject_value"
             ):
@@ -118,9 +124,9 @@ class StateChangesLite(IStateChanges):
                 return
             self.latest_outlet_update.update()
             if self.hub.sensors.carpowersensor.value > 0:
-                await self.hub.async_set_chargerobject_value("charging")
+                await self.hub.async_set_chargerobject_value(OUTLET_TYPE_CHARGING)
             else:
-                await self.hub.async_set_chargerobject_value("connected")
+                await self.hub.async_set_chargerobject_value(OUTLET_TYPE_CONNECTED)
             if old_state != await self.hub.async_request_sensor_data(
                 "chargerobject_value"
             ):

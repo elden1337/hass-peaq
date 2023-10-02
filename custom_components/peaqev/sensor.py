@@ -19,7 +19,7 @@ from custom_components.peaqev.sensors.average_sensor import (PeaqAverageSensor,
 from custom_components.peaqev.sensors.gain_loss_sensor import GainLossSensor
 from custom_components.peaqev.sensors.integration_sensor import (
     PeaqIntegrationCostSensor, PeaqIntegrationSensor)
-from custom_components.peaqev.sensors.money_sensor import PeaqMoneySensor
+from custom_components.peaqev.sensors.money_sensor import PeaqMoneySensor, PeaqMoneyDataSensor
 from custom_components.peaqev.sensors.peaq_sensor import PeaqSensor
 from custom_components.peaqev.sensors.power.amp_sensor import PeaqAmpSensor
 from custom_components.peaqev.sensors.power.power_cost_sensor import \
@@ -85,7 +85,10 @@ async def async_setup(hub, config, hass, async_add_entities):
                          ("Average price 7 days", "average_weekly"),
                          ("Average price 30 days", "average_30"),
                          ("Average price 3 days", "average_three_days"),
-                         ("My average price this month", "purchased_average_month")]
+                         ("My average price this month", "purchased_average_month"),
+                         ("My savings this month", "savings_month")]
+        sensors.append(PeaqMoneyDataSensor(hub, config.entry_id))
+
         for name, attr in simplesensors:
             sensors.append(
                 PeaqSimpleMoneySensor(

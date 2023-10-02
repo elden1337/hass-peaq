@@ -23,6 +23,7 @@ class ISpotPrice(SpotPriceAverageMixin):
         self.model = SpotPriceModel(source=source)
         self._is_initialized: bool = False
         self._dynamic_top_price = DynamicTopPrice()
+        self.converted_average_data: bool = False #remove this five versions from 3.2.0
         if not test:
             self.state_machine = hub.state_machine
             if is_active:
@@ -89,8 +90,21 @@ class ISpotPrice(SpotPriceAverageMixin):
             return 0
 
     @property
+    def savings_month(self) -> float:
+        """Ackumulated savings for the month against spotprice avg. ie can fluctuate"""
+        try:
+            month_draw = self.hub.state_machine.states.get("sensor.peaqev_energy_including_car_monthly")
+            month_diff = self.average_month - self.purchased_average_month
+            if month_draw:
+                return round(float(month_draw.state) * month_diff,3)
+            return 0
+        except ZeroDivisionError:
+            return 0
+
+    @property
     def average_data(self) -> dict[date, float]:
         return self.model.average_data
+
 
     @abstractmethod
     async def async_set_dto(self, ret, initial: bool) -> None:
