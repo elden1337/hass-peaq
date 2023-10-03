@@ -123,8 +123,7 @@ async def async_setup(hub, config, hass, async_add_entities):
             sensors.append(PeaqHousePowerSensor(hub, config.entry_id))
         else:
             sensors.append(PeaqPowerSensor(hub, config.entry_id))
-        average_delta = 2 if await hub.sensors.locale.data.async_is_quarterly() else 5
-        filters_min = await async_set_filters(hub, timedelta(minutes=average_delta))
+        filters_min = await async_set_filters(hub, timedelta(minutes=2 if await hub.sensors.locale.data.async_is_quarterly() else 5))
         average_sensors.append(
             PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION, filters_min)
         )

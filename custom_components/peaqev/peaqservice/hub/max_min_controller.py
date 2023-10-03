@@ -28,6 +28,8 @@ class MaxMinController:
             )
             self.hub.observer.add(ObserverTypes.UpdateChargerEnabled, self.async_null_max_charge)
             self.hub.observer.add(ObserverTypes.MaxMinLimiterChanged, self.async_update_maxmin_core)
+            self.hub.observer.add(ObserverTypes.ResetMaxMinChargeSensor, self.async_try_reset_max_charge_sensor)
+
 
     @property
     def max_charge(self) -> int:
@@ -96,6 +98,9 @@ class MaxMinController:
         if self._override_max_charge is None:
             await self.async_reset_max_charge_sensor()
 
+    async def async_try_reset_max_charge_sensor(self) -> None:
+        if not self.override_max_charge:
+            await self.async_reset_max_charge_sensor()
     async def async_reset_max_charge_sensor(self) -> None:
         if self.active:
             try:

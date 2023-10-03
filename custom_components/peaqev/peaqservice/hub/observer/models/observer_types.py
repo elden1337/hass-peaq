@@ -29,3 +29,8 @@ class ObserverTypes(Enum):
     SchedulerCreated = "scheduler created"
     SchedulerCancelled = "scheduler cancelled"
     KillswitchDead = "killswitch dead"
+
+    ProcessChargeController = "process charge controller"
+    ProcessCharger = "process charger"
+
+    ResetMaxMinChargeSensor = "reset max min charge sensor"

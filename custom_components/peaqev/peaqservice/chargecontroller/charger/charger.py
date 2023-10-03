@@ -32,6 +32,7 @@ class Charger:
         self.controller.hub.observer.add(ObserverTypes.PowerCanaryDead, self.async_pause_charger)
         self.controller.hub.observer.add(ObserverTypes.KillswitchDead, self.async_pause_charger)
         self.controller.hub.observer.add(ObserverTypes.CarConnected, self.async_reset_session)
+        self.controller.hub.observer.add(ObserverTypes.ProcessCharger, self.async_charge)
 
     async def async_setup(self):
         pass

@@ -131,8 +131,8 @@ class IChargeController:
                         old_state=self.status_type, new_state=status_type
                     )
                     self.model.status_type = status_type
-                    if self.model.charger_type is not ChargerType.NoCharger:
-                        await self.charger.async_charge()
+                    if self.model.charger_type is not ChargerType.NoCharger: #todo: strategy should handle this
+                        self.hub.observer.async_broadcast(ObserverTypes.ProcessCharger)
         except Exception as e:
             _LOGGER.debug(f"Error in async_set_status_type: {e}")
 
@@ -265,5 +265,7 @@ class IChargeController:
         self.hub.observer.add(ObserverTypes.HubInitialized, self._check_initialized)
         self.hub.observer.add(ObserverTypes.TimerActivated, self.async_set_status)
         self.hub.observer.add(ObserverTypes.AuxStopChanged, self.async_set_status)
+        self.hub.observer.add(ObserverTypes.ProcessChargeController, self.async_set_status)
+
 
 

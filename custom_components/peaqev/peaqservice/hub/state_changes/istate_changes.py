@@ -6,6 +6,7 @@ from peaqevcore.common.wait_timer import WaitTimer
 
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
+from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import ObserverTypes
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
@@ -19,21 +20,16 @@ _LOGGER = logging.getLogger(__name__)
 
 class IStateChanges:
     latest_spotprice_update = WaitTimer(timeout=60)
-    latest_chargecontroller_update = WaitTimer(timeout=3)
     latest_outlet_update = WaitTimer(timeout=10)
-
 
     def __init__(self, hub: HomeAssistantHub):
         self.hub = hub
 
     async def async_update_sensor(self, entity, value):
         update_session = await self.async_update_sensor_internal(entity, value)
-        if self.latest_chargecontroller_update.is_timeout():
-            self.latest_chargecontroller_update.update()
-            await self.hub.chargecontroller.async_set_status()
-            if self.hub.options.price.price_aware:  # todo: strategy should handle this
-                if not self.hub.max_min_controller.override_max_charge:
-                    await self.hub.max_min_controller.async_reset_max_charge_sensor()
+        self.hub.observer.async_broadcast(ObserverTypes.ProcessChargeController)
+        if self.hub.options.price.price_aware:  # todo: strategy should handle this
+            self.hub.observer.async_broadcast(ObserverTypes.ResetMaxMinChargeSensor)
         if self.hub.options.price.price_aware:  # todo: strategy should handle this
             if entity != self.hub.spotprice.entity and (
                 not self.hub.hours.is_initialized
@@ -42,8 +38,11 @@ class IStateChanges:
                 """tweak to provoke spotprice to update more often"""
                 self.latest_spotprice_update.update()
                 await self.hub.spotprice.async_update_spotprice()
+
         await self.async_handle_sensor_attribute()
+
         await self.async_update_session_parameters(update_session)
+
         if all(
             [
                 entity in self.hub.model.chargingtracker_entities,
@@ -51,7 +50,7 @@ class IStateChanges:
                 self.hub.chargertype is not ChargerType.NoCharger,  # todo: strategy should handle this
             ]
         ):
-            await self.hub.chargecontroller.charger.async_charge()
+            self.hub.observer.async_broadcast(ObserverTypes.ProcessCharger)
 
     async def async_update_session_parameters(self, update_session: bool) -> None:
         if all(
