@@ -18,8 +18,6 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
     ChargerType
 from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
     ObserverTypes
-from custom_components.peaqev.peaqservice.util.constants import \
-    CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
@@ -30,7 +28,7 @@ class IChargeController:
 
     def __init__(self, hub, charger_states, charger_type):
         self.hub = hub
-        self.name: str = f"{self.hub.hubname} {CHARGERCONTROLLER}"
+        #self.name: str = f"{self.hub.hubname} {CHARGERCONTROLLER}"
         self.model = ChargeControllerModel(
             charger_type=charger_type, charger_states=charger_states
         )
@@ -166,6 +164,8 @@ class IChargeController:
             _LOGGER.debug("Chargerobject_value is None. Returning Error-state.")
             return ChargeControllerStates.Error, True
 
+        if self.hub.sensors.power.killswitch.is_caution:
+            _LOGGER.debug("Killswitch is caution.")
         try:
             if not self.hub.enabled:
                 if state in self.model.charger_states[ChargeControllerStates.Idle]:
@@ -180,6 +180,7 @@ class IChargeController:
 
             if self.hub.sensors.power.killswitch.is_dead:
                 _LOGGER.debug("Killswitch is dead. Returning Error-state.")
+                self.hub.observer.async_broadcast(ObserverTypes.KillswitchDead)
                 return ChargeControllerStates.Error, True
 
             if not state in self.model.charger_states[ChargeControllerStates.Idle] and self.hub.charger_done:

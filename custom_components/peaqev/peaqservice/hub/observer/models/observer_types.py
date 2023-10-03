@@ -28,3 +28,4 @@ class ObserverTypes(Enum):
     TimerActivated = "timer activated"
     SchedulerCreated = "scheduler created"
     SchedulerCancelled = "scheduler cancelled"
+    KillswitchDead = "killswitch dead"
