@@ -19,7 +19,8 @@ from custom_components.peaqev.sensors.average_sensor import (PeaqAverageSensor,
 from custom_components.peaqev.sensors.gain_loss_sensor import GainLossSensor
 from custom_components.peaqev.sensors.integration_sensor import (
     PeaqIntegrationCostSensor, PeaqIntegrationSensor)
-from custom_components.peaqev.sensors.money_sensor import PeaqMoneySensor, PeaqMoneyDataSensor
+from custom_components.peaqev.sensors.money_sensor import (PeaqMoneyDataSensor,
+                                                           PeaqMoneySensor)
 from custom_components.peaqev.sensors.peaq_sensor import PeaqSensor
 from custom_components.peaqev.sensors.power.amp_sensor import PeaqAmpSensor
 from custom_components.peaqev.sensors.power.power_cost_sensor import \

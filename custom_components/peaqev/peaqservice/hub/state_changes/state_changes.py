@@ -3,10 +3,12 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
-from custom_components.peaqev.peaqservice.chargertypes.types.outlet import OUTLET_TYPE_CHARGING, OUTLET_TYPE_CONNECTED
+from custom_components.peaqev.peaqservice.chargertypes.types.outlet import (
+    OUTLET_TYPE_CHARGING, OUTLET_TYPE_CONNECTED)
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
+
 import logging
 
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
