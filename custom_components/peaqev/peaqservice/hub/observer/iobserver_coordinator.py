@@ -74,17 +74,17 @@ class IObserver:
     async def async_dequeue_and_broadcast(self, command: Command):
         if await self.async_ok_to_broadcast(command.command):
             async with self._lock:
-                _LOGGER.debug(
-                    f"ready to broadcast: {command.command.name} with params: {command.argument}"
-                )
+                # _LOGGER.debug(
+                #     f"ready to broadcast: {command.command.name} with params: {command.argument}"
+                # )
                 for func in self.model.subscribers.get(command.command, []):
                     await self.async_broadcast_separator(func, command)
                 if command in self.model.broadcast_queue:
                     self.model.broadcast_queue.remove(command)
-        else:
-            _LOGGER.debug(
-                f"not able to broadcast: {command.command.name} with params: {command.argument}"
-            )
+        # else:
+        #     _LOGGER.debug(
+        #         f"not able to broadcast: {command.command.name} with params: {command.argument}"
+        #     )
 
     @abstractmethod
     async def async_broadcast_separator(self, func, command):
