@@ -34,6 +34,14 @@ class HubSettersMixin:
                 )
 
 
+    async def async_update_peak(self, val) -> None:
+        await self.sensors.locale.async_try_update_peak(
+            new_val=val[0], timestamp=val[1]
+        )
+        self.sensors.current_peak.value = (
+            list(self.sensors.locale.data.query_model.peaks.p.values())
+        )
+
     async def async_update_average_monthly_price(self, val) -> None:
         if self.options.price.price_aware and isinstance(val, float):
             await self.hours.async_update_top_price(val)

@@ -34,3 +34,4 @@ class ObserverTypes(Enum):
     ProcessCharger = "process charger"
 
     ResetMaxMinChargeSensor = "reset max min charge sensor"
+    UpdatePeak = "update peak"

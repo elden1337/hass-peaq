@@ -132,7 +132,7 @@ class IChargeController:
                     )
                     self.model.status_type = status_type
                     if self.model.charger_type is not ChargerType.NoCharger: #todo: strategy should handle this
-                        self.hub.observer.async_broadcast(ObserverTypes.ProcessCharger)
+                        await self.hub.observer.async_broadcast(ObserverTypes.ProcessCharger)
         except Exception as e:
             _LOGGER.debug(f"Error in async_set_status_type: {e}")
 
@@ -180,7 +180,7 @@ class IChargeController:
 
             if self.hub.sensors.power.killswitch.is_dead:
                 _LOGGER.debug("Killswitch is dead. Returning Error-state.")
-                self.hub.observer.async_broadcast(ObserverTypes.KillswitchDead)
+                await self.hub.observer.async_broadcast(ObserverTypes.KillswitchDead)
                 return ChargeControllerStates.Error, True
 
             if not state in self.model.charger_states[ChargeControllerStates.Idle] and self.hub.charger_done:

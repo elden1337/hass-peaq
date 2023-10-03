@@ -27,10 +27,9 @@ class IStateChanges:
 
     async def async_update_sensor(self, entity, value):
         update_session = await self.async_update_sensor_internal(entity, value)
-        self.hub.observer.async_broadcast(ObserverTypes.ProcessChargeController)
+        await self.hub.observer.async_broadcast(ObserverTypes.ProcessChargeController)
         if self.hub.options.price.price_aware:  # todo: strategy should handle this
-            self.hub.observer.async_broadcast(ObserverTypes.ResetMaxMinChargeSensor)
-        if self.hub.options.price.price_aware:  # todo: strategy should handle this
+            await self.hub.observer.async_broadcast(ObserverTypes.ResetMaxMinChargeSensor)
             if entity != self.hub.spotprice.entity and (
                 not self.hub.hours.is_initialized
                 or self.latest_spotprice_update.is_timeout()
@@ -40,7 +39,6 @@ class IStateChanges:
                 await self.hub.spotprice.async_update_spotprice()
 
         await self.async_handle_sensor_attribute()
-
         await self.async_update_session_parameters(update_session)
 
         if all(
@@ -50,7 +48,7 @@ class IStateChanges:
                 self.hub.chargertype is not ChargerType.NoCharger,  # todo: strategy should handle this
             ]
         ):
-            self.hub.observer.async_broadcast(ObserverTypes.ProcessCharger)
+            await self.hub.observer.async_broadcast(ObserverTypes.ProcessCharger)
 
     async def async_update_session_parameters(self, update_session: bool) -> None:
         if all(
@@ -96,27 +94,10 @@ class IStateChanges:
         await self.async_handle_outlet_updates()
 
     async def async_update_total_energy_and_peak(self, value) -> None:
-        try:
-            self.hub.sensors.totalhourlyenergy.value = value
-        except:
-            _LOGGER.debug(f"Unable to set totalhourlyenergy to {value}")
-        try:
-            await self.hub.sensors.locale.async_try_update_peak(
-                new_val=float(value), timestamp=datetime.now()
-            )
-        except:
-            _LOGGER.debug(f"Unable to update peak to {value}")
-        try:
-            self.hub.sensors.current_peak.value = (
-                list(self.hub.sensors.locale.data.query_model.peaks.p.values())
-            )
-        except Exception as e:
-            _LOGGER.debug(f"Unable to set current_peak to {value}. {self.hub.sensors.locale.data.query_model.peaks.p.values()}. Exception: {e}")
+        self.hub.sensors.totalhourlyenergy.value = value
+        await self.hub.observer.async_broadcast(ObserverTypes.UpdatePeak, (float(value), datetime.now()))
+        await self.hub.chargecontroller.savings.async_add_consumption(float(value))
 
-        try:
-            await self.hub.chargecontroller.savings.async_add_consumption(float(value))
-        except:
-            _LOGGER.debug(f"Unable to add consumption to savings")
         if self.hub.options.price.price_aware and not self.hub.options.peaqev_lite:  # todo: strategy should handle this
             try:
                 await self.hub.hours.async_update_max_min(

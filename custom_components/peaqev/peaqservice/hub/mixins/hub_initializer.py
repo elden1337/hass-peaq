@@ -117,3 +117,4 @@ class HubInitializerMixin:
         self.observer.add(
             ObserverTypes.DynamicMaxPriceChanged, self.async_update_average_monthly_price
         )
+        self.observer.add(ObserverTypes.UpdatePeak, self.async_update_peak)
