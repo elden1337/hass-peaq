@@ -4,7 +4,7 @@ import time
 from dataclasses import dataclass, field
 from functools import partial
 from statistics import mean
-from typing import Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Tuple
 
 from peaqevcore.common.trend import Gradient
 from peaqevcore.models.hub.carpowersensor import CarPowerSensor
@@ -15,10 +15,12 @@ from peaqevcore.models.hub.hubmember import HubMember
 from peaqevcore.models.hub.power import Power
 from peaqevcore.services.locale.Locale import LocaleData, LocaleFactory
 
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
+    ChargerType
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
+
 from custom_components.peaqev.peaqservice.hub.const import (
     AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H, CHARGER_DONE, CHARGERENABLED,
     CONSUMPTION_TOTAL_NAME, HOURLY)
