@@ -102,7 +102,7 @@ class IChargerType:
 
     @property
     @abstractmethod
-    def type(self):
+    def type(self) -> ChargerType:
         """type returns the implemented chargertype."""
 
     @abstractmethod

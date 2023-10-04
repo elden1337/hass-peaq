@@ -4,7 +4,7 @@ import time
 from dataclasses import dataclass, field
 from functools import partial
 from statistics import mean
-from typing import Tuple
+from typing import Tuple, TYPE_CHECKING
 
 from peaqevcore.common.trend import Gradient
 from peaqevcore.models.hub.carpowersensor import CarPowerSensor
@@ -15,6 +15,10 @@ from peaqevcore.models.hub.hubmember import HubMember
 from peaqevcore.models.hub.power import Power
 from peaqevcore.services.locale.Locale import LocaleData, LocaleFactory
 
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
 from custom_components.peaqev.peaqservice.hub.const import (
     AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H, CHARGER_DONE, CHARGERENABLED,
     CONSUMPTION_TOTAL_NAME, HOURLY)
@@ -84,7 +88,7 @@ class HubSensors:
     async def async_setup(
         self, options: HubOptions, state_machine, domain: str, chargerobject
     ):
-        self.chargertype = chargerobject
+        self.chargertype: IChargerType = chargerobject
         self.state_machine = state_machine
         self.locale = await LocaleFactory.async_create(options.locale, domain)
 
@@ -154,7 +158,7 @@ class HubSensors:
             ),
         }
 
-        if self.chargertype.type.value != "None":
+        if self.chargertype.type is not ChargerType.NoCharger:
             chobj = await self.async_set_chargerobject_and_switch()
             self.chargerobject = chobj[0]
             self.chargerobject_switch = chobj[1]
@@ -169,12 +173,13 @@ class HubSensors:
         for k, v in sensors.items():
             setattr(self, k, v())
         self.sensors_list = [
-            self.amp_meter,
             self.chargerobject,
             self.chargerobject_switch,
             self.charger_enabled,
             self.charger_done,
         ]
+        if self.chargertype.type is not ChargerType.NoCharger:
+            self.sensors_list.append(self.amp_meter)
 
     async def async_set_chargerobject_and_switch(
         self,
