@@ -84,7 +84,10 @@ class ISpotPrice(SpotPriceAverageMixin):
             month_draw = self.hub.state_machine.states.get("sensor.peaqev_energy_including_car_monthly")
             month_cost = self.hub.state_machine.states.get("sensor.peaqev_energy_cost_integral_monthly")
             if month_cost and month_draw:
-                return round(float(month_cost.state) / float(month_draw.state),3)
+                try:
+                    return round(float(month_cost.state) / float(month_draw.state),3)
+                except ValueError as v:
+                    _LOGGER.debug(f"Unable to calculate purchased_average_month. {v}")
             return 0
         except ZeroDivisionError:
             return 0
