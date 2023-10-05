@@ -28,7 +28,6 @@ class IChargeController:
 
     def __init__(self, hub, charger_states, charger_type):
         self.hub = hub
-        #self.name: str = f"{self.hub.hubname} {CHARGERCONTROLLER}"
         self.model = ChargeControllerModel(
             charger_type=charger_type, charger_states=charger_states
         )
@@ -36,6 +35,10 @@ class IChargeController:
         self.session = Session(self.charger)
         self.savings = SavingsController(self)
         self._setup_observers()
+
+    async def async_setup(self):
+        await self.session.async_setup()
+        await self.charger.async_setup()
 
     @abstractmethod
     async def async_below_startthreshold(self) -> bool:
@@ -87,9 +90,7 @@ class IChargeController:
         return self.model.is_initialized
 
 
-    async def async_setup(self):
-        await self.session.async_setup()
-        await self.charger.async_setup()
+
 
     async def async_update_latest_charger_start(self):
         if self.hub.enabled:

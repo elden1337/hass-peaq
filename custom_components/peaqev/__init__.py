@@ -12,9 +12,9 @@ from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.constants import TYPELITE
 from custom_components.peaqev.services import async_prepare_register_services
-
 from .const import DOMAIN, PLATFORMS
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
+from .peaqservice.hub.hub_factory import HubFactory
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -25,9 +25,9 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][conf.entry_id] = conf.data
     options = await async_set_options(conf)
-    hub = HomeAssistantHub(hass, options, DOMAIN)
+    hub = await HubFactory.async_create(hass, options, DOMAIN)
     hass.data[DOMAIN]["hub"] = hub
-    await hub.setup()
+    await hub.async_setup()
 
     conf.async_on_unload(conf.add_update_listener(async_update_entry))
     await async_prepare_register_services(hub, hass)
@@ -75,13 +75,6 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 
 
 async def async_set_options(conf) -> HubOptions:
-    #remove this after september 2023.
-    if await async_get_existing_param(
-        conf, "blocknocturnal", False
-    ):
-        _LOGGER.warning("You are using the deprecated option 'blocknocturnal'. Please note that this option no longer has any effect and that your charger may be started during the night.")
-    # remove this after september 2023.
-
     options = HubOptions()
     options.peaqev_lite = bool(conf.data.get("peaqevtype") == TYPELITE)
     if options.peaqev_lite is False:

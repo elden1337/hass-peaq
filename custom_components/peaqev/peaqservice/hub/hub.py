@@ -11,19 +11,11 @@ from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_factory import \
-    ChargeControllerFactory
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
     IChargeController
-from custom_components.peaqev.peaqservice.chargertypes.chargertype_factory import \
-    ChargerTypeFactory
 from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
     IChargerType
 from custom_components.peaqev.peaqservice.hub.const import *
-from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import \
-    HourselectionFactory
-from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import \
-    ThresholdFactory
 from custom_components.peaqev.peaqservice.hub.hub_events import HubEvents
 from custom_components.peaqev.peaqservice.hub.max_min_controller import \
     MaxMinController
@@ -40,21 +32,13 @@ from custom_components.peaqev.peaqservice.hub.observer.models.observer_types imp
     ObserverTypes
 from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
     Observer
-from custom_components.peaqev.peaqservice.hub.sensors.hubsensors_factory import \
-    HubSensorsFactory
 from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import \
     HubSensors
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.hub.spotprice.ispotprice import \
     ISpotPrice
-from custom_components.peaqev.peaqservice.hub.spotprice.spotprice_factory import \
-    SpotPriceFactory
 from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
     IStateChanges
-from custom_components.peaqev.peaqservice.hub.state_changes.state_changes_factory import \
-    StateChangesFactory
-from custom_components.peaqev.peaqservice.powertools.powertools_factory import \
-    PowerToolsFactory
 from custom_components.peaqev.peaqservice.util.extensionmethods import \
     async_iscoroutine
 
@@ -85,28 +69,32 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
         self._set_observers()
         self.max_min_controller = MaxMinController(self)
 
-    async def setup(self):
-        self.chargertype = await ChargerTypeFactory.async_create(
-            self.state_machine, self.options
-        )  # chargecontroller
-        self.sensors: HubSensors = await HubSensorsFactory.async_create(hub=self)
-        self.chargecontroller = await ChargeControllerFactory.async_create(
-            self,
-            charger_states=self.chargertype.chargerstates,
-            charger_type=self.chargertype.type,
-        )
-        self.hours: Hours = await HourselectionFactory.async_create(self)  # top level
-        self.threshold: ThresholdBase = await ThresholdFactory.async_create(
-            self
-        )  # top level
-        self.prediction = Prediction(self)  # threshold
-        self.servicecalls = ServiceCalls(self)  # top level
-        self.states = await StateChangesFactory.async_create(self)  # top level
-        self.spotprice: ISpotPrice = SpotPriceFactory.create(hub=self, test=False, is_active=self.options.price.price_aware)
-        self.power = await PowerToolsFactory.async_create(self)
-        self.events = HubEvents(self, self.state_machine)
+    async def async_setup(self):
         trackers = await self.async_setup_tracking()
         async_track_state_change(self.state_machine, trackers, self.async_state_changed)
+
+    # async def async_setup(self):
+    #     self.chargertype = await ChargerTypeFactory.async_create(
+    #         self.state_machine, self.options
+    #     )  # chargecontroller
+    #     self.sensors: HubSensors = await HubSensorsFactory.async_create(hub=self)
+    #     self.chargecontroller = await ChargeControllerFactory.async_create(
+    #         self,
+    #         charger_states=self.chargertype.chargerstates,
+    #         charger_type=self.chargertype.type,
+    #     )
+    #     self.hours: Hours = await HourselectionFactory.async_create(self)  # top level
+    #     self.threshold: ThresholdBase = await ThresholdFactory.async_create(
+    #         self
+    #     )  # top level
+    #     self.prediction = Prediction(self)  # threshold
+    #     self.servicecalls = ServiceCalls(self)  # top level
+    #     self.states = await StateChangesFactory.async_create(self)  # top level
+    #     self.spotprice: ISpotPrice = SpotPriceFactory.create(hub=self, test=False, is_active=self.options.price.price_aware)
+    #     self.power = await PowerToolsFactory.async_create(self)
+    #     self.events = HubEvents(self, self.state_machine)
+    #     trackers = await self.async_setup_tracking()
+    #     async_track_state_change(self.state_machine, trackers, self.async_state_changed)
 
     @property
     def enabled(self) -> bool:
@@ -121,19 +109,6 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
         return self.hours.dynamic_caution_hours
 
     @property
-    def current_peak_dynamic(self):
-        """Dynamically calculated peak to adhere to caution-hours"""
-        if self.options.price.price_aware and len(self.dynamic_caution_hours) > 0:
-            if datetime.now().replace(minute=0,second=0,microsecond=0) in self.dynamic_caution_hours.keys() and not getattr(
-                self.hours.timer, "is_override", False
-            ):
-                return (
-                    self.sensors.current_peak.value
-                    * self.dynamic_caution_hours[datetime.now().hour]
-                )
-        return self.sensors.current_peak.value
-
-    @property
     def is_initialized(self) -> bool:
         if not self._is_initialized:
             if self.check_initializer():
@@ -145,19 +120,23 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
 
     @property
     def watt_cost(self) -> int:
-        if self.options.price.price_aware:
-            try:
-                return int(
-                    round(
-                        float(self.sensors.power.total.value)
-                        * float(self.spotprice.state),
-                        0,
-                    )
-                )
-            except Exception as e:
-                _LOGGER.error(f"Unable to calculate watt cost. Exception: {e}")
-                return 0
         return 0
+
+    async def async_update_adjusted_average(self, val) -> None:
+        pass
+
+    async def async_update_average_monthly_price(self, val) -> None:
+        pass
+
+    async def async_update_prices(self, prices: list) -> None:
+        pass
+
+    async def async_is_caution_hour(self) -> bool:
+        return str(datetime.now().hour) in [str(h) for h in self.hours.caution_hours]
+
+    @property
+    def current_peak_dynamic(self):
+        return self.sensors.current_peak.value
 
     @property
     def charger_done(self) -> bool:
@@ -185,9 +164,28 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
         return ret
 
     async def async_request_sensor_data(self, *args) -> dict | any:
+        ret = {}
         if not self.is_initialized:
-            return {}
-        lookup = {
+            return ret
+        for arg in args:
+            func: Callable = self._request_sensor_lookup().get(arg, None)
+            if await async_iscoroutine(func):
+                ret[arg] = await func()
+            else:
+                ret[arg] = func()
+        if "max_charge" in ret.keys():
+            self.max_min_controller._original_total_charge = ret["max_charge"][0]
+            # todo: 247
+        if len(ret) == 1:
+            """If only one value is requested, return the value instead of a dict"""
+            val = list(ret.values())[0]
+            if isinstance(val, str):
+                return val.lower()
+            return val
+        return ret
+
+    def _request_sensor_lookup(self) -> dict:
+        return {
             CHARGER_DONE: partial(getattr, self.sensors.charger_done, "value"),
             CHARGEROBJECT_VALUE:    partial(
                 getattr, self.sensors.chargerobject, "value"
@@ -234,21 +232,3 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
                 self.chargecontroller.savings.async_export_data
             ),
         }
-        ret = {}
-        for arg in args:
-            func: Callable = lookup.get(arg, None)
-            if await async_iscoroutine(func):
-                ret[arg] = await func()
-            else:
-                ret[arg] = func()
-        if "max_charge" in ret.keys():
-            self.max_min_controller._original_total_charge = ret["max_charge"][0]
-            # todo: 247
-        if len(ret) == 1:
-            val = list(ret.values())[0]
-            if isinstance(val, str):
-                return val.lower()
-            return val
-        return ret
-
-
