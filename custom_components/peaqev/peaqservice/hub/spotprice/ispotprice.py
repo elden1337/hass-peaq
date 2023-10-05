@@ -12,6 +12,7 @@ from custom_components.peaqev.peaqservice.hub.spotprice.models.spotprice_model i
     SpotPriceModel
 from custom_components.peaqev.peaqservice.hub.spotprice.spotprice_average_mixin import \
     SpotPriceAverageMixin
+from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -87,7 +88,7 @@ class ISpotPrice(SpotPriceAverageMixin):
                 try:
                     return round(float(month_cost.state) / float(month_draw.state),3)
                 except ValueError as v:
-                    _LOGGER.debug(f"Unable to calculate purchased_average_month. {v}")
+                    log_once(f"Unable to calculate purchased_average_month. {v}")
             return 0
         except ZeroDivisionError:
             return 0
