@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass, field
 from functools import partial
-from typing import Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Tuple
 
 from peaqevcore.common.trend import Gradient
 from peaqevcore.models.hub.carpowersensor import CarPowerSensor
@@ -15,16 +15,19 @@ from peaqevcore.models.hub.power import Power
 from peaqevcore.services.locale.Locale import LocaleData, LocaleFactory
 
 from custom_components.peaqev.peaqservice.hub.sensors.const import *
-from custom_components.peaqev.peaqservice.hub.sensors.models.average import Average
+from custom_components.peaqev.peaqservice.hub.sensors.models.average import \
+    Average
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
+
 from custom_components.peaqev.peaqservice.hub.const import (
     AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H, CHARGER_DONE, CHARGERENABLED,
     CONSUMPTION_TOTAL_NAME, HOURLY)
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
+
 
 @dataclass
 class HubSensorsBase:
