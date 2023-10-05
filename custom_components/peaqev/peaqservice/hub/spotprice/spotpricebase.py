@@ -17,7 +17,7 @@ from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 _LOGGER = logging.getLogger(__name__)
 
 
-class ISpotPrice(SpotPriceAverageMixin):
+class SpotPriceBase(SpotPriceAverageMixin):
     def __init__(self, hub, source: str, test:bool = False, is_active: bool = True):
         _LOGGER.debug(f"Initializing Spotprice for {source}.")
         self.hub = hub

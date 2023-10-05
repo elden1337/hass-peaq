@@ -40,7 +40,7 @@ class ChargeController(IChargeController):
     def _check_initialized(self) -> bool:
         if self.model.is_initialized:
             return True
-        _state = self.hub.get_power_sensor_from_hass()
+        _state = self.hub.state_machine.states.get(self.hub.options.powersensor)
         if _state is not None:
             if isinstance(_state, (float, int)):
                 if _state > 0:

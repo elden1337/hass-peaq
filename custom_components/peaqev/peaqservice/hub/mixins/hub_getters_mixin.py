@@ -1,5 +1,7 @@
+import logging
 from datetime import datetime
 
+_LOGGER = logging.getLogger(__name__)
 
 class HubGettersMixin:
 
@@ -12,9 +14,11 @@ class HubGettersMixin:
         return now in self.dynamic_caution_hours.keys()
 
     async def async_free_charge(self) -> bool:
+        """Returns true if free charge is enabled, which means that peaks are currently not tracked"""
         try:
             return await self.sensors.locale.data.async_free_charge()
-        except Exception:
+        except Exception as e:
+            _LOGGER.debug(f"Unable to get free charge. Exception: {e}")
             return False
 
     async def async_predictedpercentageofpeak(self):
@@ -22,7 +26,7 @@ class HubGettersMixin:
             predicted_energy=await self.async_get_predicted_energy(),
             peak=self.sensors.current_peak.value,
         )
-        self.peak_breached = ret > 100
+        self.model.peak_breached = ret > 100
         return ret
 
     async def async_threshold_start(self):
@@ -36,8 +40,6 @@ class HubGettersMixin:
             is_caution_hour=await self.async_is_caution_hour(),
             is_quarterly=await self.sensors.locale.data.async_is_quarterly(),
         )
-
-
 
     async def async_get_predicted_energy(self) -> float:
         ret = await self.prediction.async_predicted_energy(

@@ -14,13 +14,12 @@ import logging
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
-    IStateChanges
+    StateChangesBase
 
 _LOGGER = logging.getLogger(__name__)
 
 
-
-class StateChanges(IStateChanges):
+class StateChanges(StateChangesBase):
     def __init__(self, hub: HomeAssistantHub):
         self.hub = hub
         super().__init__(hub)
@@ -95,7 +94,7 @@ class StateChanges(IStateChanges):
                 )
 
 
-class StateChangesLite(IStateChanges):
+class StateChangesLite(StateChangesBase):
     def __init__(self, hub):
         self.hub = hub
         super().__init__(hub)
@@ -137,7 +136,7 @@ class StateChangesLite(IStateChanges):
                 )
 
 
-class StateChangesNoCharger(IStateChanges):
+class StateChangesNoCharger(StateChangesBase):
     def __init__(self, hub):
         self.hub = hub
         super().__init__(hub)
@@ -169,7 +168,7 @@ class StateChangesNoCharger(IStateChanges):
         return update_session
 
 
-class StateChangesLiteNoCharger(IStateChanges):
+class StateChangesLiteNoCharger(StateChangesBase):
     def __init__(self, hub):
         self.hub = hub
         super().__init__(hub)

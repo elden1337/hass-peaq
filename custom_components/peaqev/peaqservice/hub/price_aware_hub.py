@@ -4,6 +4,7 @@ from datetime import datetime
 from homeassistant.core import HomeAssistant
 
 from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
+from custom_components.peaqev.peaqservice.hub.max_min_controller import MaxMinController
 from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
 
 _LOGGER = logging.getLogger(__name__)
@@ -11,6 +12,7 @@ _LOGGER = logging.getLogger(__name__)
 class PriceAwareHub(HomeAssistantHub):
     def __init__(self, hass: HomeAssistant, options: HubOptions, domain: str):
         super().__init__(hass, options, domain)
+        self.max_min_controller = MaxMinController(self)
 
     @property
     def current_peak_dynamic(self):
@@ -57,3 +59,8 @@ class PriceAwareHub(HomeAssistantHub):
     async def async_update_adjusted_average(self, val) -> None:
         if isinstance(val, float):
             await self.hours.async_update_adjusted_average(val)
+
+    def _check_max_min_total_charge(self, ret:dict) -> None:
+        if "max_charge" in ret.keys():
+            self.max_min_controller._original_total_charge = ret["max_charge"][0]
+            # todo: 247

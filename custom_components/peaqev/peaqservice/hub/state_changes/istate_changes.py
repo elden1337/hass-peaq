@@ -19,7 +19,7 @@ from datetime import datetime
 _LOGGER = logging.getLogger(__name__)
 
 
-class IStateChanges:
+class StateChangesBase:
     latest_spotprice_update = WaitTimer(timeout=60)
     latest_outlet_update = WaitTimer(timeout=10)
 

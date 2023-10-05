@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
-    IStateChanges
+    StateChangesBase
 from custom_components.peaqev.peaqservice.hub.state_changes.state_changes import (
     StateChanges, StateChangesLite, StateChangesLiteNoCharger,
     StateChangesNoCharger)
@@ -15,7 +15,7 @@ from custom_components.peaqev.peaqservice.hub.state_changes.state_changes import
 
 class StateChangesFactory:
     @staticmethod
-    async def async_create(hub: HomeAssistantHub) -> IStateChanges:
+    async def async_create(hub: HomeAssistantHub) -> StateChangesBase:
         if all(
             [
                 hub.options.peaqev_lite is True,

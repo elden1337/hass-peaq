@@ -6,15 +6,15 @@ import homeassistant.helpers.template as template
 from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
     ObserverTypes
 from custom_components.peaqev.peaqservice.hub.spotprice.const import NORDPOOL
-from custom_components.peaqev.peaqservice.hub.spotprice.ispotprice import \
-    ISpotPrice
 from custom_components.peaqev.peaqservice.hub.spotprice.models.spotprice_dto import \
     NordpoolDTO
+from custom_components.peaqev.peaqservice.hub.spotprice.spotpricebase import \
+    SpotPriceBase
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class NordPoolUpdater(ISpotPrice):
+class NordPoolUpdater(SpotPriceBase):
     def __init__(self, hub, test:bool = False, is_active: bool = True):
         super().__init__(hub=hub, source=NORDPOOL, test=test, is_active=is_active)
 

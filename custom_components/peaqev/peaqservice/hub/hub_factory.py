@@ -42,7 +42,4 @@ class HubFactory:
         hub.spotprice = SpotPriceFactory.create(hub=hub, test=False,is_active=hub.options.price.price_aware)
         hub.power = await PowerToolsFactory.async_create(hub)
         hub.events = HubEvents(hub, hub.state_machine)
-
-
-
         return hub
