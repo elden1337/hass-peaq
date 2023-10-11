@@ -10,13 +10,14 @@ from custom_components.peaqev.peaqservice.hub.sensors.models.ema import EMA
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
-import custom_components.peaqev.peaqservice.util.extensionmethods as ex
-from custom_components.peaqev.const import DOMAIN
-from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
+import logging
+
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.const import POWER_WATT
 
-import logging
+import custom_components.peaqev.peaqservice.util.extensionmethods as ex
+from custom_components.peaqev.const import DOMAIN
+from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
 
 _LOGGER = logging.getLogger(__name__)
 

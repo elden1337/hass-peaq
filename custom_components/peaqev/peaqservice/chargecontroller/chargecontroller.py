@@ -32,7 +32,7 @@ class ChargeController(IChargeController):
     @property
     def status_string(self) -> str:
         if not self.is_initialized:
-            gg = self._check_initialized()
+            self._check_initialized()
             return INITIALIZING
         if not self._check_initialized():
             return WAITING_FOR_POWER
@@ -48,7 +48,7 @@ class ChargeController(IChargeController):
                 if isinstance(float_state, (float, int)):
                     if float_state > 0:
                         return self._do_initialize()
-            except Exception as e:
+            except Exception:
                 return False
         return False
 

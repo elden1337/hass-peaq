@@ -4,8 +4,10 @@ from datetime import datetime
 from homeassistant.core import HomeAssistant
 
 from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
-from custom_components.peaqev.peaqservice.hub.max_min_controller import MaxMinController
-from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
+from custom_components.peaqev.peaqservice.hub.max_min_controller import \
+    MaxMinController
+from custom_components.peaqev.peaqservice.hub.models.hub_options import \
+    HubOptions
 
 _LOGGER = logging.getLogger(__name__)
 
