@@ -62,7 +62,7 @@ class HubInitializerMixin:
                 self.initialized_log_last_logged - time.time() > 30,
             ]
         ):
-            _LOGGER.info(f"Hub is awaiting {not_ready} before being ready to use.")
+            _LOGGER.debug(f"Hub is awaiting {not_ready} before being ready to use.")
             self.not_ready_list_old_state = len(not_ready)
             self.initialized_log_last_logged = time.time()
         if [InitializerTypes.ChargerObject, InitializerTypes.ChargerType] in not_ready:

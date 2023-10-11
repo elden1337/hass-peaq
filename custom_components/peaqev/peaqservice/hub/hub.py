@@ -75,6 +75,7 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
     def is_initialized(self) -> bool:
         if not self._is_initialized:
             if self.check_initializer():
+                _LOGGER.debug("init hub is done")
                 self.observer.activate(ObserverTypes.HubInitialized)
                 self._is_initialized = True
                 return True

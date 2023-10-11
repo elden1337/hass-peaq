@@ -19,8 +19,9 @@ class SpotPriceAverageMixin:
         ):
             self.model.average_month = _new
             if self.model.average_month is not None:
+                _LOGGER.debug(f"broadcasting average month: {_new}")
                 await self.hub.observer.async_broadcast(
-                    ObserverTypes.MonthlyAveragePriceChanged, self.model.average_month
+                    ObserverTypes.MonthlyAveragePriceChanged, _new
                 )
 
     async def async_update_average(self, length: list[int]) -> None:

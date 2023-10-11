@@ -89,9 +89,6 @@ class IChargeController:
             return self._check_initialized()
         return self.model.is_initialized
 
-
-
-
     async def async_update_latest_charger_start(self):
         if self.hub.enabled:
             self.model.latest_charger_start.update()
@@ -121,6 +118,8 @@ class IChargeController:
                 if update_timer is True:
                     await self.async_update_latest_charger_start()
                 await self.async_set_status_type(ret)
+            else:
+                _LOGGER.debug("chargecontroller is not init")
         except Exception as e:
             _LOGGER.debug(f"Error in async_set_status2: {e}")
 

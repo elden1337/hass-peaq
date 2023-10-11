@@ -66,12 +66,11 @@ class IGainLoss:
             return average, cost
 
     def _update_monthly_average(self, val):
-        if isinstance(val, float):
-            self._monthly_average = val
+        _LOGGER.debug(f"received average month: {val}")
+        self._monthly_average = val
 
     def _update_daily_average(self, val):
-        if isinstance(val, float):
-            self._daily_average = val
+        self._daily_average = val
 
     async def async_get_average(self, time_period: TimePeriods) -> float:
         if time_period == TimePeriods.Monthly:

@@ -32,6 +32,7 @@ class ChargeController(IChargeController):
     @property
     def status_string(self) -> str:
         if not self.is_initialized:
+            gg = self._check_initialized()
             return INITIALIZING
         if not self._check_initialized():
             return WAITING_FOR_POWER
@@ -42,9 +43,13 @@ class ChargeController(IChargeController):
             return True
         _state = self.hub.state_machine.states.get(self.hub.options.powersensor)
         if _state is not None:
-            if isinstance(_state, (float, int)):
-                if _state > 0:
-                    return self._do_initialize()
+            try:
+                float_state = float(_state.state)
+                if isinstance(float_state, (float, int)):
+                    if float_state > 0:
+                        return self._do_initialize()
+            except Exception as e:
+                return False
         return False
 
     async def async_below_startthreshold(self) -> bool:

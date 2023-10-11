@@ -22,6 +22,9 @@ class Average:
         except ZeroDivisionError:
             self._average = 0
 
+    def readings(self) -> list:
+        return self._readings
+
     def _remove_from_list(self):
         """Removes overflowing number of samples and old samples from the list."""
         while len(self._readings) > self._max_samples:
