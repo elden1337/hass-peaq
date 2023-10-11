@@ -2,55 +2,58 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from homeassistant.components.sensor import SensorEntity
+from homeassistant.helpers.restore_state import RestoreEntity
+
+from custom_components.peaqev.peaqservice.hub.sensors.models.ema import EMA
+
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
-from datetime import timedelta
-
-from homeassistant.components.filter.sensor import (TIME_SMA_LAST,
-                                                    LowPassFilter,
-                                                    OutlierFilter,
-                                                    SensorFilter,
-                                                    TimeSMAFilter)
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
 from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
+from homeassistant.components.sensor import SensorDeviceClass
+from homeassistant.const import POWER_WATT
+
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 
-async def async_set_filters(hub: HomeAssistantHub, filtertimedelta: timedelta) -> list:
-    return [
-        LowPassFilter(
-            window_size=1,
-            precision=0,
-            entity=hub.sensors.power.house.entity,
-            time_constant=10,
-        ),
-        TimeSMAFilter(
-            window_size=filtertimedelta,
-            precision=0,
-            entity=hub.sensors.power.house.entity,
-            type=TIME_SMA_LAST,
-        ),
-        OutlierFilter(
-            window_size=4,
-            precision=0,
-            entity=hub.sensors.power.house.entity,
-            radius=2,
-        ),
-    ]
+class PeaqAverageSensor(SensorEntity, RestoreEntity):
+    device_class = SensorDeviceClass.POWER
+    unit_of_measurement = POWER_WATT
 
-
-class PeaqAverageSensor(SensorFilter):
-    def __init__(self, hub: HomeAssistantHub, entry_id, name, filters):
+    def __init__(self, hub: HomeAssistantHub, entry_id, name, max_age):
         self.hub = hub
         self._entry_id = entry_id
         self._attr_name = f"{hub.hubname} {name}"
-        super().__init__(
-            name=self._attr_name,
-            unique_id=self.unique_id,
-            entity_id=self.hub.sensors.power.house.entity,
-            filters=filters,
-        )
+        self._state = None
+        self._avg = EMA(max_age)
+
+    @property
+    def state(self):
+        return self._state
+
+    async def async_update(self) -> None:
+        data = self.hub.state_machine.states.get(self.hub.sensors.power.house.entity)
+        if data:
+            try:
+                floatdata = float(data.state)
+                if isinstance(floatdata, float):
+                    self._state = self._avg.average(floatdata)
+                else:
+                    _LOGGER.debug(f"Could not convert {data.state} to float.")
+            except:
+                pass
+
+    async def async_added_to_hass(self) -> None:
+        state = await super().async_get_last_state()
+        _LOGGER.debug("last state of %s = %s", self._attr_name, state)
+        if state:
+            self._state = float(state.state)
+            self._avg.imported_average = float(state.state)
 
     @property
     def device_info(self):
@@ -60,3 +63,4 @@ class PeaqAverageSensor(SensorFilter):
     def unique_id(self):
         """Return a unique ID to use for this sensor."""
         return f"{DOMAIN}_{self._entry_id}_{ex.nametoid(self._attr_name)}"
+

@@ -14,8 +14,7 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
     ChargerType
 from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_INTEGRAL_NAME, CONSUMPTION_TOTAL_NAME)
-from custom_components.peaqev.sensors.average_sensor import (PeaqAverageSensor,
-                                                             async_set_filters)
+from custom_components.peaqev.sensors.average_sensor import PeaqAverageSensor
 from custom_components.peaqev.sensors.gain_loss_sensor import GainLossSensor
 from custom_components.peaqev.sensors.integration_sensor import (
     PeaqIntegrationCostSensor, PeaqIntegrationSensor)
@@ -130,13 +129,14 @@ async def async_setup(hub, config, hass, async_add_entities):
             sensors.append(PeaqHousePowerSensor(hub, config.entry_id))
         else:
             sensors.append(PeaqPowerSensor(hub, config.entry_id))
-        filters_min = await async_set_filters(hub, timedelta(minutes=2 if await hub.sensors.locale.data.async_is_quarterly() else 5))
+
+        #filters_min = await async_set_filters(hub, timedelta(minutes=2 if await hub.sensors.locale.data.async_is_quarterly() else 5))
         average_sensors.append(
-            PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION, filters_min)
+            PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION, 120 if await hub.sensors.locale.data.async_is_quarterly() else 300)
         )
-        filters24 = await async_set_filters(hub, timedelta(hours=24))
+        # filters24 = await async_set_filters(hub, timedelta(hours=24))
         average_sensors.append(
-            PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION_24H, filters24)
+            PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION_24H, 86400)
         )
         async_add_entities(average_sensors)
 
