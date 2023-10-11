@@ -18,6 +18,7 @@ Interested in sponsoring or prioritizing a certain feature, look [here](https://
 Peaqev aims at lowering the household's peak energy charges, targeted at charging an electronic vehicle (EV) below a dynamic threshold. 
 Peaqev covers [28 different energy companies](https://github.com/elden1337/hass-peaq/wiki/Locale) in Sweden, Norway and Belgium.
 You will get the best experience with a supported charger that can update amps while charging, as well as using a connected power meter that update your total power draw frequently (every 10s or more).
+_Peaqev can also be used without living in an area with peak-shaving implemented, you may utilize it soley for the purpose of charging at the lowest available hours in your area (Requires Nordpool)_
 
 The integration does not communicate with any proprietary API's. However, the chargers selected will use the integrations set for them, and may include cloud polling of data.
 
