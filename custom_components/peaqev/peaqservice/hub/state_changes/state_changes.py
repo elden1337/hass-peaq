@@ -46,9 +46,8 @@ class StateChanges(StateChangesBase):
                 case self.hub.sensors.powersensormovingaverage24.entity:
                     self.hub.sensors.powersensormovingaverage24.value = value
                 case self.hub.spotprice.entity:
-                    if self.hub.options.price.price_aware:
-                        await self.hub.spotprice.async_update_spotprice()
-                        update_session = True
+                    await self.hub.async_update_spotprice()
+                    update_session = True
             return update_session
         except Exception as e:
             _LOGGER.error(f"async_update_sensor_internal for {entity}: {e}")
@@ -114,8 +113,7 @@ class StateChangesLite(StateChangesBase):
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self.async_update_total_energy_and_peak(value)
             case self.hub.spotprice.entity:
-                if self.hub.options.price.price_aware:
-                    await self.hub.spotprice.async_update_spotprice()
+                await self.hub.async_update_spotprice()
         return False
 
     async def _handle_outlet_updates(self):
@@ -162,9 +160,8 @@ class StateChangesNoCharger(StateChangesBase):
             case self.hub.sensors.powersensormovingaverage24.entity:
                 self.hub.sensors.powersensormovingaverage24.value = value
             case self.hub.spotprice.entity:
-                if self.hub.options.price.price_aware:
-                    await self.hub.spotprice.async_update_spotprice()
-                    update_session = True
+                await self.hub.async_update_spotprice()
+                update_session = True
         return update_session
 
 
@@ -178,6 +175,5 @@ class StateChangesLiteNoCharger(StateChangesBase):
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self.async_update_total_energy_and_peak(value)
             case self.hub.spotprice.entity:
-                if self.hub.options.price.price_aware:
-                    await self.hub.spotprice.async_update_spotprice()
+                await self.hub.async_update_spotprice()
         return False

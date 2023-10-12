@@ -105,6 +105,9 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
     async def async_update_average_monthly_price(self, val) -> None:
         pass
 
+    async def async_update_spotprice(self) -> None:
+        pass
+
     async def async_update_prices(self, prices: list) -> None:
         pass
 

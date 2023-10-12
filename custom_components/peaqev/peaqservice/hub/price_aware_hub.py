@@ -30,6 +30,10 @@ class PriceAwareHub(HomeAssistantHub):
     async def async_is_caution_hour(self) -> bool:
         return False
 
+    async def async_update_spotprice(self) -> None:
+        await self.spotprice.async_update_spotprice()
+
+
     @property
     def watt_cost(self) -> int:
         try:
