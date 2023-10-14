@@ -6,7 +6,6 @@ if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
 from homeassistant.helpers.restore_state import RestoreEntity
-from peaqevcore.common.currency_translation import currency_translation
 
 from custom_components.peaqev.peaqservice.hub.const import (
     AVERAGE_KWH_PRICE, AVERAGE_MONTHLY, AVERAGE_SPOTPRICE_DATA, CURRENCY,
@@ -46,9 +45,7 @@ class PeaqMoneyDataSensor(MoneyDevice, RestoreEntity):
 
     @property
     def extra_state_attributes(self) -> dict:
-        attr_dict = {
-            "Spotprice average data":          self._average_spotprice_data,
-        }
+        attr_dict = {"Spotprice average data":   self._average_spotprice_data }
         return attr_dict
 
     async def async_added_to_hass(self):
