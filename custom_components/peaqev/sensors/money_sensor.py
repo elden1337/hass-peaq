@@ -40,8 +40,26 @@ class PeaqMoneyDataSensor(MoneyDevice, RestoreEntity):
         if ret is not None:
             if len(ret):
                 self._state = "on"
+                if ret != self._average_spotprice_data:
+                    _diff = self.diff_dicts(self._average_spotprice_data, ret)
+                    _LOGGER.debug(f"dict was changed: added: {_diff[0]}, removed: {_diff[1]}")
                 self._average_spotprice_data = ret
                 self.hub.spotprice.converted_average_data = True
+
+    @staticmethod
+    def diff_dicts(dict1, dict2):
+        added = {}
+        removed = {}
+
+        for key in dict2:
+            if key not in dict1:
+                added[key] = dict2[key]
+
+        for key in dict1:
+            if key not in dict2:
+                removed[key] = dict1[key]
+
+        return added, removed
 
     @property
     def extra_state_attributes(self) -> dict:
