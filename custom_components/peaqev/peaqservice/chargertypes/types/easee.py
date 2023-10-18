@@ -131,7 +131,7 @@ class Easee(IChargerType):
         amp_sensor = f"sensor.{self.entities.entityschema}_dynamic_charger_limit"
         if not await self.async_validate_sensor(amp_sensor):
             amp_sensor = f"sensor.{self.entities.entityschema}_max_charger_limit"
-        self.entities.maxamps = f"sensor.{self.entities.entityschema}_max_charger_limit"
+        self.entities.maxamps = f"sensor.{self.entities.entityschema}_status|circuit_ratedCurrent"
         self.entities.chargerentity = f"sensor.{self.entities.entityschema}_status"
         self.entities.powermeter = f"sensor.{self.entities.entityschema}_power"
         self.options.powermeter_factor = 1000
@@ -139,15 +139,19 @@ class Easee(IChargerType):
         self.entities.ampmeter = amp_sensor
 
     def get_allowed_amps(self) -> int:
-        ret = self._hass.states.get(self.entities.maxamps)
-        if ret is not None:
-            log_once(f"Got max amps from Easee. Setting {ret.state}A.")
-            return int(ret.state)
+        entity = self.entities.maxamps.split("|")
+        state = self._hass.states.get(entity[0])
+        ret = 16
+        if state is not None:
+            retattr = state.attributes.get(entity[1], None)
+            if retattr is not None:
+                log_once(f"Got max amps from Easee. Setting {retattr}A.")
+                ret = int(retattr)
         else:
             log_once(
                 f"Unable to get max amps. The sensor {self.entities.maxamps} returned state {ret}. Setting max amps to 16 til I get a proper state."
             )
-        return 16
+        return ret
 
     async def async_validate_sensor(self, sensor: str) -> bool:
         ret = self._hass.states.get(sensor)
