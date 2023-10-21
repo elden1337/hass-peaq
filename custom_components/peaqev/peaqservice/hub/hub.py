@@ -40,7 +40,7 @@ from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes impor
 from custom_components.peaqev.peaqservice.powertools.ipower_tools import \
     IPowerTools
 from custom_components.peaqev.peaqservice.util.extensionmethods import \
-    async_iscoroutine
+    async_iscoroutine, log_once
 
 _LOGGER = logging.getLogger(__name__)
 
