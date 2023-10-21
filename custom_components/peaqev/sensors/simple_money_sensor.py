@@ -41,7 +41,12 @@ class PeaqSimpleMoneySensor(MoneyDevice):
     async def async_update(self) -> None:
         self._use_cent = self.hub.spotprice.use_cent
         self._attr_unit_of_measurement = getattr(self.hub.spotprice, "currency")
-        ret = getattr(self.hub.spotprice, self._caller_attribute)
+        caller_split = self._caller_attribute.split(".")
+        if len(caller_split) > 1:
+            self._caller_attribute = caller_split[1]
+            ret = getattr(self.hub.spotprice, self._caller_attribute)
+        else:
+            ret = getattr(self.hub, self._caller_attribute)
         if ret is not None:
             self._state = ret if not self._use_cent else ret / 100
 

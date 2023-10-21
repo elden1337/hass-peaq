@@ -40,7 +40,7 @@ from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes impor
 from custom_components.peaqev.peaqservice.powertools.ipower_tools import \
     IPowerTools
 from custom_components.peaqev.peaqservice.util.extensionmethods import \
-    async_iscoroutine
+    async_iscoroutine, log_once
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -123,6 +123,32 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
         if hasattr(self.sensors, "charger_done"):
             return self.sensors.charger_done.value
         return False
+
+    @property
+    def purchased_average_month(self) -> float:
+        try:
+            month_draw = self.state_machine.states.get("sensor.peaqev_energy_including_car_monthly")
+            month_cost = self.state_machine.states.get("sensor.peaqev_energy_cost_integral_monthly")
+            if month_cost and month_draw:
+                try:
+                    return round(float(month_cost.state) / float(month_draw.state),3)
+                except ValueError as v:
+                    log_once(f"Unable to calculate purchased_average_month. {v}")
+            return 0
+        except ZeroDivisionError:
+            return 0
+
+    @property
+    def savings_month(self) -> float:
+        """Ackumulated savings for the month against spotprice avg. ie can fluctuate"""
+        try:
+            month_draw = self.state_machine.states.get("sensor.peaqev_energy_including_car_monthly")
+            month_diff = self.spotprice.average_month - self.purchased_average_month
+            if month_draw:
+                return round(float(month_draw.state) * month_diff,3)
+            return 0
+        except ZeroDivisionError:
+            return 0
 
     @callback
     async def async_state_changed(self, entity_id, old_state, new_state):

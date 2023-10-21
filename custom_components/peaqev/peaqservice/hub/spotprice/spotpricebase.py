@@ -12,7 +12,6 @@ from custom_components.peaqev.peaqservice.hub.spotprice.models.spotprice_model i
     SpotPriceModel
 from custom_components.peaqev.peaqservice.hub.spotprice.spotprice_average_mixin import \
     SpotPriceAverageMixin
-from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -78,32 +77,6 @@ class SpotPriceBase(SpotPriceAverageMixin):
     @property
     def average_30(self) -> float:
         return self.model.average_30
-
-    @property
-    def purchased_average_month(self) -> float:
-        try:
-            month_draw = self.hub.state_machine.states.get("sensor.peaqev_energy_including_car_monthly")
-            month_cost = self.hub.state_machine.states.get("sensor.peaqev_energy_cost_integral_monthly")
-            if month_cost and month_draw:
-                try:
-                    return round(float(month_cost.state) / float(month_draw.state),3)
-                except ValueError as v:
-                    log_once(f"Unable to calculate purchased_average_month. {v}")
-            return 0
-        except ZeroDivisionError:
-            return 0
-
-    @property
-    def savings_month(self) -> float:
-        """Ackumulated savings for the month against spotprice avg. ie can fluctuate"""
-        try:
-            month_draw = self.hub.state_machine.states.get("sensor.peaqev_energy_including_car_monthly")
-            month_diff = self.average_month - self.purchased_average_month
-            if month_draw:
-                return round(float(month_draw.state) * month_diff,3)
-            return 0
-        except ZeroDivisionError:
-            return 0
 
     @property
     def average_data(self) -> dict[date, float]:
