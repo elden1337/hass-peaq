@@ -6,14 +6,14 @@ from abc import abstractmethod
 from asyncio import Lock
 from typing import Callable
 
+from peaqevcore.common.models.observer_types import ObserverTypes
+
 from custom_components.peaqev.peaqservice.hub.observer.const import (
     COMMAND_WAIT, TIMEOUT)
 from custom_components.peaqev.peaqservice.hub.observer.models.command import \
     Command
 from custom_components.peaqev.peaqservice.hub.observer.models.observer_model import \
     ObserverModel
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
-    ObserverTypes
 
 _LOGGER = logging.getLogger(__name__)
 

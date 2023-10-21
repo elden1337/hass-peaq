@@ -3,10 +3,10 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Tuple
 
+from peaqevcore.common.models.observer_types import ObserverTypes
+
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
-    ObserverTypes
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub

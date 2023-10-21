@@ -7,6 +7,7 @@ from typing import Callable
 
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_state_change
+from peaqevcore.common.models.observer_types import ObserverTypes
 from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase
@@ -26,8 +27,6 @@ from custom_components.peaqev.peaqservice.hub.mixins.hub_setters_mixin import \
 from custom_components.peaqev.peaqservice.hub.models.hub_model import HubModel
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
-    ObserverTypes
 from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
     Observer
 from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import \

@@ -1,7 +1,6 @@
 import logging
 
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
-    ObserverTypes
+from peaqevcore.common.models.observer_types import ObserverTypes
 
 events = [
     "peaqhvac.try_heat_water_changed",    

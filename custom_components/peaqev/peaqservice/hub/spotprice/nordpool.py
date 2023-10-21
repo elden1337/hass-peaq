@@ -2,9 +2,8 @@ import asyncio
 import logging
 
 import homeassistant.helpers.template as template
+from peaqevcore.common.models.observer_types import ObserverTypes
 
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
-    ObserverTypes
 from custom_components.peaqev.peaqservice.hub.spotprice.const import NORDPOOL
 from custom_components.peaqev.peaqservice.hub.spotprice.models.spotprice_dto import \
     NordpoolDTO
