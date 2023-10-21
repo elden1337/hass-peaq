@@ -2,8 +2,8 @@ import logging
 from datetime import date, datetime
 from statistics import mean
 
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
-    ObserverTypes
+from peaqevcore.common.models.observer_types import ObserverTypes
+
 from custom_components.peaqev.peaqservice.hub.spotprice.const import \
     AVERAGE_MAX_LEN
 

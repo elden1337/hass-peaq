@@ -3,14 +3,14 @@ from __future__ import annotations
 import logging
 import time
 
+from peaqevcore.common.models.observer_types import ObserverTypes
+
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import \
     HourselectionFactory
 from custom_components.peaqev.peaqservice.hub.models.initializer_types import \
     InitializerTypes
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
-    ObserverTypes
 from custom_components.peaqev.peaqservice.util.constants import \
     CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid

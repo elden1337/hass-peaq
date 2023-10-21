@@ -1,8 +1,8 @@
 import asyncio
 import logging
 
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
-    ObserverTypes
+from peaqevcore.common.models.observer_types import ObserverTypes
+
 from custom_components.peaqev.peaqservice.hub.spotprice.const import (
     ENERGIDATASERVICE, ENERGIDATASERVICE_SENSOR)
 from custom_components.peaqev.peaqservice.hub.spotprice.models.spotprice_dto import \

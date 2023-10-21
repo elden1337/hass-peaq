@@ -3,6 +3,7 @@ import time
 from abc import abstractmethod
 from typing import Tuple
 
+from peaqevcore.common.models.observer_types import ObserverTypes
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.services.session.session import Session
 
@@ -16,8 +17,6 @@ from custom_components.peaqev.peaqservice.chargecontroller.const import (
     DEBUGLOG_TIMEOUT, DONETIMEOUT)
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
-    ObserverTypes
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)

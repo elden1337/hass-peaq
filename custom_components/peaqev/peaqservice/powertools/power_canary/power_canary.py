@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import logging
 
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_types import \
-    ObserverTypes
+from peaqevcore.common.models.observer_types import ObserverTypes
+
 from custom_components.peaqev.peaqservice.powertools.power_canary.const import \
     FUSES_MAX_SINGLE_FUSE
 from custom_components.peaqev.peaqservice.powertools.power_canary.ipower_canary import \
