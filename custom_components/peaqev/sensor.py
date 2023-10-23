@@ -80,10 +80,10 @@ async def async_setup(hub, config, hass, async_add_entities):
 
     if hub.options.price.price_aware:
         sensors.append(PeaqMoneySensor(hub, config.entry_id))
-        simplesensors = [("Average price this month", "spotprice.average_month"),
-                         ("Average price 7 days", "spotprice.average_weekly"),
-                         ("Average price 30 days", "spotprice.average_30"),
-                         ("Average price 3 days", "spotprice.average_three_days")]
+        simplesensors = [("Average price this month", "spotprice|average_month"),
+                         ("Average price 7 days", "spotprice|average_weekly"),
+                         ("Average price 30 days", "spotprice|average_30"),
+                         ("Average price 3 days", "spotprice|average_three_days")]
 
         if all([
             hub.options.gainloss,
