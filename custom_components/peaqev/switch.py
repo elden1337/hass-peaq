@@ -4,9 +4,9 @@ from datetime import timedelta
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.restore_state import RestoreEntity
+from peaqevcore.common.models.observer_types import ObserverTypes
 
 from .const import DOMAIN
-from .peaqservice.hub.observer.models.observer_types import ObserverTypes
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = timedelta(seconds=4)
