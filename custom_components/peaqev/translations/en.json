@@ -204,6 +204,16 @@
           "description": "The observed peaks for each month you would like to import."
         }
       }
-    }
+    },
+    "update_current_peaks": {
+        "name": "Update current peaks",
+        "description": "Use this call only if you have faulty values registered and need to override the peak-calcuations.",
+        "fields": {
+          "import_dictionary": {
+            "name": "Dictionary to import",
+            "description": "The observed peak(s) for the month you would like to override. Make sure you check the example value and update properly according to your locale."
+          }
+        }
+      }
   }
 }

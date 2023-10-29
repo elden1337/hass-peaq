@@ -138,11 +138,11 @@
       "name": "Enable Peaqev",
       "description": "Enables Peaqev smart charging."
     },
-  "disable": {
+    "disable": {
       "name": "Disable Peaqev",
       "description": "Disables Peaqev smart charging."
     },
-  "override_nonhours": {
+    "override_nonhours": {
       "name": "Enable Peaqev",
       "description": "Will override non-hours for the set amount of hours. Default per call is to add one hour. Note that this service will not keep state on reboot.",
       "fields": {
@@ -152,7 +152,7 @@
         }
       }
     },
-  "scheduler_set": {
+    "scheduler_set": {
       "name": "Set Peaqev Scheduler",
       "description": "Set a one-time schedule to help Peaqev optimize the cheapest hours for your desired charge-amount. Does not work with Peaqev-lite.",
       "fields": {
@@ -174,11 +174,11 @@
         }
       }
     },
-  "scheduler_cancel": {
+    "scheduler_cancel": {
       "name": "Cancel Peaqev Scheduler",
       "description": "Will cancel the previously set scheduled charge."
     },
-  "override_charge_amount": {
+    "override_charge_amount": {
       "name": "Override Max Charge Amount",
       "description": "Override the scheduled charge amount (requires price-awareness). Will be active during one session.",
       "fields": {
@@ -197,7 +197,16 @@
           "description": "The observed peaks for each month you would like to import."
         }
       }
+    },
+      "update_current_peaks": {
+        "name": "Update current peaks",
+        "description": "Use this call only if you have faulty values registered and need to override the peak-calcuations.",
+        "fields": {
+          "import_dictionary": {
+            "name": "Dictionary to import",
+            "description": "The observed peak(s) for the month you would like to override. Make sure you check the example value and update properly according to your locale."
+          }
+        }
+      }
     }
   }
-
-}

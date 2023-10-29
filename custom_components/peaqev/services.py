@@ -24,6 +24,7 @@ class ServiceCalls(Enum):
     SCHEDULER_CANCEL = "scheduler_cancel"
     OVERRIDE_CHARGE_AMOUNT = "override_charge_amount"
     UPDATE_PEAKS_HISTORY = "update_peaks_history"
+    UPDATE_CURRENT_PEAK = "update_current_peak"
 
 
 async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssistant) -> None:
@@ -76,6 +77,17 @@ async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssis
         _result = hub.sensors.current_peak.import_from_service(_import_dict)
         return _result
 
+
+    async def async_servicehandler_update_current_peaks(call: ServiceCall) -> ServiceResponse:
+        _LOGGER.debug("Calling {} service".format(ServiceCalls.UPDATE_CURRENT_PEAK.value))
+        if len(call.data) == 0 or call.data.get("import_dictionary") is None:
+            return {"result": "error", "message": "No data provided"}
+        _import_dict = call.data.get("import_dictionary")
+        if not validate_import_dictionary(_import_dict, hub.sensors.locale.data.query_model.sum_counter.counter):
+            return {"result": "error", "message": "Invalid data provided"}
+        _result = await hub.sensors.locale.data.query_model.async_import_from_service(_import_dict)
+        return _result
+
     # Register services
     SERVICES = {
         ServiceCalls.ENABLE: async_servicehandler_enable,
@@ -89,4 +101,31 @@ async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssis
     for service, handler in SERVICES.items():
         hass.services.async_register(DOMAIN, service.value, handler)
     hass.services.async_register(DOMAIN, ServiceCalls.UPDATE_PEAKS_HISTORY.value, async_servicehandler_update_peaks_history, supports_response=SupportsResponse.ONLY)
+    hass.services.async_register(DOMAIN, ServiceCalls.UPDATE_CURRENT_PEAK.value,
+                                 async_servicehandler_update_current_peaks, supports_response=SupportsResponse.ONLY)
     #_LOGGER.debug("Registered services: {}".format(SERVICES.keys()))
+
+
+    def validate_import_dictionary(import_dict: dict, max_len: int) -> bool:
+        _LOGGER.debug("Validating import dictionary", max_len)
+        return all([
+            # is it a dict?
+            isinstance(import_dict, dict),
+            # are the keys strings?
+            all(isinstance(k, str) for k in import_dict.keys()),
+            # are the values floats?
+            all(isinstance(v, float) for v in import_dict.values()),
+            # is the length of the dict less than or equal to max_len for the locale?
+            len(import_dict.items()) <= max_len,
+            # are the keys valid times?
+            all(is_valid_time(k) for k in import_dict.keys())
+        ])
+
+
+
+    def is_valid_time(time) -> bool:
+        times = list(time.split('h'))
+        if len(times) == 2:
+            if times[0].isdigit() and times[1].isdigit():
+                return True
+        return False
