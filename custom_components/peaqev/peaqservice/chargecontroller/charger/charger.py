@@ -74,7 +74,7 @@ class Charger:
                 case ChargeControllerStates.Connected | ChargeControllerStates.Disabled:
                     pass
                 case _:
-                    _LOGGER.debug(
+                    _LOGGER.error(
                         f"Could not match any chargecontroller-state. state: {self.controller.status_type}"
                     )
         else:
