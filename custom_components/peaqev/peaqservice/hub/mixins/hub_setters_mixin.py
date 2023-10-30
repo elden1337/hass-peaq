@@ -5,10 +5,8 @@ from peaqevcore.common.models.observer_types import ObserverTypes
 _LOGGER = logging.getLogger(__name__)
 
 class HubSettersMixin:
-    async def async_set_init_dict(self, init_dict):
-        await self.sensors.locale.data.query_model.peaks.async_set_init_dict(
-            init_dict
-        )
+    async def async_set_init_dict(self, init_dict, override: bool = False) -> None:
+        await self.sensors.locale.data.query_model.peaks.async_set_init_dict(init_dict, override=override)
         try:
             ff = getattr(self.sensors.locale.data.query_model.peaks, "export_peaks", {})
             _LOGGER.debug(f"intialized_peaks: {ff}")

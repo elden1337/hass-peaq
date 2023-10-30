@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -24,7 +25,7 @@ class ServiceCalls(Enum):
     SCHEDULER_CANCEL = "scheduler_cancel"
     OVERRIDE_CHARGE_AMOUNT = "override_charge_amount"
     UPDATE_PEAKS_HISTORY = "update_peaks_history"
-    UPDATE_CURRENT_PEAK = "update_current_peak"
+    UPDATE_CURRENT_PEAK = "update_current_peaks"
 
 
 async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssistant) -> None:
@@ -79,14 +80,16 @@ async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssis
 
 
     async def async_servicehandler_update_current_peaks(call: ServiceCall) -> ServiceResponse:
-        _LOGGER.debug("Calling {} service".format(ServiceCalls.UPDATE_CURRENT_PEAK.value))
+        _LOGGER.debug(f"Calling {ServiceCalls.UPDATE_CURRENT_PEAK.value} service with {call.data}")
         if len(call.data) == 0 or call.data.get("import_dictionary") is None:
             return {"result": "error", "message": "No data provided"}
-        _import_dict = call.data.get("import_dictionary")
+        _import_dict = call.data.get("import_dictionary", {})
         if not validate_import_dictionary(_import_dict, hub.sensors.locale.data.query_model.sum_counter.counter):
             return {"result": "error", "message": "Invalid data provided"}
-        _result = await hub.sensors.locale.data.query_model.async_import_from_service(_import_dict)
-        return _result
+
+        _import_dict_decorated = {"m": datetime.now().month, "p": _import_dict}
+        await hub.async_set_init_dict(_import_dict_decorated, override=True)
+        return {"result": "success", "message": "Imported successfully"}
 
     # Register services
     SERVICES = {
@@ -103,25 +106,33 @@ async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssis
     hass.services.async_register(DOMAIN, ServiceCalls.UPDATE_PEAKS_HISTORY.value, async_servicehandler_update_peaks_history, supports_response=SupportsResponse.ONLY)
     hass.services.async_register(DOMAIN, ServiceCalls.UPDATE_CURRENT_PEAK.value,
                                  async_servicehandler_update_current_peaks, supports_response=SupportsResponse.ONLY)
-    #_LOGGER.debug("Registered services: {}".format(SERVICES.keys()))
 
 
-    def validate_import_dictionary(import_dict: dict, max_len: int) -> bool:
-        _LOGGER.debug("Validating import dictionary", max_len)
-        return all([
-            # is it a dict?
-            isinstance(import_dict, dict),
-            # are the keys strings?
-            all(isinstance(k, str) for k in import_dict.keys()),
-            # are the values floats?
-            all(isinstance(v, float) for v in import_dict.values()),
-            # is the length of the dict less than or equal to max_len for the locale?
-            len(import_dict.items()) <= max_len,
-            # are the keys valid times?
-            all(is_valid_time(k) for k in import_dict.keys())
-        ])
+    def validate_import_dictionary(import_dict: dict, max_len: int) -> dict:
+        ret = {"result": "success", "errors": ""}
+        _LOGGER.debug("Validating import dictionary", import_dict, max_len)
+        first = isinstance(import_dict, dict)
+        if not first:
+            ret["errors"] = "Imported data is not a dictionary"
+            return ret
+        second = all(isinstance(k, str) for k in import_dict.keys())
+        if not second:
+            ret["errors"] += "Not all keys are strings"
+        third = all(isinstance(v, float) for v in import_dict.values())
+        if not third:
+            ret["errors"] += "Not all values are floats"
+        fourth = len(import_dict.items()) <= max_len
+        if not fourth:
+            ret["errors"] += "Too many items in dictionary. Max is {}".format(max_len)
+        fifth = all(is_valid_time(k) for k in import_dict.keys())
+        if not fifth:
+            ret["errors"] += "Not all keys are valid times"
 
+        if not all([first, second, third, fourth, fifth]):
+            ret["result"] = "error"
+            ret["message"] = "Invalid data provided"
 
+        return ret
 
     def is_valid_time(time) -> bool:
         times = list(time.split('h'))
