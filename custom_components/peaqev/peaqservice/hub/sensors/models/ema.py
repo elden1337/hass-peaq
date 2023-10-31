@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-BASEFACTOR = 5.9204
+BASEFACTOR = 4.9204
 
 class EMA:
     def __init__(self, len_avg, smoothing_exp=1, precision=0):
