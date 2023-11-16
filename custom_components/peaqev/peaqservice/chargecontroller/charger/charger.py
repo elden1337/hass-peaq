@@ -66,7 +66,7 @@ class Charger:
             match self.controller.status_type:
                 case ChargeControllerStates.Start:
                     await self.async_start_case()
-                case ChargeControllerStates.Stop:
+                case ChargeControllerStates.Stop | ChargeControllerStates.Error:
                     await self.async_stop_case()
                 case ChargeControllerStates.Done | ChargeControllerStates.Idle:
                     await self.async_done_idle_case()
