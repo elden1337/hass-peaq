@@ -23,7 +23,7 @@ class PriceAwareHub(HomeAssistantHub):
             if self.now_is_caution_hour() and not getattr(self.hours.timer, "is_override", False):
                 return (
                         self.sensors.current_peak.value
-                        * self.dynamic_caution_hours[datetime.now().hour]
+                        * self.dynamic_caution_hours.get(datetime.now().replace(minute=0, second=0, microsecond=0), 1)
                 )
         return self.sensors.current_peak.value
 
