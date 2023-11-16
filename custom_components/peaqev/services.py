@@ -78,18 +78,26 @@ async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssis
         _result = hub.sensors.current_peak.import_from_service(_import_dict)
         return _result
 
-
     async def async_servicehandler_update_current_peaks(call: ServiceCall) -> ServiceResponse:
         _LOGGER.debug(f"Calling {ServiceCalls.UPDATE_CURRENT_PEAK.value} service with {call.data}")
-        if len(call.data) == 0 or call.data.get("import_dictionary") is None:
-            return {"result": "error", "message": "No data provided"}
+        error_result = {"result": "error", "message": "No data provided"}
         _import_dict = call.data.get("import_dictionary", {})
+
+        if not len(_import_dict):
+            return error_result
         if not validate_import_dictionary(_import_dict, hub.sensors.locale.data.query_model.sum_counter.counter):
-            return {"result": "error", "message": "Invalid data provided"}
+            return error_result
 
         _import_dict_decorated = {"m": datetime.now().month, "p": _import_dict}
+
+        """Update the peaks history"""
+        now_key = f"{datetime.now().year}_{datetime.now().month}"
+        current_history = hub.sensors.current_peak.history
+        current_history[now_key] = list(_import_dict.values())
+
         await hub.async_set_init_dict(_import_dict_decorated, override=True)
-        return {"result": "success", "message": "Imported successfully"}
+        _result = hub.sensors.current_peak.import_from_service(current_history)
+        return {"result": "success", "message": "Imported successfully", "history-update": _result}
 
     # Register services
     SERVICES = {
