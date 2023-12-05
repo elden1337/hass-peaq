@@ -159,12 +159,14 @@ class IChargeController:
 
     async def async_get_status(self) -> Tuple[ChargeControllerStates, bool]:
         state = await self.hub.async_request_sensor_data("chargerobject_value")
-        if state is None:
-            _LOGGER.debug("Chargerobject_value is None. Returning Error-state.")
+
+        if state not in self.model.flattened_chargerstates():
+            _LOGGER.debug(f"Chargerobject_value is not in charger_states. Returning Error-state. {str(state)}")
             return ChargeControllerStates.Error, True
 
         if self.hub.sensors.power.killswitch.is_caution:
             _LOGGER.debug("Killswitch is caution.")
+        extended_errors = []
         try:
             if not self.hub.enabled:
                 if state in self.model.charger_states[ChargeControllerStates.Idle]:
@@ -189,13 +191,19 @@ class IChargeController:
                 return ChargeControllerStates.Stop, True
 
             if state in self.model.charger_states[ChargeControllerStates.Connected]:
-                return await self.async_get_status_connected(state)
+                try:
+                    return await self.async_get_status_connected(state)
+                except Exception as e:
+                    extended_errors.append(f"Error in async_get_status_connected: {e}")
 
             if state in self.model.charger_states[ChargeControllerStates.Charging]:
-                return await self.async_get_status_charging(), True
+                try:
+                    return await self.async_get_status_charging(), True
+                except Exception as e:
+                    extended_errors.append(f"Error in async_get_status_charging: {e}")
 
         except Exception as e:
-            _LOGGER.debug(f"Error in async_get_status: {e}")
+            _LOGGER.debug(f"Error in async_get_status: {e}. Extended errors {extended_errors}")
 
         _LOGGER.debug(f"async_get_status: {state} returning Error. {str(state)}")
         return ChargeControllerStates.Error, True

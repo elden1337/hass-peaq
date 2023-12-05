@@ -1,7 +1,5 @@
 from homeassistant.core import HomeAssistant
 from peaqevcore.common.models.peaq_system import PeaqSystem
-# from custom_components.peaqev.peaqservice.hub.spotprice.spotprice_factory import \
-#     SpotPriceFactory
 from peaqevcore.common.spotprice.spotprice_factory import SpotPriceFactory
 from peaqevcore.services.prediction.prediction import Prediction
 

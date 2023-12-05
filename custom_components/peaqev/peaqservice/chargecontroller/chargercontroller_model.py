@@ -17,3 +17,7 @@ class ChargeControllerModel:
     status_type: ChargeControllerStates = ChargeControllerStates.Idle
     latest_charger_start: WaitTimer = WaitTimer(timeout=DONETIMEOUT)
     latest_debuglog: float = 0
+
+    def flattened_chargerstates(self) -> list:
+        ret = set([item for val in self.charger_states.values() for item in val])
+        return list(ret)

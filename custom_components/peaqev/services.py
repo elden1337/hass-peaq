@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -24,6 +25,7 @@ class ServiceCalls(Enum):
     SCHEDULER_CANCEL = "scheduler_cancel"
     OVERRIDE_CHARGE_AMOUNT = "override_charge_amount"
     UPDATE_PEAKS_HISTORY = "update_peaks_history"
+    UPDATE_CURRENT_PEAK = "update_current_peaks"
 
 
 async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssistant) -> None:
@@ -76,6 +78,27 @@ async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssis
         _result = hub.sensors.current_peak.import_from_service(_import_dict)
         return _result
 
+    async def async_servicehandler_update_current_peaks(call: ServiceCall) -> ServiceResponse:
+        _LOGGER.debug(f"Calling {ServiceCalls.UPDATE_CURRENT_PEAK.value} service with {call.data}")
+        error_result = {"result": "error", "message": "No data provided"}
+        _import_dict = call.data.get("import_dictionary", {})
+
+        if not len(_import_dict):
+            return error_result
+        if not validate_import_dictionary(_import_dict, hub.sensors.locale.data.query_model.sum_counter.counter):
+            return error_result
+
+        _import_dict_decorated = {"m": datetime.now().month, "p": _import_dict}
+
+        """Update the peaks history"""
+        now_key = f"{datetime.now().year}_{datetime.now().month}"
+        current_history = hub.sensors.current_peak.history
+        current_history[now_key] = list(_import_dict.values())
+
+        await hub.async_set_init_dict(_import_dict_decorated, override=True)
+        _result = hub.sensors.current_peak.import_from_service(current_history)
+        return {"result": "success", "message": "Imported successfully", "history-update": _result}
+
     # Register services
     SERVICES = {
         ServiceCalls.ENABLE: async_servicehandler_enable,
@@ -89,4 +112,39 @@ async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssis
     for service, handler in SERVICES.items():
         hass.services.async_register(DOMAIN, service.value, handler)
     hass.services.async_register(DOMAIN, ServiceCalls.UPDATE_PEAKS_HISTORY.value, async_servicehandler_update_peaks_history, supports_response=SupportsResponse.ONLY)
-    #_LOGGER.debug("Registered services: {}".format(SERVICES.keys()))
+    hass.services.async_register(DOMAIN, ServiceCalls.UPDATE_CURRENT_PEAK.value,
+                                 async_servicehandler_update_current_peaks, supports_response=SupportsResponse.ONLY)
+
+
+    def validate_import_dictionary(import_dict: dict, max_len: int) -> dict:
+        ret = {"result": "success", "errors": ""}
+        _LOGGER.debug("Validating import dictionary", import_dict, max_len)
+        first = isinstance(import_dict, dict)
+        if not first:
+            ret["errors"] = "Imported data is not a dictionary"
+            return ret
+        second = all(isinstance(k, str) for k in import_dict.keys())
+        if not second:
+            ret["errors"] += "Not all keys are strings"
+        third = all(isinstance(v, float) for v in import_dict.values())
+        if not third:
+            ret["errors"] += "Not all values are floats"
+        fourth = len(import_dict.items()) <= max_len
+        if not fourth:
+            ret["errors"] += "Too many items in dictionary. Max is {}".format(max_len)
+        fifth = all(is_valid_time(k) for k in import_dict.keys())
+        if not fifth:
+            ret["errors"] += "Not all keys are valid times"
+
+        if not all([first, second, third, fourth, fifth]):
+            ret["result"] = "error"
+            ret["message"] = "Invalid data provided"
+
+        return ret
+
+    def is_valid_time(time) -> bool:
+        times = list(time.split('h'))
+        if len(times) == 2:
+            if times[0].isdigit() and times[1].isdigit():
+                return True
+        return False

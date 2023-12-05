@@ -8,6 +8,7 @@ from typing import Callable
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_state_change
 from peaqevcore.common.models.observer_types import ObserverTypes
+from peaqevcore.common.spotprice.spotpricebase import SpotPriceBase
 from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase
@@ -32,8 +33,6 @@ from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator impo
 from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import \
     HubSensorsBase
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
-from custom_components.peaqev.peaqservice.hub.spotprice.spotpricebase import \
-    SpotPriceBase
 from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
     StateChangesBase
 from custom_components.peaqev.peaqservice.powertools.ipower_tools import \
