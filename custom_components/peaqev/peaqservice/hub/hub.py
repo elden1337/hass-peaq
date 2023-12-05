@@ -197,6 +197,7 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
             ),
             SPOTPRICE_SOURCE:       partial(getattr, self.spotprice, "source", "unknown"),
             AVERAGE_SPOTPRICE_DATA: partial(getattr, self.spotprice, "average_data"),
+            AVERAGE_STDEV_DATA:     partial(getattr, self.spotprice, "average_stdev_data"),
             USE_CENT:               partial(getattr, self.spotprice.model, "use_cent"),
             CURRENT_PEAK:           partial(getattr, self.sensors.current_peak, "value"),
             AVERAGE_KWH_PRICE:      partial(self.hours.async_get_average_kwh_price),

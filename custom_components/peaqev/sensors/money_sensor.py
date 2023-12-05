@@ -10,7 +10,7 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from custom_components.peaqev.peaqservice.hub.const import (
     AVERAGE_KWH_PRICE, AVERAGE_MONTHLY, AVERAGE_SPOTPRICE_DATA, CURRENCY,
     CURRENT_PEAK, FUTURE_HOURS, MAX_CHARGE, MAX_PRICE, MIN_PRICE,
-    SPOTPRICE_SOURCE, USE_CENT)
+    SPOTPRICE_SOURCE, USE_CENT, AVERAGE_STDEV_DATA)
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
 from custom_components.peaqev.sensors.money_sensor_helpers import *
 from custom_components.peaqev.sensors.sensorbase import MoneyDevice, SensorBase
@@ -35,7 +35,7 @@ class PeaqMoneyDataSensor(MoneyDevice, RestoreEntity):
 
     async def async_update(self) -> None:
         ret = await self.hub.async_request_sensor_data(
-            AVERAGE_SPOTPRICE_DATA,
+            AVERAGE_SPOTPRICE_DATA, AVERAGE_STDEV_DATA
         )
         if ret is not None:
             if len(ret):
@@ -63,7 +63,10 @@ class PeaqMoneyDataSensor(MoneyDevice, RestoreEntity):
 
     @property
     def extra_state_attributes(self) -> dict:
-        attr_dict = {"Spotprice average data":   self._average_spotprice_data }
+        attr_dict = {
+            "Spotprice average data":   self._average_spotprice_data,
+            "Spotprice stdev data": self._average_stdev_data
+        }
         return attr_dict
 
     async def async_added_to_hass(self):
@@ -72,10 +75,12 @@ class PeaqMoneyDataSensor(MoneyDevice, RestoreEntity):
         if state:
             self._state = "on"
             data = state.attributes.get("Spotprice average data", [])
+            stdev = state.attributes.get("Spotprice average stdev", [])
             if len(data):
                 self.hub.spotprice.converted_average_data = True
-                await self.hub.spotprice.async_import_average_data(data)
+                await self.hub.spotprice.async_import_average_data(incoming_prices=data, incoming_stdev=stdev)
                 self._average_spotprice_data = self.hub.spotprice.average_data
+                self._average_stdev_data = self.hub.spotprice.average_stdev_data
 
 class PeaqMoneySensor(SensorBase, RestoreEntity):
     """Special sensor which is only created if priceaware is true"""
@@ -183,12 +188,9 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         _LOGGER.debug("last state of %s = %s", self._attr_name, state)
         if state:
             if not self.hub.spotprice.converted_average_data:
-                #mockdata = {"2023-08-28":1.551,"2023-08-29":1.027,"2023-08-30":1.606,"2023-08-31":1.486,"2023-09-01":0.715,"2023-09-02":0.38,"2023-09-03":0.356,"2023-09-04":0.257,"2023-09-05":0.216,"2023-09-06":0.716,"2023-09-07":0.773,"2023-09-08":1.296,"2023-09-09":0.234,"2023-09-10":0.241,"2023-09-11":0.978,"2023-09-12":0.229,"2023-09-13":1.032,"2023-09-14":1.356,"2023-09-15":0.451,"2023-09-16":0.242,"2023-09-17":0.224,"2023-09-18":0.2,"2023-09-19":0.08,"2023-09-20":0.105,"2023-09-21":0.099,"2023-09-22":0.091,"2023-09-23":0.121,"2023-09-24":0.113,"2023-09-25":0.077,"2023-09-26":0.194,"2023-09-27":0.235}
-                # await self.hub.spotprice.async_import_average_data(
-                #     mockdata)
                 data = state.attributes.get("Spotprice average data", state.attributes.get("Nordpool average data", []))
                 if len(data):
-                    await self.hub.spotprice.async_import_average_data(data)
+                    await self.hub.spotprice.async_import_average_data(incoming_prices=data)
                     self._average_spotprice_data = self.hub.spotprice.average_data
             self._average_spotprice_weekly = (
                 f"{self.hub.spotprice.average_weekly} {self._currency}"
