@@ -122,6 +122,10 @@ class IChargeController:
         except Exception as e:
             _LOGGER.debug(f"Error in async_set_status2: {e}")
 
+    @abstractmethod
+    async def _aux_check_running_charger_mismatch(self, status_type: ChargeControllerStates) -> None:
+        pass
+
     async def async_set_status_type(self, status_type: ChargeControllerStates) -> None:
         try:
             if isinstance(status_type, ChargeControllerStates):
@@ -132,6 +136,7 @@ class IChargeController:
                     self.model.status_type = status_type
                     if self.model.charger_type is not ChargerType.NoCharger: #todo: strategy should handle this
                         await self.hub.observer.async_broadcast(ObserverTypes.ProcessCharger)
+                await self._aux_check_running_charger_mismatch(status_type)
         except Exception as e:
             _LOGGER.debug(f"Error in async_set_status_type: {e}")
 
