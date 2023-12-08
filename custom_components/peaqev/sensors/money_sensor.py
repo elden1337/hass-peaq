@@ -28,6 +28,7 @@ class PeaqMoneyDataSensor(MoneyDevice, RestoreEntity):
         self._attr_name = name
         self._state = None
         self._average_spotprice_data = {}
+        self._average_stdev_data = {}
 
     @property
     def icon(self) -> str:
@@ -40,11 +41,15 @@ class PeaqMoneyDataSensor(MoneyDevice, RestoreEntity):
         if ret is not None:
             if len(ret):
                 self._state = "on"
-                if ret != self._average_spotprice_data:
-                    _diff = self.diff_dicts(self._average_spotprice_data, ret)
-                    _LOGGER.debug(f"dict was changed: added: {_diff[0]}, removed: {_diff[1]}")
-                self._average_spotprice_data = ret
+                if ret.get(AVERAGE_SPOTPRICE_DATA, {}) != self._average_spotprice_data:
+                    _diff = self.diff_dicts(self._average_spotprice_data, ret.get(AVERAGE_SPOTPRICE_DATA, {}))
+                    _LOGGER.debug(f"dict avgprice was changed: added: {_diff[0]}, removed: {_diff[1]}")
+                self._average_spotprice_data = ret.get(AVERAGE_SPOTPRICE_DATA, {})
                 self.hub.spotprice.converted_average_data = True
+                if ret.get(AVERAGE_STDEV_DATA, {}) != self._average_stdev_data:
+                    _diff = self.diff_dicts(self._average_stdev_data, ret.get(AVERAGE_STDEV_DATA, {}))
+                    _LOGGER.debug(f"dict stdev was changed: added: {_diff[0]}, removed: {_diff[1]}")
+                self._average_stdev_data = ret.get(AVERAGE_STDEV_DATA, {})
 
     @staticmethod
     def diff_dicts(dict1, dict2):
@@ -74,11 +79,53 @@ class PeaqMoneyDataSensor(MoneyDevice, RestoreEntity):
         _LOGGER.debug("last state of %s = %s", self._attr_name, state)
         if state:
             self._state = "on"
-            data = state.attributes.get("Spotprice average data", [])
-            stdev = state.attributes.get("Spotprice average stdev", [])
+            data = state.attributes.get("Spotprice average data", {})
+            stdev = state.attributes.get("Spotprice stdev data", {})
+
+            # data = {
+            #           "2023-11-08": 1.025,
+            #           "2023-11-09": 0.737,
+            #           "2023-11-10": 0.714,
+            #           "2023-11-11": 0.45,
+            #           "2023-11-12": 0.512,
+            #           "2023-11-13": 1.107,
+            #           "2023-11-14": 1.032,
+            #           "2023-11-15": 1.567,
+            #           "2023-11-16": 1.743,
+            #           "2023-11-17": 1.76,
+            #           "2023-11-18": 1.36,
+            #           "2023-11-19": 0.993,
+            #           "2023-11-20": 1.591,
+            #           "2023-11-21": 1.825,
+            #           "2023-11-22": 0.686,
+            #           "2023-11-23": 0.451,
+            #           "2023-11-24": 0.328,
+            #           "2023-11-25": 1.112,
+            #           "2023-11-26": 1.711,
+            #           "2023-11-27": 1.666,
+            #           "2023-11-28": 1.72,
+            #           "2023-11-29": 1.988,
+            #           "2023-11-30": 2.443,
+            #           "2023-12-01": 2.174,
+            #           "2023-12-02": 1.7,
+            #           "2023-12-03": 1.554,
+            #           "2023-12-04": 2.225,
+            #           "2023-12-05": 2.338,
+            #           "2023-12-06": 1.928,
+            #           "2023-12-07": 1.701,
+            #           "2023-12-08": 1.476
+            #         }
+            # stdev = {"2023-12-08": 0.231}
+
             if len(data):
                 self.hub.spotprice.converted_average_data = True
-                await self.hub.spotprice.async_import_average_data(incoming_prices=data, incoming_stdev=stdev)
+                try:
+                    await self.hub.spotprice.async_import_average_data(incoming_prices=data, incoming_stdev=stdev)
+                except Exception as e:
+                    _LOGGER.error(f"Unable to import average data from state. {e}")
+                    _LOGGER.debug(f"Data: {data}")
+                    _LOGGER.debug(f"Stdev: {stdev}")
+
                 self._average_spotprice_data = self.hub.spotprice.average_data
                 self._average_stdev_data = self.hub.spotprice.average_stdev_data
 
