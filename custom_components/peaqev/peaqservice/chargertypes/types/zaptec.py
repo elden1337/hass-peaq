@@ -83,7 +83,8 @@ class Zaptec(IChargerType):
 
     @property
     def call_update_current(self) -> CallType:
-        raise NotImplementedError
+        """not available from integration yet."""
+        pass
 
     @property
     def servicecalls_options(self) -> ServiceCallsOptions:
