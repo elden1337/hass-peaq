@@ -23,7 +23,7 @@ def log_once(msg):
     try:
         if msg not in already_logged:
             already_logged.append(msg)
-            _LOGGER.debug(msg)
+            _LOGGER.info(msg)
     except Exception as e:
         _LOGGER.error(f"Error in log_once_per_minute: {e}")
 
