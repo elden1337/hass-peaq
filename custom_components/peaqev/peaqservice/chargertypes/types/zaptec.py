@@ -64,7 +64,7 @@ class Zaptec(IChargerType):
 
     @property
     def max_amps(self) -> int:
-        return 16
+        return self.get_allowed_amps()
 
     @property
     def call_on(self) -> CallType:
@@ -89,10 +89,14 @@ class Zaptec(IChargerType):
     @property
     def servicecalls_options(self) -> ServiceCallsOptions:
         return ServiceCallsOptions(
-            allowupdatecurrent=False,
-            update_current_on_termination=False,
+            allowupdatecurrent=True,
+            update_current_on_termination=True,
             switch_controls_charger=False,
         )
+
+    def get_allowed_amps(self) -> int:
+        """no such method for chargeamps available right now."""
+        return 16
 
     async def async_set_sensors(self):
         try:
