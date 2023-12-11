@@ -12,6 +12,7 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
     ChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
+from custom_components.peaqev.peaqservice.util.constants import CURRENT
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -67,7 +68,7 @@ class Zaptec(IChargerType):
 
     @property
     def call_on(self) -> CallType:
-        return CallType("start_charging", {"charger_id": self._chargerid})
+        return CallType("restart_charger", {"charger_id": self._chargerid})
 
     @property
     def call_off(self) -> CallType:
@@ -79,12 +80,11 @@ class Zaptec(IChargerType):
 
     @property
     def call_pause(self) -> CallType:
-        return CallType("stop_pause_charging", {"charger_id": self._chargerid})
+        return CallType("stop_charging", {"charger_id": self._chargerid})
 
     @property
     def call_update_current(self) -> CallType:
-        """not available from integration yet."""
-        pass
+        return CallType("limit_current",{"installation_id": self._chargerid, CURRENT: "available_current"})
 
     @property
     def servicecalls_options(self) -> ServiceCallsOptions:
