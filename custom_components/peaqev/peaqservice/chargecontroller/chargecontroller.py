@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import time
 from typing import TYPE_CHECKING, Tuple
 
 from peaqevcore.common.models.observer_types import ObserverTypes
@@ -11,7 +10,7 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
-
+from peaqevcore.common.wait_timer import WaitTimer
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
 from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import \
@@ -29,7 +28,6 @@ class ChargeController(IChargeController):
         self, hub: HomeAssistantHub, charger_states: dict, charger_type: ChargerType
     ):
         self._aux_running_grace_timer = WaitTimer(timeout=300, init_now=True)
-        self._init_time = time.time()
         super().__init__(hub, charger_states, charger_type)
 
     @property
@@ -106,7 +104,7 @@ class ChargeController(IChargeController):
 
     async def _aux_check_running_charger_mismatch(self, status_type: ChargeControllerStates) -> None:
         if self._aux_running_grace_timer.is_timeout():
-            _LOGGER.warning(f"Charger seems to be running without Peaqev controlling it. Attempting aux stop. If you wish to charge without Peaqev you need to disable it on the switch. {self._aux_running_grace_timer.value}, {self._aux_running_grace_timer.timeout}, {self._init_time}")
+            _LOGGER.warning(f"Charger seems to be running without Peaqev controlling it. Attempting aux stop. If you wish to charge without Peaqev you need to disable it on the switch.")
             await self.hub.observer.async_broadcast(ObserverTypes.KillswitchDead)
             self._aux_running_grace_timer.reset()
         elif status_type in [
