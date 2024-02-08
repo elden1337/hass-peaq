@@ -39,10 +39,12 @@ class IGainLoss:
         average: float|None = None
         if consumption is not None and cost is not None:
             if await self.async_check_invalid_states(consumption, cost):
+                _LOGGER.debug("Gainloss: invalid states")
                 return 0.0
             try:
                 average, cost = self.normalize_numbers(await self.async_get_average(time_period), float(cost))
             except TypeError:
+                _LOGGER.warning(f"Can't calculate gain/loss. avg: {average}, cost: {cost}")
                 return 0.0
             if float(consumption) > 0 and cost > 0 and average is not None:
                 net = cost / float(consumption)
@@ -50,7 +52,9 @@ class IGainLoss:
                     ret = round((net / average) - 1, 4)
                     return max(-1.0,min(ret,1.0))
                 except ZeroDivisionError:
+                    _LOGGER.warning(f"Gainloss, zerodivision error. net:{net}, average:{average}")
                     return 0.0
+        _LOGGER.debug("Gainloss, missing consumption or cost")
         return 0.0
 
     @staticmethod

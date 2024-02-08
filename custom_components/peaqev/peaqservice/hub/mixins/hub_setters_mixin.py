@@ -21,9 +21,12 @@ class HubSettersMixin:
         await self.sensors.locale.async_try_update_peak(
             new_val=val[0], timestamp=val[1]
         )
+        checkval = self.sensors.current_peak.value
         self.sensors.current_peak.value = (
             list(self.sensors.locale.data.query_model.peaks.p.values())
         )
+        if checkval != self.sensors.current_peak.value:
+            _LOGGER.info("observed peak updated to %s", self.sensors.current_peak.value)
 
     async def async_update_charger_done(self, val):
         setattr(self.sensors.charger_done, "value", bool(val))

@@ -55,7 +55,7 @@ class HubSensorsBase:
                 initval=False,
             ),
             CURRENTPEAK_SENSOR: partial(
-                CurrentPeak, data_type=float, initval=0, startpeaks=options.startpeaks, options_use_history=options.use_peak_history
+                CurrentPeak, data_type=float, initval=0, startpeaks=options.startpeaks, locale=self.locale, options_use_history=options.use_peak_history
             ),
             TOTALHOURLYENERGY_SENSOR: partial(
                 HubMember,

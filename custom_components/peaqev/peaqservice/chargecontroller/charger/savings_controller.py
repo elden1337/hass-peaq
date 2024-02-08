@@ -65,7 +65,7 @@ class SavingsController:
         await self.service.async_import_data(data)
 
     async def async_enter(self):
-        _LOGGER.debug("SavingsController: async_enter")
+        #_LOGGER.debug("SavingsController: async_enter")
         # if car is being  connected to charger
         if self.status is SavingsStatus.Off:
             await self.service.async_start_listen()

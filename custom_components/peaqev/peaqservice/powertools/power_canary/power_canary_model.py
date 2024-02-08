@@ -30,7 +30,7 @@ class PowerCanaryModel:
     def _set_allowed_amps(self, amps_dict, default_amps) -> dict:
         """only allow amps if user has set this value high enough"""
         if self.fuse_max > 0:
-            return {k: v for (k, v) in default_amps.items() if k < self.fuse_max}
+            return {k: v for (k, v) in amps_dict.items() if k < self.fuse_max}
         return default_amps
 
     @property

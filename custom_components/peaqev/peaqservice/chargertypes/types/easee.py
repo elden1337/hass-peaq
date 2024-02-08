@@ -15,7 +15,6 @@ from custom_components.peaqev.peaqservice.hub.models.hub_options import \
 from custom_components.peaqev.peaqservice.util.constants import (CHARGER,
                                                                  CHARGERID,
                                                                  CURRENT)
-from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
 # docs: https://github.com/fondberg/easee_hass
@@ -45,10 +44,13 @@ class Easee(IChargerType):
         ]
         self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
         self.chargerstates[ChargeControllerStates.Done] = ["completed"]
+        self._easee_max_amps = None
 
     @property
     def max_amps(self) -> int:
-        return self.get_allowed_amps()
+        if self._easee_max_amps is None:
+            return self.get_allowed_amps()
+        return self._easee_max_amps
 
     @property
     def type(self) -> ChargerType:
@@ -145,10 +147,11 @@ class Easee(IChargerType):
         if state is not None:
             retattr = state.attributes.get(entity[1], None)
             if retattr is not None:
-                log_once(f"Got max amps from Easee. Setting {retattr}A.")
+                _LOGGER.info(f"Got max amps from Easee. Setting {retattr}A.")
                 ret = int(retattr)
+                self._easee_max_amps = ret
         else:
-            log_once(
+            _LOGGER.warning(
                 f"Unable to get max amps. The sensor {self.entities.maxamps} returned state {ret}. Setting max amps to 16 til I get a proper state."
             )
         return ret

@@ -12,6 +12,7 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
     ChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
+from custom_components.peaqev.peaqservice.util.constants import CURRENT
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,6 +36,7 @@ class Zaptec(IChargerType):
         self.entities.imported_entityendings = self.entity_endings
         self._auth_required = auth_required
         self.options.powerswitch_controls_charging = True
+        self.installation_name = None
 
         self.chargerstates[ChargeControllerStates.Idle] = ["disconnected"]
         self.chargerstates[ChargeControllerStates.Connected] = ["waiting"]
@@ -63,11 +65,11 @@ class Zaptec(IChargerType):
 
     @property
     def max_amps(self) -> int:
-        return 16
+        return self.get_allowed_amps()
 
     @property
     def call_on(self) -> CallType:
-        return CallType("start_charging", {"charger_id": self._chargerid})
+        return CallType("restart_charger", {"charger_id": self._chargerid})
 
     @property
     def call_off(self) -> CallType:
@@ -79,30 +81,31 @@ class Zaptec(IChargerType):
 
     @property
     def call_pause(self) -> CallType:
-        return CallType("stop_pause_charging", {"charger_id": self._chargerid})
+        return CallType("stop_charging", {"charger_id": self._chargerid})
 
     @property
     def call_update_current(self) -> CallType:
-        raise NotImplementedError
+        return CallType("limit_current",{"installation_id": self._chargerid, CURRENT: "available_current"})
 
     @property
     def servicecalls_options(self) -> ServiceCallsOptions:
         return ServiceCallsOptions(
-            allowupdatecurrent=False,
-            update_current_on_termination=False,
+            allowupdatecurrent=True,
+            update_current_on_termination=True,
             switch_controls_charger=False,
         )
 
+    def get_allowed_amps(self) -> int:
+        """no such method for chargeamps available right now."""
+        return 16
+
     async def async_set_sensors(self):
         try:
-            self.entities.chargerentity = f"sensor.zaptec_{self.entities.entityschema}"
-            self.entities.powermeter = (
-                f"{self.entities.chargerentity}|total_charge_power"
-            )
+            self.entities.chargerentity = f"sensor.{self.entities.entityschema}_charger_mode"
+            self.entities.powermeter = f"sensor.{self.entities.chargerentity}_charge_power"
             self.options.powermeter_factor = 1
-            self.entities.powerswitch = (
-                f"switch.zaptec_{self.entities.entityschema}_switch"
-            )
+            self.entities.powerswitch = f"switch.{self.entities.entityschema}_charging"
+            self.entities.ampmeter = f"number.{self.installation_name}_available_current" #todo: installation_name is not part of peaqevsetup. how to handle?
             _LOGGER.debug("Sensors for Zaptec have been set up.")
         except Exception as e:
             _LOGGER.exception(f"Could not set needed sensors for Zaptec. {e}")
