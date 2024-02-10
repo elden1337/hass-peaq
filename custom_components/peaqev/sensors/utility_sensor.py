@@ -12,7 +12,9 @@ from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
 from custom_components.peaqev.const import DOMAIN
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
+import logging
 
+_LOGGER = logging.getLogger(__name__)
 
 class Object:
     pass
@@ -43,6 +45,7 @@ async def async_create_single_utility(hub: HomeAssistantHub, sensor: any, meter_
         "meter_type": meter_type.value,
         "meter_offset": METER_OFFSET,
         "net_consumption": True,
+        "sensor_always_available": True,
         "tariff": None,
         "tariff_entity": None,
         "periodically_resetting": False,
@@ -59,6 +62,7 @@ async def async_create_single_utility(hub: HomeAssistantHub, sensor: any, meter_
         params["cron_pattern"] = None
 
     utility_meter = PeaqUtilitySensor(**params)
+    _LOGGER.debug(f"Creating utility meter {name} with entity_id {this_sensor}. Result {utility_meter}")
     utility_meter.entity_id = this_sensor
     return utility_meter
 
