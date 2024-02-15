@@ -31,39 +31,36 @@ class PeaqMoneyDataSensor(MoneyDevice, RestoreEntity):
         self._average_stdev_data = {}
 
     @property
+    def state(self) -> str:
+        return self._state.strftime("%Y-%m-%d %H:%M:%S") if self._state else "off"
+
+    @property
     def icon(self) -> str:
         return "mdi:database-outline"
 
     async def async_update(self) -> None:
-        ret = await self.hub.async_request_sensor_data(
-            AVERAGE_SPOTPRICE_DATA, AVERAGE_STDEV_DATA
-        )
-        if ret is not None:
-            if len(ret):
-                self._state = "on"
-                if ret.get(AVERAGE_SPOTPRICE_DATA, {}) != self._average_spotprice_data:
-                    _diff = self.diff_dicts(self._average_spotprice_data, ret.get(AVERAGE_SPOTPRICE_DATA, {}))
-                    _LOGGER.debug(f"dict avgprice was changed: added: {_diff[0]}, removed: {_diff[1]}")
-                self._average_spotprice_data = ret.get(AVERAGE_SPOTPRICE_DATA, {})
-                self.hub.spotprice.converted_average_data = True
-                if ret.get(AVERAGE_STDEV_DATA, {}) != self._average_stdev_data:
-                    _diff = self.diff_dicts(self._average_stdev_data, ret.get(AVERAGE_STDEV_DATA, {}))
-                    _LOGGER.debug(f"dict stdev was changed: added: {_diff[0]}, removed: {_diff[1]}")
-                self._average_stdev_data = ret.get(AVERAGE_STDEV_DATA, {})
+        if datetime.now() - self._state > timedelta(minutes=1):
+            ret = await self.hub.async_request_sensor_data(
+                AVERAGE_SPOTPRICE_DATA, AVERAGE_STDEV_DATA
+            )
+            if ret is not None:
+                if len(ret):
+                    self._state = datetime.now()
+                    if ret.get(AVERAGE_SPOTPRICE_DATA, {}) != self._average_spotprice_data:
+                        _diff = self.diff_dicts(self._average_spotprice_data, ret.get(AVERAGE_SPOTPRICE_DATA, {}))
+                        _LOGGER.debug(f"dict avgprice was changed: added: {_diff[0]}, removed: {_diff[1]}")
+                    self._average_spotprice_data = ret.get(AVERAGE_SPOTPRICE_DATA, {})
+                    self.hub.spotprice.converted_average_data = True
+                    if ret.get(AVERAGE_STDEV_DATA, {}) != self._average_stdev_data:
+                        _diff = self.diff_dicts(self._average_stdev_data, ret.get(AVERAGE_STDEV_DATA, {}))
+                        _LOGGER.debug(f"dict stdev was changed: added: {_diff[0]}, removed: {_diff[1]}")
+                    self._average_stdev_data = ret.get(AVERAGE_STDEV_DATA, {})
 
     @staticmethod
     def diff_dicts(dict1, dict2):
-        added = {}
-        removed = {}
-
-        for key in dict2:
-            if key not in dict1:
-                added[key] = dict2[key]
-
-        for key in dict1:
-            if key not in dict2:
-                removed[key] = dict1[key]
-
+        """Just a helper to debuglog if there has been changes so we know what it's doing."""
+        added = {key: dict2[key] for key in dict2 if key not in dict1}
+        removed = {key: dict1[key] for key in dict1 if key not in dict2}
         return added, removed
 
     @property
@@ -78,7 +75,7 @@ class PeaqMoneyDataSensor(MoneyDevice, RestoreEntity):
         state = await super().async_get_last_state()
         _LOGGER.debug("last state of %s = %s", self._attr_name, state)
         if state:
-            self._state = "on"
+            self._state = datetime.now()
             data = state.attributes.get("Spotprice average data", {})
             stdev = state.attributes.get("Spotprice stdev data", {})
             if len(data):
