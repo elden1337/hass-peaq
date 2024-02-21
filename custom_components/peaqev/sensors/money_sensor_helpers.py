@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 from peaqevcore.common.currency_translation import currency_translation
 from peaqevcore.services.hoursselection_service_new.models.hour_price import \
     HourPrice
-from peaqevcore.services.hoursselection_service_new.models.permittance_type import PermittanceType
+from peaqevcore.services.hoursselection_service_new.models.permittance_type import \
+    PermittanceType
 
 _LOGGER = logging.getLogger(__name__)
 
