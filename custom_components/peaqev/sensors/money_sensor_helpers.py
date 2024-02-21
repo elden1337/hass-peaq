@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from peaqevcore.common.currency_translation import currency_translation
 from peaqevcore.services.hoursselection_service_new.models.hour_price import \
     HourPrice
+from peaqevcore.services.hoursselection_service_new.models.permittance_type import PermittanceType
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -71,11 +72,15 @@ def set_all_hours_display(future_hours: list[HourPrice], tomorrow_valid: bool) -
 
         match h.permittance:
             case 0:
-                ret[str(dt_string)] = "-"
+                ret[str(dt_string)] = "—"
             case 1:
                 ret[str(dt_string)] = "Charge"
             case _:
                 ret[str(dt_string)] = f"Caution {str(int(h.permittance * 100))}%"
+
+        if h.permittance_type is PermittanceType.MaxMin:
+            ret[str(dt_string)] = f"{ret[str(dt_string)]} ★"
+
     return ret
 
 
