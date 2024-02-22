@@ -39,14 +39,13 @@ class PeaqMoneyDataSensor(MoneyDevice, RestoreEntity):
         return "mdi:database-outline"
 
     async def async_update(self) -> None:
-        if datetime.now() - self._state > timedelta(minutes=1):
             ret = await self.hub.async_request_sensor_data(
                 AVERAGE_SPOTPRICE_DATA, AVERAGE_STDEV_DATA
             )
             if ret is not None:
                 if len(ret):
-                    self._state = datetime.now()
                     if ret.get(AVERAGE_SPOTPRICE_DATA, {}) != self._average_spotprice_data:
+                        self._state = datetime.now()
                         _diff = self.diff_dicts(self._average_spotprice_data, ret.get(AVERAGE_SPOTPRICE_DATA, {}))
                         _LOGGER.debug(f"dict avgprice was changed: added: {_diff[0]}, removed: {_diff[1]}")
                     self._average_spotprice_data = ret.get(AVERAGE_SPOTPRICE_DATA, {})
