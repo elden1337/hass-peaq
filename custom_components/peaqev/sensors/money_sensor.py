@@ -39,21 +39,23 @@ class PeaqMoneyDataSensor(MoneyDevice, RestoreEntity):
         return "mdi:database-outline"
 
     async def async_update(self) -> None:
-            ret = await self.hub.async_request_sensor_data(
-                AVERAGE_SPOTPRICE_DATA, AVERAGE_STDEV_DATA
-            )
+            ret = await self.hub.async_request_sensor_data(AVERAGE_SPOTPRICE_DATA, AVERAGE_STDEV_DATA)
             if ret is not None:
                 if len(ret):
-                    if ret.get(AVERAGE_SPOTPRICE_DATA, {}) != self._average_spotprice_data:
+                    incoming_prices = ret.get(AVERAGE_SPOTPRICE_DATA, {})
+                    incoming_stdev = ret.get(AVERAGE_STDEV_DATA, {})
+
+                    if incoming_prices != self._average_spotprice_data or self._state < datetime.now()+timedelta(minutes=-30):
                         self._state = datetime.now()
-                        _diff = self.diff_dicts(self._average_spotprice_data, ret.get(AVERAGE_SPOTPRICE_DATA, {}))
+                        _diff = self.diff_dicts(self._average_spotprice_data, incoming_prices)
                         _LOGGER.debug(f"dict avgprice was changed: added: {_diff[0]}, removed: {_diff[1]}")
-                    self._average_spotprice_data = ret.get(AVERAGE_SPOTPRICE_DATA, {})
+                    self._average_spotprice_data = incoming_prices
                     self.hub.spotprice.converted_average_data = True
-                    if ret.get(AVERAGE_STDEV_DATA, {}) != self._average_stdev_data:
-                        _diff = self.diff_dicts(self._average_stdev_data, ret.get(AVERAGE_STDEV_DATA, {}))
+
+                    if incoming_stdev != self._average_stdev_data:
+                        _diff = self.diff_dicts(self._average_stdev_data, incoming_stdev)
                         _LOGGER.debug(f"dict stdev was changed: added: {_diff[0]}, removed: {_diff[1]}")
-                    self._average_stdev_data = ret.get(AVERAGE_STDEV_DATA, {})
+                    self._average_stdev_data = incoming_stdev
 
     @staticmethod
     def diff_dicts(dict1, dict2):
