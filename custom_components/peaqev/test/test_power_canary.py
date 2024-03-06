@@ -14,8 +14,8 @@ async def test_power_canary():
     canary.total_power = 1000
     assert canary.model.is_valid
     assert canary.alive == True
-    assert canary.max_current_amp == 16
-    assert canary.threephase_amps == {4100: 6, 5500: 8, 6875: 10, 8250: 12, 9625: 14, 11000: 16}
+    assert canary.max_current_amp == 24
+    assert canary.threephase_amps == {4100: 6, 5500: 8, 6875: 10, 8250: 12, 9625: 14, 11000: 16,12375: 18, 13750: 20}
 
 
 @pytest.mark.asyncio
