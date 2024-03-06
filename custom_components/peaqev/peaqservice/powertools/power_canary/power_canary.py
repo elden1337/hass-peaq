@@ -34,8 +34,10 @@ class PowerCanary(IPowerCanary):
 
     def check_current_percentage(self):
         if not self.alive:
+            _LOGGER.warning("PowerCanary is dead!")
             self.hub.observer.broadcast(command=ObserverTypes.PowerCanaryDead)
         if self.current_percentage >= self.model.warning_threshold:
+            _LOGGER.warning("PowerCanary is caution!")
             self.hub.observer.broadcast(command=ObserverTypes.PowerCanaryWarning)
 
     @property
