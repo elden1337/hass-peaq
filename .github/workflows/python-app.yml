@@ -20,9 +20,6 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Change working directory
-        run: |
-          cd custom_components/peaqev
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -33,12 +30,12 @@ jobs:
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 custom_components/peaqev --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings.
-          flake8 . --count --exit-zero --statistics
+          flake8 custom_components/peaqev --count --exit-zero --statistics
       - name: Test with pytest
         run: |
-          pytest test/
+          pytest custom_components/peaqev/test/
       - name: Report pytest results
         uses: EnricoMi/publish-unit-test-result-action@v1
         if: always()
