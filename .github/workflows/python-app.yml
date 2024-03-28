@@ -22,7 +22,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Change working directory
         run: |
-          cd /custom_components/peaqev
+          cd custom_components/peaqev
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
