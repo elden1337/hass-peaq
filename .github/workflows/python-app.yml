@@ -36,8 +36,3 @@ jobs:
       - name: Test with pytest
         run: |
           pytest custom_components/peaqev/test/
-      - name: Report pytest results
-        uses: EnricoMi/publish-unit-test-result-action@v1
-        if: always()
-        with:
-          files: pytest.xml
