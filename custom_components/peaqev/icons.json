@@ -1,0 +1,12 @@
+{
+  "services": {
+    "enable": "mdi:flash",
+    "disable": "mdi:flash-off",
+    "override_nonhours": "mdi:calendar-edit",
+    "scheduler_set": "mdi:calendar-clock",
+    "scheduler_cancel": "mdi:calendar-remove",
+    "override_charge_amount": "mdi:ev-station",
+    "update_peaks_history": "mdi:history",
+    "update_current_peaks": "mdi:chart-histogram"
+  }
+}
