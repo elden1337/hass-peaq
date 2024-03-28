@@ -1,4 +1,4 @@
-peaqevcore~=13.0.0
+peaqevcore~=19.7.0
 black
 isort
 autoflake
