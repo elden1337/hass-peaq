@@ -3,3 +3,4 @@ black
 isort
 autoflake
 pytest
+pytest-asyncio
