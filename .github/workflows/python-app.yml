@@ -1,6 +1,10 @@
 name: Python package
 
-on: [push,pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
   build:
@@ -25,8 +29,8 @@ jobs:
         run: |
           # stop the build if there are Python syntax errors or undefined names
           flake8 custom_components --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. 
+          # exit-zero treats all errors as warnings.
           flake8 custom_components --count --exit-zero --statistics
-#      - name: Test with pytest
-#        run: |
-#          pytest custom_components/peaqev/test/
+      - name: Test with pytest
+        run: |
+          pytest custom_components/peaqev/test/
