@@ -48,13 +48,14 @@ class PeaqMoneyDataSensor(MoneyDevice, RestoreEntity):
                     if incoming_prices != self._average_spotprice_data or self._state < datetime.now()+timedelta(minutes=-30):
                         self._state = datetime.now()
                         _diff = self.diff_dicts(self._average_spotprice_data, incoming_prices)
-                        _LOGGER.debug(f"dict avgprice was changed: added: {_diff[0]}, removed: {_diff[1]}")
+                        if len(_diff[0]) or len(_diff[1]):
+                            _LOGGER.debug(f"dict avgprice was changed: added: {_diff[0]}, removed: {_diff[1]}")
                     self._average_spotprice_data = incoming_prices
-                    self.hub.spotprice.converted_average_data = True
 
                     if incoming_stdev != self._average_stdev_data:
                         _diff = self.diff_dicts(self._average_stdev_data, incoming_stdev)
-                        _LOGGER.debug(f"dict stdev was changed: added: {_diff[0]}, removed: {_diff[1]}")
+                        if len(_diff[0]) or len(_diff[1]):
+                            _LOGGER.debug(f"dict stdev was changed: added: {_diff[0]}, removed: {_diff[1]}")
                     self._average_stdev_data = incoming_stdev
 
     @staticmethod
@@ -80,7 +81,6 @@ class PeaqMoneyDataSensor(MoneyDevice, RestoreEntity):
             data = state.attributes.get("Spotprice average data", {})
             stdev = state.attributes.get("Spotprice stdev data", {})
             if len(data):
-                self.hub.spotprice.converted_average_data = True
                 try:
                     await self.hub.spotprice.async_import_average_data(incoming_prices=data, incoming_stdev=stdev)
                 except Exception as e:
@@ -144,8 +144,6 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             self._currency = ret.get(CURRENCY)
             self._current_peak = ret.get(CURRENT_PEAK)
             self._max_charge = set_total_charge(ret.get(MAX_CHARGE))
-            if not self.hub.spotprice.converted_average_data:
-                self._average_spotprice_data = ret.get(AVERAGE_SPOTPRICE_DATA, [])
             self._charge_permittance = set_current_charge_permittance_display(ret.get(FUTURE_HOURS))
             self._avg_cost = set_avg_cost(
                 avg_cost=ret.get(AVERAGE_KWH_PRICE),
@@ -184,8 +182,6 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
             "All hours": self._all_hours,
             "Spotprice source": self._source
         }
-        if not self.hub.spotprice.converted_average_data:
-            attr_dict["Spotprice average data"] = self._average_spotprice_data
         if self.hub.options.price.dynamic_top_price:
             attr_dict["Max price based on"] = self._max_price_based_on
             attr_dict["Max min price"] = self._max_min_price
@@ -196,11 +192,6 @@ class PeaqMoneySensor(SensorBase, RestoreEntity):
         state = await super().async_get_last_state()
         _LOGGER.debug("last state of %s = %s", self._attr_name, state)
         if state:
-            if not self.hub.spotprice.converted_average_data:
-                data = state.attributes.get("Spotprice average data", state.attributes.get("Nordpool average data", []))
-                if len(data):
-                    await self.hub.spotprice.async_import_average_data(incoming_prices=data)
-                    self._average_spotprice_data = self.hub.spotprice.average_data
             self._average_spotprice_weekly = (
                 f"{self.hub.spotprice.average_weekly} {self._currency}"
             )
