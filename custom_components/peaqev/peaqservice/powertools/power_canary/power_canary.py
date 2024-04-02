@@ -42,6 +42,7 @@ class PowerCanary(IPowerCanary):
 
     @property
     def max_current_amp(self) -> int:
+        """returns the max current amp allowed by the power canary. -1 if disabled"""
         if not self.enabled:
             return -1
         return self.get_max_current_amp(self.hub.threshold.phases)
