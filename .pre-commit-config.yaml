@@ -1,0 +1,10 @@
+repos:
+  -   repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.5.0  # Use the ref you want to point at
+      hooks:
+      -   id: check-ast
+      -   id: check-json
+      -   id: check-yaml
+      -   id: double-quote-string-fixer
+      -   id: end-of-file-fixer
+      -   id: trailing-whitespace
