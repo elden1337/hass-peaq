@@ -1,5 +1,6 @@
-peaqevcore~=19.7.0
-black
+peaqevcore
+flake8
+homeassistant
 isort
 autoflake
 pytest
