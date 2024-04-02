@@ -48,13 +48,15 @@ class PeaqMoneyDataSensor(MoneyDevice, RestoreEntity):
                     if incoming_prices != self._average_spotprice_data or self._state < datetime.now()+timedelta(minutes=-30):
                         self._state = datetime.now()
                         _diff = self.diff_dicts(self._average_spotprice_data, incoming_prices)
-                        _LOGGER.debug(f"dict avgprice was changed: added: {_diff[0]}, removed: {_diff[1]}")
+                        if len(_diff[0]) or len(_diff[1]):
+                            _LOGGER.debug(f"dict avgprice was changed: added: {_diff[0]}, removed: {_diff[1]}")
                     self._average_spotprice_data = incoming_prices
                     self.hub.spotprice.converted_average_data = True
 
                     if incoming_stdev != self._average_stdev_data:
                         _diff = self.diff_dicts(self._average_stdev_data, incoming_stdev)
-                        _LOGGER.debug(f"dict stdev was changed: added: {_diff[0]}, removed: {_diff[1]}")
+                        if len(_diff[0]) or len(_diff[1]):
+                            _LOGGER.debug(f"dict stdev was changed: added: {_diff[0]}, removed: {_diff[1]}")
                     self._average_stdev_data = incoming_stdev
 
     @staticmethod
