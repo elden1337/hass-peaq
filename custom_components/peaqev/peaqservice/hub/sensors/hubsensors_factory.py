@@ -4,9 +4,12 @@ from typing import TYPE_CHECKING
 
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
-from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors import HubSensors
-from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_base import HubSensorsBase
-from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_lite import HubSensorsLite
+from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors import \
+    HubSensors
+from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_base import \
+    HubSensorsBase
+from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_lite import \
+    HubSensorsLite
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub

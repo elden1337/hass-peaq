@@ -4,7 +4,8 @@ from dataclasses import dataclass
 
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
-from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_base import HubSensorsBase
+from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_base import \
+    HubSensorsBase
 
 
 @dataclass
