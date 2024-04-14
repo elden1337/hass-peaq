@@ -4,8 +4,9 @@ from typing import TYPE_CHECKING
 
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
-from custom_components.peaqev.peaqservice.hub.sensors.ihub_sensors import (
-    HubSensors, HubSensorsLite)
+from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors import HubSensors
+from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_base import HubSensorsBase
+from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_lite import HubSensorsLite
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
 
 class HubSensorsFactory:
     @staticmethod
-    async def async_create(hub: HomeAssistantHub) -> HubSensors:
+    async def async_create(hub: HomeAssistantHub) -> HubSensorsBase:
         if hub.options.peaqev_lite:
             sensors = HubSensorsLite
         else:
