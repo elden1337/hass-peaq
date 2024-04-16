@@ -7,8 +7,8 @@ if TYPE_CHECKING:
 
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from custom_components.peaqev.peaqservice.hub.const import (AVERAGE_SPOTPRICE_DATA,AVERAGE_STDEV_DATA)
-
+from custom_components.peaqev.peaqservice.hub.const import (
+    AVERAGE_SPOTPRICE_DATA, AVERAGE_STDEV_DATA)
 from custom_components.peaqev.sensors.money_sensor_helpers import *
 from custom_components.peaqev.sensors.sensorbase import MoneyDevice
 
