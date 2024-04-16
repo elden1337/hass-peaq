@@ -21,6 +21,7 @@ from custom_components.peaqev.sensors.hourcontroller_sensor import HourControlle
 from custom_components.peaqev.sensors.integration_sensor import (
     PeaqIntegrationCostSensor, PeaqIntegrationSensor)
 from custom_components.peaqev.sensors.moneydata_sensor import MoneyDataSensor
+from custom_components.peaqev.sensors.peak_sensor import PeaqPeakSensor
 from custom_components.peaqev.sensors.power.amp_sensor import PeaqAmpSensor
 from custom_components.peaqev.sensors.power.power_cost_sensor import \
     PeaqPowerCostSensor
@@ -36,7 +37,6 @@ from custom_components.peaqev.sensors.session_sensor import (
     PeaqSessionCostSensor, PeaqSessionSensor)
 from custom_components.peaqev.sensors.simple_money_sensor import \
     PeaqSimpleMoneySensor
-from custom_components.peaqev.sensors.sql_sensor import PeaqPeakSensor
 from custom_components.peaqev.sensors.threshold_sensor import \
     PeaqThresholdSensor
 from custom_components.peaqev.sensors.utility_sensor import (
