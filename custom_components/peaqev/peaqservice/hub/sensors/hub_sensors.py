@@ -8,11 +8,13 @@ from peaqevcore.common.trend import Gradient
 from peaqevcore.models.hub.hubmember import HubMember
 from peaqevcore.models.hub.power import Power
 
-from custom_components.peaqev.peaqservice.hub.const import (AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H)
+from custom_components.peaqev.peaqservice.hub.const import (
+    AVERAGECONSUMPTION, AVERAGECONSUMPTION_24H)
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.hub.sensors.const import *
-from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_base import HubSensorsBase
+from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_base import \
+    HubSensorsBase
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 
 

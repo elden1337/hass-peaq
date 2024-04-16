@@ -16,8 +16,10 @@ from custom_components.peaqev.peaqservice.hub.sensors.const import *
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
 
-from custom_components.peaqev.peaqservice.hub.const import (CHARGER_DONE, CHARGERENABLED,CONSUMPTION_TOTAL_NAME, HOURLY)
-from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
+from custom_components.peaqev.peaqservice.hub.const import (
+    CHARGER_DONE, CHARGERENABLED, CONSUMPTION_TOTAL_NAME, HOURLY)
+from custom_components.peaqev.peaqservice.hub.models.hub_options import \
+    HubOptions
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
 
 
