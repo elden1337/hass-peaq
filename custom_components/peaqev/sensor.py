@@ -15,9 +15,11 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
 from custom_components.peaqev.peaqservice.util.constants import (
     CONSUMPTION_INTEGRAL_NAME, CONSUMPTION_TOTAL_NAME)
 from custom_components.peaqev.sensors.average_sensor import PeaqAverageSensor
-from custom_components.peaqev.sensors.chargercontroller_sensor import ChargerControllerSensor
+from custom_components.peaqev.sensors.chargercontroller_sensor import \
+    ChargerControllerSensor
 from custom_components.peaqev.sensors.gain_loss_sensor import GainLossSensor
-from custom_components.peaqev.sensors.hourcontroller_sensor import HourControllerSensor
+from custom_components.peaqev.sensors.hourcontroller_sensor import \
+    HourControllerSensor
 from custom_components.peaqev.sensors.integration_sensor import (
     PeaqIntegrationCostSensor, PeaqIntegrationSensor)
 from custom_components.peaqev.sensors.moneydata_sensor import MoneyDataSensor
