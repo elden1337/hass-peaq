@@ -204,10 +204,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         """Priceaware"""
         errors = {}
         if user_input is not None:
-            try:
-                await ConfigFlowValidation.validate_price_sensor(self.hass, user_input['custom_price_sensor'])
-            except ValueError:
-                errors['base'] = 'invalid_pricesensor'
+            if len(user_input['custom_price_sensor']) > 2:
+                try:
+                    await ConfigFlowValidation.validate_price_sensor(self.hass, user_input['custom_price_sensor'])
+                except ValueError:
+                    errors['base'] = 'invalid_pricesensor'
+            else:
+                _LOGGER.info('Nulling Custom price sensor')
+                user_input['custom_price_sensor'] = ''
             if not errors:
                 self.options.update(user_input)
                 if self.options['priceaware'] is False:
