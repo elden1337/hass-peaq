@@ -28,8 +28,22 @@ class ConfigFlowValidation:
         if val_state is None:
             raise FaultyPowerSensor('It returned None as state.')
 
-        elif not isinstance(float(val_state.state), float):
+        if not isinstance(float(val_state.state), float):
             raise FaultyPriceSensor(f'Value of state is not a number. {val_state.state}')
+
+        try:
+            ConfigFlowValidation.validate_price_sensor_attributes(val_state.attributes)
+        except Exception as e:
+            raise FaultyPriceSensor(f'Could not validate chosen pricing sensor. {e}')
+
+    @staticmethod
+    def validate_price_sensor_attributes(attributes: dict):
+        if 'today' not in attributes:
+            raise ValueError('Today values is missing')
+        if 'tomorrow_valid' not in attributes:
+            raise ValueError('Tomorrow valid is missing.')
+        if 'currency' not in attributes:
+            raise ValueError('Currency is missing.')
 
     @staticmethod
     async def validate_input_first(data: dict) -> dict[str, Any]:

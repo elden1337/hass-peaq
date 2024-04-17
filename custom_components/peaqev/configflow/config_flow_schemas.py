@@ -11,8 +11,8 @@ from custom_components.peaqev.peaqservice.util.constants import (
 TYPE_SCHEMA = vol.Schema(
     {
         vol.Optional(
-            "peaqevtype",
-            default="",
+            'peaqevtype',
+            default='',
         ): vol.In(INSTALLATIONTYPES)
     }
 )
@@ -20,57 +20,58 @@ TYPE_SCHEMA = vol.Schema(
 SENSOR_SCHEMA = vol.Schema(
     {
         vol.Optional(CONF_NAME): cv.string,
-        vol.Optional("powersensorincludescar", default=False): cv.boolean,
+        vol.Optional('powersensorincludescar', default=False): cv.boolean,
     }
 )
 
 CHARGER_SCHEMA = vol.Schema(
     {
         vol.Optional(
-            "chargertype",
-            default="",
+            'chargertype',
+            default='',
         ): vol.In(CHARGERTYPES),
         vol.Optional(
-            "locale",
-            default="",
+            'locale',
+            default='',
         ): vol.In(LOCALES),
     }
 )
 
 CHARGER_DETAILS_SCHEMA = vol.Schema(
     {
-        vol.Optional("chargerid"): cv.string,
+        vol.Optional('chargerid'): cv.string,
     }
 )
 
 OUTLET_DETAILS_SCHEMA = vol.Schema(
     {
-        vol.Optional("outletswitch"): cv.string,
-        vol.Optional("outletpowermeter"): cv.string,
+        vol.Optional('outletswitch'): cv.string,
+        vol.Optional('outletpowermeter'): cv.string,
     }
 )
 
 HOURS_SCHEMA = vol.Schema(
     {
-        vol.Optional("nonhours"): cv.multi_select(list(range(0, 24))),
-        vol.Optional("cautionhours"): cv.multi_select(list(range(0, 24))),
+        vol.Optional('nonhours'): cv.multi_select(list(range(0, 24))),
+        vol.Optional('cautionhours'): cv.multi_select(list(range(0, 24))),
     }
 )
 
 PRICEAWARE_HOURS_SCHEMA = vol.Schema(
     {
-        vol.Optional("priceaware_nonhours"): cv.multi_select(list(range(0, 24))),
+        vol.Optional('priceaware_nonhours'): cv.multi_select(list(range(0, 24))),
     }
 )
 
 PRICEAWARE_SCHEMA = vol.Schema(
     {
-        vol.Optional("priceaware", default=False): cv.boolean,
-        vol.Optional("absolute_top_price"): cv.positive_float,
-        vol.Optional("dynamic_top_price", default=False): cv.boolean,
-        vol.Optional("min_priceaware_threshold_price"): cv.positive_float,
+        vol.Optional('priceaware', default=False): cv.boolean,
+        vol.Optional('custom_price_sensor'): cv.string,
+        vol.Optional('absolute_top_price'): cv.positive_float,
+        vol.Optional('dynamic_top_price', default=False): cv.boolean,
+        vol.Optional('min_priceaware_threshold_price'): cv.positive_float,
         vol.Optional(
-            "cautionhour_type",
+            'cautionhour_type',
             default=CautionHourType.INTERMEDIATE.value,
         ): vol.In(CAUTIONHOURTYPE_NAMES),
     }
@@ -78,19 +79,19 @@ PRICEAWARE_SCHEMA = vol.Schema(
 
 MONTHS_SCHEMA = vol.Schema(
     {
-        vol.Optional("jan", default=1.5): cv.positive_float,
-        vol.Optional("feb", default=1.5): cv.positive_float,
-        vol.Optional("mar", default=1.5): cv.positive_float,
-        vol.Optional("apr", default=1.5): cv.positive_float,
-        vol.Optional("may", default=1.5): cv.positive_float,
-        vol.Optional("jun", default=1.5): cv.positive_float,
-        vol.Optional("jul", default=1.5): cv.positive_float,
-        vol.Optional("aug", default=1.5): cv.positive_float,
-        vol.Optional("sep", default=1.5): cv.positive_float,
-        vol.Optional("oct", default=1.5): cv.positive_float,
-        vol.Optional("nov", default=1.5): cv.positive_float,
-        vol.Optional("dec", default=1.5): cv.positive_float,
-        vol.Optional("use_peak_history", default=False): cv.boolean,
+        vol.Optional('jan', default=1.5): cv.positive_float,
+        vol.Optional('feb', default=1.5): cv.positive_float,
+        vol.Optional('mar', default=1.5): cv.positive_float,
+        vol.Optional('apr', default=1.5): cv.positive_float,
+        vol.Optional('may', default=1.5): cv.positive_float,
+        vol.Optional('jun', default=1.5): cv.positive_float,
+        vol.Optional('jul', default=1.5): cv.positive_float,
+        vol.Optional('aug', default=1.5): cv.positive_float,
+        vol.Optional('sep', default=1.5): cv.positive_float,
+        vol.Optional('oct', default=1.5): cv.positive_float,
+        vol.Optional('nov', default=1.5): cv.positive_float,
+        vol.Optional('dec', default=1.5): cv.positive_float,
+        vol.Optional('use_peak_history', default=False): cv.boolean,
     }
 )
 
