@@ -20,12 +20,12 @@ class PriceAwareHub(HomeAssistantHub):
     def current_peak_dynamic(self):
         """Dynamically calculated peak to adhere to caution-hours"""
         if len(self.dynamic_caution_hours) > 0:
-            if self.now_is_caution_hour() and not getattr(self.hours.timer, "is_override", False):
+            if self.now_is_caution_hour() and not getattr(self.hours.timer, 'is_override', False):
                 return (
-                        self.sensors.current_peak.value
+                        self.sensors.current_peak.observed_peak
                         * self.dynamic_caution_hours.get(datetime.now().replace(minute=0, second=0, microsecond=0), 1)
                 )
-        return self.sensors.current_peak.value
+        return self.sensors.current_peak.observed_peak
 
     async def async_is_caution_hour(self) -> bool:
         return False
@@ -45,7 +45,7 @@ class PriceAwareHub(HomeAssistantHub):
                 )
             )
         except Exception as e:
-            _LOGGER.error(f"Unable to calculate watt cost. Exception: {e}")
+            _LOGGER.error(f'Unable to calculate watt cost. Exception: {e}')
             return 0
 
     async def async_update_prices(self, prices: list) -> None:
@@ -67,6 +67,6 @@ class PriceAwareHub(HomeAssistantHub):
             await self.hours.async_update_adjusted_average(val)
 
     def _check_max_min_total_charge(self, ret:dict) -> None:
-        if "max_charge" in ret.keys():
-            self.max_min_controller._original_total_charge = ret["max_charge"][0]
+        if 'max_charge' in ret.keys():
+            self.max_min_controller._original_total_charge = ret['max_charge'][0]
             # todo: 247

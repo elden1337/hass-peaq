@@ -114,7 +114,7 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
 
     @property
     def current_peak_dynamic(self):
-        return self.sensors.current_peak.value
+        return self.sensors.current_peak.observed_peak
 
     @property
     def charger_done(self) -> bool:

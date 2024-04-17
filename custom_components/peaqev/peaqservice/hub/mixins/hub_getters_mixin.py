@@ -18,13 +18,13 @@ class HubGettersMixin:
         try:
             return await self.sensors.locale.data.async_free_charge()
         except Exception as e:
-            _LOGGER.debug(f"Unable to get free charge. Exception: {e}")
+            _LOGGER.debug(f'Unable to get free charge. Exception: {e}')
             return False
 
     async def async_predictedpercentageofpeak(self):
         ret = await self.prediction.async_predicted_percentage_of_peak(
             predicted_energy=await self.async_get_predicted_energy(),
-            peak=self.sensors.current_peak.value,
+            peak=self.sensors.current_peak.observed_peak,
         )
         self.model.peak_breached = ret > 100
         return ret

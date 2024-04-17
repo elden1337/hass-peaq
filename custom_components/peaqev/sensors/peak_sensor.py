@@ -38,11 +38,11 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
             return 0
 
     async def async_update(self) -> None:
-        self._charged_peak = getattr(self.hub.sensors.locale.data.query_model, 'charged_peak')
-        _peaks_dict = getattr(self.hub.sensors.locale.data.query_model.peaks, 'export_peaks')
+        self._charged_peak = self.hub.sensors.current_peak.charged_peak
+        _peaks_dict = self.hub.sensors.current_peak.current_peaks_dictionary
         if self._peaks_dict != _peaks_dict:
             self._peaks_dict = _peaks_dict
-        self._observed_peak = self.hub.sensors.current_peak.value
+        self._observed_peak = self.hub.sensors.current_peak.observed_peak
         self._history = self.hub.sensors.current_peak.history
 
     @property
