@@ -102,7 +102,8 @@ async def async_set_options(conf) -> HubOptions:
         options.nonhours = await async_get_existing_param(conf, 'priceaware_nonhours', [])
     else:
         options.nonhours = await async_get_existing_param(conf, 'nonhours', [])
-    options.price.custom_sensor = await async_get_existing_param(conf, 'custom_price_sensor', None)
+    custom_sensor = await async_get_existing_param(conf, 'custom_price_sensor', None)
+    options.price.custom_sensor = custom_sensor if custom_sensor and len(custom_sensor) > 2 else None
     options.price.min_price = await async_get_existing_param(
         conf, 'min_priceaware_threshold_price', 0
     )
