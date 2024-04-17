@@ -49,6 +49,7 @@ PRICE_CHANGES = [
     'cautionhours',
     '_startpeaks',
     'nonhours',
+    'custom_price_sensor'
 ]
 
 RELOAD_CHANGES = ['fuse_type', 'gain_loss', 'price_aware', 'name', 'powersensorincludescar']
@@ -90,9 +91,7 @@ async def async_set_options(conf) -> HubOptions:
     if options.charger.chargertype == ChargerType.NoCharger.value:
         options.powersensor_includes_car = True
     else:
-        options.powersensor_includes_car = conf.options.get('powersensorincludescar', conf.data.get(
-            'powersensorincludescar', False
-        ))
+        options.powersensor_includes_car = await async_get_existing_param(conf, 'powersensorincludescar', False)
 
     options.startpeaks = conf.options.get('startpeaks', conf.data.get('startpeaks'))
     options.use_peak_history = conf.options.get('use_peak_history', conf.data.get('use_peak_history', False))
@@ -105,6 +104,8 @@ async def async_set_options(conf) -> HubOptions:
         options.nonhours = await async_get_existing_param(conf, 'priceaware_nonhours', [])
     else:
         options.nonhours = await async_get_existing_param(conf, 'nonhours', [])
+    custom_sensor = await async_get_existing_param(conf, 'custom_price_sensor', None)
+    options.price.custom_sensor = custom_sensor if custom_sensor and len(custom_sensor) > 2 else None
     options.price.min_price = await async_get_existing_param(
         conf, 'min_priceaware_threshold_price', 0
     )
@@ -115,7 +116,7 @@ async def async_set_options(conf) -> HubOptions:
         conf, 'dynamic_top_price', False
     )
     options.price.cautionhour_type = await async_get_existing_param(
-        conf, 'cautionhour_type', 'intermediate'
+        conf, 'cautionhour_type', 'suave'
     )
     options.max_charge = conf.options.get('max_charge', 0)
     options.fuse_type = await async_get_existing_param(conf, 'mains', '')
