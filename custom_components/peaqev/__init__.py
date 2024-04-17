@@ -48,9 +48,10 @@ PRICE_CHANGES = [
     'cautionhours',
     '_startpeaks',
     'nonhours',
+    'custom_price_sensor'
 ]
 
-RELOAD_CHANGES = ['fuse_type', 'gain_loss', 'price_aware', 'name', 'powersensorincludescar', 'custom_price_sensor']
+RELOAD_CHANGES = ['fuse_type', 'gain_loss', 'price_aware', 'name', 'powersensorincludescar']
 
 
 async def async_update_entry(hass: HomeAssistant, config_entry: ConfigEntry):
