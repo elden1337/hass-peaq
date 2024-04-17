@@ -18,16 +18,17 @@ class Price(OptionsComparer):
     price_aware: bool = False
     min_price: float = 0.0
     top_price: float = 0.0
-    cautionhour_type: str = ""
+    cautionhour_type: str = ''
     dynamic_top_price: bool = False
+    custom_sensor: str = None
 
 
 @dataclass
 class Charger(OptionsComparer):
-    chargertype: str = ""
-    chargerid: str = ""
-    powerswitch: str = ""
-    powermeter: str = ""
+    chargertype: str = ''
+    chargerid: str = ''
+    powerswitch: str = ''
+    powermeter: str = ''
 
 
 @dataclass
@@ -41,7 +42,7 @@ class HubOptions:
     _startpeaks: dict = field(default_factory=dict)
     cautionhours: List = field(default_factory=lambda: [])
     nonhours: List = field(default_factory=lambda: [])
-    fuse_type: str = ""
+    fuse_type: str = ''
     gainloss: bool = False
     max_charge: int = 0
     use_peak_history: bool = False
@@ -62,7 +63,7 @@ class HubOptions:
         for key, value in self.__dict__.items():
             if key not in other.__dict__.keys():
                 diff.append(key)
-            elif key in ["charger", "price"]:
+            elif key in ['charger', 'price']:
                 diff.extend(value.compare(other=other.__dict__[key]))
             elif value != other.__dict__[key]:
                 diff.append(key)
