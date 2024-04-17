@@ -11,6 +11,7 @@ from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.constants import TYPELITE
 from custom_components.peaqev.services import async_prepare_register_services
+
 from .const import DOMAIN, PLATFORMS
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from .peaqservice.hub.hub_factory import HubFactory
