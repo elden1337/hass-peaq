@@ -11,6 +11,12 @@
           "max_charge": "[%key:common::config_flow::data::max_charge%]"
         }
       },
+      "sensor": {
+        "data": {
+          "name": "[%key:common::config_flow::data::powersensor%]",
+          "powersensorincludescar": "[%key:common::config_flow::data::powersensorincludescar%]"
+        }
+      },
       "priceaware_hours": {
         "data": {
           "priceaware_nonhours": "[%key:common::config_flow::data::priceaware_nonhours%]"

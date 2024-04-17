@@ -12,6 +12,12 @@
         },
         "description": "Select price-aware if you wish to adhere to Nordpool- or EnergiDataService-prices (requires integration)"
       },
+      "sensor": {
+        "data": {
+          "name": "PowerSensor",
+          "powersensorincludescar": "PowerSensor includes car"
+        }
+      },
       "priceaware_hours": {
         "data": {
           "priceaware_nonhours": "Hours when the charger is always disabled"
