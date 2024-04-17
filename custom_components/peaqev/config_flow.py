@@ -21,7 +21,6 @@ from custom_components.peaqev.peaqservice.powertools.power_canary.const import \
     FUSES_LIST
 from custom_components.peaqev.peaqservice.util.constants import (
     CAUTIONHOURTYPE_NAMES, TYPELITE, CautionHourType)
-
 from .const import DOMAIN  # pylint:disable=unused-import
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
@@ -117,7 +116,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             try:
-                self.info = await ConfigFlowValidation.validate_input_first(user_input)
                 await ConfigFlowValidation.validate_price_sensor(self.hass, user_input['custom_price_sensor'])
             except ValueError:
                 errors['base'] = 'invalid_pricesensor'
@@ -207,7 +205,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         errors = {}
         if user_input is not None:
             try:
-                self.info = await ConfigFlowValidation.validate_input_first(user_input)
                 await ConfigFlowValidation.validate_price_sensor(self.hass, user_input['custom_price_sensor'])
             except ValueError:
                 errors['base'] = 'invalid_pricesensor'
@@ -249,7 +246,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         errors = {}
         if user_input is not None:
             try:
-                self.info = await ConfigFlowValidation.validate_input_first(user_input)
                 await ConfigFlowValidation.validate_power_sensor(self.hass, user_input['name'])
             except ValueError:
                 errors['base'] = 'invalid_powersensor'
