@@ -44,18 +44,18 @@ class ServiceCalls:
             dep_time = None
             start_time = None
             try:
-                dep_time = datetime.strptime(departure_time, "%Y-%m-%d %H:%M")
+                dep_time = datetime.strptime(departure_time, '%Y-%m-%d %H:%M')
             except ValueError:
-                _LOGGER.error(f"Could not parse departure time: {departure_time}")
+                _LOGGER.error(f'Could not parse departure time: {departure_time}')
             if schedule_starttime is not None:
                 try:
-                    start_time = datetime.strptime(schedule_starttime, "%Y-%m-%d %H:%M")
+                    start_time = datetime.strptime(schedule_starttime, '%Y-%m-%d %H:%M')
                 except ValueError:
-                    _LOGGER.error(f"Could not parse schedule start time: {schedule_starttime}")
+                    _LOGGER.error(f'Could not parse schedule start time: {schedule_starttime}')
             else:
                 start_time = datetime.now()
             _LOGGER.debug(
-                f"scheduler params. charge: {charge_amount}, dep-time: {dep_time}, start_time: {start_time}"
+                f'scheduler params. charge: {charge_amount}, dep-time: {dep_time}, start_time: {start_time}'
             )
             await self.hub.hours.scheduler.async_create_schedule(
                 charge_amount, dep_time, start_time, override_settings
@@ -65,5 +65,5 @@ class ServiceCalls:
 
     async def async_call_scheduler_cancel(self):
         if self.hub.hours.price_aware:
-            await self.hub.hours.hub.scheduler.async_cancel_facade()
+            await self.hub.hours.scheduler.async_cancel_facade()
             await self.hub.observer.async_broadcast(ObserverTypes.SchedulerCancelled)

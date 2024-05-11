@@ -211,6 +211,9 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
             IS_SCHEDULER_ACTIVE: partial(
                 getattr, self.hours.scheduler, 'scheduler_active', False
             ),
+            'schedules': partial(
+                getattr, self.hours.scheduler, 'schedules', {}
+            ),
             CHARGECONTROLLER_STATUS: partial(
                 getattr, self.chargecontroller, 'status_string'
             ),

@@ -27,6 +27,7 @@ class ChargerControllerSensor(SensorBase):
         self._current_hour = None
         self._price_aware: bool = False
         self._scheduler_active: bool = False
+        self._schedules = None
 
     @property
     def state(self):
@@ -57,6 +58,7 @@ class ChargerControllerSensor(SensorBase):
             'hour_state',
             'is_price_aware',
             'is_scheduler_active',
+            'schedules'
         )
         if ret is not None:
             self._state = ret.get('chargecontroller_status')
@@ -65,6 +67,7 @@ class ChargerControllerSensor(SensorBase):
             self._current_hour = ret.get('hour_state')
             self._price_aware = ret.get('is_price_aware')
             self._scheduler_active = ret.get('is_scheduler_active')
+            self._schedules = ret.get('schedules')
 
     @property
     def extra_state_attributes(self) -> dict:
@@ -77,4 +80,5 @@ class ChargerControllerSensor(SensorBase):
             attr_dict['non_hours'] = self.hub.options.nonhours
         attr_dict['current_hour state'] = self._current_hour
         attr_dict['scheduler_active'] = self._scheduler_active
+        attr_dict['schedules'] = self._schedules
         return attr_dict
