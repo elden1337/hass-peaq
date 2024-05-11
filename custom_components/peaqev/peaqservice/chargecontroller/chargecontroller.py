@@ -98,13 +98,13 @@ class ChargeController(IChargeController):
             return ChargeControllerStates.Stop, True
         except Exception as e:
             _LOGGER.debug(
-                f"async_get_status_connected for: {e}. charger-state: {charger_state}"
+                f'async_get_status_connected for: {e}. charger-state: {charger_state}'
             )
             return ChargeControllerStates.Error, True
 
     async def _aux_check_running_charger_mismatch(self, status_type: ChargeControllerStates) -> None:
         if self._aux_running_grace_timer.is_timeout():
-            _LOGGER.warning(f"Charger seems to be running without Peaqev controlling it. Attempting aux stop. If you wish to charge without Peaqev you need to disable it on the switch.")
+            _LOGGER.warning(f'Charger seems to be running without Peaqev controlling it. Attempting aux stop. If you wish to charge without Peaqev you need to disable it on the switch.')
             await self.hub.observer.async_broadcast(ObserverTypes.KillswitchDead)
             self._aux_running_grace_timer.reset()
         elif status_type in [
@@ -123,6 +123,6 @@ class ChargeController(IChargeController):
                 await self.async_below_startthreshold() and self.hub.sensors.totalhourlyenergy.value != 0,
                 await self.hub.async_free_charge()
             ]),
-            any([not defer_start(self.hub.hours.non_hours), getattr(self.hub.hours.timer, "is_override", True)]),
+            any([not defer_start(self.hub.non_hours), getattr(self.hub.hours.timer, 'is_override', True)]),
             not self.hub.events.aux_stop
         ])
