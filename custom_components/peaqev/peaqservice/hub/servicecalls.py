@@ -57,6 +57,9 @@ class ServiceCalls:
             _LOGGER.debug(
                 f'scheduler params. charge: {charge_amount}, dep-time: {dep_time}, start_time: {start_time}'
             )
+            if self.hub.hours.scheduler.scheduler_active:
+                _LOGGER.debug('Scheduler already active, cancelling before adding new.')
+                await self.hub.hours.scheduler.async_cancel_facade()
             await self.hub.hours.scheduler.async_create_schedule(
                 charge_amount, dep_time, start_time, override_settings
             )

@@ -39,6 +39,7 @@ from custom_components.peaqev.peaqservice.powertools.ipower_tools import \
     IPowerTools
 from custom_components.peaqev.peaqservice.util.extensionmethods import (
     async_iscoroutine, log_once)
+from custom_components.peaqev.peaqservice.util.schedule_options_handler import SchedulerOptionsHandler
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -111,6 +112,10 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
 
     async def async_is_caution_hour(self) -> bool:
         return str(datetime.now().hour) in [str(h) for h in self.hours.caution_hours]
+
+    @property
+    def scheduler_options_handler(self) -> SchedulerOptionsHandler|None:
+        return None
 
     @property
     def current_peak_dynamic(self):

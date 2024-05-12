@@ -125,7 +125,7 @@ class ChargeController(IChargeController):
         is_below_treshold = await self.async_below_startthreshold()
         energy_has_value = self.hub.sensors.totalhourlyenergy.value != 0
 
-        ret = all([
+        return all([
             any([
                 is_below_treshold and energy_has_value,
                 is_free_charge
@@ -133,6 +133,3 @@ class ChargeController(IChargeController):
             any([dont_defer_nonhour, timer_is_override]),
             not aux_stop
         ])
-        _LOGGER.debug(
-            f'should start charging: {ret}. \naux_stop: {aux_stop}, dont_defer_nonhour: {dont_defer_nonhour}, timer_is_override: {timer_is_override}, is_free_charge: {is_free_charge}, is_below_treshold: {is_below_treshold}, energy_has_value: {energy_has_value}')
-        return ret

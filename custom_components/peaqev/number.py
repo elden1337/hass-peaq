@@ -29,8 +29,68 @@ async def async_setup_entry(
     if hub.options.price.price_aware and not hub.options.peaqev_lite:
         entities.extend(PeaqNumber(i, hub) for i in inputnumbers)
         entities.append(PeaqMaxMinLimiterNumber('Max min limiter', hub))
+        entities.append(PeaqSchedulerChargeAmountNumber('Scheduler charge amount', hub))
         async_add_entities(entities)
 
+
+class PeaqSchedulerChargeAmountNumber(NumberEntity, RestoreEntity):
+    """If max-min is used, this value can be set to ignore maxmin if the per-kwh-cost of maxmin vs regular is less than this value."""
+    def __init__(self, name, hub) -> None:
+        self._number = name
+        self.hub = hub
+        self._currency = self.hub.spotprice.currency
+        self._attr_name = f'{hub.hubname} {self._number}'
+        self._attr_device_class = None
+        self._state = 0
+
+    @property
+    def native_max_value(self) -> float:
+        return 100
+
+    @property
+    def native_min_value(self) -> float:
+        return 0
+
+    @property
+    def native_step(self) -> float:
+        return 1
+
+    @property
+    def native_value(self) -> float | None:
+        return self._state
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        return 'kWh'
+
+    @property
+    def mode(self) -> str:
+        return 'box'
+
+    @property
+    def icon(self) -> str:
+        return 'mdi:adjust'
+
+    @property
+    def unique_id(self) -> str:
+        return f'{DOMAIN}_{self.hub.hubname}_{self._number}'
+
+    async def async_set_native_value(self, value: float) -> None:
+        self._state = value
+        self.hub.scheduler_options_handler.charge_limit = int(value)
+
+    async def async_added_to_hass(self):
+        state = await super().async_get_last_state()
+        if state:
+            if state.state != self._state:
+                _LOGGER.debug(
+                    f'Restoring state {state.state} for {self.name}.'
+                )
+                await self.async_set_native_value(float(state.state))
+            else:
+                self._state = 0
+        else:
+            self._state = 0
 
 class PeaqMaxMinLimiterNumber(NumberEntity, RestoreEntity):
     """If max-min is used, this value can be set to ignore maxmin if the per-kwh-cost of maxmin vs regular is less than this value."""
@@ -38,8 +98,6 @@ class PeaqMaxMinLimiterNumber(NumberEntity, RestoreEntity):
         self._number = name
         self.hub = hub
         self._currency = self.hub.spotprice.currency
-        # self._use_cent = self.hub.spotprice.use_cent
-        # self._multiplier = 100 if self._use_cent else 1
         self._attr_name = f'{hub.hubname} {self._number}'
 
         self._attr_device_class = None

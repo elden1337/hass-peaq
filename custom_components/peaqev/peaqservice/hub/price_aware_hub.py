@@ -16,7 +16,11 @@ class PriceAwareHub(HomeAssistantHub):
     def __init__(self, hass: HomeAssistant, options: HubOptions, domain: str):
         super().__init__(hass, options, domain)
         self.max_min_controller = MaxMinController(self)
-        self.scheduler_options_handler = SchedulerOptionsHandler(self)
+        self._scheduler_options_handler = SchedulerOptionsHandler(self)
+
+    @property
+    def scheduler_options_handler(self) -> SchedulerOptionsHandler:
+        return self._scheduler_options_handler
 
     @property
     def current_peak_dynamic(self):
