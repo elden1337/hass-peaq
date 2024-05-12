@@ -68,7 +68,6 @@ class HourControllerSensor(SensorBase, RestoreEntity):
             self._secondary_threshold = self.hub.spotprice.model.adjusted_average
             self._all_hours = set_all_hours_display(ret.get(FUTURE_HOURS, []), self.hub.spotprice.tomorrow_valid)
             self._currency = ret.get(CURRENCY)
-            #self._current_peak = ret.get(CURRENT_PEAK)
             self._max_charge = set_total_charge(ret.get(MAX_CHARGE))
             self._charge_permittance = set_current_charge_permittance_display(ret.get(FUTURE_HOURS))
             self._avg_cost = set_avg_cost(

@@ -118,11 +118,21 @@ class ChargeController(IChargeController):
 
 
     async def _should_start_charging(self) -> bool:
-        return all([
+        aux_stop = self.hub.events.aux_stop
+        dont_defer_nonhour = not defer_start(self.hub.non_hours)
+        timer_is_override = getattr(self.hub.hours.timer, 'is_override', True)
+        is_free_charge = await self.hub.async_free_charge()
+        is_below_treshold = await self.async_below_startthreshold()
+        energy_has_value = self.hub.sensors.totalhourlyenergy.value != 0
+
+        ret = all([
             any([
-                await self.async_below_startthreshold() and self.hub.sensors.totalhourlyenergy.value != 0,
-                await self.hub.async_free_charge()
+                is_below_treshold and energy_has_value,
+                is_free_charge
             ]),
-            any([not defer_start(self.hub.non_hours), getattr(self.hub.hours.timer, 'is_override', True)]),
-            not self.hub.events.aux_stop
+            any([dont_defer_nonhour, timer_is_override]),
+            not aux_stop
         ])
+        _LOGGER.debug(
+            f'should start charging: {ret}. \naux_stop: {aux_stop}, dont_defer_nonhour: {dont_defer_nonhour}, timer_is_override: {timer_is_override}, is_free_charge: {is_free_charge}, is_below_treshold: {is_below_treshold}, energy_has_value: {energy_has_value}')
+        return ret
