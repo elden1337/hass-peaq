@@ -16,19 +16,19 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-MAX_CHARGE = "Max Charge"
+MAX_CHARGE = 'Max Charge'
 
 
 async def async_setup_entry(
     hass: HomeAssistant, config_entry, async_add_entities
 ):  # pylint:disable=unused-argument
-    hub: HomeAssistantHub = hass.data[DOMAIN]["hub"]
+    hub: HomeAssistantHub = hass.data[DOMAIN]['hub']
 
     entities = []
-    inputnumbers = [{"name": MAX_CHARGE, "entity": "_max_charge"}]
+    inputnumbers = [{'name': MAX_CHARGE, 'entity': '_max_charge'}]
     if hub.options.price.price_aware and not hub.options.peaqev_lite:
         entities.extend(PeaqNumber(i, hub) for i in inputnumbers)
-        entities.append(PeaqMaxMinLimiterNumber("Max min limiter", hub))
+        entities.append(PeaqMaxMinLimiterNumber('Max min limiter', hub))
         async_add_entities(entities)
 
 
@@ -40,7 +40,7 @@ class PeaqMaxMinLimiterNumber(NumberEntity, RestoreEntity):
         self._currency = self.hub.spotprice.currency
         # self._use_cent = self.hub.spotprice.use_cent
         # self._multiplier = 100 if self._use_cent else 1
-        self._attr_name = f"{hub.hubname} {self._number}"
+        self._attr_name = f'{hub.hubname} {self._number}'
 
         self._attr_device_class = None
         self._state = None
@@ -67,19 +67,19 @@ class PeaqMaxMinLimiterNumber(NumberEntity, RestoreEntity):
 
     @property
     def native_unit_of_measurement(self) -> str | None:
-        return f"{self.hub.spotprice.currency}/kWh"
+        return f'{self.hub.spotprice.currency}/kWh'
 
     @property
     def mode(self) -> str:
-        return "box"
+        return 'box'
 
     @property
     def icon(self) -> str:
-        return "mdi:adjust"
+        return 'mdi:adjust'
 
     @property
     def unique_id(self) -> str:
-        return f"{DOMAIN}_{self.hub.hubname}_{self._number}"
+        return f'{DOMAIN}_{self.hub.hubname}_{self._number}'
 
     async def async_set_native_value(self, value: float) -> None:
         self._state = value
@@ -90,15 +90,13 @@ class PeaqMaxMinLimiterNumber(NumberEntity, RestoreEntity):
         if state:
             if state.state != self._state:
                 _LOGGER.debug(
-                    f"Restoring state {state.state} for {self.name}."
+                    f'Restoring state {state.state} for {self.name}.'
                 )
                 await self.async_set_native_value(float(state.state))
             else:
                 self._state = 0
         else:
             self._state = 0
-
-
 
 class PeaqNumber(NumberEntity, RestoreEntity):
     """Sensor to override the set max-min charge level."""
@@ -127,15 +125,15 @@ class PeaqNumber(NumberEntity, RestoreEntity):
 
     @property
     def native_unit_of_measurement(self) -> str | None:
-        return "kWh"
+        return 'kWh'
 
     @property
     def mode(self) -> str:
-        return "slider"
+        return 'slider'
 
     @property
     def icon(self) -> str:
-        return "mdi:adjust"
+        return 'mdi:adjust'
 
     @property
     def unique_id(self) -> str:
@@ -168,7 +166,7 @@ class PeaqNumber(NumberEntity, RestoreEntity):
             if state:
                 if state.state != _set_max:
                     _LOGGER.debug(
-                        f"Restoring state {state.state} for {self.name}. hub reports: {_set_max}"
+                        f'Restoring state {state.state} for {self.name}. hub reports: {_set_max}'
                     )
                     await self.async_set_native_value(float(state.state))
                 else:
