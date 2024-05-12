@@ -39,7 +39,8 @@ from custom_components.peaqev.peaqservice.powertools.ipower_tools import \
     IPowerTools
 from custom_components.peaqev.peaqservice.util.extensionmethods import (
     async_iscoroutine, log_once)
-from custom_components.peaqev.peaqservice.util.schedule_options_handler import SchedulerOptionsHandler
+from custom_components.peaqev.peaqservice.util.schedule_options_handler import \
+    SchedulerOptionsHandler
 
 _LOGGER = logging.getLogger(__name__)
 

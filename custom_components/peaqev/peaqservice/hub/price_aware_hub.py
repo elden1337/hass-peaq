@@ -8,7 +8,8 @@ from custom_components.peaqev.peaqservice.hub.max_min_controller import \
     MaxMinController
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
-from custom_components.peaqev.peaqservice.util.schedule_options_handler import SchedulerOptionsHandler
+from custom_components.peaqev.peaqservice.util.schedule_options_handler import \
+    SchedulerOptionsHandler
 
 _LOGGER = logging.getLogger(__name__)
 

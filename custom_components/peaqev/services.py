@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 
 import logging
 from enum import Enum
+
 from homeassistant.core import ServiceCall, ServiceResponse, SupportsResponse
 
 from .const import DOMAIN
