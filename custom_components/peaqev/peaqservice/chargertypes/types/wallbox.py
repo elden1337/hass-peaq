@@ -24,7 +24,7 @@ _LOGGER = logging.getLogger(__name__)
 class WallBox(IChargerType):
     def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
         _LOGGER.warning(
-            "You are initiating Wallbox as Chargertype. Bare in mind that this chargertype has not been signed off in testing and may be very unstable. Report findings to the developer."
+            'You are initiating Wallbox as Chargertype. Bare in mind that this chargertype has not been signed off in testing and may be very unstable. Report findings to the developer.'
         )
         self._hass = hass
         self._is_initialized = False
@@ -34,9 +34,9 @@ class WallBox(IChargerType):
 
         self.entities.imported_entityendings = self.entity_endings
         self.options.powerswitch_controls_charging = True
-        self.chargerstates[ChargeControllerStates.Idle] = ["available"]
-        self.chargerstates[ChargeControllerStates.Connected] = ["connected"]
-        self.chargerstates[ChargeControllerStates.Charging] = ["charging"]
+        self.chargerstates[ChargeControllerStates.Idle] = ['available']
+        self.chargerstates[ChargeControllerStates.Connected] = ['connected']
+        self.chargerstates[ChargeControllerStates.Charging] = ['charging']
 
     @property
     def type(self) -> ChargerType:
@@ -46,7 +46,7 @@ class WallBox(IChargerType):
     @property
     def domain_name(self) -> str:
         """declare the domain name as stated in HA"""
-        return "wallbox"
+        return 'wallbox'
 
     # @property
     # def max_amps(self) -> int:
@@ -56,34 +56,34 @@ class WallBox(IChargerType):
     def entity_endings(self) -> list:
         """declare a list of strings with sensor-endings to help peaqev find the correct sensor-schema."""
         return [
-            "_max_charging_current",
-            "_charging_power",
-            "_paused",
-            "_max_charging_current",
+            '_max_charging_current',
+            '_charging_power',
+            '_paused',
+            '_max_charging_current',
         ]
 
     @property
     def native_chargerstates(self) -> list:
         """declare a list of the native-charger states available for the type."""
         return [
-        "charging",
-        "discharging",
-        "paused",
-        "scheduled",
-        "waiting_for_car_demand",
-        "waiting",
-        "disconnected",
-        "error",
-        "ready",
-        "locked",
-        "locked,_car_connected",
-        "updating",
-        "waiting_in_queue_by_power_sharing",
-        "waiting_in_queue_by_power_boost",
-        "waiting_mid_failed",
-        "waiting_mid_safety_margin_exceeded",
-        "waiting_in_queue_by_eco-smart",
-        "unknown"
+        'charging',
+        'discharging',
+        'paused',
+        'scheduled',
+        'waiting_for_car_demand',
+        'waiting',
+        'disconnected',
+        'error',
+        'ready',
+        'locked',
+        'locked,_car_connected',
+        'updating',
+        'waiting_in_queue_by_power_sharing',
+        'waiting_in_queue_by_power_boost',
+        'waiting_mid_failed',
+        'waiting_mid_safety_margin_exceeded',
+        'waiting_in_queue_by_eco-smart',
+        'unknown'
         ]
 
     @property
@@ -105,9 +105,9 @@ class WallBox(IChargerType):
     @property
     def call_update_current(self) -> CallType:
         return CallType(
-            call="set_value",
-            params={"entity_id": self.entities.ampmeter, CURRENT: "value"},
-            domain="number",
+            call='set_value',
+            params={'entity_id': self.entities.ampmeter, CURRENT: 'value'},
+            domain='number',
         )
 
     @property
@@ -141,24 +141,24 @@ class WallBox(IChargerType):
 
     async def async_set_sensors(self) -> None:
         self.entities.maxamps = (
-            f"sensor.{self.entities.entityschema}_max_charging_current"
+            f'sensor.{self.entities.entityschema}_max_charging_current'
         )
-        self.entities.powermeter = f"sensor.{self.entities.entityschema}_charging_power"
+        self.entities.powermeter = f'sensor.{self.entities.entityschema}_charging_power'
         self.options.powermeter_factor = 1000
-        self.entities.powerswitch = f"switch.{self.entities.entityschema}_paused"
+        self.entities.powerswitch = f'switch.{self.entities.entityschema}_paused'
         self.entities.ampmeter = (
-            f"number.{self.entities.entityschema}_max_charging_current"
+            f'number.{self.entities.entityschema}_max_charging_current'
         )
         # self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"
 
     def get_allowed_amps(self) -> int:
         ret = self._hass.states.get(self.entities.maxamps)
         if ret is not None:
-            log_once(f"Got max amps from Wallbox. Setting {ret.state}A.")
+            log_once(f'Got max amps from Wallbox. Setting {ret.state}A.', 'debug')
             return int(ret.state)
         else:
             log_once(
-                f"Unable to get max amps. The sensor {self.entities.maxamps} returned state {ret}. Setting max amps to 16 til I get a proper state."
+                f'Unable to get max amps. The sensor {self.entities.maxamps} returned state {ret}. Setting max amps to 16 til I get a proper state.', 'warning'
             )
         return 16
 

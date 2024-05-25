@@ -31,16 +31,16 @@ class ServiceCalls(Enum):
 
 async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssistant) -> None:
     async def async_servicehandler_enable(call: ServiceCall):  # pylint:disable=unused-argument
-        _LOGGER.debug('Calling {} service'.format(ServiceCalls.ENABLE.value))
+        _LOGGER.info('Calling {} service'.format(ServiceCalls.ENABLE.value))
         await hub.servicecalls.async_call_enable_peaq()
 
     async def async_servicehandler_disable(call: ServiceCall):  # pylint:disable=unused-argument
-        _LOGGER.debug('Calling {} service'.format(ServiceCalls.DISABLE.value))
+        _LOGGER.info('Calling {} service'.format(ServiceCalls.DISABLE.value))
         await hub.servicecalls.async_call_disable_peaq()
 
     async def async_servicehandler_override_nonhours(call: ServiceCall):  # pylint:disable=unused-argument
         hours = call.data.get('hours')
-        _LOGGER.debug('Calling {} service'.format(ServiceCalls.OVERRIDE_NONHOURS.value))
+        _LOGGER.info('Calling {} service'.format(ServiceCalls.OVERRIDE_NONHOURS.value))
         await hub.servicecalls.async_call_override_nonhours(1 if hours is None else hours)
 
     async def async_servicehandler_scheduler_set(call: ServiceCall):  # pylint:disable=unused-argument
@@ -48,7 +48,7 @@ async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssis
         departure_time = call.data.get('departure_time')
         schedule_starttime = call.data.get('schedule_starttime')
         override_settings = call.data.get('override_settings')
-        _LOGGER.debug('Calling {} service'.format(ServiceCalls.SCHEDULER_SET.value))
+        _LOGGER.info('Calling {} service'.format(ServiceCalls.SCHEDULER_SET.value))
         await hub.servicecalls.async_call_schedule_needed_charge(
             charge_amount=charge_amount,
             departure_time=departure_time,
@@ -57,20 +57,20 @@ async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssis
         )
 
     async def async_servicehandler_scheduler_cancel(call: ServiceCall):
-        _LOGGER.debug('Calling {} service'.format(ServiceCalls.SCHEDULER_CANCEL.value))
+        _LOGGER.info('Calling {} service'.format(ServiceCalls.SCHEDULER_CANCEL.value))
         await hub.servicecalls.async_call_scheduler_cancel()
 
     async def async_servicehandler_override_charge_amount(call: ServiceCall):
         _amount = call.data.get('desired_charge_amount')
         if hub.options.price.price_aware:
-            _LOGGER.debug('Calling {} service'.format(ServiceCalls.OVERRIDE_CHARGE_AMOUNT.value))
+            _LOGGER.info('Calling {} service'.format(ServiceCalls.OVERRIDE_CHARGE_AMOUNT.value))
             if _amount and _amount > 0:
                 await hub.max_min_controller.async_servicecall_override_charge_amount(_amount)
             else:
                 await hub.max_min_controller.async_servicecall_reset_charge_amount()
 
     async def async_servicehandler_update_peaks_history(call: ServiceCall) -> ServiceResponse:
-        _LOGGER.debug('Calling {} service'.format(ServiceCalls.UPDATE_PEAKS_HISTORY.value))
+        _LOGGER.info('Calling {} service'.format(ServiceCalls.UPDATE_PEAKS_HISTORY.value))
         if len(call.data) == 0 or call.data.get('import_dictionary') is None:
             return {'result': 'error', 'message': 'No data provided'}
         _import_dict = call.data.get('import_dictionary')
@@ -80,7 +80,7 @@ async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssis
         return _result
 
     async def async_servicehandler_update_current_peaks(call: ServiceCall) -> ServiceResponse:
-        _LOGGER.debug(f'Calling {ServiceCalls.UPDATE_CURRENT_PEAK.value} service with {call.data}')
+        _LOGGER.info(f'Calling {ServiceCalls.UPDATE_CURRENT_PEAK.value} service with {call.data}')
         error_result = {'result': 'error', 'message': 'No data provided'}
         _import_dict = call.data.get('import_dictionary', {})
 

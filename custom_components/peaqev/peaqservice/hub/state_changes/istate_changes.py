@@ -51,22 +51,25 @@ class StateChangesBase:
             await self.hub.observer.async_broadcast(ObserverTypes.ProcessCharger)
 
     async def async_update_session_parameters(self, update_session: bool) -> None:
-        if all(
-            [
-                self.hub.chargecontroller.charger.session_active,
-                update_session,
-                hasattr(self.hub.sensors, 'carpowersensor'),
-            ]
-        ):
-            await self.hub.chargecontroller.session.async_set_session_energy(
-                getattr(self.hub.sensors.carpowersensor, 'value')
-            )
-            if self.hub.options.price.price_aware:  # todo: strategy should handle this
-                await self.hub.chargecontroller.session.async_set_session_price(
-                    float(self.hub.spotprice.state)
+        try:
+            if all(
+                [
+                    self.hub.chargecontroller.charger.session_active,
+                    update_session,
+                    hasattr(self.hub.sensors, 'carpowersensor'),
+                ]
+            ):
+                await self.hub.chargecontroller.session.async_set_session_energy(
+                    getattr(self.hub.sensors.carpowersensor, 'value')
                 )
-        if getattr(self.hub.hours.scheduler, 'schedule_created', False):
-            await self.hub.hours.scheduler.async_update_facade()
+                if self.hub.options.price.price_aware:  # todo: strategy should handle this
+                    await self.hub.chargecontroller.session.async_set_session_price(
+                        float(self.hub.spotprice.state)
+                    )
+            if getattr(self.hub.hours.scheduler, 'schedule_created', False):
+                await self.hub.hours.scheduler.async_update_facade()
+        except Exception as e:
+            _LOGGER.exception(f'Unable to update session parameters: {e}')
 
     async def async_handle_sensor_attribute(self) -> None:
         # is this needed if we loop them all?
@@ -85,7 +88,7 @@ class StateChangesBase:
                         )
                     return
                 except Exception as e:
-                    _LOGGER.debug(
+                    _LOGGER.error(
                         f'Unable to get attribute-state for {entity.entity}|{entity.attribute}. {e}'
                     )
 
@@ -107,7 +110,7 @@ class StateChangesBase:
                     car_connected=self.hub.chargecontroller.connected,
                 )
             except Exception as e:
-                _LOGGER.debug(f'Unable to update max_min: {e}')
+                _LOGGER.error(f'Unable to update max_min: {e}')
 
     @abstractmethod
     async def async_update_sensor_internal(self, entity, value) -> bool:

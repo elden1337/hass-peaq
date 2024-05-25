@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import traceback
 from datetime import datetime
 from functools import partial
 from typing import Callable
@@ -137,7 +138,7 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
                 try:
                     return round(float(month_cost.state) / float(month_draw.state),3)
                 except ValueError as v:
-                    log_once(f'Unable to calculate purchased_average_month. {v}')
+                    log_once(f'Unable to calculate purchased_average_month. {v}', 'warning')
             return 0
         except ZeroDivisionError:
             return 0
@@ -161,7 +162,8 @@ class HomeAssistantHub(HubInitializerMixin, HubSettersMixin, HubGettersMixin):
                 if old_state is None or old_state != new_state:
                     await self.states.async_update_sensor(entity_id, new_state.state)
             except Exception as e:
-                msg = f'Unable to handle data-update: {entity_id} {old_state}|{new_state}. Exception: {e}'
+                tb = traceback.format_exc()  # Get the full traceback
+                msg = f'Unable to handle data-update: {entity_id} {old_state}|{new_state}. Exception: {e}\n{tb}'
                 _LOGGER.error(msg)
 
     async def async_request_sensor_data(self, *args) -> dict | any:

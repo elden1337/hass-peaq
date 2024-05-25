@@ -27,11 +27,11 @@ async def async_do_update(
 
 
 async def async_do_service_call(domain, command, params, state_machine) -> bool:
-    _LOGGER.debug(f"Calling charger {command} for domain '{domain}' with parameters: {params}")
+    _LOGGER.info(f"Calling charger {command} for domain '{domain}' with parameters: {params}")
     try:
         await state_machine.services.async_call(domain, command, params)
     except Exception as e:
-        _LOGGER.error(f"Error in async_do_service_call: {e}")
+        _LOGGER.error(f'Error in async_do_service_call: {e}')
         return False
     return True
 

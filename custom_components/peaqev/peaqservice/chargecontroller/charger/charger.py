@@ -74,17 +74,17 @@ class Charger:
                     pass
                 case _:
                     _LOGGER.error(
-                        f"Could not match any chargecontroller-state. state: {self.controller.status_type}"
+                        f'Could not match any chargecontroller-state. state: {self.controller.status_type}'
                     )
         else:
             if self.charger_active and self.model.running:
                 if self.controller.hub.sensors.power.killswitch.is_dead:
                     _LOGGER.debug(
-                        f"Powersensor has failed to update for more than {self.controller.hub.sensors.power.killswitch.total_timer}s. Charging is paused until it comes alive again."
+                        f'Powersensor has failed to update for more than {self.controller.hub.sensors.power.killswitch.total_timer}s. Charging is paused until it comes alive again.'
                     )
                 elif self.controller.hub.enabled:
                     _LOGGER.debug(
-                        "Detected charger running outside of peaqev-session, overtaking command and pausing."
+                        'Detected charger running outside of peaqev-session, overtaking command and pausing.'
                     )
                 await self.async_pause_charger()
 
@@ -96,14 +96,14 @@ class Charger:
         ):
             await self.async_terminate_charger()
         elif self.charger_active and _state is ChargeControllerStates.Idle:
-            _LOGGER.debug("Going to terminate since the car has been disconnected.")
+            _LOGGER.debug('Going to terminate since the car has been disconnected.')
             await self.async_terminate_charger()
 
     async def async_stop_case(self) -> None:
         if self.charger_active:
             if not self.model.running and not self.session_active:
                 _LOGGER.debug(
-                    "Detected charger running outside of peaqev-session, overtaking command and pausing."
+                    'Detected charger running outside of peaqev-session, overtaking command and pausing.'
                 )
             await self.async_pause_charger()
 
@@ -113,7 +113,7 @@ class Charger:
                 await self.async_start_charger()
             else:
                 _LOGGER.debug(
-                    "Detected charger running outside of peaqev-session, overtaking command."
+                    'Detected charger running outside of peaqev-session, overtaking command.'
                 )
                 await self.async_overtake_charger()
         # elif (
@@ -132,7 +132,7 @@ class Charger:
             await self.controller.session.async_reset(
                 getattr(
                     self.controller.hub.sensors.locale.data.query_model,
-                    "charged_peak",
+                    'charged_peak',
                     0,
                 )
             )
@@ -192,7 +192,7 @@ class Charger:
             )
             self.model.latest_charger_call = time.time()
         except Exception as e:
-            _LOGGER.error(f"Error calling charger: {e}")
+            _LOGGER.error(f'Error calling charger: {e}')
 
     async def async_update_max_current(self) -> None:
         calls = self._charger.servicecalls.get_call(CallTypes.UpdateCurrent)
@@ -241,24 +241,24 @@ class Charger:
     def _internal_state_on(self):
         self.model.running = True
         self.model.disable_current_updates = False
-        _LOGGER.debug("Internal charger has been started")
+        _LOGGER.debug('Internal charger has been started')
 
     async def async_internal_state_off(self):
         self.model.disable_current_updates = True
         charger_state = await self.controller.hub.async_request_sensor_data(
-            "chargerobject_value"
+            'chargerobject_value'
         )
         if charger_state not in self._charger.chargerstates.get(
             ChargeControllerStates.Charging
         ):
             self.model.running = False
             self.model.unsuccessful_stop = False
-            _LOGGER.debug("Internal charger has been stopped")
+            _LOGGER.debug('Internal charger has been stopped')
         elif time.time() - self.model.lastest_call_off > 10:
             self.model.unsuccessful_stop = True
             self.model.lastest_call_off = time.time()
             log_once(
-                f"Fail when trying to stop connected charger. Retrying stop-attempt..."
+                f'Fail when trying to stop connected charger. Retrying stop-attempt...', 'warning'
             )
 
     async def async_do_update(self, calls_domain, calls_command, calls_params) -> bool:
@@ -270,20 +270,20 @@ class Charger:
             )
 
     async def async_do_outlet_update(self, call) -> bool:
-        _LOGGER.debug("Calling charger-outlet")
+        _LOGGER.debug('Calling charger-outlet')
         try:
             self.controller.hub.state_machine.states.async_set(
                 self._charger.entities.powerswitch, call
             )  # todo: composition
         except Exception as e:
-            _LOGGER.error(f"Error in async_do_outlet_update: {e}")
+            _LOGGER.error(f'Error in async_do_outlet_update: {e}')
             return False
         return True
 
     async def async_do_service_call(self, domain, command, params) -> bool:
         _domain = domain
-        if params.get("domain", None) is not None:
-            _domain = params.pop("domain")
+        if params.get('domain', None) is not None:
+            _domain = params.pop('domain')
 
         _LOGGER.debug(
             f"Calling charger {command} for domain '{domain}' with parameters: {params}"
@@ -293,6 +293,6 @@ class Charger:
                 _domain, command, params
             )
         except Exception as e:
-            _LOGGER.error(f"Error in async_do_service_call: {e}")
+            _LOGGER.error(f'Error in async_do_service_call: {e}')
             return False
         return True
