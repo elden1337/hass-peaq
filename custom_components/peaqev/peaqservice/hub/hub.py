@@ -174,6 +174,9 @@ class HomeAssistantHub:
     async def async_is_caution_hour(self) -> bool:
         return str(datetime.now().hour) in [str(h) for h in self.hours.caution_hours]
 
+    def _check_max_min_total_charge(self, ret: dict) -> None:
+        pass
+
     async def async_request_sensor_data(self, *args) -> dict | any:
         ret = {}
         if not self.is_initialized:
@@ -192,10 +195,7 @@ class HomeAssistantHub:
             return val
         return ret
 
-    def _check_max_min_total_charge(self, ret: dict) -> None:
-        pass
-
-    def _request_sensor_lookup(self) -> dict:
+    def _request_sensor_lookup(self) -> dict[LookupKeys, Callable]:
         """Proxies the request to the correct sensor."""
         return {
             LookupKeys.CHARGER_DONE: partial(getattr, self.sensors.charger_done, 'value'),
@@ -251,12 +251,12 @@ class HomeAssistantHub:
 
     def now_is_non_hour(self) -> bool:
         now = datetime.now().replace(minute=0, second=0, microsecond=0)
-        non_hours = self._request_sensor_lookup().get(LookupKeys.NON_HOURS, [])
+        non_hours = self._request_sensor_lookup().get(LookupKeys.NON_HOURS, [])[0]()
         return now in non_hours
 
     def now_is_caution_hour(self) -> bool:
         now = datetime.now().replace(minute=0, second=0, microsecond=0)
-        caution_hours = self._request_sensor_lookup().get(LookupKeys.DYNAMIC_CAUTION_HOURS, {})
+        caution_hours = self._request_sensor_lookup().get(LookupKeys.DYNAMIC_CAUTION_HOURS, {})[0]()
         return now in caution_hours.keys()
 
     async def async_free_charge(self) -> bool:

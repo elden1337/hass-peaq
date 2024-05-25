@@ -27,7 +27,7 @@ class PriceAwareHub(HomeAssistantHub):
     @property
     def current_peak_dynamic(self):
         """Dynamically calculated peak to adhere to caution-hours"""
-        dynamic_caution_hours = self._request_sensor_lookup().get(LookupKeys.DYNAMIC_CAUTION_HOURS, {})
+        dynamic_caution_hours: dict = self._request_sensor_lookup().get(LookupKeys.DYNAMIC_CAUTION_HOURS, {})()
         if len(dynamic_caution_hours) > 0:
             if self.now_is_caution_hour() and not getattr(self.hours.timer, 'is_override', False):
                 return self.sensors.current_peak.observed_peak * dynamic_caution_hours.get(datetime.now().replace(minute=0, second=0, microsecond=0), 1)

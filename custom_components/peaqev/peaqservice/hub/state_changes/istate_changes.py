@@ -73,7 +73,8 @@ class StateChangesBase:
                     peak=self.hub.current_peak_dynamic,
                     charged_amount=self.hub.chargecontroller.session.session_energy,
                     prices=self.hub.hours.prices,
-                    prices_tomorrow=self.hub.hours.prices_tomorrow
+                    prices_tomorrow=self.hub.hours.prices_tomorrow,
+                    chargecontroller_state=self.hub.chargecontroller.status_type
                 )
                 await self.hub.hours.scheduler.async_update_facade(dto)
         except Exception as e:

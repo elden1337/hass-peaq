@@ -21,9 +21,10 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class ChargeController(IChargeController):
     def __init__(
-        self, hub: HomeAssistantHub, charger_states: dict, charger_type: ChargerType
+            self, hub: HomeAssistantHub, charger_states: dict, charger_type: ChargerType
     ):
         self._aux_running_grace_timer = WaitTimer(timeout=300, init_now=True)
         super().__init__(hub, charger_states, charger_type)
@@ -48,7 +49,11 @@ class ChargeController(IChargeController):
                     if float_state > 0:
                         return self._do_initialize()
             except Exception as e:
-                _LOGGER.error('Could not convert state to float: %s', e)
+                _LOGGER.error(
+                    'Could not convert state to float for sensor (%s). Exception: %s',
+                    self.hub.options.powersensor,
+                    e
+                )
                 return False
         return False
 
@@ -70,12 +75,12 @@ class ChargeController(IChargeController):
     async def async_get_status_charging(self) -> ChargeControllerStates:
         if any([not self.hub.power.power_canary.alive, self.hub.events.aux_stop,
                 all(
-            [
-                await self.async_above_stopthreshold(),
-                self.hub.sensors.totalhourlyenergy.value > 0,
-                not await self.hub.async_free_charge(),
-            ]
-        )]):
+                    [
+                        await self.async_above_stopthreshold(),
+                        self.hub.sensors.totalhourlyenergy.value > 0,
+                        not await self.hub.async_free_charge(),
+                    ]
+                )]):
             return ChargeControllerStates.Stop
         return ChargeControllerStates.Start
 

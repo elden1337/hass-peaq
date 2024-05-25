@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from peaqevcore.common.models.observer_types import ObserverTypes
+from peaqevcore.services.scheduler.update_scheduler_dto import UpdateSchedulerDTO
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
@@ -63,7 +64,15 @@ class ServiceCalls:
             await self.hub.hours.scheduler.async_create_schedule(
                 charge_amount, dep_time, start_time, override_settings
             )
-            await self.hub.hours.scheduler.async_update_facade()
+            dto = UpdateSchedulerDTO(
+                moving_avg24=self.hub.sensors.powersensormovingaverage24.value,
+                peak=self.hub.current_peak_dynamic,
+                charged_amount=self.hub.chargecontroller.session.session_energy,
+                prices=self.hub.hours.prices,
+                prices_tomorrow=self.hub.hours.prices_tomorrow,
+                chargecontroller_state = self.hub.chargecontroller.status_type
+            )
+            await self.hub.hours.scheduler.async_update_facade(dto)
             await self.hub.observer.async_broadcast(ObserverTypes.SchedulerCreated)
 
     async def async_call_scheduler_cancel(self):
