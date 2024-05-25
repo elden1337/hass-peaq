@@ -4,21 +4,16 @@ import logging
 from typing import TYPE_CHECKING, Tuple
 
 from peaqevcore.common.models.observer_types import ObserverTypes
-
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
-
-if TYPE_CHECKING:
-    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 from peaqevcore.common.wait_timer import WaitTimer
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import \
-    defer_start
-from custom_components.peaqev.peaqservice.chargecontroller.const import (
-    INITIALIZING, WAITING_FOR_POWER)
-from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
-    IChargeController
+from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import defer_start
+from custom_components.peaqev.peaqservice.chargecontroller.const import INITIALIZING, WAITING_FOR_POWER
+from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
+
+if TYPE_CHECKING:
+    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,7 +43,8 @@ class ChargeController(IChargeController):
                 if isinstance(float_state, (float, int)):
                     if float_state > 0:
                         return self._do_initialize()
-            except Exception:
+            except Exception as e:
+                _LOGGER.error('Could not convert state to float: %s', e)
                 return False
         return False
 
@@ -80,30 +76,43 @@ class ChargeController(IChargeController):
         return ChargeControllerStates.Start
 
     async def async_get_status_connected(
-        self, charger_state=None
+            self, charger_state=None
     ) -> Tuple[ChargeControllerStates, bool]:
         try:
             if not self.hub.enabled:
                 return ChargeControllerStates.Connected, True
             if (
-                charger_state is not None
-                and self.hub.sensors.carpowersensor.value < 1
-                and await self.async_is_done(charger_state)
+                    charger_state is not None
+                    and self.hub.sensors.carpowersensor.value < 1
+                    and await self.async_is_done(charger_state)
             ):
                 await self.hub.observer.async_broadcast(ObserverTypes.CarDone)
                 return ChargeControllerStates.Done, False
             if await self._should_start_charging():
                 return ChargeControllerStates.Start, False
             return ChargeControllerStates.Stop, True
+        except TypeError as e:
+            _LOGGER.error(
+                'TypeError in async_get_status_connected for: %s. charger-state: %s', e, charger_state
+            )
+            return ChargeControllerStates.Error, True
+        except ValueError as e:
+            _LOGGER.error(
+                'ValueError in async_get_status_connected for: %s. charger-state: %s', e, charger_state
+            )
+            return ChargeControllerStates.Error, True
+        # Add more specific exceptions as needed
         except Exception as e:
-            _LOGGER.debug(
-                f'async_get_status_connected for: {e}. charger-state: {charger_state}'
+            _LOGGER.error(
+                'Unexpected error in async_get_status_connected for: %s. charger-state: %s', e, charger_state
             )
             return ChargeControllerStates.Error, True
 
     async def _aux_check_running_charger_mismatch(self, status_type: ChargeControllerStates) -> None:
         if self._aux_running_grace_timer.is_timeout():
-            _LOGGER.warning(f'Charger seems to be running without Peaqev controlling it. Attempting aux stop. If you wish to charge without Peaqev you need to disable it on the switch.')
+            _LOGGER.warning(
+                'Charger seems to be running without Peaqev controlling it. Attempting aux stop. If you wish to charge without Peaqev you need to disable it on the switch.'
+            )
             await self.hub.observer.async_broadcast(ObserverTypes.KillswitchDead)
             self._aux_running_grace_timer.reset()
         elif status_type in [
