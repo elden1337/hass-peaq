@@ -49,7 +49,14 @@ class HubFactory:
         hub.prediction = Prediction(hub)  # threshold
         hub.servicecalls = ServiceCalls(hub)  # top level
         hub.states = await StateChangesFactory.async_create(hub)  # top level
-        hub.spotprice = SpotPriceFactory.create(hub=hub, observer=hub.observer, system=PeaqSystem.PeaqEv, test=False,is_active=hub.options.price.price_aware, custom_sensor=hub.options.price.custom_sensor)
+        hub.spotprice = SpotPriceFactory.create(
+            hub=hub,
+            observer=hub.observer,
+            system=PeaqSystem.PeaqEv,
+            test=False,
+            is_active=hub.options.price.price_aware,
+            custom_sensor=hub.options.price.custom_sensor
+        )
         hub.power = await PowerToolsFactory.async_create(hub)
         hub.events = HubEvents(hub, hub.state_machine)
         return hub

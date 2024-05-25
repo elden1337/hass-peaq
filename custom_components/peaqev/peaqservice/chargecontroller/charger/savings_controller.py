@@ -44,8 +44,6 @@ class SavingsController:
 
     @property
     def enabled(self) -> bool:
-        if self._enabled:
-            return self.service.enabled
         return self._enabled
 
     @property

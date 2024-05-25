@@ -22,7 +22,6 @@ from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller imp
 
 _LOGGER = logging.getLogger(__name__)
 
-
 class ChargeController(IChargeController):
     def __init__(
         self, hub: HomeAssistantHub, charger_states: dict, charger_type: ChargerType
