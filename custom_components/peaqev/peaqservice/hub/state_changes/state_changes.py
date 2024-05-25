@@ -7,11 +7,13 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
-from custom_components.peaqev.peaqservice.chargertypes.types.outlet import OUTLET_TYPE_CHARGING, OUTLET_TYPE_CONNECTED
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
+    ChargerType
+from custom_components.peaqev.peaqservice.chargertypes.types.outlet import (
+    OUTLET_TYPE_CHARGING, OUTLET_TYPE_CONNECTED)
 from custom_components.peaqev.peaqservice.hub.const import LookupKeys
-
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
-from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import StateChangesBase
+from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
+    StateChangesBase
 
 _LOGGER = logging.getLogger(__name__)
 
