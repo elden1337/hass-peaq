@@ -3,6 +3,7 @@ from datetime import datetime
 
 from homeassistant.core import HomeAssistant
 
+from custom_components.peaqev.peaqservice.hub.const import LookupKeys
 from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 from custom_components.peaqev.peaqservice.hub.max_min_controller import \
     MaxMinController
@@ -26,12 +27,10 @@ class PriceAwareHub(HomeAssistantHub):
     @property
     def current_peak_dynamic(self):
         """Dynamically calculated peak to adhere to caution-hours"""
-        if len(self.dynamic_caution_hours) > 0:
+        dynamic_caution_hours = self._request_sensor_lookup().get(LookupKeys.DYNAMIC_CAUTION_HOURS, {})
+        if len(dynamic_caution_hours) > 0:
             if self.now_is_caution_hour() and not getattr(self.hours.timer, 'is_override', False):
-                return (
-                        self.sensors.current_peak.observed_peak
-                        * self.dynamic_caution_hours.get(datetime.now().replace(minute=0, second=0, microsecond=0), 1)
-                )
+                return self.sensors.current_peak.observed_peak * dynamic_caution_hours.get(datetime.now().replace(minute=0, second=0, microsecond=0), 1)
         return self.sensors.current_peak.observed_peak
 
     async def async_is_caution_hour(self) -> bool:

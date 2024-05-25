@@ -124,7 +124,6 @@ class ChargeController(IChargeController):
             return
         self._aux_running_grace_timer.update()
 
-
     async def _should_start_charging(self) -> bool:
         aux_stop = self.hub.events.aux_stop
         dont_defer_nonhour = not defer_start(self.hub.non_hours)

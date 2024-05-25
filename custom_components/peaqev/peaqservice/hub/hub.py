@@ -37,6 +37,10 @@ from custom_components.peaqev.peaqservice.util.schedule_options_handler import S
 
 _LOGGER = logging.getLogger(__name__)
 
+class HubInitializer:
+    initialized_log_last_logged = 0
+    not_ready_list_old_state = 0
+    _initialized: bool = False
 
 class HomeAssistantHub:
     hub_id = 1337
@@ -77,10 +81,6 @@ class HomeAssistantHub:
         return self.hours.non_hours
 
     @property
-    def dynamic_caution_hours(self) -> dict:
-        return self.hours.dynamic_caution_hours
-
-    @property
     def is_initialized(self) -> bool:
         if self._is_initialized:
             return True
@@ -94,21 +94,6 @@ class HomeAssistantHub:
     @property
     def watt_cost(self) -> int:
         return 0
-
-    async def async_update_adjusted_average(self, val) -> None:
-        pass
-
-    async def async_update_average_monthly_price(self, val) -> None:
-        pass
-
-    async def async_update_spotprice(self) -> None:
-        pass
-
-    async def async_update_prices(self, prices: list) -> None:
-        pass
-
-    async def async_is_caution_hour(self) -> bool:
-        return str(datetime.now().hour) in [str(h) for h in self.hours.caution_hours]
 
     @property
     def scheduler_options_handler(self) -> SchedulerOptionsHandler|None:
@@ -140,7 +125,7 @@ class HomeAssistantHub:
 
     @property
     def savings_month(self) -> float:
-        """Ackumulated savings for the month against spotprice avg. ie can fluctuate"""
+        """Accumulated savings for the month against spotprice avg. ie can fluctuate"""
         try:
             month_draw = self.state_machine.states.get('sensor.peaqev_energy_including_car_monthly')
             month_diff = self.spotprice.average_month - self.purchased_average_month
@@ -160,6 +145,21 @@ class HomeAssistantHub:
                 tb = traceback.format_exc()  # Get the full traceback
                 msg = f'Unable to handle data-update: {entity_id} {old_state}|{new_state}. Exception: {e}\n{tb}'
                 _LOGGER.error(msg)
+
+    async def async_update_adjusted_average(self, val) -> None:
+        pass
+
+    async def async_update_average_monthly_price(self, val) -> None:
+        pass
+
+    async def async_update_spotprice(self) -> None:
+        pass
+
+    async def async_update_prices(self, prices: list) -> None:
+        pass
+
+    async def async_is_caution_hour(self) -> bool:
+        return str(datetime.now().hour) in [str(h) for h in self.hours.caution_hours]
 
     async def async_request_sensor_data(self, *args) -> dict | any:
         ret = {}
@@ -192,11 +192,11 @@ class HomeAssistantHub:
             LookupKeys.HOUR_STATE:             partial(getattr, self.hours, 'state', 'unknown'),
             LookupKeys.PRICES:                 partial(getattr, self.hours, 'prices', []),
             LookupKeys.PRICES_TOMORROW:        partial(getattr, self.hours, 'prices_tomorrow', []),
-            LookupKeys.NON_HOURS:              partial(getattr, self, 'non_hours', []),
+            LookupKeys.NON_HOURS:              partial(getattr, self.hours, 'non_hours', []),
             LookupKeys.FUTURE_HOURS:           partial(getattr, self.hours, 'future_hours', []),
             LookupKeys.CAUTION_HOURS:          partial(getattr, self.hours, 'caution_hours', []),
             LookupKeys.DYNAMIC_CAUTION_HOURS:  partial(
-                getattr, self, 'dynamic_caution_hours', {}
+                getattr, self.hours, 'dynamic_caution_hours', {}
             ),
             LookupKeys.SPOTPRICE_SOURCE:       partial(getattr, self.spotprice, 'source', 'unknown'),
             LookupKeys.AVERAGE_SPOTPRICE_DATA: partial(getattr, self.spotprice, 'average_data'),
@@ -238,11 +238,13 @@ class HomeAssistantHub:
 
     def now_is_non_hour(self) -> bool:
         now = datetime.now().replace(minute=0, second=0, microsecond=0)
-        return now in self.non_hours
+        non_hours = self._request_sensor_lookup().get(LookupKeys.NON_HOURS, [])
+        return now in non_hours
 
     def now_is_caution_hour(self) -> bool:
         now = datetime.now().replace(minute=0, second=0, microsecond=0)
-        return now in self.dynamic_caution_hours.keys()
+        caution_hours = self._request_sensor_lookup().get(LookupKeys.DYNAMIC_CAUTION_HOURS, {})
+        return now in caution_hours.keys()
 
     async def async_free_charge(self) -> bool:
         """Returns true if free charge is enabled, which means that peaks are currently not tracked"""
