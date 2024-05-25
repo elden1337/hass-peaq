@@ -67,12 +67,18 @@ class StateChangesBase:
                         float(self.hub.spotprice.state)
                     )
             if getattr(self.hub.hours.scheduler, 'schedule_created', False):
-                await self.hub.hours.scheduler.async_update_facade()
+                dto = UpdateSchedulerDTO(
+                    moving_avg24=self.hub.sensors.powersensormovingaverage24.value,
+                    peak=self.hub.current_peak_dynamic,
+                    charged_amount=self.hub.chargecontroller.session.session_energy,
+                    prices=self.hub.hours.prices,
+                    prices_tomorrow=self.hub.hours.prices_tomorrow
+                )
+                await self.hub.hours.scheduler.async_update_facade(dto)
         except Exception as e:
             _LOGGER.exception(f'Unable to update session parameters: {e}')
 
     async def async_handle_sensor_attribute(self) -> None:
-        # is this needed if we loop them all?
         if hasattr(self.hub.sensors, 'carpowersensor'):
             if self.hub.sensors.carpowersensor.use_attribute:  # todo: strategy should handle this
                 entity = self.hub.sensors.carpowersensor

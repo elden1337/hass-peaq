@@ -17,6 +17,7 @@ from custom_components.peaqev.peaqservice.chargecontroller.const import (
     DEBUGLOG_TIMEOUT, DONETIMEOUT)
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
+from custom_components.peaqev.peaqservice.hub.const import LookupKeys
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
 _LOGGER = logging.getLogger(__name__)
@@ -165,7 +166,7 @@ class IChargeController:
                 pass
 
     async def async_get_status(self) -> Tuple[ChargeControllerStates, bool]:
-        state = await self.hub.async_request_sensor_data('chargerobject_value')
+        state = await self.hub.async_request_sensor_data(LookupKeys.CHARGEROBJECT_VALUE)
 
         if state not in self.model.flattened_chargerstates():
             _LOGGER.debug(f'Chargerobject_value is not in charger_states. Returning Error-state. {str(state)}')

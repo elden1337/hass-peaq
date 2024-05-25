@@ -7,10 +7,7 @@ if TYPE_CHECKING:
 
 from homeassistant.helpers.restore_state import RestoreEntity
 
-from custom_components.peaqev.peaqservice.hub.const import (
-    AVERAGE_KWH_PRICE, AVERAGE_MONTHLY, AVERAGE_SPOTPRICE_DATA, CURRENCY,
-    CURRENT_PEAK, FUTURE_HOURS, MAX_CHARGE, MAX_PRICE, MIN_PRICE,
-    SPOTPRICE_SOURCE, USE_CENT)
+from custom_components.peaqev.peaqservice.hub.const import LookupKeys
 from custom_components.peaqev.peaqservice.util.constants import HOURCONTROLLER
 from custom_components.peaqev.sensors.money_sensor_helpers import *
 from custom_components.peaqev.sensors.sensorbase import SensorBase
@@ -50,47 +47,47 @@ class HourControllerSensor(SensorBase, RestoreEntity):
 
     async def async_update(self) -> None:
         ret = await self.hub.async_request_sensor_data(
-            CURRENCY,
-            AVERAGE_SPOTPRICE_DATA,
-            USE_CENT,
-            CURRENT_PEAK,
-            AVERAGE_KWH_PRICE,
-            MAX_CHARGE,
-            MAX_PRICE,
-            MIN_PRICE,
-            FUTURE_HOURS,
-            AVERAGE_MONTHLY,
-            SPOTPRICE_SOURCE
+            LookupKeys.CURRENCY,
+            LookupKeys.AVERAGE_SPOTPRICE_DATA,
+            LookupKeys.USE_CENT,
+            LookupKeys.CURRENT_PEAK,
+            LookupKeys.AVERAGE_KWH_PRICE,
+            LookupKeys.MAX_CHARGE,
+            LookupKeys.MAX_PRICE,
+            LookupKeys.MIN_PRICE,
+            LookupKeys.FUTURE_HOURS,
+            LookupKeys.AVERAGE_MONTHLY,
+            LookupKeys.SPOTPRICE_SOURCE
         )
         if ret is not None:
             self._state = await self.async_state_display()
-            self._source = str(ret.get(SPOTPRICE_SOURCE)).capitalize()
+            self._source = str(ret.get(LookupKeys.SPOTPRICE_SOURCE)).capitalize()
             self._secondary_threshold = self.hub.spotprice.model.adjusted_average
-            self._all_hours = set_all_hours_display(ret.get(FUTURE_HOURS, []), self.hub.spotprice.tomorrow_valid)
-            self._currency = ret.get(CURRENCY)
-            self._max_charge = set_total_charge(ret.get(MAX_CHARGE))
-            self._charge_permittance = set_current_charge_permittance_display(ret.get(FUTURE_HOURS))
+            self._all_hours = set_all_hours_display(ret.get(LookupKeys.FUTURE_HOURS, []), self.hub.spotprice.tomorrow_valid)
+            self._currency = ret.get(LookupKeys.CURRENCY)
+            self._max_charge = set_total_charge(ret.get(LookupKeys.MAX_CHARGE))
+            self._charge_permittance = set_current_charge_permittance_display(ret.get(LookupKeys.FUTURE_HOURS))
             self._avg_cost = set_avg_cost(
-                avg_cost=ret.get(AVERAGE_KWH_PRICE),
-                currency=ret.get(CURRENCY),
-                use_cent=ret.get(USE_CENT),
+                avg_cost=ret.get(LookupKeys.AVERAGE_KWH_PRICE),
+                currency=ret.get(LookupKeys.CURRENCY),
+                use_cent=ret.get(LookupKeys.USE_CENT),
             )
             self._average_data_current_month = currency_translation(
-                value=ret.get(AVERAGE_MONTHLY),
-                currency=ret.get(CURRENCY),
-                use_cent=ret.get(USE_CENT, False),
+                value=ret.get(LookupKeys.AVERAGE_MONTHLY),
+                currency=ret.get(LookupKeys.CURRENCY),
+                use_cent=ret.get(LookupKeys.USE_CENT, False),
             )
 
             if self.hub.options.price.dynamic_top_price:
                 _maxp = currency_translation(
-                    value=ret.get(MAX_PRICE) if ret.get(MAX_PRICE, 0) > 0 else None,
-                    currency=ret.get(CURRENCY),
-                    use_cent=ret.get(USE_CENT, False),
+                    value=ret.get(LookupKeys.MAX_PRICE) if ret.get(LookupKeys.MAX_PRICE, 0) > 0 else None,
+                    currency=ret.get(LookupKeys.CURRENCY),
+                    use_cent=ret.get(LookupKeys.USE_CENT, False),
                 )
                 _minp = currency_translation(
-                    value=ret.get(MIN_PRICE) if ret.get(MIN_PRICE, 0) > 0 else None,
-                    currency=ret.get(CURRENCY),
-                    use_cent=ret.get(USE_CENT, False),
+                    value=ret.get(LookupKeys.MIN_PRICE) if ret.get(LookupKeys.MIN_PRICE, 0) > 0 else None,
+                    currency=ret.get(LookupKeys.CURRENCY),
+                    use_cent=ret.get(LookupKeys.USE_CENT, False),
                 )
                 self._max_min_price = f'max:{_maxp}, min:{_minp}'
                 self._max_price_based_on = (

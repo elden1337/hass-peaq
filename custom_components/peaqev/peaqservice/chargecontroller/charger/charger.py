@@ -6,14 +6,12 @@ from peaqevcore.common.models.observer_types import ObserverTypes
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.services.chargertype.const import DOMAIN, PARAMS
 
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import \
-    call_ok
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import \
-    ChargerStates
-from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelpers import (
-    ChargerHelpers, async_set_chargerparams)
-from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import \
-    ChargerModel
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import call_ok
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import ChargerStates
+from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelpers import ChargerHelpers, \
+    async_set_chargerparams
+from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import ChargerModel
+from custom_components.peaqev.peaqservice.hub.const import LookupKeys
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
@@ -245,9 +243,7 @@ class Charger:
 
     async def async_internal_state_off(self):
         self.model.disable_current_updates = True
-        charger_state = await self.controller.hub.async_request_sensor_data(
-            'chargerobject_value'
-        )
+        charger_state = await self.controller.hub.async_request_sensor_data(LookupKeys.CHARGEROBJECT_VALUE)
         if charger_state not in self._charger.chargerstates.get(
             ChargeControllerStates.Charging
         ):

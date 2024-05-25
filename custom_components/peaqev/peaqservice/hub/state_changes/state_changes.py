@@ -1,20 +1,17 @@
 from __future__ import annotations
 
+import logging
 import time
 from typing import TYPE_CHECKING
-
-from custom_components.peaqev.peaqservice.chargertypes.types.outlet import (
-    OUTLET_TYPE_CHARGING, OUTLET_TYPE_CONNECTED)
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
-import logging
+from custom_components.peaqev.peaqservice.chargertypes.types.outlet import OUTLET_TYPE_CHARGING, OUTLET_TYPE_CONNECTED
+from custom_components.peaqev.peaqservice.hub.const import LookupKeys
 
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
-from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
-    StateChangesBase
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
+from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import StateChangesBase
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -50,7 +47,7 @@ class StateChanges(StateChangesBase):
                     update_session = True
             return update_session
         except Exception as e:
-            _LOGGER.error(f"async_update_sensor_internal for {entity}: {e}")
+            _LOGGER.error(f'async_update_sensor_internal for {entity}: {e}')
             return False
 
     async def async_handle_powersensor(self, value) -> None:
@@ -77,7 +74,7 @@ class StateChanges(StateChangesBase):
         )
     async def async_handle_outlet_updates(self):
         if self.hub.chargertype.type is ChargerType.Outlet:
-            old_state = await self.hub.async_request_sensor_data("chargerobject_value")
+            old_state = await self.hub.async_request_sensor_data(LookupKeys.CHARGEROBJECT_VALUE)
             if not self.latest_outlet_update.is_timeout():
                 return
             self.latest_outlet_update.update()
@@ -85,11 +82,9 @@ class StateChanges(StateChangesBase):
                 await self.hub.async_set_chargerobject_value(OUTLET_TYPE_CHARGING)
             else:
                 await self.hub.async_set_chargerobject_value(OUTLET_TYPE_CONNECTED)
-            if old_state != await self.hub.async_request_sensor_data(
-                "chargerobject_value"
-            ):
+            if old_state != await self.hub.async_request_sensor_data(LookupKeys.CHARGEROBJECT_VALUE):
                 _LOGGER.debug(
-                    f"smartoutlet is now {await self.hub.async_request_sensor_data('chargerobject_value')}"
+                    f'smartoutlet is now {await self.hub.async_request_sensor_data(LookupKeys.CHARGEROBJECT_VALUE)}'
                 )
 
 
@@ -118,7 +113,7 @@ class StateChangesLite(StateChangesBase):
 
     async def _handle_outlet_updates(self):
         if self.hub.chargertype.type is ChargerType.Outlet:
-            old_state = await self.hub.async_request_sensor_data("chargerobject_value")
+            old_state = await self.hub.async_request_sensor_data(LookupKeys.CHARGEROBJECT_VALUE)
             if not self.latest_outlet_update.is_timeout():
                 return
             self.latest_outlet_update.update()
@@ -126,11 +121,9 @@ class StateChangesLite(StateChangesBase):
                 await self.hub.async_set_chargerobject_value(OUTLET_TYPE_CHARGING)
             else:
                 await self.hub.async_set_chargerobject_value(OUTLET_TYPE_CONNECTED)
-            if old_state != await self.hub.async_request_sensor_data(
-                "chargerobject_value"
-            ):
+            if old_state != await self.hub.async_request_sensor_data(LookupKeys.CHARGEROBJECT_VALUE):
                 _LOGGER.debug(
-                    f"smartoutlet is now {await self.hub.async_request_sensor_data('chargerobject_value')}"
+                    f'smartoutlet is now {await self.hub.async_request_sensor_data(LookupKeys.CHARGEROBJECT_VALUE)}'
                 )
 
 
@@ -155,7 +148,7 @@ class StateChangesNoCharger(StateChangesBase):
             case self.hub.sensors.totalhourlyenergy.entity:
                 await self.async_update_total_energy_and_peak(value)
             case self.hub.sensors.powersensormovingaverage.entity:
-                _LOGGER.debug(f"trying to update powersensormovingaverage with {value}")
+                _LOGGER.debug(f'trying to update powersensormovingaverage with {value}')
                 self.hub.sensors.powersensormovingaverage.value = value
             case self.hub.sensors.powersensormovingaverage24.entity:
                 self.hub.sensors.powersensormovingaverage24.value = value

@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 from homeassistant.helpers.restore_state import RestoreEntity
 
 from custom_components.peaqev.peaqservice.hub.const import (
-    AVERAGE_SPOTPRICE_DATA, AVERAGE_STDEV_DATA)
+    AVERAGE_SPOTPRICE_DATA, LookupKeys)
 from custom_components.peaqev.sensors.money_sensor_helpers import *
 from custom_components.peaqev.sensors.sensorbase import MoneyDevice
 
@@ -36,11 +36,11 @@ class MoneyDataSensor(MoneyDevice, RestoreEntity):
         return 'mdi:database-outline'
 
     async def async_update(self) -> None:
-            ret = await self.hub.async_request_sensor_data(AVERAGE_SPOTPRICE_DATA, AVERAGE_STDEV_DATA)
+            ret = await self.hub.async_request_sensor_data(LookupKeys.AVERAGE_SPOTPRICE_DATA, LookupKeys.AVERAGE_STDEV_DATA)
             if ret is not None:
                 if len(ret):
-                    incoming_prices = ret.get(AVERAGE_SPOTPRICE_DATA, {})
-                    incoming_stdev = ret.get(AVERAGE_STDEV_DATA, {})
+                    incoming_prices = ret.get(LookupKeys.AVERAGE_SPOTPRICE_DATA, {})
+                    incoming_stdev = ret.get(LookupKeys.AVERAGE_STDEV_DATA, {})
 
                     if incoming_prices != self._average_spotprice_data or self._state < datetime.now()+timedelta(minutes=-30):
                         self._state = datetime.now()

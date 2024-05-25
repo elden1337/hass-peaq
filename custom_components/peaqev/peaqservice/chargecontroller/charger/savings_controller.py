@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 
 from peaqevcore.common.models.observer_types import ObserverTypes
 
+from custom_components.peaqev.peaqservice.hub.const import LookupKeys
+
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import (
         IChargeController,
@@ -69,7 +71,7 @@ class SavingsController:
         # if car is being  connected to charger
         if self.status is SavingsStatus.Off:
             await self.service.async_start_listen()
-            prices = await self.controller.hub.async_request_sensor_data("prices")
+            prices = await self.controller.hub.async_request_sensor_data(LookupKeys.PRICES)
             await self.service.async_add_prices(prices)
 
     async def async_exit(self, val=None):

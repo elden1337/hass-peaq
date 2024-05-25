@@ -7,43 +7,33 @@ from datetime import datetime
 from functools import partial
 from typing import Callable
 
+# Third party imports
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_state_change
+# Local application imports
 from peaqevcore.common.models.observer_types import ObserverTypes
 from peaqevcore.common.spotprice.spotpricebase import SpotPriceBase
 from peaqevcore.services.hourselection.initializers.hoursbase import Hours
 from peaqevcore.services.prediction.prediction import Prediction
 from peaqevcore.services.threshold.thresholdbase import ThresholdBase
 
-from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
-    IChargeController
-from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
-    IChargerType
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
-    ChargerType
-from custom_components.peaqev.peaqservice.hub.const import *
-from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import \
-    HourselectionFactory
+from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
+from custom_components.peaqev.peaqservice.hub.const import LookupKeys
+from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import HourselectionFactory
 from custom_components.peaqev.peaqservice.hub.hub_events import HubEvents
 from custom_components.peaqev.peaqservice.hub.models.hub_model import HubModel
-from custom_components.peaqev.peaqservice.hub.models.hub_options import \
-    HubOptions
-from custom_components.peaqev.peaqservice.hub.models.initializer_types import \
-    InitializerTypes
-from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
-    Observer
-from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_base import \
-    HubSensorsBase
+from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
+from custom_components.peaqev.peaqservice.hub.models.initializer_types import InitializerTypes
+from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import Observer
+from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_base import HubSensorsBase
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
-from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
-    StateChangesBase
-from custom_components.peaqev.peaqservice.powertools.ipower_tools import \
-    IPowerTools
-from custom_components.peaqev.peaqservice.util.constants import \
-    CHARGERCONTROLLER
+from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import StateChangesBase
+from custom_components.peaqev.peaqservice.powertools.ipower_tools import IPowerTools
+from custom_components.peaqev.peaqservice.util.constants import CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import async_iscoroutine, log_once, nametoid
-from custom_components.peaqev.peaqservice.util.schedule_options_handler import \
-    SchedulerOptionsHandler
+from custom_components.peaqev.peaqservice.util.schedule_options_handler import SchedulerOptionsHandler
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -61,6 +51,9 @@ class HomeAssistantHub:
     spotprice: SpotPriceBase
     events :HubEvents
     power: IPowerTools #is interface only
+    initialized_log_last_logged = 0
+    not_ready_list_old_state = 0
+    _initialized: bool = False
 
     def __init__(self, hass: HomeAssistant, options: HubOptions, domain: str):
         self.model = HubModel(domain, hass)
@@ -180,7 +173,6 @@ class HomeAssistantHub:
                 ret[arg] = func()
         self._check_max_min_total_charge(ret)
         if len(ret) == 1:
-            """If only one value is requested, return the value instead of a dict"""
             val = list(ret.values())[0]
             if isinstance(val, str):
                 return val.lower()
@@ -191,54 +183,55 @@ class HomeAssistantHub:
         pass
 
     def _request_sensor_lookup(self) -> dict:
+        """Proxies the request to the correct sensor."""
         return {
-            CHARGER_DONE: partial(getattr, self.sensors.charger_done, 'value'),
-            CHARGEROBJECT_VALUE:    partial(
+            LookupKeys.CHARGER_DONE: partial(getattr, self.sensors.charger_done, 'value'),
+            LookupKeys.CHARGEROBJECT_VALUE:    partial(
                 getattr, self.sensors.chargerobject, 'value'
             ),
-            HOUR_STATE:             partial(getattr, self.hours, 'state', 'unknown'),
-            PRICES:                 partial(getattr, self.hours, 'prices', []),
-            PRICES_TOMORROW:        partial(getattr, self.hours, 'prices_tomorrow', []),
-            NON_HOURS:              partial(getattr, self, 'non_hours', []),
-            FUTURE_HOURS:           partial(getattr, self.hours, 'future_hours', []),
-            CAUTION_HOURS:          partial(getattr, self.hours, 'caution_hours', []),
-            DYNAMIC_CAUTION_HOURS:  partial(
+            LookupKeys.HOUR_STATE:             partial(getattr, self.hours, 'state', 'unknown'),
+            LookupKeys.PRICES:                 partial(getattr, self.hours, 'prices', []),
+            LookupKeys.PRICES_TOMORROW:        partial(getattr, self.hours, 'prices_tomorrow', []),
+            LookupKeys.NON_HOURS:              partial(getattr, self, 'non_hours', []),
+            LookupKeys.FUTURE_HOURS:           partial(getattr, self.hours, 'future_hours', []),
+            LookupKeys.CAUTION_HOURS:          partial(getattr, self.hours, 'caution_hours', []),
+            LookupKeys.DYNAMIC_CAUTION_HOURS:  partial(
                 getattr, self, 'dynamic_caution_hours', {}
             ),
-            SPOTPRICE_SOURCE:       partial(getattr, self.spotprice, 'source', 'unknown'),
-            AVERAGE_SPOTPRICE_DATA: partial(getattr, self.spotprice, 'average_data'),
-            AVERAGE_STDEV_DATA:     partial(getattr, self.spotprice, 'average_stdev_data'),
-            USE_CENT:               partial(getattr, self.spotprice.model, 'use_cent'),
-            CURRENT_PEAK:           partial(getattr, self.sensors.current_peak, 'observed_peak'),
-            AVERAGE_KWH_PRICE:      partial(self.hours.async_get_average_kwh_price),
-            MAX_CHARGE:             partial(self.hours.async_get_total_charge),
-            AVERAGE_WEEKLY:         partial(getattr, self.spotprice, 'average_weekly'),
-            AVERAGE_MONTHLY:        partial(getattr, self.spotprice, 'average_month'),
-            AVERAGE_30:             partial(getattr, self.spotprice, 'average_30'),
-            CURRENCY:               partial(getattr, self.spotprice, 'currency'),
-            OFFSETS:                partial(getattr, self.hours, 'offsets', {}),
-            IS_PRICE_AWARE:         partial(getattr, self.options.price, 'price_aware'),
-            IS_SCHEDULER_ACTIVE: partial(
+            LookupKeys.SPOTPRICE_SOURCE:       partial(getattr, self.spotprice, 'source', 'unknown'),
+            LookupKeys.AVERAGE_SPOTPRICE_DATA: partial(getattr, self.spotprice, 'average_data'),
+            LookupKeys.AVERAGE_STDEV_DATA:     partial(getattr, self.spotprice, 'average_stdev_data'),
+            LookupKeys.USE_CENT:               partial(getattr, self.spotprice.model, 'use_cent'),
+            LookupKeys.CURRENT_PEAK:           partial(getattr, self.sensors.current_peak, 'observed_peak'),
+            LookupKeys.AVERAGE_KWH_PRICE:      partial(self.hours.async_get_average_kwh_price),
+            LookupKeys.MAX_CHARGE:             partial(self.hours.async_get_total_charge),
+            LookupKeys.AVERAGE_WEEKLY:         partial(getattr, self.spotprice, 'average_weekly'),
+            LookupKeys.AVERAGE_MONTHLY:        partial(getattr, self.spotprice, 'average_month'),
+            LookupKeys.AVERAGE_30:             partial(getattr, self.spotprice, 'average_30'),
+            LookupKeys.CURRENCY:               partial(getattr, self.spotprice, 'currency'),
+            LookupKeys.OFFSETS:                partial(getattr, self.hours, 'offsets', {}),
+            LookupKeys.IS_PRICE_AWARE:         partial(getattr, self.options.price, 'price_aware'),
+            LookupKeys.IS_SCHEDULER_ACTIVE: partial(
                 getattr, self.hours.scheduler, 'scheduler_active', False
             ),
-            'schedules': partial(
+            LookupKeys.SCHEDULES: partial(
                 getattr, self.hours.scheduler, 'schedules', {}
             ),
-            CHARGECONTROLLER_STATUS: partial(
+            LookupKeys.CHARGECONTROLLER_STATUS: partial(
                 getattr, self.chargecontroller, 'status_string'
             ),
-            MAX_PRICE: partial(getattr, self.hours, 'absolute_top_price'),
-            MIN_PRICE: partial(getattr, self.hours, 'min_price'),
-            SAVINGS_PEAK: partial(
+            LookupKeys.MAX_PRICE: partial(getattr, self.hours, 'absolute_top_price'),
+            LookupKeys.MIN_PRICE: partial(getattr, self.hours, 'min_price'),
+            LookupKeys.SAVINGS_PEAK: partial(
                 getattr, self.chargecontroller.savings, 'savings_peak'
             ),
-            SAVINGS_TRADE: partial(
+            LookupKeys.SAVINGS_TRADE: partial(
                 getattr, self.chargecontroller.savings, 'savings_trade'
             ),
-            SAVINGS_TOTAL: partial(
+            LookupKeys.SAVINGS_TOTAL: partial(
                 getattr, self.chargecontroller.savings, 'savings_total'
             ),
-            EXPORT_SAVINGS_DATA: partial(
+            LookupKeys.EXPORT_SAVINGS_DATA: partial(
                 self.chargecontroller.savings.async_export_data
             ),
         }
@@ -286,10 +279,6 @@ class HomeAssistantHub:
             is_quarterly=await self.sensors.locale.data.async_is_quarterly(),
         )
         return ret
-
-    initialized_log_last_logged = 0
-    not_ready_list_old_state = 0
-    _initialized: bool = False
 
     def check_initializer(self):
         if self._initialized:
