@@ -31,13 +31,12 @@ from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.hub.models.initializer_types import \
     InitializerTypes
-from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
-    Observer
 from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_base import \
     HubSensorsBase
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes import \
     StateChangesBase
+from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.powertools.ipower_tools import \
     IPowerTools
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
@@ -72,13 +71,13 @@ class HomeAssistantHub:
     not_ready_list_old_state = 0
     _initialized: bool = False
 
-    def __init__(self, hass: IHomeAssistantFacade, options: HubOptions, domain: str):
+    def __init__(self, hass: IHomeAssistantFacade, options: HubOptions, domain: str, observer: IObserver):
         self.model = HubModel(domain, hass)
         self.hubname = domain.capitalize()
         self.state_machine = hass
         self.options: HubOptions = options
         self._is_initialized = False
-        self.observer = Observer(self)
+        self.observer = observer
         self._set_observers()
 
     async def async_setup(self):

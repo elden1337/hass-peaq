@@ -8,11 +8,11 @@ from typing import Callable
 
 from peaqevcore.common.models.observer_types import ObserverTypes
 
-from custom_components.peaqev.peaqservice.hub.observer.const import (
+from custom_components.peaqev.peaqservice.observer.const import (
     COMMAND_WAIT, TIMEOUT)
-from custom_components.peaqev.peaqservice.hub.observer.models.command import \
+from custom_components.peaqev.peaqservice.observer.models.command import \
     Command
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_model import \
+from custom_components.peaqev.peaqservice.observer.models.observer_model import \
     ObserverModel
 
 _LOGGER = logging.getLogger(__name__)
@@ -41,9 +41,9 @@ class IObserver:
         if isinstance(command, str):
             try:
                 command = ObserverTypes(command)
-                _LOGGER.warning(f"Observer.add: command {command} was not of type ObserverTypes but was converted.")
+                _LOGGER.warning(f'Observer.add: command {command} was not of type ObserverTypes but was converted.')
             except ValueError:
-                _LOGGER.error(f"Observer.add: command {command} was not of type ObserverTypes and could not be converted.")
+                _LOGGER.error(f'Observer.add: command {command} was not of type ObserverTypes and could not be converted.')
                 return ObserverTypes.Test
         return command
 
@@ -123,7 +123,7 @@ class IObserver:
             else:
                 await func()
         except Exception as e:
-            _LOGGER.error(f"async_call_func for {func} with command {command}: {e}")
+            _LOGGER.error(f'async_call_func for {func} with command {command}: {e}')
 
     async def async_ok_to_broadcast(self, command) -> bool:
         if command not in self.model.wait_queue.keys():

@@ -15,6 +15,8 @@ from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller imp
     IChargeController
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
+from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
+from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
@@ -24,10 +26,10 @@ _LOGGER = logging.getLogger(__name__)
 
 class ChargeController(IChargeController):
     def __init__(
-            self, hub: HomeAssistantHub, charger_states: dict, charger_type: ChargerType #todo: inject IHomeAssistantFacade
-    ): #todo: inject IObserver
+            self, hub: HomeAssistantHub, charger_states: dict, charger_type: ChargerType, observer: IObserver, state_machine: IHomeAssistantFacade
+    ):
         self._aux_running_grace_timer = WaitTimer(timeout=300, init_now=True)
-        super().__init__(hub, charger_states, charger_type)
+        super().__init__(hub, charger_states, charger_type, observer, state_machine)
 
     @property
     def status_string(self) -> str:
@@ -41,7 +43,7 @@ class ChargeController(IChargeController):
     def _check_initialized(self) -> bool:
         if self.model.is_initialized:
             return True
-        _state = self.hub.state_machine.get_state(self.hub.options.powersensor)
+        _state = self.state_machine.get_state(self.hub.options.powersensor)
         if _state is not None:
             try:
                 float_state = float(_state.state)
@@ -95,7 +97,7 @@ class ChargeController(IChargeController):
                     and self.hub.sensors.carpowersensor.value < 1
                     and await self.async_is_done(charger_state)
             ):
-                await self.hub.observer.async_broadcast(ObserverTypes.CarDone)
+                await self.observer.async_broadcast(ObserverTypes.CarDone)
                 return ChargeControllerStates.Done, False
             if await self._should_start_charging():
                 return ChargeControllerStates.Start, False
@@ -122,7 +124,7 @@ class ChargeController(IChargeController):
             _LOGGER.warning(
                 'Charger seems to be running without Peaqev controlling it. Attempting aux stop. If you wish to charge without Peaqev you need to disable it on the switch.'
             )
-            await self.hub.observer.async_broadcast(ObserverTypes.KillswitchDead)
+            await self.observer.async_broadcast(ObserverTypes.KillswitchDead)
             self._aux_running_grace_timer.reset()
         elif status_type in [
             ChargeControllerStates.Idle,

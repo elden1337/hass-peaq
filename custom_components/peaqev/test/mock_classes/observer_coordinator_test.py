@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 
-from custom_components.peaqev.peaqservice.hub.observer.iobserver_coordinator import \
+from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import \
     IObserver
 from custom_components.peaqev.peaqservice.util.extensionmethods import \
     async_iscoroutine

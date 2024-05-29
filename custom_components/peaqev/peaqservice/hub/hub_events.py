@@ -11,9 +11,9 @@ EVENTS = [
 _LOGGER = logging.getLogger(__name__)
 
 class HubEvents:
-    def __init__(self, hub, state_machine):
-        self._hub = hub
+    def __init__(self, state_machine, observer):
         self.state_machine = state_machine
+        self.observer = observer
         self._aux_stop = False
         self._event_handler_dict: dict = {}
         for e in EVENTS:
@@ -34,7 +34,7 @@ class HubEvents:
                 self._aux_stop
             )
             self._aux_stop = new_state
-            await self._hub.observer.async_broadcast(ObserverTypes.AuxStopChanged)
+            await self.observer.async_broadcast(ObserverTypes.AuxStopChanged)
 
     @property
     def aux_stop(self) -> bool:

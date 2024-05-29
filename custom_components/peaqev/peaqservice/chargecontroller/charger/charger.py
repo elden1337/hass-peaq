@@ -15,6 +15,7 @@ from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelper
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import \
     ChargerModel
 from custom_components.peaqev.peaqservice.hub.const import LookupKeys
+from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
@@ -23,16 +24,17 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class Charger:
-    def __init__(self, controller, state_machine: IHomeAssistantFacade):
+    def __init__(self, controller, observer: IObserver, state_machine: IHomeAssistantFacade):
         self.controller = controller
         self.state_machine = state_machine
+        self.observer = observer
         self._charger = controller.hub.chargertype
         self.model = ChargerModel()
         self.helpers = ChargerHelpers(self)
-        self.controller.hub.observer.add(ObserverTypes.PowerCanaryDead, self.async_pause_charger) #todo: decouple and inject observer here
-        self.controller.hub.observer.add(ObserverTypes.KillswitchDead, self.async_terminate_charger) #todo: decouple and inject observer here
-        self.controller.hub.observer.add(ObserverTypes.CarConnected, self.async_reset_session) #todo: decouple and inject observer here
-        self.controller.hub.observer.add(ObserverTypes.ProcessCharger, self.async_charge) #todo: decouple and inject observer here
+        self.observer.add(ObserverTypes.PowerCanaryDead, self.async_pause_charger)
+        self.observer.add(ObserverTypes.KillswitchDead, self.async_terminate_charger)
+        self.observer.add(ObserverTypes.CarConnected, self.async_reset_session)
+        self.observer.add(ObserverTypes.ProcessCharger, self.async_charge)
 
     async def async_setup(self):
         pass
@@ -170,7 +172,7 @@ class Charger:
             await self.async_internal_state(ChargerStates.Stop)
             self.model.session_active = False
             await self.async_call_charger(CallTypes.Off)
-            await self.controller.hub.observer.async_broadcast(
+            await self.observer.async_broadcast(
                 ObserverTypes.UpdateChargerDone, True
             )
 

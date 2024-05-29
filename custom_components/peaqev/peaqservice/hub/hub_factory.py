@@ -21,6 +21,8 @@ from custom_components.peaqev.peaqservice.hub.sensors.hubsensors_factory import 
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.hub.state_changes.state_changes_factory import \
     StateChangesFactory
+from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
+from custom_components.peaqev.peaqservice.observer.observer_coordinator import Observer
 from custom_components.peaqev.peaqservice.powertools.powertools_factory import \
     PowerToolsFactory
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
@@ -33,16 +35,23 @@ class HubFactory:
             hub = PriceAwareHub
         else:
             hub = HomeAssistantHub
-        return await HubFactory.async_setup(hub(hass, options, domain))
+        ob = Observer(hass)
+        return await HubFactory.async_setup(hub(hass, options, domain, ob), ob, hass)
 
     @staticmethod
-    async def async_setup(hub: HomeAssistantHub) -> HomeAssistantHub:
+    async def async_setup(hub: HomeAssistantHub, observer: IObserver, state_machine: IHomeAssistantFacade) -> HomeAssistantHub:
         hub.chargertype = await ChargerTypeFactory.async_create(hub.state_machine, hub.options)
-        hub.sensors = await HubSensorsFactory.async_create(hub=hub)
+        hub.sensors = await HubSensorsFactory.async_create(
+            state_machine,
+            hub.options,
+            hub.model.domain,
+            hub.chargertype
+        )
         hub.chargecontroller = await ChargeControllerFactory.async_create(
             hub,
             charger_states=hub.chargertype.chargerstates,
             charger_type=hub.chargertype.type,
+            observer=observer
         )
         hub.hours = await HourselectionFactory.async_create(hub)
         hub.threshold = await ThresholdFactory.async_create(hub)
@@ -51,12 +60,12 @@ class HubFactory:
         hub.states = await StateChangesFactory.async_create(hub)  # top level
         hub.spotprice = SpotPriceFactory.create(
             hub=hub,
-            observer=hub.observer,
+            observer=observer,
             system=PeaqSystem.PeaqEv,
             test=False,
             is_active=hub.options.price.price_aware,
             custom_sensor=hub.options.price.custom_sensor
         )
         hub.power = await PowerToolsFactory.async_create(hub)
-        hub.events = HubEvents(hub, hub.state_machine)
+        hub.events = HubEvents(observer, state_machine)
         return hub

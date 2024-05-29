@@ -8,13 +8,15 @@ from custom_components.peaqev.peaqservice.chargecontroller.const import \
     INITIALIZING
 from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import \
     IChargeController
+from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
+from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class ChargeControllerLite(IChargeController):
-    def __init__(self, hub, charger_states, charger_type):
-        super().__init__(hub, charger_states, charger_type)
+    def __init__(self, hub, charger_states, charger_type, observer: IObserver, state_machine: IHomeAssistantFacade):
+        super().__init__(hub, charger_states, charger_type, observer, state_machine)
 
     @property
     def status_string(self) -> str:
