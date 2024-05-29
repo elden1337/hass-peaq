@@ -26,6 +26,7 @@ from custom_components.peaqev.peaqservice.hub.const import LookupKeys
 from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import \
     HourselectionFactory
 from custom_components.peaqev.peaqservice.hub.hub_events import HubEvents
+from custom_components.peaqev.peaqservice.hub.max_min_controller import MaxMinController
 from custom_components.peaqev.peaqservice.hub.models.hub_model import HubModel
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
@@ -49,10 +50,12 @@ from custom_components.peaqev.peaqservice.util.schedule_options_handler import \
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class HubInitializer:
     initialized_log_last_logged = 0
     not_ready_list_old_state = 0
     _initialized: bool = False
+
 
 class HomeAssistantHub:
     hub_id = 1337
@@ -65,13 +68,20 @@ class HomeAssistantHub:
     states: StateChangesBase
     chargecontroller: IChargeController
     spotprice: SpotPriceBase
-    events :HubEvents
-    power: IPowerTools #is interface only
+    events: HubEvents
+    power: IPowerTools  #is interface only
     initialized_log_last_logged = 0
     not_ready_list_old_state = 0
     _initialized: bool = False
 
-    def __init__(self, hass: IHomeAssistantFacade, options: HubOptions, domain: str, observer: IObserver):
+    def __init__(
+            self,
+            hass: IHomeAssistantFacade,
+            options: HubOptions,
+            domain: str,
+            observer: IObserver,
+            max_min_controller: MaxMinController | None = None,
+            scheduler_options_handler: SchedulerOptionsHandler | None = None):
         self.model = HubModel(domain, hass)
         self.hubname = domain.capitalize()
         self.state_machine = hass
@@ -108,10 +118,6 @@ class HomeAssistantHub:
         return 0
 
     @property
-    def scheduler_options_handler(self) -> SchedulerOptionsHandler|None:
-        return None
-
-    @property
     def current_peak_dynamic(self):
         return self.sensors.current_peak.observed_peak
 
@@ -128,7 +134,7 @@ class HomeAssistantHub:
             month_cost = self.state_machine.get_state('sensor.peaqev_energy_cost_integral_monthly')
             if month_cost and month_draw:
                 try:
-                    return round(float(month_cost.state) / float(month_draw.state),3)
+                    return round(float(month_cost.state) / float(month_draw.state), 3)
                 except ValueError as v:
                     log_once(f'Unable to calculate purchased_average_month. {v}', 'warning')
             return 0
@@ -142,7 +148,7 @@ class HomeAssistantHub:
             month_draw = self.state_machine.get_state('sensor.peaqev_energy_including_car_monthly')
             month_diff = self.spotprice.average_month - self.purchased_average_month
             if month_draw:
-                return round(float(month_draw.state) * month_diff,3)
+                return round(float(month_draw.state) * month_diff, 3)
             return 0
         except ZeroDivisionError:
             return 0
@@ -189,7 +195,7 @@ class HomeAssistantHub:
                     ret[arg] = await func()
                 else:
                     ret[arg] = func()
-            self._check_max_min_total_charge(ret) #todo: not needed here?
+            self._check_max_min_total_charge(ret)  #todo: not needed here?
             if len(ret) == 1:
                 val = list(ret.values())[0]
                 if isinstance(val, str):
@@ -202,53 +208,53 @@ class HomeAssistantHub:
     def _request_sensor_lookup(self) -> dict[LookupKeys, Callable]:
         """Proxies the request to the correct sensor."""
         return {
-            LookupKeys.CHARGER_DONE: partial(getattr, self.sensors.charger_done, 'value'),
-            LookupKeys.CHARGEROBJECT_VALUE:    partial(
+            LookupKeys.CHARGER_DONE:            partial(getattr, self.sensors.charger_done, 'value'),
+            LookupKeys.CHARGEROBJECT_VALUE:     partial(
                 getattr, self.sensors.chargerobject, 'value'
             ),
-            LookupKeys.HOUR_STATE:             partial(getattr, self.hours, 'state', 'unknown'),
-            LookupKeys.PRICES:                 partial(getattr, self.hours, 'prices', []),
-            LookupKeys.PRICES_TOMORROW:        partial(getattr, self.hours, 'prices_tomorrow', []),
-            LookupKeys.NON_HOURS:              partial(getattr, self.hours, 'non_hours', []),
-            LookupKeys.FUTURE_HOURS:           partial(getattr, self.hours, 'future_hours', []),
-            LookupKeys.CAUTION_HOURS:          partial(getattr, self.hours, 'caution_hours', []),
-            LookupKeys.DYNAMIC_CAUTION_HOURS:  partial(
+            LookupKeys.HOUR_STATE:              partial(getattr, self.hours, 'state', 'unknown'),
+            LookupKeys.PRICES:                  partial(getattr, self.hours, 'prices', []),
+            LookupKeys.PRICES_TOMORROW:         partial(getattr, self.hours, 'prices_tomorrow', []),
+            LookupKeys.NON_HOURS:               partial(getattr, self.hours, 'non_hours', []),
+            LookupKeys.FUTURE_HOURS:            partial(getattr, self.hours, 'future_hours', []),
+            LookupKeys.CAUTION_HOURS:           partial(getattr, self.hours, 'caution_hours', []),
+            LookupKeys.DYNAMIC_CAUTION_HOURS:   partial(
                 getattr, self.hours, 'dynamic_caution_hours', {}
             ),
-            LookupKeys.SPOTPRICE_SOURCE:       partial(getattr, self.spotprice, 'source', 'unknown'),
-            LookupKeys.AVERAGE_SPOTPRICE_DATA: partial(getattr, self.spotprice, 'average_data'),
-            LookupKeys.AVERAGE_STDEV_DATA:     partial(getattr, self.spotprice, 'average_stdev_data'),
-            LookupKeys.USE_CENT:               partial(getattr, self.spotprice.model, 'use_cent'),
-            LookupKeys.CURRENT_PEAK:           partial(getattr, self.sensors.current_peak, 'observed_peak'),
-            LookupKeys.AVERAGE_KWH_PRICE:      partial(self.hours.async_get_average_kwh_price),
-            LookupKeys.MAX_CHARGE:             partial(self.hours.async_get_total_charge),
-            LookupKeys.AVERAGE_WEEKLY:         partial(getattr, self.spotprice, 'average_weekly'),
-            LookupKeys.AVERAGE_MONTHLY:        partial(getattr, self.spotprice, 'average_month'),
-            LookupKeys.AVERAGE_30:             partial(getattr, self.spotprice, 'average_30'),
-            LookupKeys.CURRENCY:               partial(getattr, self.spotprice, 'currency'),
-            LookupKeys.OFFSETS:                partial(getattr, self.hours, 'offsets', {}),
-            LookupKeys.IS_PRICE_AWARE:         partial(getattr, self.options.price, 'price_aware'),
-            LookupKeys.IS_SCHEDULER_ACTIVE: partial(
+            LookupKeys.SPOTPRICE_SOURCE:        partial(getattr, self.spotprice, 'source', 'unknown'),
+            LookupKeys.AVERAGE_SPOTPRICE_DATA:  partial(getattr, self.spotprice, 'average_data'),
+            LookupKeys.AVERAGE_STDEV_DATA:      partial(getattr, self.spotprice, 'average_stdev_data'),
+            LookupKeys.USE_CENT:                partial(getattr, self.spotprice.model, 'use_cent'),
+            LookupKeys.CURRENT_PEAK:            partial(getattr, self.sensors.current_peak, 'observed_peak'),
+            LookupKeys.AVERAGE_KWH_PRICE:       partial(self.hours.async_get_average_kwh_price),
+            LookupKeys.MAX_CHARGE:              partial(self.hours.async_get_total_charge),
+            LookupKeys.AVERAGE_WEEKLY:          partial(getattr, self.spotprice, 'average_weekly'),
+            LookupKeys.AVERAGE_MONTHLY:         partial(getattr, self.spotprice, 'average_month'),
+            LookupKeys.AVERAGE_30:              partial(getattr, self.spotprice, 'average_30'),
+            LookupKeys.CURRENCY:                partial(getattr, self.spotprice, 'currency'),
+            LookupKeys.OFFSETS:                 partial(getattr, self.hours, 'offsets', {}),
+            LookupKeys.IS_PRICE_AWARE:          partial(getattr, self.options.price, 'price_aware'),
+            LookupKeys.IS_SCHEDULER_ACTIVE:     partial(
                 getattr, self.hours.scheduler, 'scheduler_active', False
             ),
-            LookupKeys.SCHEDULES: partial(
+            LookupKeys.SCHEDULES:               partial(
                 getattr, self.hours.scheduler, 'schedules', {}
             ),
             LookupKeys.CHARGECONTROLLER_STATUS: partial(
                 getattr, self.chargecontroller, 'status_string'
             ),
-            LookupKeys.MAX_PRICE: partial(getattr, self.hours, 'absolute_top_price'),
-            LookupKeys.MIN_PRICE: partial(getattr, self.hours, 'min_price'),
-            LookupKeys.SAVINGS_PEAK: partial(
+            LookupKeys.MAX_PRICE:               partial(getattr, self.hours, 'absolute_top_price'),
+            LookupKeys.MIN_PRICE:               partial(getattr, self.hours, 'min_price'),
+            LookupKeys.SAVINGS_PEAK:            partial(
                 getattr, self.chargecontroller.savings, 'savings_peak'
             ),
-            LookupKeys.SAVINGS_TRADE: partial(
+            LookupKeys.SAVINGS_TRADE:           partial(
                 getattr, self.chargecontroller.savings, 'savings_trade'
             ),
-            LookupKeys.SAVINGS_TOTAL: partial(
+            LookupKeys.SAVINGS_TOTAL:           partial(
                 getattr, self.chargecontroller.savings, 'savings_total'
             ),
-            LookupKeys.EXPORT_SAVINGS_DATA: partial(
+            LookupKeys.EXPORT_SAVINGS_DATA:     partial(
                 self.chargecontroller.savings.async_export_data
             ),
         }

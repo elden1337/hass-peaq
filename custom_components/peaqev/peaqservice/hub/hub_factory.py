@@ -12,6 +12,7 @@ from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import
     ThresholdFactory
 from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 from custom_components.peaqev.peaqservice.hub.hub_events import HubEvents
+from custom_components.peaqev.peaqservice.hub.max_min_controller import MaxMinController
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.hub.price_aware_hub import \
@@ -26,17 +27,27 @@ from custom_components.peaqev.peaqservice.observer.observer_coordinator import O
 from custom_components.peaqev.peaqservice.powertools.powertools_factory import \
     PowerToolsFactory
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
+from custom_components.peaqev.peaqservice.util.schedule_options_handler import SchedulerOptionsHandler
 
 
 class HubFactory:
     @staticmethod
     async def async_create(hass: IHomeAssistantFacade, options: HubOptions, domain: str) -> HomeAssistantHub:
+        observer = Observer(hass)
+
         if options.price.price_aware:
-            hub = PriceAwareHub
+            hub = PriceAwareHub(hass, options, domain, observer, None, None)
+            maxmin = MaxMinController(hub, observer, hass)
+            hub.maxmin = maxmin
+            scheduler_options_handler = SchedulerOptionsHandler(hub, hass)
+            hub.scheduler_options_handler = scheduler_options_handler
+
         else:
-            hub = HomeAssistantHub
-        ob = Observer(hass)
-        return await HubFactory.async_setup(hub(hass, options, domain, ob), ob, hass)
+            hub = HomeAssistantHub(hass, options, domain, observer, None, None)
+            maxmin = None
+            scheduler_options_handler = None
+
+        return await HubFactory.async_setup(hub, observer, hass)
 
     @staticmethod
     async def async_setup(hub: HomeAssistantHub, observer: IObserver, state_machine: IHomeAssistantFacade) -> HomeAssistantHub:

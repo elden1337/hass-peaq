@@ -4,10 +4,8 @@ import asyncio
 import logging
 import re
 from datetime import datetime, timedelta
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
+from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 
 TODAYAT = 'Today at'
 TOMORROWAT = 'Tomorrow at'
@@ -15,9 +13,11 @@ NOSCHEDULE = 'No schedule'
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class SchedulerOptionsHandler:
-    def __init__(self, hub):
-        self.hub: HomeAssistantHub = hub
+    def __init__(self, hub, state_machine: IHomeAssistantFacade):
+        self.servicecalls = hub.servicecalls #todo: change when decoupled
+        self.state_machine = state_machine
         self._charge_limit: int = 0
         self._converted_option = None
 
@@ -30,7 +30,8 @@ class SchedulerOptionsHandler:
         self._charge_limit = value
         if self._converted_option is not None:
             display_option = SchedulerOptionsHandler.convert_datetime(self._converted_option)
-            asyncio.run_coroutine_threadsafe(self.async_handle_scheduler_departure_option(display_option), self.hub.state_machine.loop)
+            asyncio.run_coroutine_threadsafe(self.async_handle_scheduler_departure_option(display_option),
+                                             self.state_machine.loop)
 
     @property
     def display_options(self) -> list[str]:
@@ -54,11 +55,11 @@ class SchedulerOptionsHandler:
             converted_option = SchedulerOptionsHandler.reverse_convert_string(option)
             if converted_option is None or self.charge_limit == 0:
                 _LOGGER.info('Cancelling scheduler service %s %s', converted_option, self.charge_limit)
-                await self.hub.servicecalls.async_call_scheduler_cancel()
+                await self.servicecalls.async_call_scheduler_cancel()
                 return
             self._converted_option = converted_option
             _LOGGER.info('Calling scheduler service with %s', converted_option)
-            await self.hub.servicecalls.async_call_schedule_needed_charge(
+            await self.servicecalls.async_call_schedule_needed_charge(
                 charge_amount=self.charge_limit,
                 departure_time=converted_option.strftime('%Y-%m-%d %H:%M'),
                 override_settings=False,
