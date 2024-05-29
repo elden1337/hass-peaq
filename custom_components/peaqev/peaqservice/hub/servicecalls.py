@@ -3,7 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from peaqevcore.common.models.observer_types import ObserverTypes
-from peaqevcore.services.scheduler.update_scheduler_dto import UpdateSchedulerDTO
+from peaqevcore.services.scheduler.update_scheduler_dto import \
+    UpdateSchedulerDTO
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub

@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING
 
 from peaqevcore.common.models.observer_types import ObserverTypes
 from peaqevcore.common.wait_timer import WaitTimer
-from peaqevcore.services.scheduler.update_scheduler_dto import UpdateSchedulerDTO
+from peaqevcore.services.scheduler.update_scheduler_dto import \
+    UpdateSchedulerDTO
 
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
