@@ -37,15 +37,12 @@ class HubFactory:
 
         if options.price.price_aware:
             hub = PriceAwareHub(hass, options, domain, observer, None, None)
-            maxmin = MaxMinController(hub, observer, hass)
-            hub.maxmin = maxmin
-            scheduler_options_handler = SchedulerOptionsHandler(hub, hass)
-            hub.scheduler_options_handler = scheduler_options_handler
-
+            maxmin = MaxMinController(hub, observer, hass, options.max_charge) #todo: move to hub constructor
+            hub.maxmin = maxmin #todo: remove when redundant
+            scheduler_options_handler = SchedulerOptionsHandler(hub, hass) #todo: move to hub constructor
+            hub.scheduler_options_handler = scheduler_options_handler #todo: remove when redundant
         else:
             hub = HomeAssistantHub(hass, options, domain, observer, None, None)
-            maxmin = None
-            scheduler_options_handler = None
 
         return await HubFactory.async_setup(hub, observer, hass)
 

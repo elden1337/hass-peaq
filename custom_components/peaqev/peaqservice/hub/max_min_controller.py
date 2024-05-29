@@ -20,8 +20,9 @@ Todo: inject hours
 
 
 class MaxMinController:
-    def __init__(self, hub: HomeAssistantHub, observer: IObserver, state_machine: IHomeAssistantFacade):
+    def __init__(self, hub: HomeAssistantHub, observer: IObserver, state_machine: IHomeAssistantFacade, max_charge: int):
         self.hub: HomeAssistantHub = hub
+        self._max_charge = max_charge
         self.observer = observer
         self.state_machine = state_machine
         self.active: bool = hub.options.price.price_aware
@@ -46,10 +47,10 @@ class MaxMinController:
                 """overridden by frontend"""
                 self.is_on = True
                 return self._override_max_charge
-            if self.hub.options.max_charge > 0:
+            if self._max_charge > 0:
                 """set in config flow"""
                 self.is_on = True
-                return self.hub.options.max_charge
+                return self._max_charge
         return self._original_total_charge
 
     @property
@@ -58,7 +59,7 @@ class MaxMinController:
             return 0
         return self.max_charge - getattr(
             self.hub.chargecontroller.session, 'session_energy', 0
-        )  # todo: composition
+        )  # todo: get this via observer?
 
     @property
     def max_min_limiter(self) -> float:
@@ -77,8 +78,6 @@ class MaxMinController:
             await self.async_update_maxmin_core()
 
     async def async_update_maxmin_core(self) -> None:
-        _LOGGER.debug(
-            f'Updating maxmin with maxcharge: {self.max_charge}, limiter: {self.max_min_limiter}, session_energy: {self.hub.chargecontroller.session.session_energy}, car_connected: {self.hub.chargecontroller.connected}, avg24 = {self.hub.sensors.powersensormovingaverage24.value}, peak = {self.hub.sensors.current_peak.observed_peak}')
         await self.hub.hours.async_update_max_min(
             max_charge=self.max_charge,
             limiter=self.max_min_limiter,
