@@ -1,4 +1,3 @@
-from homeassistant.core import HomeAssistant
 from peaqevcore.common.models.peaq_system import PeaqSystem
 from peaqevcore.common.spotprice.spotprice_factory import SpotPriceFactory
 from peaqevcore.services.prediction.prediction import Prediction
@@ -24,11 +23,12 @@ from custom_components.peaqev.peaqservice.hub.state_changes.state_changes_factor
     StateChangesFactory
 from custom_components.peaqev.peaqservice.powertools.powertools_factory import \
     PowerToolsFactory
+from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 
 
 class HubFactory:
     @staticmethod
-    async def async_create(hass: HomeAssistant, options: HubOptions, domain: str) -> HomeAssistantHub:
+    async def async_create(hass: IHomeAssistantFacade, options: HubOptions, domain: str) -> HomeAssistantHub:
         if options.price.price_aware:
             hub = PriceAwareHub
         else:

@@ -8,8 +8,7 @@ from functools import partial
 from typing import Callable
 
 # Third party imports
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.event import async_track_state_change
+from homeassistant.core import callback
 # Local application imports
 from peaqevcore.common.models.observer_types import ObserverTypes
 from peaqevcore.common.spotprice.spotpricebase import SpotPriceBase
@@ -41,6 +40,7 @@ from custom_components.peaqev.peaqservice.hub.state_changes.istate_changes impor
     StateChangesBase
 from custom_components.peaqev.peaqservice.powertools.ipower_tools import \
     IPowerTools
+from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 from custom_components.peaqev.peaqservice.util.constants import \
     CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import (
@@ -72,7 +72,7 @@ class HomeAssistantHub:
     not_ready_list_old_state = 0
     _initialized: bool = False
 
-    def __init__(self, hass: HomeAssistant, options: HubOptions, domain: str):
+    def __init__(self, hass: IHomeAssistantFacade, options: HubOptions, domain: str):
         self.model = HubModel(domain, hass)
         self.hubname = domain.capitalize()
         self.state_machine = hass
@@ -83,7 +83,7 @@ class HomeAssistantHub:
 
     async def async_setup(self):
         trackers = await self.async_setup_tracking()
-        async_track_state_change(self.state_machine, trackers, self.async_state_changed)
+        self.state_machine.async_track_state_change(trackers, self.async_state_changed)
 
     @property
     def enabled(self) -> bool:
@@ -125,8 +125,8 @@ class HomeAssistantHub:
     @property
     def purchased_average_month(self) -> float:
         try:
-            month_draw = self.state_machine.states.get('sensor.peaqev_energy_including_car_monthly')
-            month_cost = self.state_machine.states.get('sensor.peaqev_energy_cost_integral_monthly')
+            month_draw = self.state_machine.get_state('sensor.peaqev_energy_including_car_monthly')
+            month_cost = self.state_machine.get_state('sensor.peaqev_energy_cost_integral_monthly')
             if month_cost and month_draw:
                 try:
                     return round(float(month_cost.state) / float(month_draw.state),3)
@@ -140,7 +140,7 @@ class HomeAssistantHub:
     def savings_month(self) -> float:
         """Accumulated savings for the month against spotprice avg. ie can fluctuate"""
         try:
-            month_draw = self.state_machine.states.get('sensor.peaqev_energy_including_car_monthly')
+            month_draw = self.state_machine.get_state('sensor.peaqev_energy_including_car_monthly')
             month_diff = self.spotprice.average_month - self.purchased_average_month
             if month_draw:
                 return round(float(month_draw.state) * month_diff,3)
@@ -179,20 +179,25 @@ class HomeAssistantHub:
 
     async def async_request_sensor_data(self, *args) -> dict | any:
         ret = {}
+        errors = ''
         if not self.is_initialized:
             return ret
-        for arg in args:
-            func: Callable = self._request_sensor_lookup().get(arg, None)
-            if await async_iscoroutine(func):
-                ret[arg] = await func()
-            else:
-                ret[arg] = func()
-        self._check_max_min_total_charge(ret)
-        if len(ret) == 1:
-            val = list(ret.values())[0]
-            if isinstance(val, str):
-                return val.lower()
-            return val
+        try:
+            for arg in args:
+                func: Callable = self._request_sensor_lookup().get(arg, None)
+                errors = f'arg: {arg}, func: {func}, type of func: {type(func)}'
+                if await async_iscoroutine(func):
+                    ret[arg] = await func()
+                else:
+                    ret[arg] = func()
+            self._check_max_min_total_charge(ret) #todo: not needed here?
+            if len(ret) == 1:
+                val = list(ret.values())[0]
+                if isinstance(val, str):
+                    return val.lower()
+                return val
+        except Exception as e:
+            _LOGGER.exception(f'Error in async_request_sensor_data. Exception: {e}. Extended info: {errors}')
         return ret
 
     def _request_sensor_lookup(self) -> dict[LookupKeys, Callable]:
@@ -251,12 +256,12 @@ class HomeAssistantHub:
 
     def now_is_non_hour(self) -> bool:
         now = datetime.now().replace(minute=0, second=0, microsecond=0)
-        non_hours = self._request_sensor_lookup().get(LookupKeys.NON_HOURS, [])[0]()
+        non_hours = self._request_sensor_lookup().get(LookupKeys.NON_HOURS, [])()
         return now in non_hours
 
     def now_is_caution_hour(self) -> bool:
         now = datetime.now().replace(minute=0, second=0, microsecond=0)
-        caution_hours = self._request_sensor_lookup().get(LookupKeys.DYNAMIC_CAUTION_HOURS, {})[0]()
+        caution_hours = self._request_sensor_lookup().get(LookupKeys.DYNAMIC_CAUTION_HOURS, {})()
         return now in caution_hours.keys()
 
     async def async_free_charge(self) -> bool:

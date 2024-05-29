@@ -15,6 +15,7 @@ from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelper
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import \
     ChargerModel
 from custom_components.peaqev.peaqservice.hub.const import LookupKeys
+from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
@@ -22,17 +23,16 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class Charger:
-    def __init__(self, controller):
+    def __init__(self, controller, state_machine: IHomeAssistantFacade):
         self.controller = controller
-        self._charger = (
-            controller.hub.chargertype
-        )  # todo: should not have direct access. route through chargecontroller
+        self.state_machine = state_machine
+        self._charger = controller.hub.chargertype
         self.model = ChargerModel()
         self.helpers = ChargerHelpers(self)
-        self.controller.hub.observer.add(ObserverTypes.PowerCanaryDead, self.async_pause_charger)
-        self.controller.hub.observer.add(ObserverTypes.KillswitchDead, self.async_terminate_charger)
-        self.controller.hub.observer.add(ObserverTypes.CarConnected, self.async_reset_session)
-        self.controller.hub.observer.add(ObserverTypes.ProcessCharger, self.async_charge)
+        self.controller.hub.observer.add(ObserverTypes.PowerCanaryDead, self.async_pause_charger) #todo: decouple and inject observer here
+        self.controller.hub.observer.add(ObserverTypes.KillswitchDead, self.async_terminate_charger) #todo: decouple and inject observer here
+        self.controller.hub.observer.add(ObserverTypes.CarConnected, self.async_reset_session) #todo: decouple and inject observer here
+        self.controller.hub.observer.add(ObserverTypes.ProcessCharger, self.async_charge) #todo: decouple and inject observer here
 
     async def async_setup(self):
         pass
@@ -160,7 +160,7 @@ class Charger:
             self._charger.servicecalls.options.allowupdatecurrent
             and not await self.controller.hub.async_free_charge()
         ):
-            self.controller.hub.state_machine.async_create_task(
+            self.state_machine.async_create_task(
                 self.async_update_max_current()
             )
 
@@ -197,7 +197,7 @@ class Charger:
 
     async def async_update_max_current(self) -> None:
         calls = self._charger.servicecalls.get_call(CallTypes.UpdateCurrent)
-        if await self.controller.hub.state_machine.async_add_executor_job(
+        if await self.state_machine.async_add_executor_job(
             self.helpers.wait_turn_on
         ):
             # call here to set amp-list
@@ -207,7 +207,7 @@ class Charger:
                     self.model.running,
                 ]
             ):
-                if await self.controller.hub.state_machine.async_add_executor_job(
+                if await self.state_machine.async_add_executor_job(
                     self.helpers.wait_update_current
                 ):
                     serviceparams = await async_set_chargerparams(
@@ -223,7 +223,7 @@ class Charger:
                         await self.async_do_service_call(
                             calls[DOMAIN], calls[CallTypes.UpdateCurrent], serviceparams
                         )
-                    await self.controller.hub.state_machine.async_add_executor_job(
+                    await self.state_machine.async_add_executor_job(
                         self.helpers.wait_loop_cycle
                     )
 
@@ -271,7 +271,7 @@ class Charger:
     async def async_do_outlet_update(self, call) -> bool:
         _LOGGER.debug('Calling charger-outlet')
         try:
-            self.controller.hub.state_machine.states.async_set(
+            self.state_machine.async_set_state(
                 self._charger.entities.powerswitch, call
             )  # todo: composition
         except Exception as e:
@@ -288,7 +288,7 @@ class Charger:
             f"Calling charger {command} for domain '{domain}' with parameters: {params}"
         )
         try:
-            await self.controller.hub.state_machine.services.async_call(
+            await self.state_machine.async_call_service(
                 _domain, command, params
             )
         except Exception as e:

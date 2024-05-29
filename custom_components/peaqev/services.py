@@ -3,20 +3,19 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from .peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
+
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
-    from homeassistant.core import HomeAssistant
 
 import logging
 from enum import Enum
 
-from homeassistant.core import ServiceCall, ServiceResponse, SupportsResponse
+from homeassistant.core import ServiceCall, ServiceResponse #todo: remove from here?
 
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
-
-
 
 class ServiceCalls(Enum):
     ENABLE = 'enable'
@@ -29,7 +28,7 @@ class ServiceCalls(Enum):
     UPDATE_CURRENT_PEAK = 'update_current_peaks'
 
 
-async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssistant) -> None:
+async def async_prepare_register_services(hub: HomeAssistantHub, hass: IHomeAssistantFacade) -> None:
     async def async_servicehandler_enable(call: ServiceCall):  # pylint:disable=unused-argument
         _LOGGER.info('Calling {} service'.format(ServiceCalls.ENABLE.value))
         await hub.servicecalls.async_call_enable_peaq()
@@ -111,10 +110,9 @@ async def async_prepare_register_services(hub: HomeAssistantHub, hass: HomeAssis
     }
 
     for service, handler in SERVICES.items():
-        hass.services.async_register(DOMAIN, service.value, handler)
-    hass.services.async_register(DOMAIN, ServiceCalls.UPDATE_PEAKS_HISTORY.value, async_servicehandler_update_peaks_history, supports_response=SupportsResponse.ONLY)
-    hass.services.async_register(DOMAIN, ServiceCalls.UPDATE_CURRENT_PEAK.value,
-                                 async_servicehandler_update_current_peaks, supports_response=SupportsResponse.ONLY)
+        hass.async_register_service(DOMAIN, service.value, handler)
+    hass.async_register_service(DOMAIN, ServiceCalls.UPDATE_PEAKS_HISTORY.value, async_servicehandler_update_peaks_history, supports_response_str='only')
+    hass.async_register_service(DOMAIN, ServiceCalls.UPDATE_CURRENT_PEAK.value, async_servicehandler_update_current_peaks, supports_response_str='only')
 
 
     def validate_import_dictionary(import_dict: dict, max_len: int) -> dict:

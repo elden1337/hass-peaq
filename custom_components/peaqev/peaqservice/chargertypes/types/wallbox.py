@@ -1,6 +1,5 @@
 import logging
 
-from homeassistant.core import HomeAssistant
 from peaqevcore.common.enums.calltype_enum import CallTypes
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
@@ -13,6 +12,7 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
     ChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
+from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
 
@@ -22,7 +22,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class WallBox(IChargerType):
-    def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
+    def __init__(self, hass: IHomeAssistantFacade, huboptions: HubOptions, chargertype):
         _LOGGER.warning(
             'You are initiating Wallbox as Chargertype. Bare in mind that this chargertype has not been signed off in testing and may be very unstable. Report findings to the developer.'
         )
@@ -125,7 +125,7 @@ class WallBox(IChargerType):
     # def _determine_entities(self) -> list:
     #     ret = []
     #     for e in self.entities.imported_entities:
-    #         entity_state = self._hass.states.get(e)
+    #         entity_state = self._hass.get_state(e)
     #         if entity_state != "unavailable":
     #             ret.append(e)
     #     return ret
@@ -134,7 +134,7 @@ class WallBox(IChargerType):
     #     ent = self._determine_entities()
     #     for e in ent:
     #         if e.startswith("switch."):
-    #             amps = self._hass.states.get(e).attributes.get("max_current")
+    #             amps = self._hass.get_state(e).attributes.get("max_current")
     #             if isinstance(amps, int):
     #                 return e
     #     raise Exception
@@ -152,7 +152,7 @@ class WallBox(IChargerType):
         # self.entities.chargerentity = f"sensor.{self.entities.entityschema}_1"
 
     def get_allowed_amps(self) -> int:
-        ret = self._hass.states.get(self.entities.maxamps)
+        ret = self._hass.get_state(self.entities.maxamps)
         if ret is not None:
             log_once(f'Got max amps from Wallbox. Setting {ret.state}A.', 'debug')
             return int(ret.state)
@@ -165,7 +165,7 @@ class WallBox(IChargerType):
     # async def async_determine_entities(self) -> list:
     #     ret = []
     #     for e in self.entities.imported_entities:
-    #         entity_state = self._hass.states.get(e)
+    #         entity_state = self._hass.get_state(e)
     #         if entity_state != "unavailable":
     #             ret.append(e)
     #     return ret

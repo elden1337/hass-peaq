@@ -1,6 +1,5 @@
 import logging
 
-from homeassistant.core import HomeAssistant
 from peaqevcore.common.enums.calltype_enum import CallTypes
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
@@ -14,18 +13,19 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
     ChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
+from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 from custom_components.peaqev.peaqservice.util.constants import SMARTOUTLET
 
 _LOGGER = logging.getLogger(__name__)
 
-OUTLET_TYPE_CHARGING = "charging"
-OUTLET_TYPE_CONNECTED = "connected"
-OUTLET_TYPE_IDLE = "idle"
+OUTLET_TYPE_CHARGING = 'charging'
+OUTLET_TYPE_CONNECTED = 'connected'
+OUTLET_TYPE_IDLE = 'idle'
 
 class SmartOutlet(IChargerType):
-    def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
+    def __init__(self, hass: IHomeAssistantFacade, huboptions: HubOptions, chargertype):
         _LOGGER.warning(
-            "You are initiating SmartOutlet as Chargertype. Bare in mind that this chargertype is generic and your results may vary depending on your brand of outlet. If issues emerge, report findings to the developer."
+            'You are initiating SmartOutlet as Chargertype. Bare in mind that this chargertype is generic and your results may vary depending on your brand of outlet. If issues emerge, report findings to the developer.'
         )
         self._hass = hass
         self._type = chargertype
@@ -47,7 +47,7 @@ class SmartOutlet(IChargerType):
             )
             return True
         except Exception:
-            _LOGGER.error(f"Could not validate setup for {self.domain_name}.")
+            _LOGGER.error(f'Could not validate setup for {self.domain_name}.')
         return False
 
     @property
@@ -84,12 +84,12 @@ class SmartOutlet(IChargerType):
     async def async_validate_setup(self):
         async def async_check_states(entity: str, type_format: type) -> bool:
             try:
-                s = self._hass.states.get(entity)
+                s = self._hass.get_state(entity)
                 if s is not None:
                     if isinstance(s.state, type_format):
                         return True
             except:
-                _LOGGER.error(f"Unable to validate outlet-sensor: {entity}")
+                _LOGGER.error(f'Unable to validate outlet-sensor: {entity}')
                 return False
 
         return all(

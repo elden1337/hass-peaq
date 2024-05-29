@@ -86,7 +86,7 @@ class StateChangesBase:
             if self.hub.sensors.carpowersensor.use_attribute:  # todo: strategy should handle this
                 entity = self.hub.sensors.carpowersensor
                 try:
-                    val = self.hub.state_machine.states.get(
+                    val = self.hub.state_machine.get_state(
                         entity.entity
                     ).attributes.get(entity.attribute)
                     if val is not None:

@@ -24,8 +24,8 @@ _LOGGER = logging.getLogger(__name__)
 
 class ChargeController(IChargeController):
     def __init__(
-            self, hub: HomeAssistantHub, charger_states: dict, charger_type: ChargerType
-    ):
+            self, hub: HomeAssistantHub, charger_states: dict, charger_type: ChargerType #todo: inject IHomeAssistantFacade
+    ): #todo: inject IObserver
         self._aux_running_grace_timer = WaitTimer(timeout=300, init_now=True)
         super().__init__(hub, charger_states, charger_type)
 
@@ -41,7 +41,7 @@ class ChargeController(IChargeController):
     def _check_initialized(self) -> bool:
         if self.model.is_initialized:
             return True
-        _state = self.hub.state_machine.states.get(self.hub.options.powersensor)
+        _state = self.hub.state_machine.get_state(self.hub.options.powersensor)
         if _state is not None:
             try:
                 float_state = float(_state.state)

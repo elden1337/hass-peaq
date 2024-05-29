@@ -10,7 +10,12 @@ if TYPE_CHECKING:
 
 _LOGGER = logging.getLogger(__name__)
 
-
+"""
+Todo: inject options
+Todo: inject observer
+Todo: inject hours
+Todo: inject state_machine
+"""
 class MaxMinController:
     def __init__(self, hub: HomeAssistantHub):
         self.hub: HomeAssistantHub = hub
@@ -103,7 +108,7 @@ class MaxMinController:
     async def async_reset_max_charge_sensor(self) -> None:
         if self.active:
             try:
-                state = self.hub.state_machine.states.get('number.peaqev_max_charge')
+                state = self.hub.state_machine.get_state('number.peaqev_max_charge')
                 if state is not None:
                     if (
                         int(float(state.state)) == int(float(self.max_charge))
@@ -124,7 +129,7 @@ class MaxMinController:
     async def async_update_sensor(self, val):
         if self.active:
             _LOGGER.debug(f'Updating input number-sensor for maxmin with {val}')
-            await self.hub.state_machine.services.async_call(
+            await self.hub.state_machine.async_call_service(
                 'number',
                 'set_value',
                 {

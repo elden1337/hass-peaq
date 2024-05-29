@@ -12,6 +12,7 @@ from peaqevcore.models.hub.hubmember import HubMember
 from peaqevcore.services.locale.Locale import LocaleData, LocaleFactory
 
 from custom_components.peaqev.peaqservice.hub.sensors.const import *
+from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
@@ -39,7 +40,7 @@ class HubSensorsBase:
     amp_meter: HubMember = field(init=False)
 
     async def async_setup_base(
-        self, options: HubOptions, state_machine, domain: str, chargerobject
+        self, options: HubOptions, state_machine: IHomeAssistantFacade, domain: str, chargerobject
     ):
         self.chargertype: IChargerType = chargerobject
         self.state_machine = state_machine
@@ -156,9 +157,9 @@ class HubSensorsBase:
     async def async_init_hub_values(self):
         """Initialize values from Home Assistant on the set objects"""
         self.totalhourlyenergy.value = (
-            self.state_machine.states.get(self.totalhourlyenergy.entity)
+            self.state_machine.get_state(self.totalhourlyenergy.entity)
             if isinstance(
-                self.state_machine.states.get(self.totalhourlyenergy.entity),
+                self.state_machine.get_state(self.totalhourlyenergy.entity),
                 (float, int),
             )
             else 0
@@ -168,22 +169,22 @@ class HubSensorsBase:
         """Initialize values from Home Assistant on the set objects"""
         if self.chargerobject is not None:
             self.chargerobject.value = (
-                self.state_machine.states.get(self.chargerobject.entity).state
-                if self.state_machine.states.get(self.chargerobject.entity)
+                self.state_machine.get_state(self.chargerobject.entity).state
+                if self.state_machine.get_state(self.chargerobject.entity)
                    is not None
                 else 0
             )
         self.chargerobject_switch.value = (
-            self.state_machine.states.get(self.chargerobject_switch.entity).state
-            if self.state_machine.states.get(self.chargerobject_switch.entity)
+            self.state_machine.get_state(self.chargerobject_switch.entity).state
+            if self.state_machine.get_state(self.chargerobject_switch.entity)
                is not None
             else ''
         )
         self.amp_meter.update()
         self.carpowersensor.value = (
-            self.state_machine.states.get(self.carpowersensor.entity).state
+            self.state_machine.get_state(self.carpowersensor.entity).state
             if isinstance(
-                self.state_machine.states.get(self.carpowersensor.entity),
+                self.state_machine.get_state(self.carpowersensor.entity),
                 (float, int),
             )
             else 0

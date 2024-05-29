@@ -1,10 +1,12 @@
 import logging
 from datetime import datetime
 
+from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
+
 _LOGGER = logging.getLogger(__name__)
 
 class EventProperty:
-    def __init__(self, name, prop_type: type, hass, default=None):
+    def __init__(self, name, prop_type: type, hass: IHomeAssistantFacade, default=None):
         self._value = default
         self._hass = hass
         self.name = name
@@ -22,8 +24,8 @@ class EventProperty:
     def value(self, val):
         if self._value != val:
             self._value = val
-            self._hass.bus.fire(f"peaqev.{self.name}", {"new": val})
-            _LOGGER.debug(f"EventProperty peaqev.{self.name} changed to {val}")
+            self._hass.bus_fire(f'peaqev.{self.name}', {'new': val})
+            _LOGGER.debug(f'EventProperty peaqev.{self.name} changed to {val}')
 
     def _is_timeout(self) -> bool:
         if self._timeout is None:

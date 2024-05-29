@@ -211,7 +211,7 @@ class IChargeController:
                     extended_errors.append(f'Error in async_get_status_charging: {e}')
 
         except Exception as e:
-            _LOGGER.debug(f'Error in async_get_status: {e}. Extended errors {extended_errors}')
+            _LOGGER.exception(f'Error in async_get_status: {e}. Extended errors {extended_errors}')
 
         _LOGGER.debug(f'async_get_status: {state} returning Error. {str(state)}')
         return ChargeControllerStates.Error, True

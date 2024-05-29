@@ -1,8 +1,6 @@
 import asyncio
 import logging
 
-from homeassistant.core import HomeAssistant
-
 from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
     IChargerType
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
@@ -23,6 +21,7 @@ from custom_components.peaqev.peaqservice.chargertypes.types.zaptec import \
     Zaptec
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
+from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -44,11 +43,11 @@ class ChargerTypeFactory:
         try:
             return types_dict.get(ChargerType(input_type))
         except Exception as e:
-            _LOGGER.debug(f"Caught exception while parsing charger-type: {e}")
+            _LOGGER.debug(f'Caught exception while parsing charger-type: {e}')
             raise ValueError
 
     @staticmethod
-    async def async_create(hass: HomeAssistant, options: HubOptions) -> IChargerType:
+    async def async_create(hass: IHomeAssistantFacade, options: HubOptions) -> IChargerType:
         input_type = options.charger.chargertype
         try:
             charger = await ChargerTypeFactory.async_get_class(input_type)
@@ -62,16 +61,16 @@ class ChargerTypeFactory:
                 ret.is_initialized = await ret.async_setup()
                 if ret.is_initialized:
                     _LOGGER.info(
-                        f"Set up charger-class for chargertype {input_type} is done. attempts:{_counter}"
+                        f'Set up charger-class for chargertype {input_type} is done. attempts:{_counter}'
                     )
                     return ret
                 await asyncio.sleep(1)
             _LOGGER.exception(
-                f"Did not manage to set up charge-class for {input_type} after {_counter} attempts. No entities found. The integration is probably not loaded."
+                f'Did not manage to set up charge-class for {input_type} after {_counter} attempts. No entities found. The integration is probably not loaded.'
             )
             raise Exception
         except Exception as e:
             _LOGGER.debug(
-                f"Exception. Did not manage to set up charge-class for {input_type}: {e}"
+                f'Exception. Did not manage to set up charge-class for {input_type}: {e}'
             )
             raise Exception

@@ -1,6 +1,5 @@
 import logging
 
-from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargertype.servicecalls_options import \
     ServiceCallsOptions
 
@@ -8,12 +7,13 @@ from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
     IChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
+from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class NoCharger(IChargerType):
-    def __init__(self, hass: HomeAssistant, huboptions: HubOptions, chargertype):
+    def __init__(self, hass: IHomeAssistantFacade, huboptions: HubOptions, chargertype):
         self._type = chargertype
 
     @property
@@ -24,7 +24,7 @@ class NoCharger(IChargerType):
     @property
     def domain_name(self) -> str:
         """declare the domain name as stated in HA"""
-        return "No charger"
+        return 'No charger'
 
     @property
     def servicecalls_options(self) -> ServiceCallsOptions:

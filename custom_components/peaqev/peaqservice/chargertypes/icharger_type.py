@@ -2,7 +2,6 @@ import logging
 from abc import abstractmethod
 from dataclasses import dataclass, field
 
-from homeassistant.core import HomeAssistant
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
 from peaqevcore.models.chargertype.charger_entities_model import \
@@ -16,6 +15,7 @@ from peaqevcore.services.chargertype.servicecalls import ServiceCalls
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
+from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 
 CHARGERSTATES_BASE = {
     ChargeControllerStates.Idle: [],
@@ -28,8 +28,8 @@ _LOGGER = logging.getLogger(__name__)
 
 @dataclass
 class IChargerType:
-    domainname: str = ""
-    _hass: HomeAssistant = None
+    domainname: str = ''
+    _hass: IHomeAssistantFacade = None
     _max_amps = None
     native_chargerstates: list = field(default_factory=lambda: [])  # type: ignore
     servicecalls: ServiceCalls = None
@@ -60,7 +60,7 @@ class IChargerType:
                     self.entities.imported_entities = entitiesobj.imported_entities
                     self.entities.entityschema = entitiesobj.entityschema
             except:
-                _LOGGER.debug(f"Could not get a proper entityschema for {self.domain_name}.")
+                _LOGGER.debug(f'Could not get a proper entityschema for {self.domain_name}.')
                 return False
 
             try:
