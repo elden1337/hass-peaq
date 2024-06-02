@@ -398,6 +398,7 @@ class HomeAssistantHub:
             ObserverTypes.DynamicMaxPriceChanged, self.async_update_average_monthly_price
         )
         self.observer.add(ObserverTypes.UpdatePeak, self.async_update_peak)
+        self.observer.add('UpdateMaxMinCore', self.async_update_max_min)
 
     async def async_set_init_dict(self, init_dict, override: bool = False) -> None:
         await self.sensors.locale.data.query_model.peaks.async_set_init_dict(init_dict, override=override)
@@ -405,7 +406,7 @@ class HomeAssistantHub:
             ff = getattr(self.sensors.locale.data.query_model.peaks, 'export_peaks', {})
             _LOGGER.debug(f'intialized_peaks: {ff}')
         except Exception as e:
-            _LOGGER.Exception(f'Unable to set init_dict: {e}')
+            _LOGGER.exception(f'Unable to set init_dict: {e}')
 
     async def async_set_chargerobject_value(self, value) -> None:
         if hasattr(self.sensors, 'chargerobject'):
@@ -431,3 +432,6 @@ class HomeAssistantHub:
             setattr(self.sensors.charger_enabled, 'value', bool(val))
         else:
             raise Exception('Peaqev cannot function without a charger_enabled entity')
+
+    async def async_update_max_min(self, keys) -> None:
+        pass

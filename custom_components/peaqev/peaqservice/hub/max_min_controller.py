@@ -5,11 +5,13 @@ from typing import TYPE_CHECKING
 
 from peaqevcore.common.models.observer_types import ObserverTypes
 
+from custom_components.peaqev.peaqservice.hub.imax_min_controller import IMaxMinController
+from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions
 from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 
 if TYPE_CHECKING:
-    from custom_components.peaqev.peaqservice.hub import HomeAssistantHub
+    pass
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,19 +21,10 @@ Todo: inject hours
 """
 
 
-class MaxMinController:
-    def __init__(self, hub: HomeAssistantHub, observer: IObserver, state_machine: IHomeAssistantFacade, max_charge: int):
-        self.hub: HomeAssistantHub = hub
-        self._max_charge = max_charge
-        self.observer = observer
-        self.state_machine = state_machine
-        self.active: bool = hub.options.price.price_aware
-        self.is_on: bool = False
-        self._override_max_charge = None
-        self._original_total_charge = 0
-        self._max_min_limiter: float = 0
-        self.override_max_charge: bool = False
-        if not hub.options.peaqev_lite:
+class MaxMinController(IMaxMinController):
+    def __init__(self, options: HubOptions, observer: IObserver, state_machine: IHomeAssistantFacade, max_charge: int, is_active: bool):
+        super().__init__(options, observer, state_machine, max_charge, is_active)
+        if not options.peaqev_lite:
             self.observer.add(ObserverTypes.CarDisconnected, self.async_null_max_charge)
             self.observer.add(
                 ObserverTypes.UpdateChargerDone, self.async_null_max_charge_done
@@ -57,9 +50,10 @@ class MaxMinController:
     def remaining_charge(self) -> float:
         if not self.active:
             return 0
-        return self.max_charge - getattr(
-            self.hub.chargecontroller.session, 'session_energy', 0
-        )  # todo: get this via observer?
+        session_energy = self.observer.get_state('session energy')
+        if session_energy:
+            return self.max_charge - session_energy
+        return self.max_charge
 
     @property
     def max_min_limiter(self) -> float:
@@ -78,12 +72,10 @@ class MaxMinController:
             await self.async_update_maxmin_core()
 
     async def async_update_maxmin_core(self) -> None:
-        await self.hub.hours.async_update_max_min(
-            max_charge=self.max_charge,
-            limiter=self.max_min_limiter,
-            session_energy=self.hub.chargecontroller.session.session_energy,
-            car_connected=self.hub.chargecontroller.connected
-        )  #todo: make observertype of this instead?
+        await self.observer.async_broadcast(
+            'UpdateMaxMinCore',
+            {'max_charge': self.max_charge, 'limiter': self.max_min_limiter}
+        )
 
     async def async_servicecall_override_charge_amount(self, amount: int):
         await self.async_override_max_charge(amount)

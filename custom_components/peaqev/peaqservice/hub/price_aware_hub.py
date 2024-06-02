@@ -4,7 +4,7 @@ from datetime import datetime
 from custom_components.peaqev.peaqservice.hub.const import LookupKeys
 from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 from custom_components.peaqev.peaqservice.hub.max_min_controller import \
-    MaxMinController
+    IMaxMinController
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
@@ -22,12 +22,13 @@ class PriceAwareHub(HomeAssistantHub):
             options: HubOptions,
             domain: str,
             observer: IObserver,
-            max_min_controller: MaxMinController,
+            max_min_controller: IMaxMinController,
             scheduler_options_handler: SchedulerOptionsHandler
     ):
         super().__init__(hass, options, domain, observer, None, None)
         self.max_min_controller = max_min_controller
         self.scheduler_options_handler = scheduler_options_handler
+        self.observer.add('session energy', self.sessionenergyy) #todo: move out of here when observer transformed.
 
 
     @property
@@ -45,6 +46,10 @@ class PriceAwareHub(HomeAssistantHub):
 
     async def async_update_spotprice(self) -> None:
         await self.spotprice.async_update_spotprice()
+
+    @property
+    def sessionenergyy(self): #todo: move out of here when observer transformed.
+        return self.chargecontroller.session.session_energy
 
     @property
     def watt_cost(self) -> int:
@@ -82,3 +87,11 @@ class PriceAwareHub(HomeAssistantHub):
         if 'max_charge' in ret.keys():
             self.max_min_controller._original_total_charge = ret['max_charge'][0]
             # todo: 247
+
+    async def async_update_max_min(self, keys) -> None:
+        await self.hours.async_update_max_min(
+            max_charge=keys.get('max_charge',0),
+            limiter=keys.get('limiter', 0),
+            session_energy=self.chargecontroller.session.session_energy,
+            car_connected=self.chargecontroller.connected
+        )

@@ -1,11 +1,9 @@
 from dataclasses import dataclass
 
-from peaqevcore.common.models.observer_types import ObserverTypes
-
 
 @dataclass
 class Command:
-    command: ObserverTypes
+    command: str
     expiration: float = None
     argument: any = None
 

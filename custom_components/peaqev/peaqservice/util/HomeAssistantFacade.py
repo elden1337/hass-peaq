@@ -2,7 +2,7 @@ from abc import abstractmethod, ABC
 from typing import Callable
 
 from homeassistant.core import HomeAssistant, SupportsResponse
-from homeassistant.helpers.event import async_track_state_change
+from homeassistant.helpers.event import async_track_state_change, async_track_time_interval
 
 
 class IHomeAssistantFacade(ABC):
@@ -90,3 +90,8 @@ class HomeAssistantFacade(IHomeAssistantFacade):
         except:
             SupportsResponseEnum = SupportsResponse.NONE
         self.homeassistant.services.async_register(DOMAIN, service, service_func, supports_response=SupportsResponseEnum)
+
+    def async_track_time_interval(self, callback, interval):
+        async_track_time_interval(
+            self.homeassistant, callback, interval
+        )

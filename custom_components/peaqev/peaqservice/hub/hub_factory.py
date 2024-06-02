@@ -36,9 +36,19 @@ class HubFactory:
         observer = Observer(hass)
 
         if options.price.price_aware:
-            hub = PriceAwareHub(hass, options, domain, observer, None, None)
-            maxmin = MaxMinController(hub, observer, hass, options.max_charge) #todo: move to hub constructor
-            hub.maxmin = maxmin #todo: remove when redundant
+            hub = PriceAwareHub(
+                hass,
+                options,
+                domain,
+                observer,
+                MaxMinController(
+                    options,
+                    observer,
+                    hass,
+                    options.max_charge
+                ),
+None
+            )
             scheduler_options_handler = SchedulerOptionsHandler(hub, hass) #todo: move to hub constructor
             hub.scheduler_options_handler = scheduler_options_handler #todo: remove when redundant
         else:

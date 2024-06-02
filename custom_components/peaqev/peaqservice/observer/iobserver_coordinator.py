@@ -37,28 +37,22 @@ class IObserver:
     def deactivate(self) -> None:
         self.model.active = False
 
-    def _check_and_convert_enum_type(self, command) -> ObserverTypes:
-        if isinstance(command, str):
-            try:
-                command = ObserverTypes(command)
-                _LOGGER.warning(f'Observer.add: command {command} was not of type ObserverTypes but was converted.')
-            except ValueError:
-                _LOGGER.error(f'Observer.add: command {command} was not of type ObserverTypes and could not be converted.')
-                return ObserverTypes.Test
+    def _check_and_convert_enum_type(self, command) -> str:
+        if isinstance(command, ObserverTypes):
+            return command.value
         return command
 
-    def add(self, command: ObserverTypes|str, func):
-        command = self._check_and_convert_enum_type(command)
-        if command in self.model.subscribers.keys():
-            self.model.subscribers[command].append(func)
+    def add(self, event: ObserverTypes | str, func):
+        event = self._check_and_convert_enum_type(event)
+        if event in self.model.subscribers.keys():
+            self.model.subscribers[event].append(func)
         else:
-            self.model.subscribers[command] = [func]
+            self.model.subscribers[event] = [func]
 
-    async def async_broadcast(self, command: ObserverTypes|str, argument=None):
-        command = self._check_and_convert_enum_type(command)
-        self.broadcast(command, argument)
+    async def async_broadcast(self, event: ObserverTypes | str, argument=None):
+        self.broadcast(event, argument)
 
-    def broadcast(self, command: ObserverTypes|str, argument=None):
+    def broadcast(self, command: ObserverTypes | str, argument=None):
         command = self._check_and_convert_enum_type(command)
         _expiration = time.time() + TIMEOUT
         cc = Command(command, _expiration, argument)
@@ -74,17 +68,10 @@ class IObserver:
     async def async_dequeue_and_broadcast(self, command: Command):
         if await self.async_ok_to_broadcast(command.command):
             async with self._lock:
-                # _LOGGER.debug(
-                #     f"ready to broadcast: {command.command.name} with params: {command.argument}"
-                # )
                 for func in self.model.subscribers.get(command.command, []):
                     await self.async_broadcast_separator(func, command)
                 if command in self.model.broadcast_queue:
                     self.model.broadcast_queue.remove(command)
-        # else:
-        #     _LOGGER.debug(
-        #         f"not able to broadcast: {command.command.name} with params: {command.argument}"
-        #     )
 
     @abstractmethod
     async def async_broadcast_separator(self, func, command):
@@ -133,3 +120,32 @@ class IObserver:
             self.model.wait_queue[command] = time.time()
             return True
         return False
+
+    def get_state(self, event: ObserverTypes | str):
+        event = self._check_and_convert_enum_type(event)
+        results = {}
+        if event not in self.model.subscribers.keys():
+            _LOGGER.warning('No subscribers for event %s that allow get state' % event)
+            return None
+        for full_path in self.model.subscribers[event]:
+            class_name, attr_name = full_path.rsplit('.', 1)
+            obj = globals()[class_name]
+            if hasattr(obj, attr_name):
+                results[full_path] = getattr(obj, attr_name)
+        if len(results) == 1:
+            return next(iter(results.values()))
+        return results
+
+    def set_state(self, event: ObserverTypes|str, value: any) -> bool:
+        event = self._check_and_convert_enum_type(event)
+        if event in self.model.subscribers.keys():
+            for full_path in self.model.subscribers[event]:
+                class_name, attr_name = full_path.rsplit('.', 1)
+                obj = globals()[class_name]
+                if hasattr(obj, attr_name):
+                    try:
+                        setattr(obj, attr_name, value)
+                    except Exception as e:
+                        _LOGGER.error(f'set state for {full_path} with value {value}: {e}')
+                        return False
+        return True

@@ -3,8 +3,6 @@ from __future__ import annotations
 import logging
 from datetime import timedelta
 
-from homeassistant.helpers.event import async_track_time_interval
-
 from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import \
     IObserver
 from custom_components.peaqev.peaqservice.observer.models.command import \
@@ -20,9 +18,7 @@ class Observer(IObserver):
     def __init__(self, state_machine: IHomeAssistantFacade):
         super().__init__()
         self.state_machine = state_machine
-        async_track_time_interval(
-            self.state_machine, self.async_dispatch, timedelta(seconds=1)
-        )
+        state_machine.async_track_time_interval(self.async_dispatch(), timedelta(seconds=1))
 
     async def async_broadcast_separator(self, func, command: Command):
         if await async_iscoroutine(func):
