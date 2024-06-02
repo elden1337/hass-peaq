@@ -26,7 +26,6 @@ from custom_components.peaqev.peaqservice.hub.const import LookupKeys
 from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import \
     HourselectionFactory
 from custom_components.peaqev.peaqservice.hub.hub_events import HubEvents
-from custom_components.peaqev.peaqservice.hub.max_min_controller import MaxMinController
 from custom_components.peaqev.peaqservice.hub.models.hub_model import HubModel
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
@@ -45,8 +44,6 @@ from custom_components.peaqev.peaqservice.util.constants import \
     CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import (
     async_iscoroutine, log_once, nametoid)
-from custom_components.peaqev.peaqservice.util.schedule_options_handler import \
-    SchedulerOptionsHandler
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -79,9 +76,7 @@ class HomeAssistantHub:
             hass: IHomeAssistantFacade,
             options: HubOptions,
             domain: str,
-            observer: IObserver,
-            max_min_controller: MaxMinController | None = None,
-            scheduler_options_handler: SchedulerOptionsHandler | None = None):
+            observer: IObserver):
         self.model = HubModel(domain, hass)
         self.hubname = domain.capitalize()
         self.state_machine = hass
