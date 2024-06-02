@@ -49,7 +49,7 @@ class HubFactory:
                 ),
 None
             )
-            scheduler_options_handler = SchedulerOptionsHandler(hub, hass) #todo: move to hub constructor
+            scheduler_options_handler = SchedulerOptionsHandler(hub.servicecalls, hass) #todo: move to hub constructor
             hub.scheduler_options_handler = scheduler_options_handler #todo: remove when redundant
         else:
             hub = HomeAssistantHub(hass, options, domain, observer, None, None)

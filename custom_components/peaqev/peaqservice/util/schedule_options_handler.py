@@ -5,6 +5,7 @@ import logging
 import re
 from datetime import datetime, timedelta
 
+from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 
 TODAYAT = 'Today at'
@@ -15,8 +16,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class SchedulerOptionsHandler:
-    def __init__(self, hub, state_machine: IHomeAssistantFacade):
-        self.servicecalls = hub.servicecalls #todo: change when decoupled
+    def __init__(self, servicecalls: ServiceCalls, state_machine: IHomeAssistantFacade):
+        self.servicecalls = servicecalls
         self.state_machine = state_machine
         self._charge_limit: int = 0
         self._converted_option = None
