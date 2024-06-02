@@ -14,43 +14,43 @@ _LOGGER = logging.getLogger(__name__)
 
 class PowerCanary(IPowerCanary):
     def __init__(self, hub):
-        super().__init__(hub, hub.options.fuse_type, hub.chargertype.servicecalls.options.allowupdatecurrent)
+        super().__init__(hub, hub.options.fuse_type, hub.chargertype.servicecalls.options.allowupdatecurrent) #todo: decouple from hub
 
     @property
     def alive(self) -> bool:
         """if returns false no charging can be conducted"""
         if self._enabled is False:
             return True
-        return self.hub.sensors.power.total.value < self.model.fuse_max * self.model.cutoff_threshold
+        return self.hub.sensors.power.total.value < self.model.fuse_max * self.model.cutoff_threshold  #todo: decouple from hub
 
     @property
     def onephase_amps(self) -> dict:
-        ret = self._get_currently_allowed_amps(self.model.onephase_amps, self.hub.sensors.power.total.value)
+        ret = self._get_currently_allowed_amps(self.model.onephase_amps, self.hub.sensors.power.total.value)  #todo: decouple from hub
         return {k: v for (k, v) in ret.items() if v < FUSES_MAX_SINGLE_FUSE.get(self.model.fuse)}
 
     @property
     def threephase_amps(self) -> dict:
-        return self._get_currently_allowed_amps(self.model.threephase_amps, self.hub.sensors.power.total.value)
+        return self._get_currently_allowed_amps(self.model.threephase_amps, self.hub.sensors.power.total.value)  #todo: decouple from hub
 
     def check_current_percentage(self):
         if not self.alive:
-            _LOGGER.warning("PowerCanary is dead!")
-            self.hub.observer.broadcast(command=ObserverTypes.PowerCanaryDead)
+            _LOGGER.warning('PowerCanary is dead!')
+            self.hub.observer.broadcast(command=ObserverTypes.PowerCanaryDead)  #todo: decouple from hub
         if self.current_percentage >= self.model.warning_threshold:
-            _LOGGER.warning("PowerCanary is caution!")
-            self.hub.observer.broadcast(command=ObserverTypes.PowerCanaryWarning)
+            _LOGGER.warning('PowerCanary is caution!')
+            self.hub.observer.broadcast(command=ObserverTypes.PowerCanaryWarning)  #todo: decouple from hub
 
     @property
     def max_current_amp(self) -> int:
         """returns the max current amp allowed by the power canary. -1 if disabled"""
         if not self.enabled:
             return -1
-        return self.get_max_current_amp(self.hub.threshold.phases)
+        return self.get_max_current_amp(self.hub.threshold.phases)  #todo: decouple from hub
 
     def _validate(self):
         if self.model.fuse_max == 0:
             return
-        if self.hub.options.peaqev_lite:
+        if self.hub.options.peaqev_lite:  #todo: decouple from hub
             return
         if self.model.is_valid:
             self._enabled = True

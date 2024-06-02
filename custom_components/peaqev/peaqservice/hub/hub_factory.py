@@ -58,17 +58,18 @@ None
 
     @staticmethod
     async def async_setup(hub: HomeAssistantHub, observer: IObserver, state_machine: IHomeAssistantFacade) -> HomeAssistantHub:
-        hub.chargertype = await ChargerTypeFactory.async_create(hub.state_machine, hub.options)
+        chargertype = await ChargerTypeFactory.async_create(hub.state_machine, hub.options)
+        hub.chargertype = chargertype
         hub.sensors = await HubSensorsFactory.async_create(
             state_machine,
             hub.options,
             hub.model.domain,
-            hub.chargertype
+            chargertype
         )
         hub.chargecontroller = await ChargeControllerFactory.async_create(
             hub,
-            charger_states=hub.chargertype.chargerstates,
-            charger_type=hub.chargertype.type,
+            charger_states=chargertype.chargerstates,
+            charger_type=chargertype.type,
             observer=observer
         )
         hub.hours = await HourselectionFactory.async_create(hub)
@@ -84,6 +85,6 @@ None
             is_active=hub.options.price.price_aware,
             custom_sensor=hub.options.price.custom_sensor
         )
-        hub.power = await PowerToolsFactory.async_create(hub)
+        hub.power = await PowerToolsFactory.async_create(hub, observer, state_machine) #todo: remove hub from here
         hub.events = HubEvents(observer, state_machine)
         return hub
