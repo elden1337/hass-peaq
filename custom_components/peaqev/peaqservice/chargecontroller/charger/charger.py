@@ -47,12 +47,12 @@ class Charger:
         if self._charger.options.powerswitch_controls_charging:
             return (
                 self.controller.hub.sensors.chargerobject_switch.value
-            )  # todo: composition
+            )   #todo: observer getter
         return all(
             [
                 # self.controller.hub.sensors.chargerobject_switch.value,  # todo: possibly remove to allow chargertypes without switch.
                 self.controller.hub.sensors.carpowersensor.value
-                > 0,  # todo: composition
+                > 0,   #todo: observer getter
             ]
         )
 
@@ -62,10 +62,10 @@ class Charger:
             await self.async_internal_state(ChargerStates.Pause)
         if (
             self.controller.hub.enabled
-            and not self.controller.hub.sensors.power.killswitch.is_dead
+            and not self.controller.hub.sensors.power.killswitch.is_dead  #todo: observer getter
         ):
             await self.async_reset_session()
-            match self.controller.status_type:
+            match self.controller.status_type:  #todo: observer getter
                 case ChargeControllerStates.Start:
                     await self.async_start_case()
                 case ChargeControllerStates.Stop | ChargeControllerStates.Error:
@@ -80,20 +80,20 @@ class Charger:
                     )
         else:
             if self.charger_active and self.model.running:
-                if self.controller.hub.sensors.power.killswitch.is_dead:
+                if self.controller.hub.sensors.power.killswitch.is_dead:  #todo: observer getter
                     _LOGGER.debug(
                         f'Powersensor has failed to update for more than {self.controller.hub.sensors.power.killswitch.total_timer}s. Charging is paused until it comes alive again.'
                     )
-                elif self.controller.hub.enabled:
+                elif self.controller.hub.enabled:  #todo: observer getter
                     _LOGGER.debug(
                         'Detected charger running outside of peaqev-session, overtaking command and pausing.'
                     )
                 await self.async_pause_charger()
 
     async def async_done_idle_case(self) -> None:
-        _state = self.controller.status_type
+        _state = self.controller.status_type  #todo: observer getter
         if (
-            not self.controller.hub.charger_done
+            not self.controller.hub.charger_done  #todo: observer getter
             and _state is ChargeControllerStates.Done
         ):
             await self.async_terminate_charger()
@@ -129,15 +129,15 @@ class Charger:
     async def async_reset_session(self) -> None:
         if (
             not self.session_active
-            and self.controller.status_type is not ChargeControllerStates.Done
+            and self.controller.status_type is not ChargeControllerStates.Done  #todo: observer getter
         ):
             await self.controller.session.async_reset(
                 getattr(
                     self.controller.hub.sensors.locale.data.query_model,
                     'charged_peak',
                     0,
-                )
-            )
+                )  #todo: observer getter
+            )  #todo: observer broadcast that handles this in chargecontroller instead.
             self.model.session_active = True
 
     async def async_overtake_charger(self) -> None:
@@ -156,10 +156,10 @@ class Charger:
             await self.async_post_start_charger()
 
     async def async_post_start_charger(self) -> None:
-        await self.controller.async_update_latest_charger_start()
+        await self.controller.async_update_latest_charger_start()  #todo: observer broadcast
         if (
             self._charger.servicecalls.options.allowupdatecurrent
-            and not await self.controller.hub.async_free_charge()
+            and not await self.controller.hub.async_free_charge()  #todo: observer getter
         ):
             self.state_machine.async_create_task(
                 self.async_update_max_current()
@@ -167,7 +167,7 @@ class Charger:
 
     async def async_terminate_charger(self) -> None:
         if self.call_ok(self.model.latest_charger_call):
-            await self.controller.session.async_terminate()
+            await self.controller.session.async_terminate()  #todo: observer getter for method. change that in iobserver
             await self.async_internal_state(ChargerStates.Stop)
             self.model.session_active = False
             await self.async_call_charger(CallTypes.Off)
@@ -178,8 +178,8 @@ class Charger:
     async def async_pause_charger(self) -> None:
         if self.call_ok(self.model.latest_charger_call):
             if (
-                self.controller.hub.charger_done
-                or self.controller.status_type is ChargeControllerStates.Idle
+                self.controller.hub.charger_done  #todo: observer getter
+                or self.controller.status_type is ChargeControllerStates.Idle  #todo: observer getter
             ):
                 await self.async_terminate_charger()
             else:
@@ -208,7 +208,7 @@ class Charger:
             # call here to set amp-list
             while all(
                 [
-                    self.controller.hub.sensors.chargerobject_switch.value,
+                    self.controller.hub.sensors.chargerobject_switch.value,  #todo: observer getter
                     self.model.running,
                 ]
             ):
@@ -217,13 +217,13 @@ class Charger:
                 ):
                     serviceparams = await async_set_chargerparams(
                         calls,
-                        await self.controller.hub.threshold.async_allowed_current(),
+                        await self.controller.hub.threshold.async_allowed_current(),  #todo: observer getter for method. change that in iobserver
                     )
                     if (
                         not self.model.disable_current_updates
                         and await self.controller.hub.power.power_canary.async_allow_adjustment(
                             new_amps=serviceparams[calls[PARAMS][CURRENT]]
-                        )
+                        )  #todo: observer broadcast
                     ):
                         await self.async_do_service_call(
                             calls[DOMAIN], calls[CallTypes.UpdateCurrent], serviceparams
@@ -251,7 +251,7 @@ class Charger:
 
     async def async_internal_state_off(self):
         self.model.disable_current_updates = True
-        charger_state = await self.controller.hub.async_request_sensor_data(LookupKeys.CHARGEROBJECT_VALUE)
+        charger_state = await self.controller.hub.async_request_sensor_data(LookupKeys.CHARGEROBJECT_VALUE)  #todo: observer getter
         if charger_state not in self._charger.chargerstates.get(
             ChargeControllerStates.Charging
         ):
@@ -278,7 +278,7 @@ class Charger:
         try:
             self.state_machine.async_set_state(
                 self._charger.entities.powerswitch, call
-            )  # todo: composition
+            )   #todo: observer getter
         except Exception as e:
             _LOGGER.error(f'Error in async_do_outlet_update: {e}')
             return False
