@@ -12,6 +12,7 @@ from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_base import \
     HubSensorsBase
 from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_lite import \
     HubSensorsLite
+from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 
 if TYPE_CHECKING:
@@ -24,24 +25,35 @@ class HubSensorsFactory:
             state_machine: IHomeAssistantFacade,
             hub_options: HubOptions,
             domain: str,
-            chargerobject: IChargerType
+            chargerobject: IChargerType,
+            observer: IObserver,
     ) -> HubSensorsBase:
         if hub_options.peaqev_lite:
             sensors = HubSensorsLite
         else:
             sensors = HubSensors
-        return await HubSensorsFactory.async_setup(state_machine, hub_options, domain, chargerobject, sensors())
+        return await HubSensorsFactory.async_setup(
+            state_machine,
+            hub_options,
+            domain,
+            chargerobject,
+            sensors(),
+            observer
+        )
 
     @staticmethod
     async def async_setup(state_machine: IHomeAssistantFacade,
             hub_options: HubOptions,
             domain: str,
-            chargertype: IChargerType, sensors: HubSensors) -> HubSensors:
+            chargertype: IChargerType,
+            sensors: HubSensors,
+            observer: IObserver) -> HubSensors:
         await sensors.async_setup(
             state_machine=state_machine,
             options=hub_options,
             domain=domain,
             chargerobject=chargertype,
+            observer=observer
         )
         if chargertype.type is not ChargerType.NoCharger:
             await sensors.async_set_charger_sensors()

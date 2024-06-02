@@ -239,19 +239,7 @@ class HomeAssistantHub:
                 getattr, self.chargecontroller, 'status_string'
             ),
             LookupKeys.MAX_PRICE:               partial(getattr, self.hours, 'absolute_top_price'),
-            LookupKeys.MIN_PRICE:               partial(getattr, self.hours, 'min_price'),
-            LookupKeys.SAVINGS_PEAK:            partial(
-                getattr, self.chargecontroller.savings, 'savings_peak'
-            ),
-            LookupKeys.SAVINGS_TRADE:           partial(
-                getattr, self.chargecontroller.savings, 'savings_trade'
-            ),
-            LookupKeys.SAVINGS_TOTAL:           partial(
-                getattr, self.chargecontroller.savings, 'savings_total'
-            ),
-            LookupKeys.EXPORT_SAVINGS_DATA:     partial(
-                self.chargecontroller.savings.async_export_data
-            ),
+            LookupKeys.MIN_PRICE:               partial(getattr, self.hours, 'min_price')
         }
 
     def now_is_non_hour(self) -> bool:

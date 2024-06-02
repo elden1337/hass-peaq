@@ -2,10 +2,16 @@ from abc import abstractmethod, ABC
 from typing import Callable
 
 from homeassistant.core import HomeAssistant, SupportsResponse
+from homeassistant.helpers.entity import entity_sources
 from homeassistant.helpers.event import async_track_state_change, async_track_time_interval
 
 
 class IHomeAssistantFacade(ABC):
+
+    @property
+    @abstractmethod
+    def entity_sources(self) -> dict:
+        pass
 
     @abstractmethod
     def get_state(self, entitystr: str):
@@ -52,9 +58,14 @@ class IHomeAssistantFacade(ABC):
     def async_register_service(self, DOMAIN, service, service_func, supports_response_str='none'):
         pass
 
+
 class HomeAssistantFacade(IHomeAssistantFacade):
     def __init__(self, homeassistant: HomeAssistant):
         self.homeassistant = homeassistant
+
+    @property
+    def entity_sources(self) -> dict:
+        return entity_sources(self.homeassistant)
 
     @property
     def loop(self):
@@ -89,7 +100,8 @@ class HomeAssistantFacade(IHomeAssistantFacade):
             SupportsResponseEnum = SupportsResponse(supports_response_str)
         except:
             SupportsResponseEnum = SupportsResponse.NONE
-        self.homeassistant.services.async_register(DOMAIN, service, service_func, supports_response=SupportsResponseEnum)
+        self.homeassistant.services.async_register(DOMAIN, service, service_func,
+                                                   supports_response=SupportsResponseEnum)
 
     def async_track_time_interval(self, callback, interval):
         async_track_time_interval(

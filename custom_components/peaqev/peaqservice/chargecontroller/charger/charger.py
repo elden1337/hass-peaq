@@ -6,14 +6,13 @@ from peaqevcore.common.models.observer_types import ObserverTypes
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.services.chargertype.const import DOMAIN, PARAMS
 
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import \
-    call_ok
 from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import \
     ChargerStates
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelpers import (
     ChargerHelpers, async_set_chargerparams)
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import \
     ChargerModel
+from custom_components.peaqev.peaqservice.chargecontroller.charger.const import CALL_WAIT_TIMER
 from custom_components.peaqev.peaqservice.hub.const import LookupKeys
 from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
@@ -147,7 +146,7 @@ class Charger:
         await self.async_post_start_charger()
 
     async def async_start_charger(self) -> None:
-        if call_ok(self.model.latest_charger_call):
+        if self.call_ok(self.model.latest_charger_call):
             await self.async_internal_state(ChargerStates.Start)
             if not self.session_active:
                 await self.async_call_charger(CallTypes.On)
@@ -167,7 +166,7 @@ class Charger:
             )
 
     async def async_terminate_charger(self) -> None:
-        if call_ok(self.model.latest_charger_call):
+        if self.call_ok(self.model.latest_charger_call):
             await self.controller.session.async_terminate()
             await self.async_internal_state(ChargerStates.Stop)
             self.model.session_active = False
@@ -177,7 +176,7 @@ class Charger:
             )
 
     async def async_pause_charger(self) -> None:
-        if call_ok(self.model.latest_charger_call):
+        if self.call_ok(self.model.latest_charger_call):
             if (
                 self.controller.hub.charger_done
                 or self.controller.status_type is ChargeControllerStates.Idle
@@ -196,6 +195,10 @@ class Charger:
             self.model.latest_charger_call = time.time()
         except Exception as e:
             _LOGGER.error(f'Error calling charger: {e}')
+
+    @staticmethod
+    def call_ok(latest_charger_call) -> bool:
+        return time.time() - latest_charger_call > CALL_WAIT_TIMER
 
     async def async_update_max_current(self) -> None:
         calls = self._charger.servicecalls.get_call(CallTypes.UpdateCurrent)

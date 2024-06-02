@@ -1,6 +1,6 @@
 import logging
 from abc import abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.chargertype.calltype import CallType
@@ -15,6 +15,7 @@ from peaqevcore.services.chargertype.servicecalls import ServiceCalls
 import custom_components.peaqev.peaqservice.chargertypes.entitieshelper as helper
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
+from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 
 CHARGERSTATES_BASE = {
@@ -31,12 +32,12 @@ class IChargerType:
     domainname: str = ''
     _hass: IHomeAssistantFacade = None
     _max_amps = None
-    native_chargerstates: list = field(default_factory=lambda: [])  # type: ignore
     servicecalls: ServiceCalls = None
     chargerstates = CHARGERSTATES_BASE
     entities = ChargerEntitiesModel
     options = ChargerOptions
     _is_initialized = False
+    observer: IObserver = None
 
     async def async_set_servicecalls(
         self,
@@ -59,13 +60,14 @@ class IChargerType:
                 if entitiesobj.valid:
                     self.entities.imported_entities = entitiesobj.imported_entities
                     self.entities.entityschema = entitiesobj.entityschema
-            except:
-                _LOGGER.debug(f'Could not get a proper entityschema for {self.domain_name}.')
+            except Exception as e:
+                _LOGGER.debug(f'Could not get a proper entityschema for {self.domain_name}. Exception: {e}')
                 return False
 
             try:
                 await self.async_set_sensors()
-            except Exception:
+            except Exception as e:
+                _LOGGER.error(f'Could not set sensors for {self.domain_name}. Exception: {e}')
                 return False
 
         await self.async_set_servicecalls(
@@ -79,6 +81,25 @@ class IChargerType:
             ),
             options=self.servicecalls_options,
         )
+
+        self.observer.add('charger max amps', self.max_amps)
+        self.observer.add('charger type', self.type)
+        self.observer.add('charger states', self.native_chargerstates)
+        self.observer.add('charger entities', self.entities)
+        self.observer.add('charger options', self.options)
+        self.observer.add('charger servicecalls', self.servicecalls)
+
+        self.observer.add('charger is initialized', self.is_initialized)
+        self.observer.add('charger max amps', self.max_amps)
+        self.observer.add('charger domain name', self.domain_name)
+        self.observer.add('charger entity endings', self.entity_endings)
+        self.observer.add('charger native charger states', self.native_chargerstates)
+        self.observer.add('charger on call', self.call_on)
+        self.observer.add('charger off call', self.call_off)
+        self.observer.add('charger resume call', self.call_resume)
+        self.observer.add('charger pause call', self.call_pause)
+        self.observer.add('charger update current call', self.call_update_current)
+        self.observer.add('charger servicecalls options', self.servicecalls_options)
         return True
 
 
@@ -104,18 +125,6 @@ class IChargerType:
     @abstractmethod
     def type(self) -> ChargerType:
         """type returns the implemented chargertype."""
-
-    @abstractmethod
-    def get_allowed_amps(self) -> int:
-        pass
-
-    @abstractmethod
-    def validatecharger(self) -> bool:
-        pass
-
-    @abstractmethod
-    async def async_get_entities(self):
-        pass
 
     @abstractmethod
     async def async_set_sensors(self):
@@ -164,4 +173,16 @@ class IChargerType:
     @property
     @abstractmethod
     def servicecalls_options(self) -> ServiceCallsOptions:
+        pass
+
+    @abstractmethod
+    def get_allowed_amps(self) -> int:
+        pass
+
+    @abstractmethod
+    def validatecharger(self) -> bool: #not used?
+        pass
+
+    @abstractmethod
+    async def async_get_entities(self): #not used?
         pass

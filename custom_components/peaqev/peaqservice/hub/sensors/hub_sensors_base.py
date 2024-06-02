@@ -12,6 +12,7 @@ from peaqevcore.models.hub.hubmember import HubMember
 from peaqevcore.services.locale.Locale import LocaleData, LocaleFactory
 
 from custom_components.peaqev.peaqservice.hub.sensors.const import *
+from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 
 if TYPE_CHECKING:
@@ -38,24 +39,28 @@ class HubSensorsBase:
     chargerobject: ChargerObject = field(init=False)
     chargerobject_switch: ChargerSwitch = field(init=False)
     amp_meter: HubMember = field(init=False)
+    observer: IObserver = field(init=False)
 
     async def async_setup_base(
-        self, options: HubOptions, state_machine: IHomeAssistantFacade, domain: str, chargerobject
+            self, options: HubOptions, state_machine: IHomeAssistantFacade, domain: str, chargerobject,
+            observer: IObserver
     ):
         self.chargertype: IChargerType = chargerobject
+        self.observer = observer
         self.state_machine = state_machine
         self.locale = await LocaleFactory.async_create(options.locale, domain)
         self.domain = domain
 
         sensors: dict = {
-            CHARGERENABLED_SENSOR: partial(
+            CHARGERENABLED_SENSOR:    partial(
                 HubMember,
                 data_type=bool,
                 listenerentity=f'switch.{domain}_{nametoid(CHARGERENABLED)}',
                 initval=False,
             ),
-            CURRENTPEAK_SENSOR: partial(
-                CurrentPeak, data_type=float, initval=0, startpeaks=options.startpeaks, locale=self.locale, options_use_history=options.use_peak_history
+            CURRENTPEAK_SENSOR:       partial(
+                CurrentPeak, data_type=float, initval=0, startpeaks=options.startpeaks, locale=self.locale,
+                options_use_history=options.use_peak_history
             ),
             TOTALHOURLYENERGY_SENSOR: partial(
                 HubMember,
@@ -67,14 +72,14 @@ class HubSensorsBase:
 
         self._set_sensors(sensors)
 
-    def _set_sensors(self, sensors:dict):
+    def _set_sensors(self, sensors: dict):
         for k, v in sensors.items():
             setattr(self, k, v())
 
     async def async_set_charger_sensors(self) -> None:
         """Not for type nocharger"""
         charger_sensors = {
-            CHARGERDONE_SENSOR:   partial(
+            CHARGERDONE_SENSOR:    partial(
                 HubMember,
                 data_type=bool,
                 listenerentity=f'binary_sensor.{self.domain}_{nametoid(CHARGER_DONE)}',
@@ -98,12 +103,12 @@ class HubSensorsBase:
         self._set_sensors(charger_sensors)
 
     async def async_set_chargerobject_and_switch(
-        self,
+            self,
     ) -> Tuple[
         ChargerObject, ChargerSwitch, HubMember
     ]:  # todo: refactor setup
         regular = {
-            CHARGEROBJECT_SENSOR: partial(
+            CHARGEROBJECT_SENSOR:        partial(
                 ChargerObject,
                 data_type=self.chargertype.native_chargerstates,
                 listenerentity=self.chargertype.entities.chargerentity,
@@ -117,7 +122,7 @@ class HubSensorsBase:
                 hubdata=self,
                 init_override=True,
             ),
-            AMP_METER_SENSOR: partial(
+            AMP_METER_SENSOR:            partial(
                 HubMember,
                 data_type=int,
                 listenerentity=self.chargertype.entities.ampmeter,
@@ -126,7 +131,7 @@ class HubSensorsBase:
             ),
         }
         lite = {
-            CHARGEROBJECT_SENSOR: partial(
+            CHARGEROBJECT_SENSOR:        partial(
                 ChargerObject,
                 data_type=self.chargertype.native_chargerstates,
                 listenerentity='no entity',

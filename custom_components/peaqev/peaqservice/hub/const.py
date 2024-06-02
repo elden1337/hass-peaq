@@ -36,10 +36,6 @@ OFFSETS ='offsets'
 IS_PRICE_AWARE ='is_price_aware'
 IS_SCHEDULER_ACTIVE ='is_scheduler_active'
 CHARGECONTROLLER_STATUS ='chargecontroller_status'
-SAVINGS_PEAK ='savings_peak'
-SAVINGS_TRADE ='savings_trade'
-SAVINGS_TOTAL ='savings_total'
-EXPORT_SAVINGS_DATA = 'export_savings_data'
 SPOTPRICE_SOURCE = 'spotprice_source'
 
 class LookupKeys(Enum):
@@ -69,8 +65,4 @@ class LookupKeys(Enum):
     CHARGECONTROLLER_STATUS = auto()
     MAX_PRICE = auto()
     MIN_PRICE = auto()
-    SAVINGS_PEAK = auto()
-    SAVINGS_TRADE = auto()
-    SAVINGS_TOTAL = auto()
-    EXPORT_SAVINGS_DATA = auto()
     SCHEDULES = auto()

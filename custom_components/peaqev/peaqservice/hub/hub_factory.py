@@ -58,13 +58,14 @@ None
 
     @staticmethod
     async def async_setup(hub: HomeAssistantHub, observer: IObserver, state_machine: IHomeAssistantFacade) -> HomeAssistantHub:
-        chargertype = await ChargerTypeFactory.async_create(hub.state_machine, hub.options)
+        chargertype = await ChargerTypeFactory.async_create(hub.state_machine, hub.options, observer)
         hub.chargertype = chargertype
         hub.sensors = await HubSensorsFactory.async_create(
             state_machine,
             hub.options,
             hub.model.domain,
-            chargertype
+            chargertype,
+            observer
         )
         hub.chargecontroller = await ChargeControllerFactory.async_create(
             hub,

@@ -9,8 +9,6 @@ from peaqevcore.services.session.session import Session
 
 from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import \
     Charger
-from custom_components.peaqev.peaqservice.chargecontroller.charger.savings_controller import \
-    SavingsController
 from custom_components.peaqev.peaqservice.chargecontroller.chargercontroller_model import \
     ChargeControllerModel
 from custom_components.peaqev.peaqservice.chargecontroller.const import (
@@ -36,7 +34,6 @@ class IChargeController:
         )
         self.charger = Charger(controller=self, state_machine=state_machine, observer=observer) #todo: move out of here
         self.session = Session(self.charger) #todo: move out of here
-        self.savings = SavingsController(self) #todo: move out of here
         self.observer = observer
         self._setup_observers()
 

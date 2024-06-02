@@ -21,6 +21,7 @@ from custom_components.peaqev.peaqservice.chargertypes.types.zaptec import \
     Zaptec
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
+from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,12 +48,12 @@ class ChargerTypeFactory:
             raise ValueError
 
     @staticmethod
-    async def async_create(hass: IHomeAssistantFacade, options: HubOptions) -> IChargerType:
+    async def async_create(hass: IHomeAssistantFacade, options: HubOptions, observer: IObserver) -> IChargerType:
         input_type = options.charger.chargertype
         try:
             charger = await ChargerTypeFactory.async_get_class(input_type)
             ret = charger(
-                hass=hass, huboptions=options, chargertype=ChargerType(input_type)
+                hass=hass, huboptions=options, chargertype=ChargerType(input_type), observer=observer
             )
 
             _counter = 0
