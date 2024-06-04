@@ -15,16 +15,16 @@ from custom_components.peaqev.peaqservice.hub.state_changes.state_changes import
 
 class StateChangesFactory:
     @staticmethod
-    async def async_create(hub: HomeAssistantHub) -> StateChangesBase:
+    async def async_create(hub: HomeAssistantHub, chargertype: ChargerType) -> StateChangesBase:
         if all(
             [
                 hub.options.peaqev_lite is True,
-                hub.chargertype.type is ChargerType.NoCharger,
+                chargertype is ChargerType.NoCharger,
             ]
         ):
-            return StateChangesLiteNoCharger(hub)
+            return StateChangesLiteNoCharger(hub, chargertype)
         if hub.options.peaqev_lite is True:
-            return StateChangesLite(hub)
-        if hub.chargertype.type is ChargerType.NoCharger:
-            return StateChangesNoCharger(hub)
-        return StateChanges(hub)
+            return StateChangesLite(hub, chargertype)
+        if chargertype is ChargerType.NoCharger:
+            return StateChangesNoCharger(hub, chargertype)
+        return StateChanges(hub, chargertype)

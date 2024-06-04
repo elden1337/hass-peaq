@@ -24,8 +24,9 @@ class StateChangesBase:
     latest_spotprice_update = WaitTimer(timeout=60)
     latest_outlet_update = WaitTimer(timeout=10)
 
-    def __init__(self, hub: HomeAssistantHub):
+    def __init__(self, hub: HomeAssistantHub, chargertype: ChargerType):
         self.hub = hub
+        self.chargertype = chargertype
 
     async def async_update_sensor(self, entity, value):
         update_session = await self.async_update_sensor_internal(entity, value)
@@ -47,7 +48,7 @@ class StateChangesBase:
             [
                 entity in self.hub.model.chargingtracker_entities,
                 self.hub.is_initialized,
-                self.hub.chargertype is not ChargerType.NoCharger,  # todo: strategy should handle this
+                self.chargertype is not ChargerType.NoCharger,  # todo: strategy should handle this
             ]
         ):
             await self.hub.observer.async_broadcast(ObserverTypes.ProcessCharger)

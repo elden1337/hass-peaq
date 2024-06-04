@@ -19,9 +19,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class StateChanges(StateChangesBase):
-    def __init__(self, hub: HomeAssistantHub):
-        self.hub = hub
-        super().__init__(hub)
+    def __init__(self, hub: HomeAssistantHub, chargertype: ChargerType):
+        super().__init__(hub, chargertype)
 
     async def async_update_sensor_internal(self, entity, value) -> bool:
         try:
@@ -75,7 +74,7 @@ class StateChanges(StateChangesBase):
             self.hub.sensors.power.total.value
         )
     async def async_handle_outlet_updates(self):
-        if self.hub.chargertype.type is ChargerType.Outlet:
+        if self.chargertype is ChargerType.Outlet:
             old_state = await self.hub.async_request_sensor_data(LookupKeys.CHARGEROBJECT_VALUE)
             if not self.latest_outlet_update.is_timeout():
                 return
@@ -91,9 +90,8 @@ class StateChanges(StateChangesBase):
 
 
 class StateChangesLite(StateChangesBase):
-    def __init__(self, hub):
-        self.hub = hub
-        super().__init__(hub)
+    def __init__(self, hub, chargertype: ChargerType):
+        super().__init__(hub, chargertype)
 
     async def async_update_sensor_internal(self, entity, value) -> bool:
         match entity:
@@ -114,7 +112,7 @@ class StateChangesLite(StateChangesBase):
         return False
 
     async def _handle_outlet_updates(self):
-        if self.hub.chargertype.type is ChargerType.Outlet:
+        if self.chargertype is ChargerType.Outlet:
             old_state = await self.hub.async_request_sensor_data(LookupKeys.CHARGEROBJECT_VALUE)
             if not self.latest_outlet_update.is_timeout():
                 return
@@ -130,9 +128,8 @@ class StateChangesLite(StateChangesBase):
 
 
 class StateChangesNoCharger(StateChangesBase):
-    def __init__(self, hub):
-        self.hub = hub
-        super().__init__(hub)
+    def __init__(self, hub, chargertype: ChargerType):
+        super().__init__(hub, chargertype)
 
     async def async_update_sensor_internal(self, entity, value) -> bool:
         update_session = False
@@ -161,9 +158,8 @@ class StateChangesNoCharger(StateChangesBase):
 
 
 class StateChangesLiteNoCharger(StateChangesBase):
-    def __init__(self, hub):
-        self.hub = hub
-        super().__init__(hub)
+    def __init__(self, hub, chargertype: ChargerType):
+        super().__init__(hub, chargertype)
 
     async def async_update_sensor_internal(self, entity, value) -> bool:
         match entity:

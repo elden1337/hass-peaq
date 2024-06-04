@@ -6,6 +6,7 @@ from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_fact
     ChargeControllerFactory
 from custom_components.peaqev.peaqservice.chargertypes.chargertype_factory import \
     ChargerTypeFactory
+from custom_components.peaqev.peaqservice.chargertypes.icharger_type import IChargerType
 from custom_components.peaqev.peaqservice.hub.factories.hourselection_factory import \
     HourselectionFactory
 from custom_components.peaqev.peaqservice.hub.factories.threshold_factory import \
@@ -34,6 +35,7 @@ class HubFactory:
     @staticmethod
     async def async_create(hass: IHomeAssistantFacade, options: HubOptions, domain: str) -> HomeAssistantHub:
         observer = Observer(hass)
+        chargertype = await ChargerTypeFactory.async_create(hass, options, observer)
 
         if options.price.price_aware:
             hub = PriceAwareHub(
@@ -54,12 +56,11 @@ None
         else:
             hub = HomeAssistantHub(hass, options, domain, observer, None, None)
 
-        return await HubFactory.async_setup(hub, observer, hass)
+        return await HubFactory.async_setup(hub, observer, hass, chargertype)
 
     @staticmethod
-    async def async_setup(hub: HomeAssistantHub, observer: IObserver, state_machine: IHomeAssistantFacade) -> HomeAssistantHub:
-        chargertype = await ChargerTypeFactory.async_create(hub.state_machine, hub.options, observer)
-        hub.chargertype = chargertype
+    async def async_setup(hub: HomeAssistantHub, observer: IObserver, state_machine: IHomeAssistantFacade, chargertype: IChargerType) -> HomeAssistantHub:
+        hub.chargertype = chargertype #todo: not needed as prop on hub
         hub.sensors = await HubSensorsFactory.async_create(
             state_machine,
             hub.options,
@@ -77,7 +78,7 @@ None
         hub.threshold = await ThresholdFactory.async_create(hub)
         hub.prediction = Prediction(hub)  # threshold
         hub.servicecalls = ServiceCalls(hub)  # top level
-        hub.states = await StateChangesFactory.async_create(hub)  # top level
+        hub.states = await StateChangesFactory.async_create(hub, chargertype.type)  # top level
         hub.spotprice = SpotPriceFactory.create(
             hub=hub,
             observer=observer,
