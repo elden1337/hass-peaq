@@ -18,10 +18,9 @@ _LOGGER = logging.getLogger(__name__)
 
 class IPowerCanary:
     _enabled: bool = False
-    _active:bool = False
+    _active: bool = False
 
-    def __init__(self, hub, fuse_type, allow_amp_adjustment: bool):
-        self.hub = hub
+    def __init__(self, fuse_type: str, allow_amp_adjustment: bool, peaqev_lite: bool):
         self.model = PowerCanaryModel(
             warning_threshold=WARNING_THRESHOLD,
             cutoff_threshold=CUTOFF_THRESHOLD,
@@ -29,7 +28,8 @@ class IPowerCanary:
             allow_amp_adjustment=allow_amp_adjustment,
         )
         self._total_power = SmoothAverage(max_age=60, max_samples=30, ignore=0)
-        self._validate()
+        if not peaqev_lite:
+            self._validate()
 
     @property
     @abstractmethod
@@ -112,7 +112,7 @@ class IPowerCanary:
         ret = new_amps <= self.max_current_amp
         if ret is False and self.max_current_amp > -1:
             _LOGGER.warning(
-                f"Power Canary cannot allow amp-increase due to the current power-draw. max-amp is:{self.max_current_amp} "
+                f'Power Canary cannot allow amp-increase due to the current power-draw. max-amp is:{self.max_current_amp} '
             )
         return ret
 

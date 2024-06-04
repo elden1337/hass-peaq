@@ -1,18 +1,16 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 
-from custom_components.peaqev.peaqservice.powertools.gainloss.gain_loss import \
-    GainLoss
-from custom_components.peaqev.peaqservice.powertools.power_canary.power_canary import \
-    PowerCanary
+from custom_components.peaqev.peaqservice.powertools.gainloss.igain_loss import IGainLoss
+from custom_components.peaqev.peaqservice.powertools.power_canary.ipower_canary import IPowerCanary
 
 
-class IPowerTools:
+class IPowerTools(ABC):
     @property
     @abstractmethod
-    def power_canary(self) -> PowerCanary:
+    def power_canary(self) -> IPowerCanary:
         pass
 
     @property
     @abstractmethod
-    def gain_loss(self) -> GainLoss:
+    def gain_loss(self) -> IGainLoss:
         pass

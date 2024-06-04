@@ -382,6 +382,8 @@ class HomeAssistantHub:
         )
         self.observer.add(ObserverTypes.UpdatePeak, self.async_update_peak)
         self.observer.add('UpdateMaxMinCore', self.async_update_max_min)
+        self.observer.add('TotalPowerValue', self.total_power_value)
+        self.observer.add('TresholdPhases', self.treshold_phases)
 
     async def async_set_init_dict(self, init_dict, override: bool = False) -> None:
         await self.sensors.locale.data.query_model.peaks.async_set_init_dict(init_dict, override=override)
@@ -418,3 +420,12 @@ class HomeAssistantHub:
 
     async def async_update_max_min(self, keys) -> None:
         pass
+
+    """These should be migrated down into their respecive places and only attached through broadcast"""
+    @property
+    def total_power_value(self):
+        return self.sensors.power.total.value
+
+    @property
+    def treshold_phases(self):
+        return self.threshold.phases
