@@ -251,13 +251,17 @@ class HomeAssistantHub:
 
     def now_is_non_hour(self) -> bool:
         now = datetime.now().replace(minute=0, second=0, microsecond=0)
-        non_hours = self._request_sensor_lookup().get(LookupKeys.NON_HOURS, [])[0]()
-        return now in non_hours
+        non_hours = self._request_sensor_lookup().get(LookupKeys.NON_HOURS, None)
+        if non_hours is None:
+            return False
+        return now in non_hours()
 
     def now_is_caution_hour(self) -> bool:
         now = datetime.now().replace(minute=0, second=0, microsecond=0)
-        caution_hours = self._request_sensor_lookup().get(LookupKeys.DYNAMIC_CAUTION_HOURS, {})[0]()
-        return now in caution_hours.keys()
+        caution_hours = self._request_sensor_lookup().get(LookupKeys.DYNAMIC_CAUTION_HOURS, None)
+        if caution_hours is None:
+            return False
+        return now in caution_hours().keys()
 
     async def async_free_charge(self) -> bool:
         """Returns true if free charge is enabled, which means that peaks are currently not tracked"""
