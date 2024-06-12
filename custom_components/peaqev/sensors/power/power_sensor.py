@@ -37,5 +37,5 @@ class PeaqPowerSensor(PowerDevice):
     async def async_update(self) -> None:
         new_state = self.hub.sensors.power.total.value
         if isinstance(new_state, (int, float)):
-            if abs(new_state - self.state) > 1:
+            if abs(new_state - self.state) > 3:
                 self._state = new_state
