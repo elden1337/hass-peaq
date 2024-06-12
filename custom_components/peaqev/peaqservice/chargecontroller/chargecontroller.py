@@ -15,7 +15,8 @@ from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller imp
     IChargeController
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
-from custom_components.peaqev.peaqservice.util.extensionmethods import log_once_per_minute
+from custom_components.peaqev.peaqservice.util.extensionmethods import \
+    log_once_per_minute
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub

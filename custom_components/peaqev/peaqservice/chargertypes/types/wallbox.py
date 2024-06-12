@@ -14,7 +14,8 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
-from custom_components.peaqev.peaqservice.util.extensionmethods import log_once_per_minute
+from custom_components.peaqev.peaqservice.util.extensionmethods import \
+    log_once_per_minute
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -18,7 +18,8 @@ from custom_components.peaqev.peaqservice.chargecontroller.const import (
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.hub.const import LookupKeys
-from custom_components.peaqev.peaqservice.util.extensionmethods import log_once_per_minute
+from custom_components.peaqev.peaqservice.util.extensionmethods import \
+    log_once_per_minute
 
 _LOGGER = logging.getLogger(__name__)
 
