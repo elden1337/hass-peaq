@@ -14,7 +14,7 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
-from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
+from custom_components.peaqev.peaqservice.util.extensionmethods import log_once_per_minute
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -154,10 +154,10 @@ class WallBox(IChargerType):
     def get_allowed_amps(self) -> int:
         ret = self._hass.states.get(self.entities.maxamps)
         if ret is not None:
-            log_once(f'Got max amps from Wallbox. Setting {ret.state}A.', 'debug')
+            log_once_per_minute(f'Got max amps from Wallbox. Setting {ret.state}A.', 'debug')
             return int(ret.state)
         else:
-            log_once(
+            log_once_per_minute(
                 f'Unable to get max amps. The sensor {self.entities.maxamps} returned state {ret}. Setting max amps to 16 til I get a proper state.', 'warning'
             )
         return 16

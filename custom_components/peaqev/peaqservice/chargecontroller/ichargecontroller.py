@@ -18,7 +18,7 @@ from custom_components.peaqev.peaqservice.chargecontroller.const import (
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
 from custom_components.peaqev.peaqservice.hub.const import LookupKeys
-from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
+from custom_components.peaqev.peaqservice.util.extensionmethods import log_once_per_minute
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -95,7 +95,7 @@ class IChargeController:
 
     def _do_initialize(self) -> bool:
         self.model.is_initialized = True
-        log_once('Chargecontroller is initialized and ready to work.', 'debug')
+        log_once_per_minute('Chargecontroller is initialized and ready to work.', 'debug')
         self.model.latest_charger_start.update()
         return self.model.is_initialized
 

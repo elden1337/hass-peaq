@@ -19,11 +19,11 @@ class PeaqPowerSensor(PowerDevice):
     unit_of_measurement = POWER_WATT
 
     def __init__(self, hub: HomeAssistantHub, entry_id):
-        name = f"{hub.hubname} {hub.sensors.power.total.name}"  # todo: composition
+        name = f'{hub.hubname} {hub.sensors.power.total.name}'  # todo: composition
         super().__init__(hub, name, entry_id)
         self.hub = hub
         self._state = None
-        self._attr_icon = "mdi:flash"
+        self._attr_icon = 'mdi:flash'
 
     @property
     def state(self) -> int:
@@ -31,8 +31,11 @@ class PeaqPowerSensor(PowerDevice):
             return int(self._state)
         except (ValueError, TypeError):
             if self._state is not None:
-                _LOGGER.error("Could not parse state %s for powersensor", self._state)
+                _LOGGER.error('Could not parse state %s for powersensor', self._state)
             return 0
 
     async def async_update(self) -> None:
-        self._state = self.hub.sensors.power.total.value  # todo: composition
+        new_state = self.hub.sensors.power.total.value
+        if isinstance(new_state, (int, float)):
+            if abs(new_state - self.state) > 1:
+                self._state = new_state

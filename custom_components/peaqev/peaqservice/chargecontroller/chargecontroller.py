@@ -15,6 +15,7 @@ from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller imp
     IChargeController
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     ChargerType
+from custom_components.peaqev.peaqservice.util.extensionmethods import log_once_per_minute
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
@@ -49,12 +50,7 @@ class ChargeController(IChargeController):
                     if float_state > 0:
                         return self._do_initialize()
             except Exception as e:
-                _LOGGER.error(
-                    'Could not convert state to float for sensor (%s). Exception: %s',
-                    self.hub.options.powersensor,
-                    e
-                )
-                return False
+                log_once_per_minute(f'Could not convert state to float for sensor ({self.hub.options.powersensor}). Exception: {e}', 'error')
         return False
 
     async def async_below_startthreshold(self) -> bool:

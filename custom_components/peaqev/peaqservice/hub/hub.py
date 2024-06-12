@@ -44,7 +44,7 @@ from custom_components.peaqev.peaqservice.powertools.ipower_tools import \
 from custom_components.peaqev.peaqservice.util.constants import \
     CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import (
-    async_iscoroutine, log_once, nametoid)
+    async_iscoroutine, log_once_per_minute, nametoid)
 from custom_components.peaqev.peaqservice.util.schedule_options_handler import \
     SchedulerOptionsHandler
 
@@ -131,7 +131,7 @@ class HomeAssistantHub:
                 try:
                     return round(float(month_cost.state) / float(month_draw.state),3)
                 except ValueError as v:
-                    log_once(f'Unable to calculate purchased_average_month. {v}', 'warning')
+                    log_once_per_minute(f'Unable to calculate purchased_average_month. {v}', 'warning')
             return 0
         except ZeroDivisionError:
             return 0
