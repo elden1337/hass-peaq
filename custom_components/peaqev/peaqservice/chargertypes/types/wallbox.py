@@ -12,6 +12,7 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
     ChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
+from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
 from custom_components.peaqev.peaqservice.util.extensionmethods import \
@@ -23,10 +24,11 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class WallBox(IChargerType):
-    def __init__(self, hass: IHomeAssistantFacade, huboptions: HubOptions, chargertype):
+    def __init__(self, hass: IHomeAssistantFacade, huboptions: HubOptions, chargertype, observer: IObserver):
         _LOGGER.warning(
             'You are initiating Wallbox as Chargertype. Bare in mind that this chargertype has not been signed off in testing and may be very unstable. Report findings to the developer.'
         )
+        self.observer = observer
         self._hass = hass
         self._is_initialized = False
         self._type = chargertype

@@ -13,6 +13,7 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
     ChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
+from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 from custom_components.peaqev.peaqservice.util.constants import SMARTOUTLET
 
@@ -23,10 +24,11 @@ OUTLET_TYPE_CONNECTED = 'connected'
 OUTLET_TYPE_IDLE = 'idle'
 
 class SmartOutlet(IChargerType):
-    def __init__(self, hass: IHomeAssistantFacade, huboptions: HubOptions, chargertype):
+    def __init__(self, hass: IHomeAssistantFacade, huboptions: HubOptions, chargertype, observer: IObserver):
         _LOGGER.warning(
             'You are initiating SmartOutlet as Chargertype. Bare in mind that this chargertype is generic and your results may vary depending on your brand of outlet. If issues emerge, report findings to the developer.'
         )
+        self.observer = observer
         self._hass = hass
         self._type = chargertype
         self.entities.powerswitch = huboptions.charger.powerswitch

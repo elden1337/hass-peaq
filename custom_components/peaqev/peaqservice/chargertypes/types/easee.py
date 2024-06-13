@@ -11,6 +11,7 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
     ChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
+from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 from custom_components.peaqev.peaqservice.util.constants import (CHARGER,
                                                                  CHARGERID,
@@ -29,8 +30,10 @@ class Easee(IChargerType):
         hass: IHomeAssistantFacade,
         huboptions: HubOptions,
         chargertype,
+        observer: IObserver,
         auth_required: bool = False,
     ):
+        self.observer = observer
         self._hass = hass
         self._type = chargertype
         self._chargerid = huboptions.charger.chargerid

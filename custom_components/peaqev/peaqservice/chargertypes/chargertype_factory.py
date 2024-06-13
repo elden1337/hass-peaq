@@ -71,7 +71,5 @@ class ChargerTypeFactory:
             )
             raise Exception
         except Exception as e:
-            _LOGGER.debug(
-                f'Exception. Did not manage to set up charge-class for {input_type}: {e}'
-            )
-            raise Exception
+            _LOGGER.exception(f'Caught exception while creating charger-type for {input_type}: {e}')
+            raise e

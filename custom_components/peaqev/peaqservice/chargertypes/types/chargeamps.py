@@ -13,6 +13,7 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
     ChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
+from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 from custom_components.peaqev.peaqservice.util.constants import (CHARGER,
                                                                  CHARGERID,
@@ -26,8 +27,9 @@ CONNECTOR = 'connector'
 
 
 class ChargeAmps(IChargerType):
-    def __init__(self, hass: IHomeAssistantFacade, huboptions: HubOptions, chargertype):
+    def __init__(self, hass: IHomeAssistantFacade, huboptions: HubOptions, chargertype, observer: IObserver):
         self._hass = hass
+        self.observer = observer
         self._type = chargertype
         self._chargeramps_type = ''
         self._chargerid = huboptions.charger.chargerid

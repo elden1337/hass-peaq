@@ -7,13 +7,15 @@ from custom_components.peaqev.peaqservice.chargertypes.icharger_type import \
     IChargerType
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
+from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class NoCharger(IChargerType):
-    def __init__(self, hass: IHomeAssistantFacade, huboptions: HubOptions, chargertype):
+    def __init__(self, hass: IHomeAssistantFacade, huboptions: HubOptions, chargertype, observer: IObserver):
+        self.observer = observer
         self._type = chargertype
 
     @property
