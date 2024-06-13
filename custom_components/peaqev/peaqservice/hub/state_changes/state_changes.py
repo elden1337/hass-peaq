@@ -54,7 +54,7 @@ class StateChanges(StateChangesBase):
     async def async_handle_powersensor(self, value) -> None:
         await self.hub.sensors.power.async_update(
             carpowersensor_value=self.hub.sensors.carpowersensor.value,
-            config_sensor_value=value if isinstance(value, (float, int)) else None
+            config_sensor_value=value
         )
         self.hub.power.power_canary.total_power = (
             self.hub.sensors.power.total.value

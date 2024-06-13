@@ -17,7 +17,8 @@ from custom_components.peaqev.peaqservice.hub.const import LookupKeys
 from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
 from custom_components.peaqev.peaqservice.util.constants import CURRENT
-from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
+from custom_components.peaqev.peaqservice.util.extensionmethods import \
+    log_once_per_minute
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -261,7 +262,7 @@ class Charger:
         elif time.time() - self.model.lastest_call_off > 10:
             self.model.unsuccessful_stop = True
             self.model.lastest_call_off = time.time()
-            log_once(
+            log_once_per_minute(
                 f'Fail when trying to stop connected charger. Retrying stop-attempt...', 'warning'
             )
 

@@ -15,12 +15,14 @@ def set_entitiesmodel(
         if len(entities) < 1:
             _LOGGER.error(f'no entities found for {domain} at {time.time()}')
         else:
+            _LOGGER.debug(f'entities: {entities} for {domain}')
             candidate = ''
             for e in entities:
                 splitted = e.split('.')
                 for ending in entity_endings:
                     if splitted[1].endswith(ending):
-                        candidate = splitted[1].replace(ending, '')
+                        len_ending = len(ending)
+                        candidate = splitted[1][:-len_ending]
                         break
                 if len(candidate) > 1:
                     break

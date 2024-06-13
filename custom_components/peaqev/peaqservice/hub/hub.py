@@ -43,7 +43,7 @@ from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeA
 from custom_components.peaqev.peaqservice.util.constants import \
     CHARGERCONTROLLER
 from custom_components.peaqev.peaqservice.util.extensionmethods import (
-    async_iscoroutine, log_once, nametoid)
+    async_iscoroutine, log_once_per_minute, nametoid)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -131,7 +131,7 @@ class HomeAssistantHub:
                 try:
                     return round(float(month_cost.state) / float(month_draw.state), 3)
                 except ValueError as v:
-                    log_once(f'Unable to calculate purchased_average_month. {v}', 'warning')
+                    log_once_per_minute(f'Unable to calculate purchased_average_month. {v}', 'warning')
             return 0
         except ZeroDivisionError:
             return 0
@@ -244,13 +244,17 @@ class HomeAssistantHub:
 
     def now_is_non_hour(self) -> bool:
         now = datetime.now().replace(minute=0, second=0, microsecond=0)
-        non_hours = self._request_sensor_lookup().get(LookupKeys.NON_HOURS, [])()
-        return now in non_hours
+        non_hours = self._request_sensor_lookup().get(LookupKeys.NON_HOURS, None)
+        if non_hours is None:
+            return False
+        return now in non_hours()
 
     def now_is_caution_hour(self) -> bool:
         now = datetime.now().replace(minute=0, second=0, microsecond=0)
-        caution_hours = self._request_sensor_lookup().get(LookupKeys.DYNAMIC_CAUTION_HOURS, {})()
-        return now in caution_hours.keys()
+        caution_hours = self._request_sensor_lookup().get(LookupKeys.DYNAMIC_CAUTION_HOURS, None)
+        if caution_hours is None:
+            return False
+        return now in caution_hours().keys()
 
     async def async_free_charge(self) -> bool:
         """Returns true if free charge is enabled, which means that peaks are currently not tracked"""

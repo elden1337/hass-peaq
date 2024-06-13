@@ -51,6 +51,7 @@ class IObserver:
 
     async def async_broadcast(self, event: ObserverTypes | str, argument=None):
         self.broadcast(event, argument)
+        await self.async_dispatch()
 
     def broadcast(self, command: ObserverTypes | str, argument=None):
         command = self._check_and_convert_enum_type(command)

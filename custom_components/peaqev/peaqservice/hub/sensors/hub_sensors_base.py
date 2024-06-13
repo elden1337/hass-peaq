@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from functools import partial
 from typing import TYPE_CHECKING, Tuple
@@ -23,6 +24,8 @@ from custom_components.peaqev.peaqservice.hub.const import (
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.extensionmethods import nametoid
+
+_LOGGER = logging.getLogger(__name__)
 
 
 @dataclass
@@ -147,6 +150,7 @@ class HubSensorsBase:
             ),
         }
         if len(self.chargertype.entities.chargerentity):
+            _LOGGER.debug(f'Initializing Chargerobject with: data_type: {self.chargertype.native_chargerstates}, listenerentity: {self.chargertype.entities.chargerentity}')
             return (
                 regular['chargerobject'](),
                 regular['chargerobject_switch'](),

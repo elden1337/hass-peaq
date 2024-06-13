@@ -140,6 +140,7 @@ class ChargeAmps(IChargerType):
         self.entities.powerswitch = await self.async_determine_switch_entity()
         self.entities.ampmeter = f'{self.entities.powerswitch}|max_current'
         self._chargeramps_type = await self.async_set_chargeamps_type(self.entities.chargerentity)
+        _LOGGER.debug('ChargeAmps type: %s', self.entities.chargerentity)
 
     async def async_determine_switch_entity(self) -> str:
         ent = await self.async_determine_entities()

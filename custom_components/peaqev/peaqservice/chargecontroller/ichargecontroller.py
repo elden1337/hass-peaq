@@ -18,7 +18,8 @@ from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum 
 from custom_components.peaqev.peaqservice.hub.const import LookupKeys
 from custom_components.peaqev.peaqservice.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.util.HomeAssistantFacade import IHomeAssistantFacade
-from custom_components.peaqev.peaqservice.util.extensionmethods import log_once
+from custom_components.peaqev.peaqservice.util.extensionmethods import \
+    log_once_per_minute
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -96,7 +97,7 @@ class IChargeController:
 
     def _do_initialize(self) -> bool:
         self.model.is_initialized = True
-        log_once('Chargecontroller is initialized and ready to work.', 'debug')
+        log_once_per_minute('Chargecontroller is initialized and ready to work.', 'debug')
         self.model.latest_charger_start.update()
         return self.model.is_initialized
 
@@ -170,11 +171,11 @@ class IChargeController:
         state = await self.hub.async_request_sensor_data(LookupKeys.CHARGEROBJECT_VALUE) #todo: observer getter
 
         if state not in self.model.flattened_chargerstates():
-            _LOGGER.debug(f'Chargerobject_value is not in charger_states. Returning Error-state. {str(state)}')
+            _LOGGER.error(f'Chargerobject_value is not in charger_states. Returning Error-state. {str(state)}')
             return ChargeControllerStates.Error, True
 
         if self.hub.sensors.power.killswitch.is_caution: #todo: shouldn't be here at all. if killswitch is caution it should be handled by the strategy
-            _LOGGER.debug('Killswitch is caution.')
+            _LOGGER.warning('Killswitch is caution, it may disengage soon.')
         extended_errors = []
         try:
             if not self.hub.enabled:
@@ -213,8 +214,9 @@ class IChargeController:
 
         except Exception as e:
             _LOGGER.exception(f'Error in async_get_status: {e}. Extended errors {extended_errors}')
+            _LOGGER.debug(f'state (chargerobj value): {state}')
 
-        _LOGGER.debug(f'async_get_status: {state} returning Error. {str(state)}')
+        _LOGGER.error(f'async_get_status: {state} returning Error. {str(state)}')
         return ChargeControllerStates.Error, True
 
 
