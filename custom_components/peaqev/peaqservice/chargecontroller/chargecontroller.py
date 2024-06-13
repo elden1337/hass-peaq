@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import time
 from typing import TYPE_CHECKING, Tuple
 
 from peaqevcore.common.models.observer_types import ObserverTypes
@@ -29,6 +30,7 @@ class ChargeController(IChargeController):
             self, hub: HomeAssistantHub, charger_states: dict, charger_type: ChargerType
     ):
         self._aux_running_grace_timer = WaitTimer(timeout=300, init_now=True)
+        self.latest_init_check: float = time.time()
         super().__init__(hub, charger_states, charger_type)
 
     @property
@@ -43,7 +45,11 @@ class ChargeController(IChargeController):
     def _check_initialized(self) -> bool:
         if self.model.is_initialized:
             return True
+        if time.time() - self.latest_init_check < 10:
+            return False
+        self.latest_init_check = time.time()
         _state = self.hub.state_machine.states.get(self.hub.options.powersensor)
+        _LOGGER.debug(f'Checking if initialized {self.hub.options.powersensor}. State: {_state.state or None}')
         if _state is not None:
             try:
                 float_state = float(_state.state)

@@ -13,7 +13,9 @@
     "tibber",
     "filter",
     "integration",
-    "utility_meter"
+    "utility_meter",
+    "shelly",
+    "template"
   ],
   "codeowners": [
     "@elden1337"
