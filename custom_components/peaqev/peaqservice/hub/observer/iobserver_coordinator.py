@@ -41,24 +41,26 @@ class IObserver:
         if isinstance(command, str):
             try:
                 command = ObserverTypes(command)
-                _LOGGER.warning(f"Observer.add: command {command} was not of type ObserverTypes but was converted.")
+                _LOGGER.warning(f'Observer.add: command {command} was not of type ObserverTypes but was converted.')
             except ValueError:
-                _LOGGER.error(f"Observer.add: command {command} was not of type ObserverTypes and could not be converted.")
+                _LOGGER.error(
+                    f'Observer.add: command {command} was not of type ObserverTypes and could not be converted.')
                 return ObserverTypes.Test
         return command
 
-    def add(self, command: ObserverTypes|str, func):
+    def add(self, command: ObserverTypes | str, func):
         command = self._check_and_convert_enum_type(command)
         if command in self.model.subscribers.keys():
             self.model.subscribers[command].append(func)
         else:
             self.model.subscribers[command] = [func]
 
-    async def async_broadcast(self, command: ObserverTypes|str, argument=None):
+    async def async_broadcast(self, command: ObserverTypes | str, argument=None):
         command = self._check_and_convert_enum_type(command)
         self.broadcast(command, argument)
+        await self.async_dispatch()
 
-    def broadcast(self, command: ObserverTypes|str, argument=None):
+    def broadcast(self, command: ObserverTypes | str, argument=None):
         command = self._check_and_convert_enum_type(command)
         _expiration = time.time() + TIMEOUT
         cc = Command(command, _expiration, argument)
@@ -123,7 +125,7 @@ class IObserver:
             else:
                 await func()
         except Exception as e:
-            _LOGGER.error(f"async_call_func for {func} with command {command}: {e}")
+            _LOGGER.error(f'async_call_func for {func} with command {command}: {e}')
 
     async def async_ok_to_broadcast(self, command) -> bool:
         if command not in self.model.wait_queue.keys():
