@@ -25,11 +25,10 @@ class PriceAwareHub(HomeAssistantHub):
             max_min_controller: IMaxMinController,
             scheduler_options_handler: SchedulerOptionsHandler
     ):
-        super().__init__(hass, options, domain, observer, None, None)
+        super().__init__(hass=hass, options=options, domain=domain, observer=observer)
         self.max_min_controller = max_min_controller
         self.scheduler_options_handler = scheduler_options_handler
-        self.observer.add('session energy', self.sessionenergyy) #todo: move out of here when observer transformed.
-
+        self.observer.add('session energy', self.sessionenergyy)  #todo: move out of here when observer transformed.
 
     @property
     def current_peak_dynamic(self):
@@ -48,7 +47,7 @@ class PriceAwareHub(HomeAssistantHub):
         await self.spotprice.async_update_spotprice()
 
     @property
-    def sessionenergyy(self): #todo: move out of here when observer transformed.
+    def sessionenergyy(self):  #todo: move out of here when observer transformed.
         return self.chargecontroller.session.session_energy
 
     @property
@@ -90,7 +89,7 @@ class PriceAwareHub(HomeAssistantHub):
 
     async def async_update_max_min(self, keys) -> None:
         await self.hours.async_update_max_min(
-            max_charge=keys.get('max_charge',0),
+            max_charge=keys.get('max_charge', 0),
             limiter=keys.get('limiter', 0),
             session_energy=self.chargecontroller.session.session_energy,
             car_connected=self.chargecontroller.connected

@@ -47,7 +47,8 @@ class HubFactory:
                     options,
                     observer,
                     hass,
-                    options.max_charge
+                    options.max_charge,
+                    options.price.price_aware
                 ),
 None
             )
