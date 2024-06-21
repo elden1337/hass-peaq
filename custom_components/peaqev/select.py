@@ -37,10 +37,10 @@ class PeaqSelectEntity(SelectEntity, RestoreEntity):
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
         _LOGGER.debug('Selected option: %s', option)
-        if hasattr(self.scheduler, 'charge_limit'):
-            _LOGGER.debug('found it! %s', self.scheduler.charge_limit)
-        else:
-            _LOGGER.debug('not found')
+        # if hasattr(self.scheduler, 'charge_limit'):
+        #     _LOGGER.debug('found it! %s', self.scheduler.charge_limit)
+        # else:
+        #     _LOGGER.debug('not found')
         await self.scheduler.async_handle_scheduler_departure_option(option)
         self._attr_current_option = option
 

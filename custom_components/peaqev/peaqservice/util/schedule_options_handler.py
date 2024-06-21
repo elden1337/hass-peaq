@@ -34,7 +34,7 @@ class SchedulerOptionsHandler:
 
     @property
     def display_options(self) -> list[str]:
-        ret = SchedulerOptionsHandler.convert_datetime_list(self.options)
+        ret = self.convert_datetime_list(self.options)
         ret.insert(0, NOSCHEDULE)
         return ret
 
@@ -66,9 +66,10 @@ class SchedulerOptionsHandler:
         except ValueError as v:
             _LOGGER.error(f'Unable to convert option {option}. {v}')
 
-    @staticmethod
-    def convert_datetime_list(dates_list):
+    def convert_datetime_list(self, dates_list):
         result = []
+        if self._converted_option is not None and self._converted_option not in dates_list and self._converted_option > datetime.now():
+            result.append(SchedulerOptionsHandler.convert_datetime(self._converted_option))
         for value in dates_list:
             result.append(SchedulerOptionsHandler.convert_datetime(value))
         return result
