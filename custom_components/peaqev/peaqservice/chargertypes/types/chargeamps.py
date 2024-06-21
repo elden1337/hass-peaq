@@ -112,27 +112,10 @@ class ChargeAmps(IChargerType):
         """no such method for chargeamps available right now."""
         return 16
 
-    def _determine_entities(self) -> list:
-        ret = []
-        for e in self.entities.imported_entities:
-            entity_state = self._hass.states.get(e)
-            if entity_state != 'unavailable':
-                ret.append(e)
-        return ret
-
     def _set_chargeamps_type(self, main_sensor_entity) -> ChargeAmpsTypes:
         if self._hass.states.get(main_sensor_entity) is not None:
             chargeampstype = self._hass.states.get(main_sensor_entity).attributes.get('chargepoint_type')
             return ChargeAmpsTypes.get_type(chargeampstype)
-
-    def _determine_switch_entity(self) -> str:
-        ent = self._determine_entities()
-        for e in ent:
-            if e.startswith('switch.'):
-                amps = self._hass.states.get(e).attributes.get('max_current')
-                if isinstance(amps, int):
-                    return e
-        raise Exception
 
     async def async_set_sensors(self) -> None:
         self.entities.chargerentity = f'sensor.{self.entities.entityschema}_1'
@@ -146,17 +129,21 @@ class ChargeAmps(IChargerType):
         ent = await self.async_determine_entities()
         for e in ent:
             if e.startswith('switch.'):
-                amps = self._hass.states.get(e).attributes.get('max_current')
-                if isinstance(amps, int):
-                    return e
-        raise Exception
+                connector = self._hass.states.get(e).attributes.get('connector_id')
+                if connector == self._chargeamps_connector:
+                    amps = self._hass.states.get(e).attributes.get('max_current')
+                    if isinstance(amps, int):
+                        _LOGGER.info('Switch entity found for Chargeamps: %s', e)
+                        return e
+        raise KeyError('No suitable switch entity found for Chargeamps')
 
     async def async_determine_entities(self) -> list:
         ret = []
         for e in self.entities.imported_entities:
             entity_state = self._hass.states.get(e)
-            if entity_state != 'unavailable':
-                ret.append(e)
+            if entity_state:
+                if entity_state.state.lower() not in ['unavailable', 'unknown']:
+                    ret.append(e)
         return ret
 
     async def async_set_chargeamps_type(self, main_sensor_entity) -> ChargeAmpsTypes:
