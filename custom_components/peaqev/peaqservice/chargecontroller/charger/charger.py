@@ -50,7 +50,6 @@ class Charger:
             )  # todo: composition
         return all(
             [
-                # self.controller.hub.sensors.chargerobject_switch.value,  # todo: possibly remove to allow chargertypes without switch.
                 self.controller.hub.sensors.carpowersensor.value
                 > 0,  # todo: composition
             ]

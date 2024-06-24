@@ -149,10 +149,18 @@ class IChargeController:
         match new_state:
             case ChargeControllerStates.Idle:
                 await self.hub.observer.async_broadcast(ObserverTypes.CarDisconnected)
+                await self.session.async_reset(
+                    getattr(
+                        self.hub.sensors.locale.data.query_model,
+                        'charged_peak',
+                        0,
+                    )
+                )
                 if self.hub.charger_done:
                     await self.hub.observer.async_broadcast(
                         ObserverTypes.UpdateChargerDone, False
                     )
+
             case ChargeControllerStates.Done:
                 await self.hub.observer.async_broadcast(ObserverTypes.UpdateChargerDone, True)
             case ChargeControllerStates.Charging | ChargeControllerStates.Start | ChargeControllerStates.Stop | ChargeControllerStates.Connected:
