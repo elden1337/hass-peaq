@@ -18,29 +18,26 @@ async def async_setup_entry(
 
     entities = []
     if hub.options.price.price_aware and not hub.options.peaqev_lite:
-        entities.append(PeaqSelectEntity('Scheduler next departure', hub))
+        entities.append(PeaqSelectEntity('Scheduler next departure', hub.scheduler_options_handler))
         async_add_entities(entities)
 
 
 class PeaqSelectEntity(SelectEntity, RestoreEntity):
-    def __init__(self, name, hub):
+    def __init__(self, name, options_handler):
         self._attr_name = name
-        self.scheduler = hub.scheduler_options_handler
+        self.scheduler = options_handler
         self._attr_options = self.scheduler.display_options
         self._attr_current_option = None
 
     async def async_update(self):
         self._attr_options = self.scheduler.display_options
+        self._attr_current_option = self.scheduler.current_option
         if self._attr_current_option not in self._attr_options:
             self._attr_current_option = self._attr_options[0]
 
     async def async_select_option(self, option: str) -> None:
         """Change the selected option."""
         _LOGGER.debug('Selected option: %s', option)
-        # if hasattr(self.scheduler, 'charge_limit'):
-        #     _LOGGER.debug('found it! %s', self.scheduler.charge_limit)
-        # else:
-        #     _LOGGER.debug('not found')
         await self.scheduler.async_handle_scheduler_departure_option(option)
         self._attr_current_option = option
 

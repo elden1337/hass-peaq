@@ -39,6 +39,12 @@ class SchedulerOptionsHandler:
         return ret
 
     @property
+    def current_option(self) -> str:
+        if self._converted_option is not None:
+            return SchedulerOptionsHandler.convert_datetime(self._converted_option)
+        return NOSCHEDULE
+
+    @property
     def options(self) -> list[datetime]:
         now = datetime.now()
         next_hour = (now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=3))
