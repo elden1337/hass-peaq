@@ -150,10 +150,18 @@ class IChargeController:
         match new_state:
             case ChargeControllerStates.Idle:
                 await self.observer.async_broadcast(ObserverTypes.CarDisconnected)
+                await self.session.async_reset(
+                    getattr(
+                        self.hub.sensors.locale.data.query_model,
+                        'charged_peak',
+                        0,
+                    )
+                )
                 if self.hub.charger_done: #todo: this should not be a prop of hub but only here. change so that it works via observer setter
                     await self.observer.async_broadcast(
                         ObserverTypes.UpdateChargerDone, False
                     )
+
             case ChargeControllerStates.Done:
                 await self.observer.async_broadcast(ObserverTypes.UpdateChargerDone, True)
             case ChargeControllerStates.Charging | ChargeControllerStates.Start | ChargeControllerStates.Stop | ChargeControllerStates.Connected:

@@ -51,7 +51,6 @@ class Charger:
             )   #todo: observer getter
         return all(
             [
-                # self.controller.hub.sensors.chargerobject_switch.value,  # todo: possibly remove to allow chargertypes without switch.
                 self.controller.hub.sensors.carpowersensor.value
                 > 0,   #todo: observer getter
             ]
