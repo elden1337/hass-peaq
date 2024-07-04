@@ -15,8 +15,10 @@ from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 from custom_components.peaqev.peaqservice.hub.hub_events import HubEvents
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
-from custom_components.peaqev.peaqservice.hub.observer.iobserver_coordinator import IObserver
-from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import Observer
+from custom_components.peaqev.peaqservice.hub.observer.iobserver_coordinator import \
+    IObserver
+from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
+    Observer
 from custom_components.peaqev.peaqservice.hub.price_aware_hub import \
     PriceAwareHub
 from custom_components.peaqev.peaqservice.hub.sensors.hubsensors_factory import \

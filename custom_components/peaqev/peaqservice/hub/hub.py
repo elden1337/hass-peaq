@@ -8,7 +8,8 @@ from functools import partial
 from typing import Callable
 
 # Third party imports
-from homeassistant.core import HomeAssistant, callback, Event, EventStateChangedData
+from homeassistant.core import (Event, EventStateChangedData, HomeAssistant,
+                                callback)
 from homeassistant.helpers.event import async_track_state_change_event
 # Local application imports
 from peaqevcore.common.models.observer_types import ObserverTypes
@@ -32,7 +33,8 @@ from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.hub.models.initializer_types import \
     InitializerTypes
-from custom_components.peaqev.peaqservice.hub.observer.iobserver_coordinator import IObserver
+from custom_components.peaqev.peaqservice.hub.observer.iobserver_coordinator import \
+    IObserver
 from custom_components.peaqev.peaqservice.hub.sensors.hub_sensors_base import \
     HubSensorsBase
 from custom_components.peaqev.peaqservice.hub.servicecalls import ServiceCalls
