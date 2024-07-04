@@ -9,14 +9,15 @@ from custom_components.peaqev.peaqservice.hub.max_min_controller import \
     MaxMinController
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
+from custom_components.peaqev.peaqservice.hub.observer.iobserver_coordinator import IObserver
 from custom_components.peaqev.peaqservice.util.schedule_options_handler import \
     SchedulerOptionsHandler
 
 _LOGGER = logging.getLogger(__name__)
 
 class PriceAwareHub(HomeAssistantHub):
-    def __init__(self, hass: HomeAssistant, options: HubOptions, domain: str):
-        super().__init__(hass, options, domain)
+    def __init__(self, hass: HomeAssistant, options: HubOptions, domain: str, observer: IObserver):
+        super().__init__(hass, options, domain, observer)
         self.max_min_controller = MaxMinController(self)
         self._scheduler_options_handler = SchedulerOptionsHandler(self)
 
