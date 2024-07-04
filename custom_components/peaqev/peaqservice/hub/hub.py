@@ -8,8 +8,8 @@ from functools import partial
 from typing import Callable
 
 # Third party imports
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.event import async_track_state_change
+from homeassistant.core import HomeAssistant, callback, Event, EventStateChangedData
+from homeassistant.helpers.event import async_track_state_change_event
 # Local application imports
 from peaqevcore.common.models.observer_types import ObserverTypes
 from peaqevcore.common.spotprice.spotpricebase import SpotPriceBase
@@ -82,7 +82,7 @@ class HomeAssistantHub:
 
     async def async_setup(self):
         trackers = await self.async_setup_tracking()
-        async_track_state_change(self.state_machine, trackers, self.async_state_changed)
+        async_track_state_change_event(self.state_machine, trackers, self._async_on_change)
 
     @property
     def enabled(self) -> bool:
@@ -148,7 +148,10 @@ class HomeAssistantHub:
             return 0
 
     @callback
-    async def async_state_changed(self, entity_id, old_state, new_state):
+    async def _async_on_change(self, event: Event[EventStateChangedData]) -> None:
+        entity_id = event.data['entity_id']
+        old_state = event.data['old_state']
+        new_state = event.data['new_state']
         if entity_id is not None:
             try:
                 if old_state is None or old_state != new_state:
@@ -157,6 +160,16 @@ class HomeAssistantHub:
                 tb = traceback.format_exc()  # Get the full traceback
                 msg = f'Unable to handle data-update: {entity_id} {old_state}|{new_state}. Exception: {e}\n{tb}'
                 _LOGGER.error(msg)
+
+    # async def async_state_changed(self, entity_id, old_state, new_state):
+    #     if entity_id is not None:
+    #         try:
+    #             if old_state is None or old_state != new_state:
+    #                 await self.states.async_update_sensor(entity_id, new_state.state)
+    #         except Exception as e:
+    #             tb = traceback.format_exc()  # Get the full traceback
+    #             msg = f'Unable to handle data-update: {entity_id} {old_state}|{new_state}. Exception: {e}\n{tb}'
+    #             _LOGGER.error(msg)
 
     async def async_update_adjusted_average(self, val) -> None:
         pass
