@@ -11,7 +11,6 @@ from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.constants import TYPELITE
 from custom_components.peaqev.services import async_prepare_register_services
-
 from .const import DOMAIN, PLATFORMS
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from .peaqservice.hub.hub_factory import HubFactory
@@ -32,11 +31,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     conf.async_on_unload(conf.add_update_listener(async_update_entry))
     await async_prepare_register_services(hub, hass)
 
-    for platform in PLATFORMS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(conf, platform)
-        )
-
+    await hass.config_entries.async_forward_entry_setups(conf, PLATFORMS)
     return True
 
 
