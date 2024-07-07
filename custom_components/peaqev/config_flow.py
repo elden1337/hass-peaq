@@ -21,7 +21,6 @@ from custom_components.peaqev.peaqservice.powertools.power_canary.const import \
     FUSES_LIST
 from custom_components.peaqev.peaqservice.util.constants import (
     CAUTIONHOURTYPE_NAMES, TYPELITE, CautionHourType)
-
 from .const import DOMAIN  # pylint:disable=unused-import
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
@@ -117,7 +116,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             try:
-                await ConfigFlowValidation.validate_price_sensor(self.hass, user_input['custom_price_sensor'])
+                await ConfigFlowValidation.validate_price_sensor(self.hass, user_input.get('custom_price_sensor', None))
             except ValueError:
                 errors['base'] = 'invalid_pricesensor'
             if not errors:
@@ -180,7 +179,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Optional(
                     'mains',
                     default='',
-                ): vol.In(FUSES_LIST),
+                ):                                      vol.In(FUSES_LIST),
                 vol.Optional('gainloss', default=True): cv.boolean,
             }
         )
@@ -233,16 +232,16 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             errors=errors,
             data_schema=vol.Schema(
                 {
-                    vol.Optional('priceaware', default=_priceaware): cv.boolean,
-                    vol.Optional('custom_price_sensor', default=_custompricesensor): cv.string,
-                    vol.Optional('dynamic_top_price', default=_dynamic_top_price): cv.boolean,
-                    vol.Optional('absolute_top_price', default=_topprice): cv.positive_float,
+                    vol.Optional('priceaware', default=_priceaware):                   cv.boolean,
+                    vol.Optional('custom_price_sensor', default=_custompricesensor):   cv.string,
+                    vol.Optional('dynamic_top_price', default=_dynamic_top_price):     cv.boolean,
+                    vol.Optional('absolute_top_price', default=_topprice):             cv.positive_float,
                     vol.Optional('min_priceaware_threshold_price', default=_minprice): cv.positive_float,
                     vol.Optional(
                         'cautionhour_type',
                         default=_hourtype,
-                    ): vol.In(CAUTIONHOURTYPE_NAMES),
-                    vol.Optional('max_charge', default=_max_charge): cv.positive_float,
+                    ):                                                                 vol.In(CAUTIONHOURTYPE_NAMES),
+                    vol.Optional('max_charge', default=_max_charge):                   cv.positive_float,
                 }
             ),
         )
@@ -264,7 +263,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id='sensor', data_schema=vol.Schema(
                 {
-                    vol.Optional('name', default=_powersensorname): cv.string,
+                    vol.Optional('name', default=_powersensorname):                          cv.string,
                     vol.Optional('powersensorincludescar', default=_powersensorincludescar): cv.boolean,
                 }), errors=errors, last_step=False
         )
@@ -301,7 +300,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             last_step=False,
             data_schema=vol.Schema(
                 {
-                    vol.Optional('nonhours', default=_nonhours): cv.multi_select(list(range(0, 24))),
+                    vol.Optional('nonhours', default=_nonhours):         cv.multi_select(list(range(0, 24))),
                     vol.Optional('cautionhours', default=_cautionhours): cv.multi_select(list(range(0, 24))),
                 }
             ),
@@ -314,7 +313,6 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self.options['use_peak_history'] = user_input.get('use_peak_history', False)
             self.options['startpeaks'] = months_dict
 
-
             return await self.async_step_misc()
 
         _defaultvalues = self.config_entry.options.get('startpeaks', self.config_entry.data.get('startpeaks'))
@@ -326,18 +324,18 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             last_step=False,
             data_schema=vol.Schema(
                 {
-                    vol.Optional('jan', default=defaultvalues[1]): cv.positive_float,
-                    vol.Optional('feb', default=defaultvalues[2]): cv.positive_float,
-                    vol.Optional('mar', default=defaultvalues[3]): cv.positive_float,
-                    vol.Optional('apr', default=defaultvalues[4]): cv.positive_float,
-                    vol.Optional('may', default=defaultvalues[5]): cv.positive_float,
-                    vol.Optional('jun', default=defaultvalues[6]): cv.positive_float,
-                    vol.Optional('jul', default=defaultvalues[7]): cv.positive_float,
-                    vol.Optional('aug', default=defaultvalues[8]): cv.positive_float,
-                    vol.Optional('sep', default=defaultvalues[9]): cv.positive_float,
-                    vol.Optional('oct', default=defaultvalues[10]): cv.positive_float,
-                    vol.Optional('nov', default=defaultvalues[11]): cv.positive_float,
-                    vol.Optional('dec', default=defaultvalues[12]): cv.positive_float,
+                    vol.Optional('jan', default=defaultvalues[1]):              cv.positive_float,
+                    vol.Optional('feb', default=defaultvalues[2]):              cv.positive_float,
+                    vol.Optional('mar', default=defaultvalues[3]):              cv.positive_float,
+                    vol.Optional('apr', default=defaultvalues[4]):              cv.positive_float,
+                    vol.Optional('may', default=defaultvalues[5]):              cv.positive_float,
+                    vol.Optional('jun', default=defaultvalues[6]):              cv.positive_float,
+                    vol.Optional('jul', default=defaultvalues[7]):              cv.positive_float,
+                    vol.Optional('aug', default=defaultvalues[8]):              cv.positive_float,
+                    vol.Optional('sep', default=defaultvalues[9]):              cv.positive_float,
+                    vol.Optional('oct', default=defaultvalues[10]):             cv.positive_float,
+                    vol.Optional('nov', default=defaultvalues[11]):             cv.positive_float,
+                    vol.Optional('dec', default=defaultvalues[12]):             cv.positive_float,
                     vol.Optional('use_peak_history', default=_default_history): cv.boolean,
                 }
             ),
@@ -358,7 +356,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Optional(
                     'mains',
                     default=mainsvalue,
-                ): vol.In(FUSES_LIST),
+                ):                                          vol.In(FUSES_LIST),
                 vol.Optional('gainloss', default=gainloss): cv.boolean,
             }
         )

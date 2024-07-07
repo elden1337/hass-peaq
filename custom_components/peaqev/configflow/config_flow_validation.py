@@ -22,15 +22,15 @@ class ConfigFlowValidation:
             raise FaultyPowerSensor
 
     @staticmethod
-    async def validate_price_sensor(hass: HomeAssistant, pricesensor:str):
+    async def validate_price_sensor(hass: HomeAssistant, pricesensor:str|None):
+        if pricesensor is None:
+            return
         _pricesensor = f'sensor.{pricesensor}' if not pricesensor.startswith('sensor.') else pricesensor
         val_state = hass.states.get(_pricesensor)
         if val_state is None:
             raise FaultyPowerSensor('It returned None as state.')
-
         if not isinstance(float(val_state.state), float):
             raise FaultyPriceSensor(f'Value of state is not a number. {val_state.state}')
-
         try:
             ConfigFlowValidation.validate_price_sensor_attributes(val_state.attributes)
         except Exception as e:

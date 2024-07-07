@@ -72,6 +72,7 @@ class PeaqIntegrationSensor(IntegrationSensor):
             unique_id=self.unique_id,
             unit_prefix='k',
             unit_time=UnitOfTime.HOURS,
+            max_sub_interval=None
         )
 
     @property
