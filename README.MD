@@ -1,12 +1,12 @@
 <img src="https://raw.githubusercontent.com/creativecommons/cc-assets/main/license_badges/big/by_nc_nd.svg" width="90">
 
-[![Peaq_downloads](https://img.shields.io/github/downloads/elden1337/hass-peaq/total)](https://github.com/elden1337/hass-peaq) 
+[![Peaq_downloads](https://img.shields.io/github/downloads/elden1337/hass-peaq/total)](https://github.com/elden1337/hass-peaq)
 [![hass-peaq_downloads](https://img.shields.io/github/downloads/elden1337/hass-peaq/latest/total)](https://github.com/elden1337/hass-peaq)
 [![Paypal](https://img.shields.io/badge/Sponsor-PayPal-orange.svg)](https://www.paypal.com/donate/?hosted_button_id=GLGW8QAAQC2FG)
 [![BuyMeACoffee](https://img.shields.io/badge/Sponsor-BuyMeACoffee-orange.svg)](https://buymeacoffee.com/elden)
 [![Discord](https://img.shields.io/badge/Join-Discord-green.svg)](https://discord.gg/kgZzdsf4XA)
 
-# Peaqev ev-charging 
+# Peaqev ev-charging
 
 
 <img src="https://raw.githubusercontent.com/elden1337/hass-peaq/main/assets/icon.png" width="125">
@@ -15,7 +15,7 @@ First time here? Check the [getting-started](https://github.com/elden1337/hass-p
 
 Interested in sponsoring or prioritizing a certain feature, look [here](https://github.com/elden1337/hass-peaq/wiki/Sponsorship-and-prioritized-development)
 
-Peaqev aims at lowering the household's peak energy charges, targeted at charging an electronic vehicle (EV) below a dynamic threshold. 
+Peaqev aims at lowering the household's peak energy charges, targeted at charging an electronic vehicle (EV) below a dynamic threshold.
 Peaqev covers [28 different energy companies](https://github.com/elden1337/hass-peaq/wiki/Locale) in Sweden, Norway and Belgium.
 You will get the best experience with a supported charger that can update amps while charging, as well as using a connected power meter that update your total power draw frequently (every 10s or more).
 _Peaqev can also be used without living in an area with peak-shaving implemented, you may utilize it soley for the purpose of charging at the lowest available hours in your area (Requires Nordpool)_
@@ -29,7 +29,7 @@ For usage-examples and more in-depth explanations, see the Wiki:
 * [Usage](https://github.com/elden1337/hass-peaq/wiki/Usage)
 
 ## Installation
-*Required to install is Home Assistant version 2022.10.5 or higher.*
+*Required to install is Home Assistant version 2024.7.1 or higher.*
 
 Preferred if you have HACS installed is to search for Peaqev there.
 
@@ -74,7 +74,7 @@ No charger| - | No | | _For using the sensors and logic_
 - `Dynamic top price` - If checked, the absolute top price for charging will be calculated by the monthly average from the spotprice-source (current month)
 - `Absolute top price` - The limit (if any) where your charger should be stopped, regardless of the hour algorithm
 - `Min price` - The lower limit (if any) where charging will always be permitted (must be lower than top price if set)
-- `Caution hour type` - Choose to what extent you would like Peaqev to hold back during caution hours. *Suave > Aggressive* 
+- `Caution hour type` - Choose to what extent you would like Peaqev to hold back during caution hours. *Suave > Aggressive*
 
 #### Hours:
 - `Non hours` - Click to select the hours (if any) where you do not wish to charge
@@ -105,4 +105,3 @@ Dec| 2.0 | 4.0
 
 
 *While this integration will try to not break your monthly energy peaks, there is off course no guarantee. Various factors beyond control of this logic do occur, so for those aiming at staying below their threshold, I do suggest you think about the non-hours, caution-hours etc in the setup. These hours should be set when you commonly utilize a lot of extra energy in your home, such as cooking, doing laundry etc.*
-
