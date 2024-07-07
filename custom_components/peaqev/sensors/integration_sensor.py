@@ -6,9 +6,11 @@ if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
 
 from homeassistant.components.integration.const import METHOD_TRAPEZOIDAL
-from homeassistant.components.integration.sensor import IntegrationSensor  # pylint: disable=import-error
-from homeassistant.components.sensor import SensorDeviceClass  # pylint: disable=import-error
-from homeassistant.const import (ENERGY_KILO_WATT_HOUR, UnitOfTime)
+from homeassistant.components.integration.sensor import \
+    IntegrationSensor  # pylint: disable=import-error
+from homeassistant.components.sensor import \
+    SensorDeviceClass  # pylint: disable=import-error
+from homeassistant.const import ENERGY_KILO_WATT_HOUR, UnitOfTime
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
