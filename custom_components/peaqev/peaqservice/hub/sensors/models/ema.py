@@ -22,7 +22,6 @@ class EMA:
         return round(self._latest_average, self._precision)
 
     def set_smoothing_factor(self, len_avg, smoothing_exp) -> float:
-        # ret = 2/(len_avg +1) if len_avg > 5000 else (BASEFACTOR/len_avg) / smoothing_exp
         ret = (BASEFACTOR / len_avg) / smoothing_exp
         return ret
 

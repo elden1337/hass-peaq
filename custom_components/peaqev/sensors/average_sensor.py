@@ -29,9 +29,10 @@ class PeaqAverageSensor(SensorEntity, RestoreEntity):
     def __init__(self, hub: HomeAssistantHub, entry_id, name, max_age):
         self.hub = hub
         self._entry_id = entry_id
-        self._attr_name = f"{hub.hubname} {name}"
+        self._attr_name = f'{hub.hubname} {name}'
         self._state = None
-        self._avg = EMA(max_age)
+        smoothing_factor = 1 if max_age < 10000 else 2
+        self._avg = EMA(max_age, smoothing_factor)
 
     @property
     def state(self):
@@ -45,23 +46,22 @@ class PeaqAverageSensor(SensorEntity, RestoreEntity):
                 if isinstance(floatdata, float):
                     self._state = self._avg.average(floatdata)
                 else:
-                    _LOGGER.debug(f"Could not convert {data.state} to float.")
+                    _LOGGER.debug(f'Could not convert {data.state} to float.')
             except:
                 pass
 
     async def async_added_to_hass(self) -> None:
         state = await super().async_get_last_state()
-        _LOGGER.debug("last state of %s = %s", self._attr_name, state)
+        _LOGGER.debug('last state of %s = %s', self._attr_name, state)
         if state:
             self._state = float(state.state)
             self._avg.imported_average = float(state.state)
 
     @property
     def device_info(self):
-        return {"identifiers": {(DOMAIN, self.hub.hub_id, POWERCONTROLS)}}
+        return {'identifiers': {(DOMAIN, self.hub.hub_id, POWERCONTROLS)}}
 
     @property
     def unique_id(self):
         """Return a unique ID to use for this sensor."""
-        return f"{DOMAIN}_{self._entry_id}_{ex.nametoid(self._attr_name)}"
-
+        return f'{DOMAIN}_{self._entry_id}_{ex.nametoid(self._attr_name)}'
