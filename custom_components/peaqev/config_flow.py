@@ -20,7 +20,8 @@ from custom_components.peaqev.configflow.config_flow_validation import \
 from custom_components.peaqev.peaqservice.powertools.power_canary.const import \
     FUSES_LIST
 from custom_components.peaqev.peaqservice.util.constants import (
-    CAUTIONHOURTYPE_NAMES, TYPELITE, CautionHourType, SPOTPRICE_VALUETYPES)
+    CAUTIONHOURTYPE_NAMES, SPOTPRICE_VALUETYPES, TYPELITE, CautionHourType)
+
 from .const import DOMAIN  # pylint:disable=unused-import
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
