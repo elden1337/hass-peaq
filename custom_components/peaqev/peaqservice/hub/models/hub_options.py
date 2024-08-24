@@ -1,16 +1,9 @@
 from dataclasses import dataclass, field
 from typing import List
 
+from peaqevcore.common.spotprice.models.spotprice_type import SpotPriceType
 
-class OptionsComparer:
-    def compare(self, other) -> list:
-        diff = []
-        for key, value in self.__dict__.items():
-            if key not in other.__dict__.keys():
-                diff.append(key)
-            elif value != other.__dict__[key]:
-                diff.append(key)
-        return diff
+from custom_components.peaqev.peaqservice.util.options_comparer import OptionsComparer
 
 
 @dataclass
@@ -21,6 +14,7 @@ class Price(OptionsComparer):
     cautionhour_type: str = ''
     dynamic_top_price: bool = False
     custom_sensor: str = None
+    spotprice_type: SpotPriceType = SpotPriceType.Auto
 
 
 @dataclass

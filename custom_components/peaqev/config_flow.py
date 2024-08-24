@@ -20,8 +20,7 @@ from custom_components.peaqev.configflow.config_flow_validation import \
 from custom_components.peaqev.peaqservice.powertools.power_canary.const import \
     FUSES_LIST
 from custom_components.peaqev.peaqservice.util.constants import (
-    CAUTIONHOURTYPE_NAMES, TYPELITE, CautionHourType)
-
+    CAUTIONHOURTYPE_NAMES, TYPELITE, CautionHourType, SPOTPRICE_VALUETYPES)
 from .const import DOMAIN  # pylint:disable=unused-import
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 
@@ -221,6 +220,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
 
         _priceaware = await self._get_existing_param('priceaware', False)
         _custompricesensor = await self._get_existing_param('custom_price_sensor', '')
+        _spotprice_type = await self._get_existing_param('spotprice_type', 'Auto')
         _topprice = await self._get_existing_param('absolute_top_price', 0)
         _minprice = await self._get_existing_param('min_priceaware_threshold_price', 0)
         _hourtype = await self._get_existing_param('cautionhour_type', CautionHourType.INTERMEDIATE.value)
@@ -234,6 +234,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             data_schema=vol.Schema(
                 {
                     vol.Optional('priceaware', default=_priceaware):                   cv.boolean,
+                    vol.Optional(
+                        'spotprice_type',
+                        default=_spotprice_type,
+                    ): vol.In(SPOTPRICE_VALUETYPES),
                     vol.Optional('custom_price_sensor', default=_custompricesensor):   cv.string,
                     vol.Optional('dynamic_top_price', default=_dynamic_top_price):     cv.boolean,
                     vol.Optional('absolute_top_price', default=_topprice):             cv.positive_float,

@@ -6,12 +6,12 @@ import logging
 from homeassistant.config_entries import \
     ConfigEntry  # pylint: disable=import-error
 from homeassistant.core import HomeAssistant  # pylint: disable=import-error
+from peaqevcore.common.spotprice.models.spotprice_type import SpotPriceType
 
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.constants import TYPELITE
 from custom_components.peaqev.services import async_prepare_register_services
-
 from .const import DOMAIN, PLATFORMS
 from .peaqservice.chargertypes.models.chargertypes_enum import ChargerType
 from .peaqservice.hub.hub_factory import HubFactory
@@ -45,6 +45,7 @@ PRICE_CHANGES = [
     'cautionhours',
     '_startpeaks',
     'nonhours',
+    'spotprice_type'
 ]
 
 RELOAD_CHANGES = ['fuse_type', 'gain_loss', 'price_aware', 'name', 'powersensorincludescar', 'custom_price_sensor']
@@ -101,6 +102,13 @@ async def async_set_options(conf) -> HubOptions:
         options.nonhours = await async_get_existing_param(conf, 'nonhours', [])
     custom_sensor = await async_get_existing_param(conf, 'custom_price_sensor', None)
     options.price.custom_sensor = custom_sensor if custom_sensor and len(custom_sensor) > 2 else None
+
+    conf_spotprice_type:str = await async_get_existing_param(conf,'spotprice_type', 'Auto')
+    try:
+        options.price.spotprice_type = SpotPriceType(conf_spotprice_type)
+    except ValueError:
+        options.price.spotprice_type = SpotPriceType(conf_spotprice_type.lower())
+
     options.price.min_price = await async_get_existing_param(
         conf, 'min_priceaware_threshold_price', 0
     )

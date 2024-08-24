@@ -4,6 +4,7 @@
       "init": {
         "data": {
           "priceaware": "[%key:common::config_flow::data::priceaware%]",
+          "spotprice_type": "[%key:common::config_flow::data::spotprice_type%]",
           "custom_price_sensor": "[%key:common::config_flow::data::custom_price_sensor%]",
           "absolute_top_price": "[%key:common::config_flow::data::absolute_top_price%]",
           "dynamic_top_price": "[%key:common::config_flow::data::dynamic_top_price%]",
@@ -87,6 +88,7 @@
       "priceaware": {
         "data": {
           "priceaware": "[%key:common::config_flow::data::priceaware%]",
+          "spotprice_type": "[%key:common::config_flow::data::spotprice_type%]",
           "custom_price_sensor": "[%key:common::config_flow::data::custom_price_sensor%]",
           "absolute_top_price": "[%key:common::config_flow::data::absolute_top_price%]",
           "dynamic_top_price": "[%key:common::config_flow::data::dynamic_top_price%]",

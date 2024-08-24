@@ -1,12 +1,13 @@
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.const import CONF_NAME
+from peaqevcore.common.spotprice.models.spotprice_type import SpotPriceType
 from peaqevcore.services.locale.Locale import LOCALES
 
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     CHARGERTYPES
 from custom_components.peaqev.peaqservice.util.constants import (
-    CAUTIONHOURTYPE_NAMES, INSTALLATIONTYPES, CautionHourType)
+    CAUTIONHOURTYPE_NAMES, INSTALLATIONTYPES, CautionHourType, SPOTPRICE_VALUETYPES)
 
 TYPE_SCHEMA = vol.Schema(
     {
@@ -66,6 +67,10 @@ PRICEAWARE_HOURS_SCHEMA = vol.Schema(
 PRICEAWARE_SCHEMA = vol.Schema(
     {
         vol.Optional('priceaware', default=False): cv.boolean,
+        vol.Optional(
+                        'spotprice_type',
+                        default=SpotPriceType.Auto.value,
+                    ): vol.In(SPOTPRICE_VALUETYPES),
         vol.Optional('custom_price_sensor'): cv.string,
         vol.Optional('absolute_top_price'): cv.positive_float,
         vol.Optional('dynamic_top_price', default=False): cv.boolean,

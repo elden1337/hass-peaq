@@ -4,6 +4,7 @@
       "init": {
         "data": {
           "priceaware": "Price aware charging",
+          "spotprice_type": "Spot price provider (must be installed)",
           "custom_price_sensor": "(Optional) Custom price sensor",
           "absolute_top_price": "(Optional) Never charge over this price",
           "dynamic_top_price": "Top price based on current month average price (ignores set max-price)",
@@ -93,6 +94,7 @@
       "priceaware": {
         "data": {
           "priceaware": "Price aware charging (requires Nordpool or EnergiDataService)",
+          "spotprice_type": "Spot price provider (must be installed)",
           "custom_price_sensor": "(Optional) Custom price sensor",
           "absolute_top_price": "(Optional) Never charge over this price",
           "dynamic_top_price": "Top price based on current month average price (ignores set max-price)",

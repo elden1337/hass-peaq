@@ -60,7 +60,8 @@ class HubFactory:
             system=PeaqSystem.PeaqEv,
             test=False,
             is_active=hub.options.price.price_aware,
-            custom_sensor=hub.options.price.custom_sensor
+            custom_sensor=hub.options.price.custom_sensor,
+            spotprice_type=hub.options.price.spotprice_type,
         )
         hub.power = await PowerToolsFactory.async_create(hub)
         hub.events = HubEvents(hub, hub.state_machine)
