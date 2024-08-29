@@ -176,6 +176,8 @@ class Charger:
         elif _call_ok or self.model.unsuccessful_stop:
             await self.async_call_charger(CallTypes.Pause)
             await self.async_internal_state(ChargerStates.Pause, time.time())
+        else:
+            self._check_unsuccessful_stop()
 
     async def async_call_charger(self, command: CallTypes) -> None:
         try:
@@ -246,12 +248,17 @@ class Charger:
             self.model.running = False
             self.model.unsuccessful_stop = False
             _LOGGER.debug('Internal charger has been stopped')
-        elif time.time() - self.model.lastest_call_off > 20:
-            self.model.unsuccessful_stop = True
-            self.model.lastest_call_off = time.time()
-            log_once_per_minute(
-                f'Fail when trying to stop connected charger. Retrying stop-attempt...', 'warning'
-            )
+        else:
+            self._check_unsuccessful_stop()
+
+    def _check_unsuccessful_stop(self):
+        if time.time() - self.model.lastest_call_off > 20:
+            if self.model.running:
+                self.model.unsuccessful_stop = True
+                self.model.lastest_call_off = time.time()
+                log_once_per_minute(
+                    f'Fail when trying to stop connected charger. Retrying stop-attempt...', 'warning'
+                )
 
     async def async_do_update(self, calls_domain, calls_command, calls_params) -> bool:
         if self._charger.servicecalls.options.switch_controls_charger:
