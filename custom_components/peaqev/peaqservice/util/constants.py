@@ -1,7 +1,6 @@
 from peaqevcore.common.enums.cautionhourtype import CautionHourType
 from peaqevcore.common.spotprice.models.spotprice_type import SpotPriceType
 
-
 """NAMING CONSTANTS"""
 CHARGERCONTROLLER = 'Charger controller'
 HOURCONTROLLER = 'Hour controller'

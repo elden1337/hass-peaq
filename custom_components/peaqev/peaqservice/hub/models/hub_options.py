@@ -3,7 +3,8 @@ from typing import List
 
 from peaqevcore.common.spotprice.models.spotprice_type import SpotPriceType
 
-from custom_components.peaqev.peaqservice.util.options_comparer import OptionsComparer
+from custom_components.peaqev.peaqservice.util.options_comparer import \
+    OptionsComparer
 
 
 @dataclass

@@ -7,7 +7,8 @@ from peaqevcore.services.locale.Locale import LOCALES
 from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
     CHARGERTYPES
 from custom_components.peaqev.peaqservice.util.constants import (
-    CAUTIONHOURTYPE_NAMES, INSTALLATIONTYPES, CautionHourType, SPOTPRICE_VALUETYPES)
+    CAUTIONHOURTYPE_NAMES, INSTALLATIONTYPES, SPOTPRICE_VALUETYPES,
+    CautionHourType)
 
 TYPE_SCHEMA = vol.Schema(
     {
