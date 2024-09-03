@@ -64,6 +64,6 @@ class HubFactory:
             custom_sensor=hub.options.price.custom_sensor,
             spotprice_type=hub.options.price.spotprice_type,
         )
-        hub.power = await PowerToolsFactory.async_create(hub)
+        hub.power = await PowerToolsFactory.async_create(hub, observer)
         hub.events = HubEvents(hub, hub.state_machine)
         return hub

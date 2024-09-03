@@ -13,7 +13,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class PowerCanary(IPowerCanary):
-    def __init__(self, hub):
+    def __init__(self, hub, observer):
+        self._observer = observer
         super().__init__(hub, hub.options.fuse_type, hub.chargertype.servicecalls.options.allowupdatecurrent)
 
     @property
@@ -34,11 +35,11 @@ class PowerCanary(IPowerCanary):
 
     def check_current_percentage(self):
         if not self.alive:
-            _LOGGER.warning("PowerCanary is dead!")
-            self.hub.observer.broadcast(command=ObserverTypes.PowerCanaryDead)
+            _LOGGER.warning('PowerCanary is dead!')
+            self._observer.broadcast(command=ObserverTypes.PowerCanaryDead)
         if self.current_percentage >= self.model.warning_threshold:
-            _LOGGER.warning("PowerCanary is caution!")
-            self.hub.observer.broadcast(command=ObserverTypes.PowerCanaryWarning)
+            _LOGGER.warning('PowerCanary is caution!')
+            self._observer.broadcast(command=ObserverTypes.PowerCanaryWarning)
 
     @property
     def max_current_amp(self) -> int:

@@ -11,11 +11,11 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class GainLoss(IGainLoss):
-    def __init__(self, hub):
+    def __init__(self, hub, observer):
         super().__init__()
         self._hub = hub
-        self._hub.observer.add(ObserverTypes.MonthlyAveragePriceChanged, self._update_monthly_average)
-        self._hub.observer.add(ObserverTypes.DailyAveragePriceChanged, self._update_daily_average)
+        observer.add(ObserverTypes.MonthlyAveragePriceChanged, self._update_monthly_average)
+        observer.add(ObserverTypes.DailyAveragePriceChanged, self._update_daily_average)
 
     async def async_get_consumption(self, time_period: TimePeriods) -> float:
         try:
@@ -32,4 +32,3 @@ class GainLoss(IGainLoss):
             return float(cost.state)
         except AttributeError:
             return 0.0
-

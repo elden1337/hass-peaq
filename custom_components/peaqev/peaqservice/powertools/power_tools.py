@@ -13,10 +13,10 @@ from custom_components.peaqev.peaqservice.powertools.power_canary.power_canary i
 
 
 class PowerTools(IPowerTools):
-    def __init__(self, hub: HomeAssistantHub):
+    def __init__(self, hub: HomeAssistantHub, observer):
         self._hub = hub
-        self._power_canary = PowerCanary(hub=hub)
-        self._gain_loss = GainLoss(hub=hub)
+        self._power_canary = PowerCanary(hub=hub, observer=observer)
+        self._gain_loss = GainLoss(hub=hub, observer=observer)
 
     @property
     def power_canary(self) -> PowerCanary:

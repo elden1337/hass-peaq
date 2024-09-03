@@ -12,8 +12,8 @@ from custom_components.peaqev.peaqservice.powertools.power_tools import (
 
 class PowerToolsFactory:
     @staticmethod
-    async def async_create(hub: HomeAssistantHub) -> IPowerTools:
+    async def async_create(hub: HomeAssistantHub, observer) -> IPowerTools:
         if hub.options.peaqev_lite:
             return PowerToolsLite()
         else:
-            return PowerTools(hub)
+            return PowerTools(hub, observer)
