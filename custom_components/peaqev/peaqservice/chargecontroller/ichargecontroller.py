@@ -32,7 +32,7 @@ class IChargeController:
         self.model = ChargeControllerModel(
             charger_type=charger_type, charger_states=charger_states
         )
-        self.charger = Charger(controller=self)
+        self.charger = Charger(controller=self, observer=hub.observer)
         self.session = Session(self.charger)
         self.savings = SavingsController(self)
         self._setup_observers()

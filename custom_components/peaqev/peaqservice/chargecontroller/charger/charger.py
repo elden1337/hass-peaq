@@ -23,17 +23,18 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class Charger:
-    def __init__(self, controller):
+    def __init__(self, controller, observer):
+        self._observer = observer
         self.controller = controller
         self._chargerType = (
             controller.hub.chargertype
         )  # todo: should not have direct access. route through chargecontroller
         self.model = ChargerModel()
         self.helpers = ChargerHelpers(self)
-        self.controller.hub.observer.add(ObserverTypes.PowerCanaryDead, self.async_pause_charger)
-        self.controller.hub.observer.add(ObserverTypes.KillswitchDead, self.async_pause_charger)
-        self.controller.hub.observer.add(ObserverTypes.CarConnected, self.async_reset_session)
-        self.controller.hub.observer.add(ObserverTypes.ProcessCharger, self.async_charge)
+        self._observer.add(ObserverTypes.PowerCanaryDead, self.async_pause_charger)
+        self._observer.add(ObserverTypes.KillswitchDead, self.async_pause_charger)
+        self._observer.add(ObserverTypes.CarConnected, self.async_reset_session)
+        self._observer.add(ObserverTypes.ProcessCharger, self.async_charge)
 
     async def async_setup(self):
         pass
@@ -155,7 +156,7 @@ class Charger:
             self.model.session_active = False
             await self.async_call_charger(CallTypes.Off)
             await self.async_internal_state(ChargerStates.Stop)
-            await self.controller.hub.observer.async_broadcast(
+            await self._observer.async_broadcast(
                 ObserverTypes.UpdateChargerDone, True
             )
 
