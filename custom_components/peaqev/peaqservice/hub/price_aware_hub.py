@@ -19,7 +19,7 @@ _LOGGER = logging.getLogger(__name__)
 class PriceAwareHub(HomeAssistantHub):
     def __init__(self, hass: HomeAssistant, options: HubOptions, domain: str, observer: IObserver):
         super().__init__(hass, options, domain, observer)
-        self.max_min_controller = MaxMinController(self)
+        self.max_min_controller = MaxMinController(self, observer)
         self._scheduler_options_handler = SchedulerOptionsHandler(self)
 
     @property

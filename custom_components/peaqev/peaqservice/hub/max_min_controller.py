@@ -12,7 +12,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class MaxMinController:
-    def __init__(self, hub: HomeAssistantHub):
+    def __init__(self, hub: HomeAssistantHub, observer):
+        self._observer = observer
         self.hub: HomeAssistantHub = hub
         self.active: bool = hub.options.price.price_aware
         self.is_on:bool = False
@@ -21,13 +22,13 @@ class MaxMinController:
         self._max_min_limiter: float = 0
         self.override_max_charge: bool = False
         if not hub.options.peaqev_lite:
-            self.hub.observer.add(ObserverTypes.CarDisconnected, self.async_null_max_charge)
-            self.hub.observer.add(
+            self._observer.add(ObserverTypes.CarDisconnected, self.async_null_max_charge)
+            self._observer.add(
                 ObserverTypes.UpdateChargerDone, self.async_null_max_charge_done
             )
-            self.hub.observer.add(ObserverTypes.UpdateChargerEnabled, self.async_null_max_charge)
-            self.hub.observer.add(ObserverTypes.MaxMinLimiterChanged, self.async_update_maxmin_core)
-            self.hub.observer.add(ObserverTypes.ResetMaxMinChargeSensor, self.async_try_reset_max_charge_sensor)
+            self._observer.add(ObserverTypes.UpdateChargerEnabled, self.async_null_max_charge)
+            self._observer.add(ObserverTypes.MaxMinLimiterChanged, self.async_update_maxmin_core)
+            self._observer.add(ObserverTypes.ResetMaxMinChargeSensor, self.async_try_reset_max_charge_sensor)
 
 
     @property
@@ -58,7 +59,7 @@ class MaxMinController:
     @max_min_limiter.setter
     def max_min_limiter(self, val: float):
         self._max_min_limiter = val
-        self.hub.observer.broadcast(ObserverTypes.MaxMinLimiterChanged)
+        self._observer.broadcast(ObserverTypes.MaxMinLimiterChanged)
 
     async def async_override_max_charge(self, max_charge: int):
         """Overrides the max-charge with the input from frontend"""
