@@ -59,9 +59,7 @@ class IChargeController:
         pass
 
     @abstractmethod
-    async def async_get_status_connected(
-            self, charger_state=None
-    ) -> Tuple[ChargeControllerStates, bool]:
+    async def async_get_status_connected(self, charger_state=None) -> Tuple[ChargeControllerStates, bool]:
         pass
 
     @abstractmethod
@@ -225,7 +223,6 @@ class IChargeController:
 
         _LOGGER.error(f'async_get_status: {state} returning Error. {str(state)}')
         return ChargeControllerStates.Error, True
-
 
     async def async_get_status_outlet(self) -> Tuple[ChargeControllerStates, bool]:
         if not self.hub.enabled:

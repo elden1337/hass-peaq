@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import time
+from datetime import datetime
 from typing import TYPE_CHECKING, Tuple
 
 from peaqevcore.common.models.observer_types import ObserverTypes
@@ -82,6 +83,7 @@ class ChargeController(IChargeController):
                         await self.async_above_stopthreshold(),
                         self.hub.sensors.totalhourlyenergy.value > 0,
                         not await self.hub.async_free_charge(),
+                        datetime.now().minute < 59 #attempt to avoid unnecessary quick stops at end of hour.
                     ]
                 )]):
             return ChargeControllerStates.Stop
