@@ -122,9 +122,8 @@ class ChargeController(IChargeController):
 
     async def _aux_check_running_charger_mismatch(self, status_type: ChargeControllerStates) -> None:
         if self._aux_running_grace_timer.is_timeout():
-            _LOGGER.warning(
-                'Charger seems to be running without Peaqev controlling it. Attempting aux stop. If you wish to charge without Peaqev you need to disable it on the switch.'
-            )
+            if status_type == ChargeControllerStates.Charging:
+                _LOGGER.warning('Charger seems to be running without Peaqev controlling it. Attempting aux stop. If you wish to charge without Peaqev you need to disable it on the switch.')
             await self.hub.observer.async_broadcast(ObserverTypes.KillswitchDead)
             self._aux_running_grace_timer.reset()
         elif status_type in [
