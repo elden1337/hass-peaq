@@ -31,7 +31,7 @@ class Charger:
         self.model = ChargerModel()
         self.helpers = ChargerHelpers(self)
         self.controller.hub.observer.add(ObserverTypes.PowerCanaryDead, self.async_pause_charger)
-        self.controller.hub.observer.add(ObserverTypes.KillswitchDead, self.async_terminate_charger)
+        self.controller.hub.observer.add(ObserverTypes.KillswitchDead, self.async_pause_charger)
         self.controller.hub.observer.add(ObserverTypes.CarConnected, self.async_reset_session)
         self.controller.hub.observer.add(ObserverTypes.ProcessCharger, self.async_charge)
 
