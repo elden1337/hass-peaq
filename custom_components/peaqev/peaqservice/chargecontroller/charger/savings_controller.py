@@ -19,17 +19,18 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class SavingsController:
-    def __init__(self, chargecontroller: IChargeController):
+    def __init__(self, chargecontroller: IChargeController, observer):
+        self._observer = observer
         self.controller = chargecontroller
         self._prices: list = []
         self.service = SavingsService(
             peak_price=self.controller.hub.sensors.locale.data.price.value
         )  # todo: must be dynamic to adhere to tiered prices.
         if self.controller.hub.sensors.locale.data.price.is_active:
-            self.controller.hub.observer.add(ObserverTypes.CarConnected, self.async_enter)
-            self.controller.hub.observer.add(ObserverTypes.CarDisconnected, self.async_exit)
-            self.controller.hub.observer.add(ObserverTypes.UpdateChargerDone, self.async_exit)
-            self.controller.hub.observer.add(ObserverTypes.PricesChanged, self.async_update_prices)
+            self._observer.add(ObserverTypes.CarConnected, self.async_enter)
+            self._observer.add(ObserverTypes.CarDisconnected, self.async_exit)
+            self._observer.add(ObserverTypes.UpdateChargerDone, self.async_exit)
+            self._observer.add(ObserverTypes.PricesChanged, self.async_update_prices)
             self._enabled = True
         else:
             self._enabled = False

@@ -45,7 +45,8 @@ class HubFactory:
         hub.chargertype = await ChargerTypeFactory.async_create(hub.state_machine, hub.options)
         hub.sensors = await HubSensorsFactory.async_create(hub=hub)
         hub.chargecontroller = await ChargeControllerFactory.async_create(
-            hub,
+            hub=hub,
+            observer=observer,
             charger_states=hub.chargertype.chargerstates,
             charger_type=hub.chargertype.type,
         )

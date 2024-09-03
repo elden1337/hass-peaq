@@ -28,11 +28,11 @@ _LOGGER = logging.getLogger(__name__)
 
 class ChargeController(IChargeController):
     def __init__(
-            self, hub: HomeAssistantHub, charger_states: dict, charger_type: ChargerType
+            self, hub: HomeAssistantHub, observer, charger_states: dict, charger_type: ChargerType
     ):
         self._aux_running_grace_timer = WaitTimer(timeout=300, init_now=True)
         self.latest_init_check: float = time.time()
-        super().__init__(hub, charger_states, charger_type)
+        super().__init__(hub, observer, charger_states, charger_type)
 
     @property
     def status_string(self) -> str:
@@ -100,7 +100,7 @@ class ChargeController(IChargeController):
                     and self.hub.sensors.carpowersensor.value < 1
                     and await self.async_is_done(charger_state)
             ):
-                await self.hub.observer.async_broadcast(ObserverTypes.CarDone)
+                await self._observer.async_broadcast(ObserverTypes.CarDone)
                 return ChargeControllerStates.Done, False
             if await self._should_start_charging():
                 return ChargeControllerStates.Start, False
@@ -126,7 +126,7 @@ class ChargeController(IChargeController):
         if self._aux_running_grace_timer.is_timeout():
             if status_type == ChargeControllerStates.Charging:
                 _LOGGER.warning('Charger seems to be running without Peaqev controlling it. Attempting aux stop. If you wish to charge without Peaqev you need to disable it on the switch.')
-            await self.hub.observer.async_broadcast(ObserverTypes.KillswitchDead)
+            await self._observer.async_broadcast(ObserverTypes.KillswitchDead)
             self._aux_running_grace_timer.reset()
         elif status_type in [
             ChargeControllerStates.Idle,

@@ -27,14 +27,15 @@ _LOGGER = logging.getLogger(__name__)
 class IChargeController:
     """The interface for the charge controller"""
 
-    def __init__(self, hub, charger_states, charger_type):
+    def __init__(self, hub, observer, charger_states, charger_type):
         self.hub = hub
+        self._observer = observer
         self.model = ChargeControllerModel(
             charger_type=charger_type, charger_states=charger_states
         )
-        self.charger = Charger(controller=self, observer=hub.observer)
+        self.charger = Charger(controller=self, observer=observer)
         self.session = Session(self.charger)
-        self.savings = SavingsController(self)
+        self.savings = SavingsController(self, observer)
         self._setup_observers()
 
     async def async_setup(self):
@@ -135,7 +136,7 @@ class IChargeController:
                     )
                     self.model.status_type = status_type
                     if self.model.charger_type is not ChargerType.NoCharger: #todo: strategy should handle this
-                        await self.hub.observer.async_broadcast(ObserverTypes.ProcessCharger)
+                        await self._observer.async_broadcast(ObserverTypes.ProcessCharger)
                 await self._aux_check_running_charger_mismatch(status_type)
         except Exception as e:
             _LOGGER.debug(f'Error in async_set_status_type: {e}')
@@ -146,7 +147,7 @@ class IChargeController:
         _LOGGER.debug(f'async_check_broadcasting: {old_state} -> {new_state}')
         match new_state:
             case ChargeControllerStates.Idle:
-                await self.hub.observer.async_broadcast(ObserverTypes.CarDisconnected)
+                await self._observer.async_broadcast(ObserverTypes.CarDisconnected)
                 await self.session.async_reset(
                     getattr(
                         self.hub.sensors.locale.data.query_model,
@@ -155,18 +156,18 @@ class IChargeController:
                     )
                 )
                 if self.hub.charger_done:
-                    await self.hub.observer.async_broadcast(
+                    await self._observer.async_broadcast(
                         ObserverTypes.UpdateChargerDone, False
                     )
 
             case ChargeControllerStates.Done:
-                await self.hub.observer.async_broadcast(ObserverTypes.UpdateChargerDone, True)
+                await self._observer.async_broadcast(ObserverTypes.UpdateChargerDone, True)
             case ChargeControllerStates.Charging | ChargeControllerStates.Start | ChargeControllerStates.Stop | ChargeControllerStates.Connected:
                 if old_state in [
                     ChargeControllerStates.Idle,
                     ChargeControllerStates.Disabled,
                 ]:
-                    await self.hub.observer.async_broadcast(ObserverTypes.CarConnected)
+                    await self._observer.async_broadcast(ObserverTypes.CarConnected)
                 if old_state == ChargeControllerStates.Stop:
                     _LOGGER.debug('Car is allowed to start charging now.')
             case _:
@@ -196,7 +197,7 @@ class IChargeController:
 
             if self.hub.sensors.power.killswitch.is_dead:
                 _LOGGER.debug('Killswitch is dead. Returning Error-state.')
-                await self.hub.observer.async_broadcast(ObserverTypes.KillswitchDead)
+                await self._observer.async_broadcast(ObserverTypes.KillswitchDead)
                 return ChargeControllerStates.Error, True
 
             if not state in self.model.charger_states[ChargeControllerStates.Idle] and self.hub.charger_done:
@@ -269,7 +270,7 @@ class IChargeController:
 
     async def async_is_done_return(self, state: bool) -> bool:
         if state and self.hub.sensors.charger_done is False:
-            await self.hub.observer.async_broadcast(ObserverTypes.UpdateChargerDone, True)
+            await self._observer.async_broadcast(ObserverTypes.UpdateChargerDone, True)
         return state
 
     def __debug_log(self, message: str): #todo: move to extensions or shared
@@ -278,13 +279,13 @@ class IChargeController:
             self.model.latest_debuglog = time.time()
 
     def _setup_observers(self) -> None:
-        self.hub.observer.add(
+        self._observer.add(
             ObserverTypes.UpdateLatestChargerStart, self.async_update_latest_charger_start
         )
-        self.hub.observer.add(
+        self._observer.add(
             ObserverTypes.UpdateChargerEnabled, self.async_update_latest_charger_start
         )
-        self.hub.observer.add(ObserverTypes.HubInitialized, self._check_initialized)
-        self.hub.observer.add(ObserverTypes.TimerActivated, self.async_set_status)
-        self.hub.observer.add(ObserverTypes.AuxStopChanged, self.async_set_status)
-        self.hub.observer.add(ObserverTypes.ProcessChargeController, self.async_set_status)
+        self._observer.add(ObserverTypes.HubInitialized, self._check_initialized)
+        self._observer.add(ObserverTypes.TimerActivated, self.async_set_status)
+        self._observer.add(ObserverTypes.AuxStopChanged, self.async_set_status)
+        self._observer.add(ObserverTypes.ProcessChargeController, self.async_set_status)
