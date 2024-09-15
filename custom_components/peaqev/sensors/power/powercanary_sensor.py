@@ -54,7 +54,9 @@ class PowerCanaryStatusSensor(PowerCanaryDevice):
 
     async def async_update(self) -> None:
         if self.hub.is_initialized:
-            self._state = self.hub.power.power_canary.state_string  # todo: composition
+            ret = self.hub.power.power_canary.state_string  # todo: composition
+            if ret != self._state:
+                self._state = ret
 
 
 class PowerCanaryPercentageSensor(PowerCanaryDevice):
