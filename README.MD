@@ -1,3 +1,20 @@
+> 2024-10-08
+> 
+> Dear Peaquser,
+> 
+> After three years of open source in these projects, I am about to set sail on the next leg of my journey.
+> I will soon start a job where I will work with adjacent technology, and thus will seize to update the repos with new features.
+> This is to not be questioned regarding IP going forward.
+> 
+> For the time being I want to let the codebases stay online, and will accept pull requests and occasionally do patch updates and bug fixes to > keep the solutions running.
+> However, I will not take part in general feature discussions any longer, starting from 2024-11-01.
+> 
+> If you wish you may fork the projects and create features that you send me as pull requests. That way we can keep the flow going without > my direct interference in the inventions.
+> For any usage not covered by the general download by hacs, look towards the license on the repos for guidance. Here's a snapshot of what > the licenses on my code requires: https://creativecommons.org/licenses/by-nc-nd/4.0/deed.en
+> 
+> Thanks for all engagement and happy to have helped a bunch of people with this spare time invention of mine. 
+> //Magnus
+
 <img src="https://raw.githubusercontent.com/creativecommons/cc-assets/main/license_badges/big/by_nc_nd.svg" width="90">
 
 [![Peaq_downloads](https://img.shields.io/github/downloads/elden1337/hass-peaq/total)](https://github.com/elden1337/hass-peaq)
