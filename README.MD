@@ -7,7 +7,7 @@
 > This is to not be questioned regarding IP going forward.
 > 
 > For the time being I want to let the codebases stay online, and will accept pull requests and occasionally do patch updates and bug fixes to > keep the solutions running.
-> However, I will not take part in general feature discussions any longer, starting from 2024-11-01.
+> However, I will not take part in general feature discussions any longer, starting from 2024-12-01.
 > 
 > If you wish you may fork the projects and create features that you send me as pull requests. That way we can keep the flow going without > my direct interference in the inventions.
 > For any usage not covered by the general download by hacs, look towards the license on the repos for guidance. Here's a snapshot of what > the licenses on my code requires: https://creativecommons.org/licenses/by-nc-nd/4.0/deed.en
