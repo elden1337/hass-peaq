@@ -81,4 +81,4 @@ class PeaqUtilitySensor(UtilityMeterSensor):
     @property
     def native_value(self):
         """Return the state of the sensor."""
-        return self._state
+        return self._attr_native_value
