@@ -4,10 +4,11 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
+
 import logging
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
-from homeassistant.const import UnitOfElectricCurrent, PERCENTAGE
+from homeassistant.const import PERCENTAGE, UnitOfElectricCurrent
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
