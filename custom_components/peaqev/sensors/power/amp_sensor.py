@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 import logging
 
 from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.const import ELECTRIC_CURRENT_AMPERE
+from homeassistant.const import UnitOfElectricCurrent
 
 from custom_components.peaqev.peaqservice.util.constants import ALLOWEDCURRENT
 from custom_components.peaqev.sensors.sensorbase import PowerDevice
@@ -17,7 +17,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class PeaqAmpSensor(PowerDevice):
     device_class = SensorDeviceClass.ENERGY
-    unit_of_measurement = ELECTRIC_CURRENT_AMPERE
+    unit_of_measurement = UnitOfElectricCurrent.AMPERE
 
     def __init__(self, hub: HomeAssistantHub, entry_id):
         name = f"{hub.hubname} {ALLOWEDCURRENT}"

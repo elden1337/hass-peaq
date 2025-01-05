@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 import logging
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
-from homeassistant.const import ELECTRIC_CURRENT_AMPERE, PERCENTAGE
+from homeassistant.const import UnitOfElectricCurrent, PERCENTAGE
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
@@ -93,7 +93,7 @@ class PowerCanaryPercentageSensor(PowerCanaryDevice):
 
 class PowerCanaryMaxAmpSensor(PowerCanaryDevice):
     device_class = SensorDeviceClass.ENERGY
-    unit_of_measurement = ELECTRIC_CURRENT_AMPERE
+    unit_of_measurement = UnitOfElectricCurrent.AMPERE
 
     def __init__(self, hub: HomeAssistantHub, entry_id, phases: int):
         name = f"{hub.hubname} {POWERCANARY} allowed amps {phases}-phase"

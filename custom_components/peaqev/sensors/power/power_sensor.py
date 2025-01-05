@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 import logging
 
 from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.const import POWER_WATT
+from homeassistant.const import UnitOfPower
 
 from custom_components.peaqev.sensors.sensorbase import PowerDevice
 
@@ -16,7 +16,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class PeaqPowerSensor(PowerDevice):
     device_class = SensorDeviceClass.POWER
-    unit_of_measurement = POWER_WATT
+    unit_of_measurement = UnitOfPower.WATT
 
     def __init__(self, hub: HomeAssistantHub, entry_id):
         name = f'{hub.hubname} {hub.sensors.power.total.name}'  # todo: composition

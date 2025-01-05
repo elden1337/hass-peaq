@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 import logging
 
 from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.const import ENERGY_KILO_WATT_HOUR
+from homeassistant.const import UnitOfEnergy
 from homeassistant.helpers.restore_state import RestoreEntity
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
@@ -20,7 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class PeaqPeakSensor(SensorBase, RestoreEntity):
     device_class = SensorDeviceClass.ENERGY
-    unit_of_measurement = ENERGY_KILO_WATT_HOUR
+    unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
 
     def __init__(self, hub:HomeAssistantHub, entry_id):
         self._name = f'{hub.hubname} peak'

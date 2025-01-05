@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 import logging
 
 from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.const import ENERGY_KILO_WATT_HOUR
+from homeassistant.const import UnitOfEnergy
 
 from custom_components.peaqev.peaqservice.util.constants import PREDICTION
 from custom_components.peaqev.sensors.sensorbase import PowerDevice
@@ -17,7 +17,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class PeaqPredictionSensor(PowerDevice):
     device_class = SensorDeviceClass.ENERGY
-    unit_of_measurement = ENERGY_KILO_WATT_HOUR
+    unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
 
     def __init__(self, hub: HomeAssistantHub, entry_id):
         name = f"{hub.hubname} {PREDICTION}"

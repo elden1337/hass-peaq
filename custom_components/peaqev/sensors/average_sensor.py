@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 import logging
 
 from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.const import POWER_WATT
+from homeassistant.const import UnitOfPower
 
 import custom_components.peaqev.peaqservice.util.extensionmethods as ex
 from custom_components.peaqev.const import DOMAIN
@@ -24,7 +24,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class PeaqAverageSensor(SensorEntity, RestoreEntity):
     device_class = SensorDeviceClass.POWER
-    unit_of_measurement = POWER_WATT
+    unit_of_measurement = UnitOfPower.WATT
 
     def __init__(self, hub: HomeAssistantHub, entry_id, name, max_age):
         self.hub = hub
