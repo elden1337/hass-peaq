@@ -63,7 +63,7 @@ async def async_setup_utility_meters(hub, hass, utility_meters: list) -> list:
     for meter in utility_meters:
         ret.append(
             await async_create_single_utility(
-                hub, meter.sensor, meter.meter_type, meter.entry_id
+                hass, hub, meter.sensor, meter.meter_type, meter.entry_id
             )
         )
     return ret
@@ -76,7 +76,7 @@ async def async_setup(hub, config, hass, async_add_entities):
     average_sensors = []
     sensors = [ChargerControllerSensor(hub, config.entry_id)]
 
-    gainloss_dict = await async_add_gainloss_sensors(hub, config)
+    gainloss_dict = await async_add_gainloss_sensors(hass, hub, config)
     sensors.extend(gainloss_dict['sensors'])
     utility_meters.extend(gainloss_dict['utility_meters'])
 
@@ -132,11 +132,9 @@ async def async_setup(hub, config, hass, async_add_entities):
         else:
             sensors.append(PeaqPowerSensor(hub, config.entry_id))
 
-        #filters_min = await async_set_filters(hub, timedelta(minutes=2 if await hub.sensors.locale.data.async_is_quarterly() else 5))
         average_sensors.append(
             PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION, 120 if await hub.sensors.locale.data.async_is_quarterly() else 300)
         )
-        # filters24 = await async_set_filters(hub, timedelta(hours=24))
         average_sensors.append(
             PeaqAverageSensor(hub, config.entry_id, AVERAGECONSUMPTION_24H, 86400)
         )
@@ -154,6 +152,7 @@ async def async_setup(hub, config, hass, async_add_entities):
             if hub.chargertype.type is not ChargerType.NoCharger:
                 integration_sensors.append(
                     PeaqIntegrationSensor(
+                        hass,
                         hub,
                         f'sensor.{DOMAIN}_{hub.sensors.power.house.id}',
                         f'{ex.nametoid(CONSUMPTION_INTEGRAL_NAME)}',
@@ -162,6 +161,7 @@ async def async_setup(hub, config, hass, async_add_entities):
                 )
             integration_sensors.append(
                 PeaqIntegrationSensor(
+                    hass,
                     hub,
                     hub.sensors.power.total.entity,
                     f'{ex.nametoid(CONSUMPTION_TOTAL_NAME)}',
@@ -171,6 +171,7 @@ async def async_setup(hub, config, hass, async_add_entities):
         else:
             integration_sensors.append(
                 PeaqIntegrationSensor(
+                    hass,
                     hub,
                     hub.sensors.power.house.entity,
                     f'{ex.nametoid(CONSUMPTION_INTEGRAL_NAME)}',
@@ -179,6 +180,7 @@ async def async_setup(hub, config, hass, async_add_entities):
             )
             integration_sensors.append(
                 PeaqIntegrationSensor(
+                    hass,
                     hub,
                     f'sensor.{DOMAIN}_{hub.sensors.power.total.id}',
                     f'{ex.nametoid(CONSUMPTION_TOTAL_NAME)}',
@@ -220,7 +222,7 @@ async def async_add_power_canary_sensors(hub, config) -> list:
     return ret
 
 
-async def async_add_gainloss_sensors(hub, config) -> dict:
+async def async_add_gainloss_sensors(hass, hub, config) -> dict:
     """implement gainloss sensors"""
     ret = {'sensors': [], 'utility_meters': []}
     if all(
@@ -234,7 +236,7 @@ async def async_add_gainloss_sensors(hub, config) -> dict:
         ret['sensors'].append(GainLossSensor(hub, config.entry_id, TimePeriods.Monthly))
         ret['sensors'].append(PeaqPowerCostSensor(hub, config.entry_id))
         ret['sensors'].append(
-            PeaqIntegrationCostSensor(hub, ENERGY_COST_INTEGRAL, config.entry_id)
+            PeaqIntegrationCostSensor(hass, hub, ENERGY_COST_INTEGRAL, config.entry_id)
         )
         ret['utility_meters'].append(
             UtilityMeterDTO(
