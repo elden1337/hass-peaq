@@ -18,13 +18,14 @@ from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
 
 
 class PeaqIntegrationCostSensor(IntegrationSensor):
-    def __init__(self, hub: HomeAssistantHub, name, entry_id):
+    def __init__(self, hass, hub: HomeAssistantHub, name, entry_id):
         self._entry_id = entry_id
         self.hub = hub
         self._attr_name = f'{self.hub.hubname} {name}'
         self._attr_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
 
         super().__init__(
+            hass=hass,
             integration_method=METHOD_TRAPEZOIDAL,
             name=self._attr_name,
             round_digits=5,
@@ -60,13 +61,14 @@ class PeaqIntegrationCostSensor(IntegrationSensor):
 
 
 class PeaqIntegrationSensor(IntegrationSensor):
-    def __init__(self, hub, sensor, name, entry_id):
+    def __init__(self, hass, hub, sensor, name, entry_id):
         self._entry_id = entry_id
         self.hub = hub
         self._attr_name = f'{self.hub.hubname} {name}'
         self._attr_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
 
         super().__init__(
+            hass=hass,
             integration_method=METHOD_TRAPEZOIDAL,
             name=self._attr_name,
             round_digits=2,
