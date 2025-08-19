@@ -35,12 +35,13 @@ class UtilityMeterDTO:
     entry_id: any
 
 
-async def async_create_single_utility(hub: HomeAssistantHub, sensor: any, meter_type: TimePeriods, entry_id: any):
+async def async_create_single_utility(hass, hub: HomeAssistantHub, sensor: any, meter_type: TimePeriods, entry_id: any):
     name = f"{hub.hubname} {sensor} {meter_type.value.lower()}"
     source = f"sensor.{DOMAIN.lower()}_{sensor}"
     this_sensor = f"{source}_{meter_type.value.lower()}"
     unique_id = f"{DOMAIN}_{entry_id}_{nametoid(name)}"
     params = {
+        "hass": hass,
         "source_entity": source,
         "name": name,
         "meter_type": meter_type.value,
