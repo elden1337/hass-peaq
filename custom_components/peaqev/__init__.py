@@ -69,7 +69,14 @@ async def async_update_entry(hass: HomeAssistant, config_entry: ConfigEntry):
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    return await hass.config_entries.async_unload_platforms(config_entry, PLATFORMS)
+    unloaded = await hass.config_entries.async_unload_platforms(config_entry, PLATFORMS)
+    if unloaded:
+        domain_data = hass.data.get(DOMAIN, {})
+        domain_data.pop('hub', None)
+        domain_data.pop(config_entry.entry_id, None)
+        if not domain_data:
+            hass.data.pop(DOMAIN, None)
+    return unloaded
 
 
 async def async_set_options(conf) -> HubOptions:

@@ -1,4 +1,4 @@
-peaqevcore==19.11.2
+peaqevcore==19.11.4
 flake8
 homeassistant==2026.7.1
 isort
