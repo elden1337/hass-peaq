@@ -16,5 +16,5 @@ class ObserverTest(IObserver):
         if await async_iscoroutine(func):
             await self.async_call_func(func=func, command=command),
         else:
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             await loop.run_in_executor(None, self._call_func, func, command)

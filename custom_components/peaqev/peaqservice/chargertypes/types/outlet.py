@@ -46,7 +46,7 @@ class SmartOutlet(IChargerType):
                 options=self.servicecalls_options,
             )
             return True
-        except Exception:
+        except Exception:  # noqa: broad-except
             _LOGGER.error(f"Could not validate setup for {self.domain_name}.")
         return False
 

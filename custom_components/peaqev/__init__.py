@@ -8,6 +8,8 @@ from homeassistant.config_entries import \
 from homeassistant.core import HomeAssistant  # pylint: disable=import-error
 from peaqevcore.common.spotprice.models.spotprice_type import SpotPriceType
 
+from typing import Any
+
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
 from custom_components.peaqev.peaqservice.util.constants import TYPELITE
@@ -135,5 +137,5 @@ async def async_set_options(conf) -> HubOptions:
     return options
 
 
-async def async_get_existing_param(conf, parameter: str, default_val: any):
+async def async_get_existing_param(conf, parameter: str, default_val: Any):
     return conf.options.get(parameter, conf.data.get(parameter, default_val))

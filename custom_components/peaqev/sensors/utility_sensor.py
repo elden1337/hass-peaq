@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
@@ -32,10 +32,10 @@ class UtilityMeterDTO:
     visible_default: bool
     sensor: str
     meter_type: TimePeriods
-    entry_id: any
+    entry_id: Any
 
 
-async def async_create_single_utility(hass, hub: HomeAssistantHub, sensor: any, meter_type: TimePeriods, entry_id: any):
+async def async_create_single_utility(hass, hub: HomeAssistantHub, sensor: Any, meter_type: TimePeriods, entry_id: Any):
     name = f"{hub.hubname} {sensor} {meter_type.value.lower()}"
     source = f"sensor.{DOMAIN.lower()}_{sensor}"
     this_sensor = f"{source}_{meter_type.value.lower()}"

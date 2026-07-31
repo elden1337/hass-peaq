@@ -65,7 +65,7 @@ class IChargerType:
 
             try:
                 await self.async_set_sensors()
-            except Exception:
+            except Exception:  # noqa: broad-except
                 return False
 
         await self.async_set_servicecalls(
