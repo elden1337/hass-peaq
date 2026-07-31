@@ -17,7 +17,10 @@ from custom_components.peaqev.peaqservice.util.constants import (CHARGER,
 
 
 def _checkchargerparams(calls) -> bool:
-    return len(calls[PARAMS][CHARGER]) > 0 and len(calls[PARAMS][CHARGERID]) > 0
+    params = calls.get(PARAMS, {})
+    charger = params.get(CHARGER, '')
+    chargerid = params.get(CHARGERID, '')
+    return len(charger) > 0 and len(chargerid) > 0
 
 
 async def async_set_chargerparams(calls, amps: int) -> dict:
