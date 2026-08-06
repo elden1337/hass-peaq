@@ -268,17 +268,19 @@ async def test_savingscontroller_status_property(mock_hub):
     mock_controller.hub = mock_hub
     mock_controller.hub.sensors.locale.data.price.is_active = True
     savings = SavingsController(mock_controller)
-    assert savings.status is not None
+    assert isinstance(savings.status, SavingsStatus)
 
 
 @pytest.mark.asyncio
 async def test_savingscontroller_is_on_property(mock_hub):
     """Test is_on property."""
+    from peaqevcore.services.savings.savings_status import SavingsStatus
     mock_controller = MagicMock()
     mock_controller.hub = mock_hub
     mock_controller.hub.sensors.locale.data.price.is_active = True
     savings = SavingsController(mock_controller)
     # is_on depends on status being Collecting
+    assert isinstance(savings.is_on, bool)
 
 
 @pytest.mark.asyncio
@@ -288,6 +290,6 @@ async def test_savingscontroller_savings_properties(mock_hub):
     mock_controller.hub = mock_hub
     mock_controller.hub.sensors.locale.data.price.is_active = True
     savings = SavingsController(mock_controller)
-    assert savings.savings_peak is not None
-    assert savings.savings_trade is not None
-    assert savings.savings_total is not None
+    assert isinstance(savings.savings_peak, (int, float))
+    assert isinstance(savings.savings_trade, (int, float))
+    assert isinstance(savings.savings_total, (int, float))

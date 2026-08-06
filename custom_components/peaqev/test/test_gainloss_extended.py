@@ -115,7 +115,8 @@ async def test_gainloss_check_invalid_states_unavailable():
 @pytest.mark.asyncio
 async def test_gainloss_check_invalid_states_invalid_list():
     """Test that INVALID_STATES contains expected values."""
-    assert "unknown" in INVALID_STATES or "unavailable" in INVALID_STATES
+    assert "unknown" in INVALID_STATES
+    assert "unavailable" in INVALID_STATES
 
 
 @pytest.mark.asyncio
@@ -155,6 +156,7 @@ async def test_normalize_numbers_typeerror():
     """Test normalize_numbers TypeError path."""
     avg, cost = IGainLoss.normalize_numbers(None, "invalid")
     # Should return as-is when TypeError occurs
+    assert avg is None and cost == "invalid"
 
 
 @pytest.mark.asyncio

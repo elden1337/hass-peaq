@@ -146,8 +146,8 @@ async def test_smoothaverage_remove_from_list_min_samples():
     sa.add_reading(100)
     sa.add_reading(200)
     time.sleep(1.5)
-    # Should not remove because we have exactly 2 samples
-    assert sa.samples >= 1
+    # After sleep, first sample should be removed due to age (max_age=1), leaving 1 sample
+    assert sa.samples == 1
 
 
 # --- PowerCanaryModel Tests ---

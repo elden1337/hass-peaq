@@ -1,6 +1,6 @@
 """Tests for ChargeController: threshold logic, state transitions, initialization."""
 import time
-from unittest.mock import MagicMock, AsyncMock, PropertyMock
+from unittest.mock import MagicMock, AsyncMock, PropertyMock, patch
 
 import pytest
 from peaqevcore.common.models.observer_types import ObserverTypes
@@ -344,7 +344,19 @@ async def test_defer_start():
     """Test defer_start helper function."""
     non_hours = []
     result = defer_start(non_hours)
-    assert result == False  # Should not defer with empty non_hours (next hour not in non_hours)
+    assert result == False  # Should not defer with empty non_hours
+
+
+@pytest.mark.asyncio
+async def test_defer_start_with_non_hours():
+    """Test defer_start returns True when next hour is in non_hours."""
+    import datetime
+    # Mock current time to be at a specific hour
+    with patch('custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers.datetime') as mock_dt:
+        mock_dt.now.return_value = datetime.datetime(2026, 7, 31, 14, 50, 0)  # 2:50 PM
+        non_hours = [15]  # Next hour (3 PM) is in non_hours
+        result = defer_start(non_hours)
+        assert result == True  # Should be True because we're at minute 50 and next hour (3 PM) is in non_hours
 
 
 # --- IChargeController Tests ---
@@ -397,3 +409,27 @@ async def test_constants_defined():
     assert WAITING_FOR_POWER == 'Waiting for power-reading...'
     assert DONETIMEOUT == 180
     assert DEBUGLOG_TIMEOUT == 60
+
+
+@pytest.mark.asyncio
+async def test_chargecontroller_factory_creates_correct_type():
+    """Test factory creates correct controller type based on peaqev_lite setting."""
+    # Test full controller
+    hub = MockHub()
+    hub.options.peaqev_lite = False
+    charger_states = {
+        ChargeControllerStates.Done: ['done'],
+        ChargeControllerStates.Idle: ['idle'],
+    }
+    controller = await ChargeControllerFactory.async_create(
+        hub, charger_states, ChargerType.Easee
+    )
+    assert isinstance(controller, ChargeController)
+    
+    # Test lite controller
+    hub_lite = MockHub()
+    hub_lite.options.peaqev_lite = True
+    controller_lite = await ChargeControllerFactory.async_create(
+        hub_lite, charger_states, ChargerType.NoCharger
+    )
+    assert isinstance(controller_lite, ChargeControllerLite)
