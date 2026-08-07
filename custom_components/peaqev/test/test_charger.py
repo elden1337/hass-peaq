@@ -1,21 +1,18 @@
 """Tests for Charger class: state management, service calls, session handling."""
 import time
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from peaqevcore.common.enums.calltype_enum import CallTypes
-from peaqevcore.common.models.observer_types import ObserverTypes
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import Charger
-from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import ChargerModel
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import ChargerStates
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import call_ok
-from custom_components.peaqev.peaqservice.chargecontroller.charger.savings_controller import SavingsController
-from custom_components.peaqev.test.conftest import (
-    MockChargeController, MockChargertype, MockHub, MockSensors
-)
-
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger import \
+    Charger
+from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import \
+    call_ok
+from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import \
+    ChargerModel
+from custom_components.peaqev.peaqservice.chargecontroller.charger.savings_controller import \
+    SavingsController
 
 # --- ChargerModel Tests ---
 
@@ -256,7 +253,7 @@ async def test_savingscontroller_subscribes_to_observer(mock_hub):
     mock_controller.hub = mock_hub
     mock_controller.hub.sensors.locale.data.price.is_active = True
     mock_hub.observer = MagicMock()
-    savings = SavingsController(mock_controller)
+    SavingsController(mock_controller)
     assert mock_hub.observer.add.call_count >= 3
 
 
@@ -274,7 +271,6 @@ async def test_savingscontroller_status_property(mock_hub):
 @pytest.mark.asyncio
 async def test_savingscontroller_is_on_property(mock_hub):
     """Test is_on property."""
-    from peaqevcore.services.savings.savings_status import SavingsStatus
     mock_controller = MagicMock()
     mock_controller.hub = mock_hub
     mock_controller.hub.sensors.locale.data.price.is_active = True

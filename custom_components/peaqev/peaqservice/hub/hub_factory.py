@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from peaqevcore.common.models.peaq_system import PeaqSystem
 from peaqevcore.common.spotprice.spotprice_factory import SpotPriceFactory
@@ -32,8 +35,10 @@ from custom_components.peaqev.peaqservice.powertools.powertools_factory import \
 
 class HubFactory:
     @staticmethod
-    async def async_create(hass: HomeAssistant, options: HubOptions, domain: str) -> HomeAssistantHub:
-        observer = Observer(hass)
+    async def async_create(
+        hass: HomeAssistant, options: HubOptions, domain: str, entry: ConfigEntry | None = None
+    ) -> HomeAssistantHub:
+        observer = Observer(hass, entry)
         if options.price.price_aware:
             hub = PriceAwareHub
         else:

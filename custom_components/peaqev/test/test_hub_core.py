@@ -1,17 +1,17 @@
 """Tests for Hub core models: HubModel, HubOptions, EventProperty."""
-import time
 from datetime import datetime, timedelta
 
 import pytest
-from peaqevcore.models.fuses import Fuses
 from peaqevcore.common.spotprice.models.spotprice_type import SpotPriceType
 
-from custom_components.peaqev.peaqservice.hub.models.event_property import EventProperty
+from custom_components.peaqev.peaqservice.hub.models.event_property import \
+    EventProperty
 from custom_components.peaqev.peaqservice.hub.models.hub_model import HubModel
-from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions, Price, Charger
-from custom_components.peaqev.peaqservice.util.options_comparer import OptionsComparer
+from custom_components.peaqev.peaqservice.hub.models.hub_options import (
+    Charger, HubOptions, Price)
+from custom_components.peaqev.peaqservice.util.options_comparer import \
+    OptionsComparer
 from custom_components.peaqev.test.conftest import MockHass
-
 
 # --- EventProperty Tests ---
 
@@ -199,7 +199,6 @@ async def test_price_default_values():
 
 @pytest.mark.asyncio
 async def test_price_with_values():
-    from peaqevcore.common.spotprice.models.spotprice_type import SpotPriceType
     price = Price(
         price_aware=True,
         min_price=1.5,

@@ -5,7 +5,7 @@ import time
 import traceback
 from datetime import datetime
 from functools import partial
-from typing import Callable, Any
+from typing import Any, Callable
 
 # Third party imports
 from homeassistant.core import (Event, EventStateChangedData, HomeAssistant,

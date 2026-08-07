@@ -1,12 +1,18 @@
 """Extended tests for Observer edge cases: throttling, sync broadcast, enum conversion, error paths."""
 import time
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from peaqevcore.common.models.observer_types import ObserverTypes
 
-from custom_components.peaqev.peaqservice.hub.observer.iobserver_coordinator import IObserver
-from custom_components.peaqev.peaqservice.hub.observer.models.command import Command
-from custom_components.peaqev.peaqservice.hub.observer.const import COMMAND_WAIT, TIMEOUT
+from custom_components.peaqev.peaqservice.hub.hub_factory import HubFactory
+from custom_components.peaqev.peaqservice.hub.observer.const import TIMEOUT
+from custom_components.peaqev.peaqservice.hub.observer.iobserver_coordinator import \
+    IObserver
+from custom_components.peaqev.peaqservice.hub.observer.models.command import \
+    Command
+from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import \
+    Observer
 from custom_components.peaqev.test.conftest import MockObserver
 
 
@@ -110,7 +116,7 @@ async def test_observer_broadcast_with_dict_async_argument(mock_observer):
 @pytest.mark.asyncio
 async def test_observer_command_expiration():
     """Test that commands expire after TIMEOUT seconds."""
-    observer = MockObserver()
+    MockObserver()
     cmd = Command(ObserverTypes.Test, expiration=time.time() - TIMEOUT - 1, argument=None)
     assert cmd.expiration < time.time()
 
@@ -118,7 +124,7 @@ async def test_observer_command_expiration():
 @pytest.mark.asyncio
 async def test_observer_command_not_expired():
     """Test that fresh commands haven't expired."""
-    observer = MockObserver()
+    MockObserver()
     cmd = Command(ObserverTypes.Test, expiration=time.time() + 100, argument=None)
     assert cmd.expiration > time.time()
 
@@ -271,3 +277,48 @@ async def test_observer_command_inequality_different_arg():
     cmd1 = Command(ObserverTypes.Test, time.time() + 100, "arg1")
     cmd2 = Command(ObserverTypes.Test, time.time() + 100, "arg2")
     assert cmd1 != cmd2
+
+
+# --- Observer lifecycle tests ---
+
+@pytest.mark.asyncio
+async def test_observer_cancels_its_interval_on_entry_unload():
+    """The dispatch interval must be tied to the config entry.
+
+    Options changes reload the entry, so an interval that outlives the unload
+    keeps dispatching against a dead hub, once per second, forever.
+    """
+    hass = MagicMock()
+    entry = MagicMock()
+    unsub = MagicMock()
+
+    with patch(
+        'custom_components.peaqev.peaqservice.hub.observer.observer_coordinator.async_track_time_interval',
+        return_value=unsub,
+    ):
+        Observer(hass, entry)
+
+    entry.async_on_unload.assert_called_once_with(unsub)
+
+
+@pytest.mark.asyncio
+async def test_hub_factory_passes_entry_to_observer():
+    """HubFactory has to hand the entry over, or the wiring above never happens."""
+    hass = MagicMock()
+    entry = MagicMock()
+    options = MagicMock()
+    options.price.price_aware = False
+
+    with (
+        patch(
+            'custom_components.peaqev.peaqservice.hub.hub_factory.Observer'
+        ) as mock_observer,
+        patch(
+            'custom_components.peaqev.peaqservice.hub.hub_factory.HomeAssistantHub'
+        ),
+        patch.object(HubFactory, 'async_setup', new_callable=AsyncMock) as mock_setup,
+    ):
+        await HubFactory.async_create(hass, options, 'peaqev', entry)
+
+    assert mock_observer.call_args.args == (hass, entry)
+    assert mock_setup.await_count == 1

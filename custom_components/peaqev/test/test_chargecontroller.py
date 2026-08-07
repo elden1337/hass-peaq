@@ -1,29 +1,26 @@
 """Tests for ChargeController: threshold logic, state transitions, initialization."""
 import time
-from unittest.mock import MagicMock, AsyncMock, PropertyMock, patch
+from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from peaqevcore.common.models.observer_types import ObserverTypes
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
-from peaqevcore.models.locale.enums.time_periods import TimePeriods
-from peaqevcore.models.phases import Phases
 
-from custom_components.peaqev.peaqservice.chargecontroller.ichargecontroller import IChargeController
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller import ChargeController
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_lite import ChargeControllerLite
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_factory import ChargeControllerFactory
+from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller import \
+    ChargeController
+from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_factory import \
+    ChargeControllerFactory
+from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import \
+    defer_start
+from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_lite import \
+    ChargeControllerLite
 from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelpers import (
-    _checkchargerparams, async_set_chargerparams
-)
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import defer_start
+    _checkchargerparams, async_set_chargerparams)
 from custom_components.peaqev.peaqservice.chargecontroller.const import (
-    INITIALIZING, WAITING_FOR_POWER, DONETIMEOUT, DEBUGLOG_TIMEOUT
-)
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType
-from custom_components.peaqev.test.conftest import (
-    MockHub, MockChargeController, MockChargertype, MockSensors
-)
-
+    DEBUGLOG_TIMEOUT, DONETIMEOUT, INITIALIZING, WAITING_FOR_POWER)
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import \
+    ChargerType
+from custom_components.peaqev.test.conftest import MockHub
 
 # --- ChargeControllerFactory Tests ---
 
@@ -211,8 +208,43 @@ async def test_chargecontroller_get_status_charging_stop(mock_hub):
     }
     controller = ChargeController(mock_hub, charger_states, ChargerType.Easee)
 
-    result = await controller.async_get_status_charging()
+    # stopping is suppressed during the last minute of the hour, so pin the clock
+    # rather than let the assertion depend on when the suite happens to run.
+    with patch(
+        'custom_components.peaqev.peaqservice.chargecontroller.chargecontroller.datetime'
+    ) as mock_dt:
+        mock_dt.now.return_value = datetime(2026, 7, 31, 14, 30, 0)
+        result = await controller.async_get_status_charging()
     assert result == ChargeControllerStates.Stop
+
+
+@pytest.mark.asyncio
+async def test_chargecontroller_get_status_charging_no_stop_at_end_of_hour(mock_hub):
+    """The stop is held back during the last minute of the hour."""
+    mock_hub.state_machine.states = {'sensor.power': MagicMock(state='100')}
+    mock_hub.power = MagicMock()
+    mock_hub.power.power_canary = MagicMock()
+    mock_hub.power.power_canary.alive = True
+    mock_hub.events.aux_stop = False
+    mock_hub.sensors.totalhourlyenergy.value = 50.0
+    mock_hub.async_free_charge = AsyncMock(return_value=False)
+    mock_hub.threshold.async_start = AsyncMock(return_value=50)
+    mock_hub.threshold.async_stop = AsyncMock(return_value=80)
+    mock_hub.async_get_predicted_energy = AsyncMock(return_value=100.0)
+    mock_hub.current_peak_dynamic = 100
+
+    charger_states = {
+        ChargeControllerStates.Done: ['done'],
+        ChargeControllerStates.Charging: ['charging'],
+    }
+    controller = ChargeController(mock_hub, charger_states, ChargerType.Easee)
+
+    with patch(
+        'custom_components.peaqev.peaqservice.chargecontroller.chargecontroller.datetime'
+    ) as mock_dt:
+        mock_dt.now.return_value = datetime(2026, 7, 31, 14, 59, 0)
+        result = await controller.async_get_status_charging()
+    assert result == ChargeControllerStates.Start
 
 
 @pytest.mark.asyncio
@@ -351,12 +383,27 @@ async def test_defer_start():
 async def test_defer_start_with_non_hours():
     """Test defer_start returns True when next hour is in non_hours."""
     import datetime
-    # Mock current time to be at a specific hour
+
+    # non_hours holds datetimes on the hour, the way peaqevcore hands them over
+    now = datetime.datetime(2026, 7, 31, 14, 50, 0)  # 2:50 PM
+    next_hour = now.replace(hour=15, minute=0, second=0, microsecond=0)
     with patch('custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers.datetime') as mock_dt:
-        mock_dt.now.return_value = datetime.datetime(2026, 7, 31, 14, 50, 0)  # 2:50 PM
-        non_hours = [15]  # Next hour (3 PM) is in non_hours
-        result = defer_start(non_hours)
-        assert result == True  # Should be True because we're at minute 50 and next hour (3 PM) is in non_hours
+        mock_dt.now.return_value = now
+        # Should be True because we're at minute 50 and next hour (3 PM) is a non-hour
+        assert defer_start([next_hour]) is True
+        # A non-hour later on is no reason to defer
+        assert defer_start([next_hour + datetime.timedelta(hours=1)]) is False
+
+
+@pytest.mark.asyncio
+async def test_defer_start_before_minute_50():
+    """Test defer_start only defers in the last ten minutes of the hour."""
+    import datetime
+    now = datetime.datetime(2026, 7, 31, 14, 49, 0)
+    next_hour = now.replace(hour=15, minute=0, second=0, microsecond=0)
+    with patch('custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers.datetime') as mock_dt:
+        mock_dt.now.return_value = now
+        assert defer_start([next_hour]) is False
 
 
 # --- IChargeController Tests ---

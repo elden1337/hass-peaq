@@ -3,7 +3,6 @@ import pytest
 
 from custom_components.peaqev import services
 
-
 # --- ServiceCalls Enum Tests ---
 
 @pytest.mark.asyncio

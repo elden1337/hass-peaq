@@ -30,7 +30,7 @@ class PeaqPredictionSensor(PowerDevice):
     def state(self):
         try:
             return round(float(self._state), 1)
-        except:
+        except Exception:
             return self._state
 
     @property

@@ -45,7 +45,7 @@ class SmoothAverage:
         t = time.time()
         try:
             floatval = float(val)
-        except:
+        except Exception:
             return
         if self._ignore is None or floatval > self._ignore:
             self._readings.append((int(t), floatval))

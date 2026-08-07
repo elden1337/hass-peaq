@@ -2,13 +2,12 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 from homeassistant.config_entries import \
     ConfigEntry  # pylint: disable=import-error
 from homeassistant.core import HomeAssistant  # pylint: disable=import-error
 from peaqevcore.common.spotprice.models.spotprice_type import SpotPriceType
-
-from typing import Any
 
 from custom_components.peaqev.peaqservice.hub.models.hub_options import \
     HubOptions
@@ -28,7 +27,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][conf.entry_id] = conf.data
     options = await async_set_options(conf)
-    hub = await HubFactory.async_create(hass, options, DOMAIN)
+    hub = await HubFactory.async_create(hass, options, DOMAIN, conf)
     hass.data[DOMAIN]['hub'] = hub
     await hub.async_setup()
 

@@ -24,7 +24,7 @@ class PeaqThresholdSensor(PowerDevice):
     def state(self):
         try:
             return round(self._state, 1)
-        except:
+        except Exception:
             return None
 
     @property
@@ -43,11 +43,11 @@ class PeaqThresholdSensor(PowerDevice):
         _stop = await self.hub.async_threshold_stop()
         try:
             self._start_threshold = round(_start, 1)
-        except:
+        except Exception:
             self._start_threshold = _start
         try:
             self._stop_threshold = round(_stop, 1)
-        except:
+        except Exception:
             self._stop_threshold = _stop
 
     @property

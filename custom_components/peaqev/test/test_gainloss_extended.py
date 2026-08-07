@@ -2,15 +2,12 @@
 import pytest
 from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
-from custom_components.peaqev.peaqservice.powertools.gainloss.igain_loss import IGainLoss
-from custom_components.peaqev.peaqservice.powertools.gainloss.gain_loss import GainLoss
 from custom_components.peaqev.peaqservice.powertools.gainloss.const import (
-    DAILY_ENERGY_SENSOR, MONTHLY_ENERGY_SENSOR,
-    DAILY_COST_SENSOR, MONTHLY_COST_SENSOR,
-    CONSUMPTION, COST, INVALID_STATES
-)
+    CONSUMPTION, COST, DAILY_COST_SENSOR, DAILY_ENERGY_SENSOR, INVALID_STATES,
+    MONTHLY_COST_SENSOR, MONTHLY_ENERGY_SENSOR)
+from custom_components.peaqev.peaqservice.powertools.gainloss.igain_loss import \
+    IGainLoss
 from custom_components.peaqev.test.conftest import MockGainLoss
-
 
 # --- async_state Tests ---
 

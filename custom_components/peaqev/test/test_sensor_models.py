@@ -4,10 +4,10 @@ from statistics import StatisticsError
 
 import pytest
 
-from custom_components.peaqev.peaqservice.hub.sensors.models.average import Average
-from custom_components.peaqev.peaqservice.hub.sensors.models.ema import EMA
 from custom_components.peaqev.peaqservice.hub.const import LookupKeys
-
+from custom_components.peaqev.peaqservice.hub.sensors.models.average import \
+    Average
+from custom_components.peaqev.peaqservice.hub.sensors.models.ema import EMA
 
 # --- Average Model Tests ---
 
@@ -53,7 +53,11 @@ async def test_average_max_age_expiration():
     avg = Average(max_age=1, max_samples=30)  # 1 second
     avg.add_reading(100)
     time.sleep(1.5)
-    # After expiration, value might change
+    # Ageing out is evaluated when the next reading arrives
+    assert len(avg.readings()) == 1
+    avg.add_reading(200)
+    assert len(avg.readings()) == 1
+    assert avg.average == 200
 
 
 # --- EMA Model Tests ---

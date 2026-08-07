@@ -1,19 +1,17 @@
 """Tests for config_flow: validation, schemas, helpers."""
+from unittest.mock import MagicMock, PropertyMock, patch
+
 import pytest
 
-from custom_components.peaqev.configflow.config_flow_validation import (
-    ConfigFlowValidation,
-    FaultyPowerSensor,
-    FaultyPriceSensor,
-    InvalidHost,
-)
-from custom_components.peaqev.configflow.config_flow_helpers import async_set_startpeak_dict
+from custom_components.peaqev.config_flow import OptionsFlowHandler
+from custom_components.peaqev.configflow.config_flow_helpers import \
+    async_set_startpeak_dict
 from custom_components.peaqev.configflow.config_flow_schemas import (
-    TYPE_SCHEMA, SENSOR_SCHEMA, CHARGER_SCHEMA, CHARGER_DETAILS_SCHEMA,
-    OUTLET_DETAILS_SCHEMA, HOURS_SCHEMA, PRICEAWARE_HOURS_SCHEMA,
-    PRICEAWARE_SCHEMA, MONTHS_SCHEMA, SCHEMAS
-)
-
+    CHARGER_DETAILS_SCHEMA, CHARGER_SCHEMA, HOURS_SCHEMA, MONTHS_SCHEMA,
+    OUTLET_DETAILS_SCHEMA, PRICEAWARE_HOURS_SCHEMA, PRICEAWARE_SCHEMA, SCHEMAS,
+    SENSOR_SCHEMA, TYPE_SCHEMA)
+from custom_components.peaqev.configflow.config_flow_validation import (
+    ConfigFlowValidation, FaultyPowerSensor, FaultyPriceSensor, InvalidHost)
 
 # --- Schema Tests ---
 
@@ -202,3 +200,31 @@ async def test_invalid_host_is_ha_error():
     """Test InvalidHost is a HomeAssistantError."""
     from homeassistant.exceptions import HomeAssistantError
     assert issubclass(InvalidHost, HomeAssistantError)
+
+
+# --- OptionsFlowHandler Tests ---
+
+@pytest.mark.asyncio
+async def test_options_flow_carries_over_existing_options():
+    """Options not touched by the steps of this run must survive it.
+
+    config_entry isn't available in __init__, so the handler seeds itself on
+    the first step instead. Without that, a run that skips a step drops the
+    values that step owns back to the initial setup defaults.
+    """
+    entry = MagicMock()
+    entry.options = {'nonhours': [1, 2, 3], 'priceaware': False}
+    entry.data = {'nonhours': [23], 'name': 'sensor.setup_default'}
+
+    handler = OptionsFlowHandler()
+    assert handler.options == {}
+
+    with patch.object(
+        type(handler), 'config_entry', new_callable=PropertyMock, return_value=entry
+    ):
+        await handler.async_step_init()
+        assert handler.options['nonhours'] == [1, 2, 3]
+
+        # a later step only updates its own keys
+        handler.options.update({'priceaware': True})
+        assert handler.options['nonhours'] == [1, 2, 3]

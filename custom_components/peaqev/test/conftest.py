@@ -1,38 +1,22 @@
 """Shared fixtures for all peaqev tests."""
-import asyncio
-from unittest.mock import MagicMock, patch, AsyncMock, PropertyMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from homeassistant.core import HomeAssistant, EventBus
-
-from peaqevcore.common.models.observer_types import ObserverTypes
+from homeassistant.core import EventBus
+from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 from peaqevcore.models.fuses import Fuses
 from peaqevcore.models.phases import Phases
-from peaqevcore.models.chargecontroller_states import ChargeControllerStates
-from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
-from custom_components.peaqev.peaqservice.hub.observer.iobserver_coordinator import IObserver
-from custom_components.peaqev.peaqservice.hub.observer.observer_coordinator import Observer
-from custom_components.peaqev.peaqservice.hub.observer.models.command import Command
-from custom_components.peaqev.peaqservice.hub.observer.models.observer_model import ObserverModel
-from custom_components.peaqev.peaqservice.hub.models.event_property import EventProperty
-from custom_components.peaqev.peaqservice.hub.models.hub_model import HubModel
-from custom_components.peaqev.peaqservice.hub.models.hub_options import HubOptions, Price, Charger
-from custom_components.peaqev.peaqservice.powertools.power_canary.smooth_average import SmoothAverage
-from custom_components.peaqev.peaqservice.powertools.power_canary.power_canary_model import PowerCanaryModel
-from custom_components.peaqev.peaqservice.powertools.gainloss.igain_loss import IGainLoss
-from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import ChargerModel
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_states import ChargerStates
-from custom_components.peaqev.peaqservice.chargecontroller.charger.charger_call_service import call_ok
-from custom_components.peaqev.peaqservice.chargecontroller.charger.chargerhelpers import (
-    _checkchargerparams, async_set_chargerparams, ChargerHelpers
-)
-from custom_components.peaqev.peaqservice.chargecontroller.chargecontroller_helpers import defer_start
-from custom_components.peaqev.peaqservice.util.extensionmethods import (
-    nametoid, dt_from_epoch, log_once_per_minute, async_iscoroutine
-)
-from custom_components.peaqev.peaqservice.util.options_comparer import OptionsComparer
-
+from custom_components.peaqev.peaqservice.chargecontroller.charger.chargermodel import \
+    ChargerModel
+from custom_components.peaqev.peaqservice.hub.observer.iobserver_coordinator import \
+    IObserver
+from custom_components.peaqev.peaqservice.powertools.gainloss.igain_loss import \
+    IGainLoss
+from custom_components.peaqev.peaqservice.powertools.power_canary.power_canary_model import \
+    PowerCanaryModel
+from custom_components.peaqev.peaqservice.powertools.power_canary.smooth_average import \
+    SmoothAverage
 
 # --- Mock Classes ---
 
@@ -62,7 +46,9 @@ class MockObserver(IObserver):
 
     async def async_broadcast_separator(self, func, command):
         import asyncio
-        from custom_components.peaqev.peaqservice.util.extensionmethods import async_iscoroutine
+
+        from custom_components.peaqev.peaqservice.util.extensionmethods import \
+            async_iscoroutine
 
         if await async_iscoroutine(func):
             await self.async_call_func(func=func, command=command)

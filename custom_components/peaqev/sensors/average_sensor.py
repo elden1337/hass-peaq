@@ -47,7 +47,7 @@ class PeaqAverageSensor(SensorEntity, RestoreEntity):
                     self._state = self._avg.average(floatdata)
                 else:
                     _LOGGER.debug(f'Could not convert {data.state} to float.')
-            except:
+            except Exception:
                 pass
 
     async def async_added_to_hass(self) -> None:

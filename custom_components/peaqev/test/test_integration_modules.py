@@ -1,24 +1,24 @@
 """Tests for HubFactory, MaxMinController, and charger-related modules."""
-import time
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-from peaqevcore.models.phases import Phases
-from peaqevcore.models.fuses import Fuses
-from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
-from custom_components.peaqev.peaqservice.hub.max_min_controller import MaxMinController
-from custom_components.peaqev.peaqservice.hub.price_aware_hub import PriceAwareHub
-from custom_components.peaqev.peaqservice.hub.hub_events import HubEvents
-from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import ChargerType, CHARGERTYPES
-from custom_components.peaqev.peaqservice.chargertypes.models.entities_model import EntitiesModel
-from custom_components.peaqev.peaqservice.util.schedule_options_handler import SchedulerOptionsHandler
-from custom_components.peaqev.peaqservice.util.extensionmethods import (
-    nametoid, dt_from_epoch, async_iscoroutine
-)
-from custom_components.peaqev.peaqservice.hub.models.initializer_types import InitializerTypes
+from custom_components.peaqev.peaqservice.chargertypes.models.chargertypes_enum import (
+    CHARGERTYPES, ChargerType)
+from custom_components.peaqev.peaqservice.chargertypes.models.entities_model import \
+    EntitiesModel
 from custom_components.peaqev.peaqservice.hub.const import LookupKeys
-
+from custom_components.peaqev.peaqservice.hub.hub_events import HubEvents
+from custom_components.peaqev.peaqservice.hub.max_min_controller import \
+    MaxMinController
+from custom_components.peaqev.peaqservice.hub.models.initializer_types import \
+    InitializerTypes
+from custom_components.peaqev.peaqservice.hub.price_aware_hub import \
+    PriceAwareHub
+from custom_components.peaqev.peaqservice.util.extensionmethods import (
+    async_iscoroutine, dt_from_epoch, nametoid)
+from custom_components.peaqev.peaqservice.util.schedule_options_handler import \
+    SchedulerOptionsHandler
 
 # --- InitializerTypes Tests ---
 

@@ -202,6 +202,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         """Priceaware"""
         errors = {}
+        if not self.options:
+            # config_entry isn't available in __init__, so carry the existing
+            # options over here instead. Steps that this run skips would
+            # otherwise drop their saved values back to the setup defaults.
+            self.options = dict(self.config_entry.options)
         if user_input is not None:
             if len(user_input['custom_price_sensor']) > 2:
                 try:

@@ -34,7 +34,7 @@ class PeaqBinarySensorDone(BinarySensorEntity):
         if self.hub.is_initialized:
             try:
                 return self.hub.charger_done
-            except:
+            except Exception:
                 _LOGGER.debug("Binarysensor_charger_done could not get state from hub.")
                 return False
         return False

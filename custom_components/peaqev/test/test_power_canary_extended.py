@@ -6,13 +6,14 @@ from peaqevcore.models.fuses import Fuses
 from peaqevcore.models.phases import Phases
 
 from custom_components.peaqev.peaqservice.powertools.power_canary.const import (
-    CRITICAL, WARNING, OK, DISABLED, CUTOFF_THRESHOLD, WARNING_THRESHOLD,
-    FUSES_DICT, FUSES_MAX_SINGLE_FUSE, FUSES_LIST
-)
-from custom_components.peaqev.peaqservice.powertools.power_canary.smooth_average import SmoothAverage
-from custom_components.peaqev.peaqservice.powertools.power_canary.power_canary_model import PowerCanaryModel
-from custom_components.peaqev.test.mock_classes.power_canary_test import PowerCanaryTest
-
+    CRITICAL, CUTOFF_THRESHOLD, DISABLED, FUSES_DICT, FUSES_LIST,
+    FUSES_MAX_SINGLE_FUSE, OK, WARNING, WARNING_THRESHOLD)
+from custom_components.peaqev.peaqservice.powertools.power_canary.power_canary_model import \
+    PowerCanaryModel
+from custom_components.peaqev.peaqservice.powertools.power_canary.smooth_average import \
+    SmoothAverage
+from custom_components.peaqev.test.mock_classes.power_canary_test import \
+    PowerCanaryTest
 
 # --- SmoothAverage Tests ---
 
@@ -106,15 +107,6 @@ async def test_smoothaverage_is_clean():
 
 
 @pytest.mark.asyncio
-async def test_smoothaverage_max_age_expiration():
-    sa = SmoothAverage(max_age=1, max_samples=30)  # 1 second age
-    time.sleep(1.5)  # Wait for readings to expire
-    sa.add_reading(100)
-    time.sleep(1.5)  # Wait for the reading to expire
-    # After expiration, value should be None (all readings expired)
-    # Note: this is a flaky test due to timing
-
-
 @pytest.mark.asyncio
 async def test_smoothaverage_zero_value_logged():
     """Test that zero values are handled correctly."""
@@ -460,13 +452,40 @@ async def test_power_canary_onephase_amps_filtered():
 
 
 @pytest.mark.asyncio
-async def test_power_canary_check_current_percentage_calls():
-    """Test check_current_percentage broadcasts events correctly."""
+def _canary_at(fraction: float) -> PowerCanaryTest:
+    """A canary loaded to the given fraction of its fuse.
+
+    `alive` reads the plain total_power attribute, while current_percentage
+    reads the smoothed _total_power, so both have to be set.
+    """
     canary = PowerCanaryTest(
         phases=Phases.ThreePhase.name,
         fuse_type=Fuses.FUSE_3_25.value,
         allow_amp_adjustment=True
     )
-    canary.total_power = 1000
-    # Should not print anything when alive and below warning
+    load = canary.model.fuse_max * fraction  # fuse_max is 17000 for a 3x25 fuse
+    canary.total_power = load
+    canary._total_power.add_reading(load)
+    return canary
+
+
+@pytest.mark.asyncio
+async def test_power_canary_check_current_percentage_calls(capsys):
+    """Test check_current_percentage reports at the warning and cutoff levels."""
+    canary = _canary_at(0.5)
     canary.check_current_percentage()
+    assert capsys.readouterr().out == ''
+    assert canary.state_string == OK
+    assert canary.alive is True
+
+    canary = _canary_at(WARNING_THRESHOLD + 0.01)
+    canary.check_current_percentage()
+    assert 'warning' in capsys.readouterr().out
+    assert canary.state_string == WARNING
+    assert canary.alive is True
+
+    canary = _canary_at(CUTOFF_THRESHOLD + 0.01)
+    canary.check_current_percentage()
+    assert 'dead' in capsys.readouterr().out
+    assert canary.state_string == CRITICAL
+    assert canary.alive is False

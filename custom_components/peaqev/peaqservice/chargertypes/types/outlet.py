@@ -88,7 +88,7 @@ class SmartOutlet(IChargerType):
                 if s is not None:
                     if isinstance(s.state, type_format):
                         return True
-            except:
+            except Exception:
                 _LOGGER.error(f"Unable to validate outlet-sensor: {entity}")
                 return False
 

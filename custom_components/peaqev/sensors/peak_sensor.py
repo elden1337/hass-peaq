@@ -34,7 +34,7 @@ class PeaqPeakSensor(SensorBase, RestoreEntity):
     def state(self) -> float:
         try:
             return round(float(self._charged_peak), 1)
-        except:
+        except Exception:
             return 0
 
     async def async_update(self) -> None:
