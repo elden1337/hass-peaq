@@ -41,7 +41,6 @@ async def async_create_single_utility(hass, hub: HomeAssistantHub, sensor: Any, 
     this_sensor = f"{source}_{meter_type.value.lower()}"
     unique_id = f"{DOMAIN}_{entry_id}_{nametoid(name)}"
     params = {
-        "hass": hass,
         "source_entity": source,
         "name": name,
         "meter_type": meter_type.value,
@@ -54,6 +53,9 @@ async def async_create_single_utility(hass, hub: HomeAssistantHub, sensor: Any, 
     }
 
     signature = inspect.signature(UtilityMeterSensor.__init__)
+    if "hass" in signature.parameters:
+        # Removed from the constructor in Home Assistant 2026.8
+        params["hass"] = hass
     if "parent_meter" in signature.parameters:
         params["parent_meter"] = source
     if "delta_values" in signature.parameters:
