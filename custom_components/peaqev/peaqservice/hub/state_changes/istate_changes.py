@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN
 from peaqevcore.common.models.observer_types import ObserverTypes
 from peaqevcore.common.wait_timer import WaitTimer
 from peaqevcore.services.scheduler.update_scheduler_dto import \
@@ -28,7 +29,14 @@ class StateChangesBase:
         self.hub = hub
 
     async def async_update_sensor(self, entity, value):
-        update_session = await self.async_update_sensor_internal(entity, value)
+        if value in (STATE_UNKNOWN, STATE_UNAVAILABLE, None):
+            # Expected while sensors are starting up or a source integration is
+            # reloading. The handlers can't do anything with it, so skip them
+            # rather than let a float() raise and log an error every restart.
+            _LOGGER.debug('Skipping update for %s, state is %s', entity, value)
+            update_session = False
+        else:
+            update_session = await self.async_update_sensor_internal(entity, value)
         await self.hub.observer.async_broadcast(ObserverTypes.ProcessChargeController)
         if self.hub.options.price.price_aware:  # todo: strategy should handle this
             await self.hub.observer.async_broadcast(ObserverTypes.ResetMaxMinChargeSensor)

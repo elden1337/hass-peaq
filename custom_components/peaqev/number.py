@@ -13,6 +13,7 @@ from homeassistant.helpers.restore_state import RestoreEntity  # type: ignore
 from peaqevcore.models.chargecontroller_states import ChargeControllerStates
 
 from .const import DOMAIN
+from .peaqservice.util.extensionmethods import try_parse_float
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -82,11 +83,16 @@ class PeaqSchedulerChargeAmountNumber(NumberEntity, RestoreEntity):
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
         if state:
-            if state.state != self._state:
+            restored = try_parse_float(state.state)
+            if restored is None:
+                # 'unknown'/'unavailable' restores would otherwise raise here
+                # and make Home Assistant drop the entity.
+                self._state = 0
+            elif state.state != self._state:
                 _LOGGER.debug(
                     f'Restoring state {state.state} for {self.name}.'
                 )
-                await self.async_set_native_value(float(state.state))
+                await self.async_set_native_value(restored)
             else:
                 self._state = 0
         else:
@@ -146,11 +152,16 @@ class PeaqMaxMinLimiterNumber(NumberEntity, RestoreEntity):
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
         if state:
-            if state.state != self._state:
+            restored = try_parse_float(state.state)
+            if restored is None:
+                # 'unknown'/'unavailable' restores would otherwise raise here
+                # and make Home Assistant drop the entity.
+                self._state = 0
+            elif state.state != self._state:
                 _LOGGER.debug(
                     f'Restoring state {state.state} for {self.name}.'
                 )
-                await self.async_set_native_value(float(state.state))
+                await self.async_set_native_value(restored)
             else:
                 self._state = 0
         else:
@@ -222,11 +233,14 @@ class PeaqNumber(NumberEntity, RestoreEntity):
         else:
             state = await super().async_get_last_state()
             if state:
-                if state.state != _set_max:
+                restored = try_parse_float(state.state)
+                if restored is None:
+                    self._state = _set_max
+                elif state.state != _set_max:
                     _LOGGER.debug(
                         f'Restoring state {state.state} for {self.name}. hub reports: {_set_max}'
                     )
-                    await self.async_set_native_value(float(state.state))
+                    await self.async_set_native_value(restored)
                 else:
                     self._state = _set_max
             else:

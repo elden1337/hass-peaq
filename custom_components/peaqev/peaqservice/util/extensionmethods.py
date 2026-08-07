@@ -16,6 +16,18 @@ def dt_from_epoch(epoch: float) -> str:
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(epoch))
 
 
+def try_parse_float(value) -> float | None:
+    """Parse a restored state, which may well be 'unknown' or 'unavailable'.
+
+    Raising inside async_added_to_hass makes Home Assistant drop the entity
+    altogether, so restoring has to tolerate a non-numeric state.
+    """
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 already_logged = {}
 
 

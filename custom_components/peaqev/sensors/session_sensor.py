@@ -79,16 +79,19 @@ class PeaqSessionSensor(SessionDevice, RestoreEntity):
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
-        if state:
+        restored = ex.try_parse_float(state.state) if state else None
+        if restored is not None:
             _LOGGER.debug("last state of %s = %s", self._attr_name, state)
             self._state = state.state
-            if float(state.state) > 0:
+            if restored > 0:
                 self.hub.chargecontroller.charger.model.session_active = True
-            await self.hub.chargecontroller.session.async_set_session_energy(float(state.state))
+            await self.hub.chargecontroller.session.async_set_session_energy(restored)
             await self.hub.chargecontroller.session.async_unpack(
                 state.attributes.get("average_weekly", 50)
             )
         else:
+            # no previous state, or one that isn't a number ('unknown' after a
+            # restart) - starting fresh beats raising and losing the entity
             await self.hub.chargecontroller.session.async_setup_fresh()
 
 
@@ -120,10 +123,11 @@ class PeaqSessionCostSensor(SessionDevice, RestoreEntity):
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
-        if state:
+        restored = ex.try_parse_float(state.state) if state else None
+        if restored is not None:
             self._state = state.state
-            if float(state.state) != 0:
+            if restored != 0:
                 self.hub.chargecontroller.charger.model.session_active = True
-            await self.hub.chargecontroller.session.async_set_session_price(float(state.state))
+            await self.hub.chargecontroller.session.async_set_session_price(restored)
         else:
             self._state = 0

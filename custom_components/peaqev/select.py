@@ -43,7 +43,9 @@ class PeaqSelectEntity(SelectEntity, RestoreEntity):
 
     async def async_added_to_hass(self):
         state = await super().async_get_last_state()
-        if state:
+        # a restored 'unknown'/'unavailable' is not a departure option, and
+        # handing it to the scheduler restores a departure that never existed
+        if state and state.state in self._attr_options:
             if state.state != self._attr_current_option:
                 _LOGGER.debug(
                     f'Restoring state {state.state} for {self.name}.'

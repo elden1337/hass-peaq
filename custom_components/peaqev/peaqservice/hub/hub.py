@@ -155,6 +155,11 @@ class HomeAssistantHub:
         old_state = event.data['old_state']
         new_state = event.data['new_state']
         if entity_id is not None:
+            if new_state is None:
+                # the entity was removed, which happens for our own entities on
+                # every unload/reload. Nothing to update, and reading .state
+                # here would log an error with a traceback each time.
+                return
             try:
                 if old_state is None or old_state != new_state:
                     await self.states.async_update_sensor(entity_id, new_state.state)

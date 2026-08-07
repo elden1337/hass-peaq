@@ -54,8 +54,12 @@ class PeaqAverageSensor(SensorEntity, RestoreEntity):
         state = await super().async_get_last_state()
         _LOGGER.debug('last state of %s = %s', self._attr_name, state)
         if state:
-            self._state = float(state.state)
-            self._avg.imported_average = float(state.state)
+            restored = ex.try_parse_float(state.state)
+            if restored is None:
+                _LOGGER.debug('Nothing to restore for %s from %s', self._attr_name, state.state)
+                return
+            self._state = restored
+            self._avg.imported_average = restored
 
     @property
     def device_info(self):
