@@ -19,8 +19,8 @@ from custom_components.peaqev.sensors.integration_sensor import (
 from custom_components.peaqev.sensors.utility_sensor import \
     async_create_single_utility
 
-
 # Constructors as of home-assistant/core tag 2026.8.1.
+
 
 def _integration_2026_8(self, *, integration_method, name, round_digits, source_entity,
                         unique_id, unit_prefix, unit_time, max_sub_interval, device=None):
@@ -86,3 +86,20 @@ async def test_utility_sensor_matches_installed_signature(monkeypatch, hub, sign
         MagicMock(), hub, 'foo', TimePeriods.Daily, 'entry_id'
     )
     assert ('hass' in captured) is expect_hass
+
+
+@pytest.mark.asyncio
+async def test_utility_sensor_keeps_device_link_on_2026_8(monkeypatch, hub):
+    """2026.8 expects the caller to resolve the device hass was used for."""
+    captured: dict = {}
+    _patch_init(monkeypatch, UtilityMeterSensor, _utility_meter_2026_8, captured)
+    device = object()
+    monkeypatch.setattr(
+        'custom_components.peaqev.sensors.utility_sensor.async_entity_id_to_device',
+        lambda hass, entity_id: device,
+    )
+
+    await async_create_single_utility(
+        MagicMock(), hub, 'foo', TimePeriods.Daily, 'entry_id'
+    )
+    assert captured['device'] is device

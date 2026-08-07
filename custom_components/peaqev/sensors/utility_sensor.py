@@ -10,6 +10,7 @@ import logging
 from dataclasses import dataclass
 
 from homeassistant.components.utility_meter.sensor import UtilityMeterSensor
+from homeassistant.helpers.device import async_entity_id_to_device
 from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
 from custom_components.peaqev.const import DOMAIN
@@ -56,6 +57,11 @@ async def async_create_single_utility(hass, hub: HomeAssistantHub, sensor: Any, 
     if "hass" in signature.parameters:
         # Removed from the constructor in Home Assistant 2026.8
         params["hass"] = hass
+    if "device" in signature.parameters:
+        # Added in 2026.8, where the caller resolves the device that hass was
+        # previously used for internally. Without it the meter loses its link
+        # to the peaqev device.
+        params["device"] = async_entity_id_to_device(hass, source)
     if "parent_meter" in signature.parameters:
         params["parent_meter"] = source
     if "delta_values" in signature.parameters:
