@@ -5,7 +5,7 @@ import time
 import traceback
 from datetime import datetime
 from functools import partial
-from typing import Callable
+from typing import Any, Callable
 
 # Third party imports
 from homeassistant.core import (Event, EventStateChangedData, HomeAssistant,
@@ -191,7 +191,7 @@ class HomeAssistantHub:
     def _check_max_min_total_charge(self, ret: dict) -> None:
         pass
 
-    async def async_request_sensor_data(self, *args) -> dict | any:
+    async def async_request_sensor_data(self, *args) -> dict | Any:
         ret = {}
         if not self.is_initialized:
             return ret

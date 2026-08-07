@@ -19,7 +19,7 @@ class ChargeAmpsTypes(Enum):
         }
         try:
             return types[type_string.lower()]
-        except:
+        except Exception:
             _LOGGER.warning("Unable to identify Chargeamps type.")
             return ChargeAmpsTypes.Unknown
 
@@ -32,6 +32,6 @@ class ChargeAmpsTypes(Enum):
         }
         try:
             return types[type_string.lower()]
-        except:
+        except Exception:
             _LOGGER.warning("Unable to identify Chargeamps type.")
             return ChargeAmpsTypes.Unknown

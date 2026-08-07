@@ -30,7 +30,6 @@ _LOGGER = logging.getLogger(__name__)
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
-    CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_POLL
     OPTIONS = 'options'
     data: Optional[dict[str, Any]]
     info: Optional[dict[str, Any]]
@@ -38,7 +37,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        return OptionsFlowHandler(config_entry)
+        return OptionsFlowHandler()
 
     async def async_step_user(self, user_input=None):
         """Invoked when a user initiates a flow via the user interface."""
@@ -189,12 +188,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class OptionsFlowHandler(config_entries.OptionsFlow):
-    def __init__(self, config_entry):
+    def __init__(self) -> None:
         """Initialize options flow."""
-        self.config_entry = config_entry
-        self.options = dict(config_entry.options)
+        self.options: dict[str, Any] = {}
 
-    async def _get_existing_param(self, parameter: str, default_val: any):
+    def _get_existing_param(self, parameter: str, default_val: Any):
         if parameter in self.config_entry.options.keys():
             return self.config_entry.options.get(parameter)
         if parameter in self.config_entry.data.keys():
@@ -204,6 +202,11 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_init(self, user_input=None):
         """Priceaware"""
         errors = {}
+        if not self.options:
+            # config_entry isn't available in __init__, so carry the existing
+            # options over here instead. Steps that this run skips would
+            # otherwise drop their saved values back to the setup defaults.
+            self.options = dict(self.config_entry.options)
         if user_input is not None:
             if len(user_input['custom_price_sensor']) > 2:
                 try:
@@ -219,14 +222,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                     return await self.async_step_hours()
                 return await self.async_step_sensor()
 
-        _priceaware = await self._get_existing_param('priceaware', False)
-        _custompricesensor = await self._get_existing_param('custom_price_sensor', '')
-        _spotprice_type = await self._get_existing_param('spotprice_type', 'Auto')
-        _topprice = await self._get_existing_param('absolute_top_price', 0)
-        _minprice = await self._get_existing_param('min_priceaware_threshold_price', 0)
-        _hourtype = await self._get_existing_param('cautionhour_type', CautionHourType.INTERMEDIATE.value)
-        _dynamic_top_price = await self._get_existing_param('dynamic_top_price', False)
-        _max_charge = await self._get_existing_param('max_charge', 0)
+        _priceaware = self._get_existing_param('priceaware', False)
+        _custompricesensor = self._get_existing_param('custom_price_sensor', '')
+        _spotprice_type = self._get_existing_param('spotprice_type', 'Auto')
+        _topprice = self._get_existing_param('absolute_top_price', 0)
+        _minprice = self._get_existing_param('min_priceaware_threshold_price', 0)
+        _hourtype = self._get_existing_param('cautionhour_type', CautionHourType.INTERMEDIATE.value)
+        _dynamic_top_price = self._get_existing_param('dynamic_top_price', False)
+        _max_charge = self._get_existing_param('max_charge', 0)
 
         return self.async_show_form(
             step_id='init',
@@ -263,8 +266,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                 self.options.update(user_input)
             return await self.async_step_priceaware_hours()
 
-        _powersensorname = await self._get_existing_param('name', '')
-        _powersensorincludescar = await self._get_existing_param('powersensorincludescar', False)
+        _powersensorname = self._get_existing_param('name', '')
+        _powersensorincludescar = self._get_existing_param('powersensorincludescar', False)
 
         return self.async_show_form(
             step_id='sensor', data_schema=vol.Schema(
@@ -280,7 +283,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self.options.update(user_input)
             return await self.async_step_months()
 
-        _nonhours = await self._get_existing_param('priceaware_nonhours', list(range(0, 24)))
+        _nonhours = self._get_existing_param('priceaware_nonhours', list(range(0, 24)))
 
         return self.async_show_form(
             step_id='priceaware_hours',
@@ -298,8 +301,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self.options.update(user_input)
             return await self.async_step_months()
 
-        _nonhours = await self._get_existing_param('nonhours', list(range(0, 24)))
-        _cautionhours = await self._get_existing_param('cautionhours', list(range(0, 24)))
+        _nonhours = self._get_existing_param('nonhours', list(range(0, 24)))
+        _cautionhours = self._get_existing_param('cautionhours', list(range(0, 24)))
 
         return self.async_show_form(
             step_id='hours',
@@ -322,7 +325,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             return await self.async_step_misc()
 
         _defaultvalues = self.config_entry.options.get('startpeaks', self.config_entry.data.get('startpeaks'))
-        _default_history = await self._get_existing_param('use_peak_history', False)
+        _default_history = self._get_existing_param('use_peak_history', False)
         defaultvalues = {float(k): v for (k, v) in _defaultvalues.items()}
 
         return self.async_show_form(
@@ -354,8 +357,8 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             self.options['gainloss'] = user_input['gainloss']
             return self.async_create_entry(title='', data=self.options)
 
-        mainsvalue = await self._get_existing_param('mains', '')
-        gainloss = await self._get_existing_param('gainloss', True)
+        mainsvalue = self._get_existing_param('mains', '')
+        gainloss = self._get_existing_param('gainloss', True)
 
         schema = vol.Schema(
             {

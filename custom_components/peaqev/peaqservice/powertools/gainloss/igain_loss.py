@@ -43,7 +43,7 @@ class IGainLoss:
                 return 0.0
             try:
                 average, cost = self.normalize_numbers(await self.async_get_average(time_period), float(cost))
-            except TypeError:
+            except (TypeError, ValueError):
                 _LOGGER.warning(f"Can't calculate gain/loss. avg: {average}, cost: {cost}")
                 return 0.0
             if float(consumption) > 0 and cost > 0 and average is not None:

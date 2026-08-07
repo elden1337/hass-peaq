@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
@@ -10,6 +10,7 @@ import logging
 from dataclasses import dataclass
 
 from homeassistant.components.utility_meter.sensor import UtilityMeterSensor
+from homeassistant.helpers.device import async_entity_id_to_device
 from peaqevcore.models.locale.enums.time_periods import TimePeriods
 
 from custom_components.peaqev.const import DOMAIN
@@ -32,16 +33,15 @@ class UtilityMeterDTO:
     visible_default: bool
     sensor: str
     meter_type: TimePeriods
-    entry_id: any
+    entry_id: Any
 
 
-async def async_create_single_utility(hass, hub: HomeAssistantHub, sensor: any, meter_type: TimePeriods, entry_id: any):
+async def async_create_single_utility(hass, hub: HomeAssistantHub, sensor: Any, meter_type: TimePeriods, entry_id: Any):
     name = f"{hub.hubname} {sensor} {meter_type.value.lower()}"
     source = f"sensor.{DOMAIN.lower()}_{sensor}"
     this_sensor = f"{source}_{meter_type.value.lower()}"
     unique_id = f"{DOMAIN}_{entry_id}_{nametoid(name)}"
     params = {
-        "hass": hass,
         "source_entity": source,
         "name": name,
         "meter_type": meter_type.value,
@@ -54,6 +54,14 @@ async def async_create_single_utility(hass, hub: HomeAssistantHub, sensor: any, 
     }
 
     signature = inspect.signature(UtilityMeterSensor.__init__)
+    if "hass" in signature.parameters:
+        # Removed from the constructor in Home Assistant 2026.8
+        params["hass"] = hass
+    if "device" in signature.parameters:
+        # Added in 2026.8, where the caller resolves the device that hass was
+        # previously used for internally. Without it the meter loses its link
+        # to the peaqev device.
+        params["device"] = async_entity_id_to_device(hass, source)
     if "parent_meter" in signature.parameters:
         params["parent_meter"] = source
     if "delta_values" in signature.parameters:

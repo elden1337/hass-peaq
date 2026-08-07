@@ -16,12 +16,17 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class Observer(IObserver):
-    def __init__(self, hass):
+    def __init__(self, hass, entry=None):
         super().__init__()
         self.hass = hass
-        async_track_time_interval(
-            self.hass, self.async_dispatch, timedelta(seconds=1)
+        unsub = async_track_time_interval(
+            self.hass, self.async_dispatch, timedelta(seconds=1),
+            cancel_on_shutdown=True,
         )
+        if entry is not None:
+            entry.async_on_unload(unsub)
+        else:
+            self._unsub = unsub
 
     async def async_broadcast_separator(self, func, command: Command):
         if await async_iscoroutine(func):

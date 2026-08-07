@@ -46,7 +46,7 @@ For usage-examples and more in-depth explanations, see the Wiki:
 * [Usage](https://github.com/elden1337/hass-peaq/wiki/Usage)
 
 ## Installation
-*Required to install is Home Assistant version 2024.7.1 or higher.*
+*Required to install is Home Assistant version 2026.7.1 or higher.*
 
 Preferred if you have HACS installed is to search for Peaqev there.
 

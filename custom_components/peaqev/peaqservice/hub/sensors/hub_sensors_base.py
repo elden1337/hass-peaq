@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from functools import partial
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING, Any, Tuple
 
 from peaqevcore.models.hub.carpowersensor import CarPowerSensor
 from peaqevcore.models.hub.chargerobject import ChargerObject
@@ -29,9 +29,9 @@ _LOGGER = logging.getLogger(__name__)
 @dataclass
 class HubSensorsBase:
     domain: str = field(init=False)
-    state_machine: any = field(init=False)
+    state_machine: Any = field(init=False)
     locale: LocaleData = field(init=False)
-    chargertype: any = field(init=False)
+    chargertype: Any = field(init=False)
     charger_enabled: HubMember = field(init=False)
     current_peak: CurrentPeak = field(init=False)
     totalhourlyenergy: HubMember = field(init=False)

@@ -1,13 +1,14 @@
 from dataclasses import dataclass
+from typing import Any
 
 from peaqevcore.common.models.observer_types import ObserverTypes
 
 
-@dataclass
+@dataclass(frozen=True)
 class Command:
     command: ObserverTypes
-    expiration: float = None
-    argument: any = None
+    expiration: float | None = None
+    argument: Any = None
 
     def __eq__(self, other):
         if all([self.command == other.command, self.argument == other.argument]):

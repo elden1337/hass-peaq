@@ -71,7 +71,7 @@ class IPowerCanary:
     def current_percentage(self) -> float:
         try:
             return self._total_power.value / self.model.fuse_max
-        except:
+        except Exception:
             return 0
 
     @property

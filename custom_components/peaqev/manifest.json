@@ -24,9 +24,10 @@
   "documentation": "https://github.com/elden1337/hass-peaq",
   "integration_type": "hub",
   "iot_class": "calculated",
+  "single_config_entry": true,
   "issue_tracker": "https://github.com/elden1337/hass-peaq/issues",
   "requirements": [
-    "peaqevcore==19.11.3"
+    "peaqevcore==19.11.4"
   ],
   "version": "3.7.4"
 }

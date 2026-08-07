@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import inspect
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from custom_components.peaqev.peaqservice.hub.hub import HomeAssistantHub
@@ -17,6 +18,16 @@ from custom_components.peaqev.const import DOMAIN
 from custom_components.peaqev.peaqservice.util.constants import POWERCONTROLS
 
 
+def _add_hass_if_supported(params: dict[str, Any], hass) -> dict[str, Any]:
+    """Home Assistant 2026.8 removed `hass` from IntegrationSensor.__init__.
+
+    Only forward it while the installed core still accepts it.
+    """
+    if 'hass' in inspect.signature(IntegrationSensor.__init__).parameters:
+        params['hass'] = hass
+    return params
+
+
 class PeaqIntegrationCostSensor(IntegrationSensor):
     def __init__(self, hass, hub: HomeAssistantHub, name, entry_id):
         self._entry_id = entry_id
@@ -25,15 +36,19 @@ class PeaqIntegrationCostSensor(IntegrationSensor):
         self._attr_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
 
         super().__init__(
-            hass=hass,
-            integration_method=METHOD_TRAPEZOIDAL,
-            name=self._attr_name,
-            round_digits=5,
-            source_entity=f'sensor.{hub.hubname.lower()}_wattage_cost',
-            unique_id=self.unique_id,
-            unit_prefix='k',
-            unit_time=UnitOfTime.HOURS,
-            max_sub_interval=None
+            **_add_hass_if_supported(
+                {
+                    'integration_method': METHOD_TRAPEZOIDAL,
+                    'name': self._attr_name,
+                    'round_digits': 5,
+                    'source_entity': f'sensor.{hub.hubname.lower()}_wattage_cost',
+                    'unique_id': self.unique_id,
+                    'unit_prefix': 'k',
+                    'unit_time': UnitOfTime.HOURS,
+                    'max_sub_interval': None,
+                },
+                hass,
+            )
         )
 
     @property
@@ -68,15 +83,19 @@ class PeaqIntegrationSensor(IntegrationSensor):
         self._attr_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
 
         super().__init__(
-            hass=hass,
-            integration_method=METHOD_TRAPEZOIDAL,
-            name=self._attr_name,
-            round_digits=2,
-            source_entity=sensor,
-            unique_id=self.unique_id,
-            unit_prefix='k',
-            unit_time=UnitOfTime.HOURS,
-            max_sub_interval=None
+            **_add_hass_if_supported(
+                {
+                    'integration_method': METHOD_TRAPEZOIDAL,
+                    'name': self._attr_name,
+                    'round_digits': 2,
+                    'source_entity': sensor,
+                    'unique_id': self.unique_id,
+                    'unit_prefix': 'k',
+                    'unit_time': UnitOfTime.HOURS,
+                    'max_sub_interval': None,
+                },
+                hass,
+            )
         )
 
     @property

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 from homeassistant.config_entries import \
     ConfigEntry  # pylint: disable=import-error
@@ -26,7 +27,7 @@ async def async_setup_entry(hass: HomeAssistant, conf: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][conf.entry_id] = conf.data
     options = await async_set_options(conf)
-    hub = await HubFactory.async_create(hass, options, DOMAIN)
+    hub = await HubFactory.async_create(hass, options, DOMAIN, conf)
     hass.data[DOMAIN]['hub'] = hub
     await hub.async_setup()
 
@@ -69,7 +70,14 @@ async def async_update_entry(hass: HomeAssistant, config_entry: ConfigEntry):
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    return await hass.config_entries.async_unload_platforms(config_entry, PLATFORMS)
+    unloaded = await hass.config_entries.async_unload_platforms(config_entry, PLATFORMS)
+    if unloaded:
+        domain_data = hass.data.get(DOMAIN, {})
+        domain_data.pop('hub', None)
+        domain_data.pop(config_entry.entry_id, None)
+        if not domain_data:
+            hass.data.pop(DOMAIN, None)
+    return unloaded
 
 
 async def async_set_options(conf) -> HubOptions:
@@ -128,5 +136,5 @@ async def async_set_options(conf) -> HubOptions:
     return options
 
 
-async def async_get_existing_param(conf, parameter: str, default_val: any):
+async def async_get_existing_param(conf, parameter: str, default_val: Any):
     return conf.options.get(parameter, conf.data.get(parameter, default_val))

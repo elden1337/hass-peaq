@@ -1,0 +1,4 @@
+homeassistant==2026.8.1
+peaqevcore==19.11.4
+pytest
+pytest-asyncio
