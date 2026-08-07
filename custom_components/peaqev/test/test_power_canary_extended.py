@@ -146,8 +146,12 @@ async def test_smoothaverage_remove_from_list_min_samples():
     sa.add_reading(100)
     sa.add_reading(200)
     time.sleep(1.5)
-    # After sleep, first sample should be removed due to age (max_age=1), leaving 1 sample
-    assert sa.samples == 1
+    # Ageing out is only evaluated when a reading comes in
+    assert sa.samples == 2
+    sa.add_reading(300)
+    # The stale sample is dropped, but the list is never pruned below 2
+    assert sa.samples == 2
+    assert 100 not in [v for _, v in sa.samples_raw]
 
 
 # --- PowerCanaryModel Tests ---

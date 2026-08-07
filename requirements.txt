@@ -1,6 +1,6 @@
 peaqevcore==19.11.4
 flake8
-homeassistant==2026.7.1
+homeassistant==2026.8.1
 isort
 autoflake
 pytest
